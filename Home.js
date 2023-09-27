@@ -1,65 +1,67 @@
-import React from 'react';
-import { View, Text, Button} from 'react-native';
+import React, {useEffect,useState} from 'react';
+import { View, Text, Button, FlatList} from 'react-native';
 import axios from 'axios';
-import {AsyncStorage} from '@react-native-async-storage/async-storage';
-
-// Home screen has 
-// 1. Header
-// 2. Body
-
-
-// Header has
-// 1. Icon (Menu)
-
-// Body has
-// 1. button to : add new plant (navigate to AddTreeScreen)
-// 2. button to : fetch tree type list from api
-// 3. button to : fetch zone list from api
-// 4. button to : sync data
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getSaplingIds,getDBConnection } from './tree_db';
 
 const HomeScreen = ({navigation}) => {
-    // var user_id = '';
-    // const retrieveData = async () => {
-    //     try {
-    //       user_id = await AsyncStorage.getItem('userid');
-    //       if (value !== null) {
-    //         console.log('Retrieved data:', value);
-    //       } else {
-    //         console.log('No data found.');
-    //       }
-    //     } catch (error) {
-    //       console.error('Error retrieving data:', error);
-    //     }
-    //   };
-    //   retrieveData();
-    // const fetchHelperData = () => {
-    //     console.log('fetching helper data');
-    //     const helperData = axios.post('https://5530-103-21-124-76.ngrok.io/api/v2/fetchHelperData',{
-    //         userid: user_id
-    //     });
-    //     console.log(helperData);
+    // const user_id = getUserId();
+    const [user_id, setUser_id] = React.useState(null);
+    const getUserId = async () => {
+        const value = await AsyncStorage.getItem('userid');
+        setUser_id(value);
+    }
+    getUserId();
+    // console.log('at home, user id is:');
+    // console.log(user_id);
+
+    // const [saplings, setSaplings] = useState([]);
+    // const fetchSaplings = async () => {
+    //     const db = await getDBConnection();
+    //     const saplings = await getSaplingIds(db);
+    //     setSaplings(saplings);
     // }
+    // display sapling ids in the component
+
+    // useEffect(() => {
+    //     fetchSaplings();
+    // },[saplings]);
+
+    
+    const fetchHelperData =async () => {
+        console.log('fetching helper data');
+        const helperData = await axios.post('https://d725-103-21-124-76.ngrok.io/api/v2/fetchHelperData',{
+            userId: user_id
+        });
+        console.log(helperData.data);
+    }
+
+
 
     return (
         <View style={{ backgroundColor:'black', height: '100%'}}>
-          <Text > Home </Text>
-          <Button
+          <Text style={{fontSize: 20,color: '#ffffff',textAlign: 'center'}} > Home </Text>
+          <View style={{margin:20}}>
+            <Button
               title="Add Tree"
               onPress={() => navigation.navigate('AddTree')}
-          />
-
+            />
+        </View>
+        <View style={{margin:20}}>
           <Button
               title="Fetch Helper Data"
-              onPress={() => fetchHelperData()}
+              onPress={fetchHelperData}
           />
+        </View>
+        <Text style={{fontSize: 20,color: '#ffffff',textAlign: 'center'}} > Saplings </Text>
+        {/* <FlatList
+            data={saplings}
+            renderItem={({item}) => <Text style={{fontSize: 20,color: '#ffffff',textAlign: 'center'}}>{item}</Text>}
+            keyExtractor={item => item}
+        /> */}
+          
         </View>
     );
 }
-
-
-
-
-
-
 
 export default HomeScreen;

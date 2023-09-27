@@ -4,7 +4,8 @@ import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import PhoneInput, { isValidNumber } from 'react-native-phone-number-input';
 import {GoogleSignin,GoogleSigninButton,statusCodes,} from '@react-native-google-signin/google-signin'; 
 import axios from 'axios';
-import {AsyncStorage} from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const LoginScreen = ({navigation}) =>{
 
@@ -24,39 +25,41 @@ const LoginScreen = ({navigation}) =>{
     setPassword(text);
   };
 
+  
+
 
   useEffect(() => {
     GoogleSignin.configure()
   }, [])
+
+  
 
 
   const googleLogin = async () => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      navigation.navigate('Home');
+      // navigation.navigate('Home');
 // -------------------- add the endpoint here --------------------
-      // const response = await axios.post('https://5530-103-21-124-76.ngrok.io/api/v2/login', {
-      //   name: userInfo.user.name,
-      //   email: userInfo.user.email,
-      //   phone: phoneNumber,
-      //   secret: password
-      // });
-      // userObj = response.data;
-      // const storeData = async () => {
-      //   try {
-      //     await AsyncStorage.setItem('userid', userObj._id);
-      //   } catch (error) {
-      //     console.error('Error storing data:', error);
-      //   }
-      // };
-      // storeData();
+      const response = await axios.post('https://d725-103-21-124-76.ngrok.io/api/v2/login', {
+        name: userInfo.user.name,
+        email: userInfo.user.email,
+        phone: phoneNumber,
+        secret: password
+      });
+      console.log('at login : ',response.data._id)
+      // storeUserId(response.data._id);
+      await AsyncStorage.setItem('userid', response.data._id);
+      // const dummy = getUserId();
+      console.log(response.status);
       // console.log(response.data);
-      // if (response.status === 200) {
-      //   navigation.navigate('Home');
-      // } else {
-      //   Alert.alert('Login Failed', 'Please check your credentials and try again.');
-      // }
+      // console.log(userObj._id);
+      console.log(response.status);
+      if (response.status === 200) {
+        navigation.navigate('Home');
+      } else {
+        Alert.alert('Login Failed', 'Please check your credentials and try again.');
+      }
 
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {

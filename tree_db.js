@@ -42,18 +42,75 @@ export const createTable = async db => {
   await db.executeSql(query2);
 };
 
+
 export const getTreesToUpload = async db => {
   try {
     const trees = [];
     const results = await db.executeSql(
-      `SELECT * FROM ${tableName} where uploaded=0`,
+      `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng FROM ${tableName} where uploaded=0`,
     );
     results.forEach(result => {
       for (let index = 0; index < result.rows.length; index++) {
         trees.push(result.rows.item(index));
+        // const imgresults =  db.executeSql(`SELECT  imageid as name, image as data FROM sapling_images where saplingid='${result.rows.item(index).sapling_id}'`);
+        // imgresults.forEach(imgresult => {
+        //   for (let indexi = 0; indexi < imgresult.rows.length; indexi++) {
+        //     images.push(imgresult.rows.item(indexi));
+        //   }
+        // });
+        // const coordresults = db.executeSql(
+        //   `SELECT lat, lng FROM ${tableName} where saplingid='${result.rows.item(
+        //     index,
+        //   ).saplingid}'`,
+        // );
+        // coordresults.forEach(coordresult => {
+        //   for (let indexc = 0; indexc < coordresult.rows.length; indexc++) {
+        //     coordinates.push(coordresult.rows.item(indexc));
+        //   }
+        // }
+        // );
+        // trees[index].images = getTreeImages(db,trees[index].sapling_id); 
+        // trees[index].coordinates = getTreeCoordinates(db,trees[index].sapling_id);
       }
+
     });
+
+    // for(index = 0; index < trees.length; index++){
+      //fetch image and add to tree
+      // trees[index].images = await getTreeImages(db,trees[index].sapling_id);
+      // console.log(trees[index].sapling_id,' : ');
+      // console.log(trees[index].images);
+      //fetch coordinates and add to tree
+      // trees[index].coordinates = await getTreeCoordinates(db,trees[index].sapling_id);
+    // }
+
+
+
+    // convert trees to dictionary
+    // const treesDict = {};
+
+    // trees.forEach(tree => {
+
+    //   if (treesDict[tree.sapling_id] === undefined) {
+    //     treesDict[tree.sapling_id] = {
+    //       sapling_id: tree.sapling_id,
+    //       type_id: tree.type_id,
+    //       plot_id: tree.plot_id,
+    //       user_id: tree.user_id,
+    //       images: [],
+    //       coordinates: []
+    //     };
+    //   }
+    //   treesDict[tree.sapling_id].images.push(tree.images);
+    //   treesDict[tree.sapling_id].coordinates.push(tree.coordinates);
+    // }
+    // );
+    // console.log(treesDict);
+    // return treesDict;
+
     return trees;
+
+
   } catch (error) {
     console.error(error);
     throw Error('Failed to get treedata !!!');
@@ -64,7 +121,31 @@ export const getTreeImages = async (db, saplingid) => {
   try {
     const treesimgs = [];
     const results = await db.executeSql(
-      `SELECT * FROM sapling_images where saplingid='${saplingid}'`,
+      `SELECT imageid as name, image as Data FROM sapling_images where saplingid='${saplingid}'`,
+    );
+    results.forEach(result => {
+      for (let index = 0; index < result.rows.length; index++) {
+        const image = {
+          name: result.rows.item(index).name,
+          data: result.rows.item(index).Data,
+        };
+        treesimgs.push(image);
+      }
+    });
+    return treesimgs;
+  } catch (error) {
+    console.error(error);
+    throw Error('Failed to get treeimgdata !!!');
+  }
+};
+
+// get coordinates of all trees from table 'tree'
+
+const getTreeCoordinates = async (db, saplingid) => {
+  try {
+    const coordinates = [];
+    const results = await db.executeSql(
+      `SELECT   where saplingid='${saplingid}'`,
     );
     results.forEach(result => {
       for (let index = 0; index < result.rows.length; index++) {
@@ -100,19 +181,23 @@ export const setFalse = async db => {
 };  
 
 export const saveTrees = async (db, i, uploaded) => {
+  
   const insertQuery =
     `INSERT OR REPLACE INTO ${tableName}(treeid, saplingid, lat, lng, plotid, uploaded, user_id) values` +
     `('${i.treeid}', '${i.saplingid}', '${i.lat}', '${i.lng}', '${i.plotid}', ${uploaded}, '${i.user_id}')`;
+  console.log('insterting tree');
   return db.executeSql(insertQuery);
+  
 };
 
 // save tree images
 
 export const saveTreeImages = async (db, i) => {
-    const timestamp = new Date().toISOString();
+    
     const insertQuery =
         `INSERT OR REPLACE INTO sapling_images(saplingid, image, imageid) values` +
-        `('${i.saplingid}', '${i.image}', '${timestamp}')`;
+        `('${i.saplingid}', '${i.image}', '${i.imageid}')`;
+    console.log('image stored!')
     return db.executeSql(insertQuery);
 };
 
@@ -136,6 +221,26 @@ export const updateTreetbl = async (db, tree) => {
     `('${tree.name}', '${tree.tree_id}')`;
   return db.executeSql(insertQuery);
 };
+
+// get sapling ids of all trees from table 'tree'
+
+export const getSaplingIds = async db => {
+  const saplings = [];
+  try {
+    let res = await db.executeSql(`SELECT saplingid FROM ${tableName}`);
+    res.forEach(result => {
+      for (let index = 0; index < result.rows.length; index++) {
+        saplings.push(result.rows.item(index).saplingid);
+      }
+    });
+    return saplings;
+  } catch (error) {
+    console.error(error);
+    throw Error('Failed to get saplingids !!!');
+  }
+};
+
+
 
 export const getTreesList = async db => {
   const trees = [];
