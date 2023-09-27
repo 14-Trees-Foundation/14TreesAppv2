@@ -4,7 +4,7 @@ import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import PhoneInput, { isValidNumber } from 'react-native-phone-number-input';
 import {GoogleSignin,GoogleSigninButton,statusCodes,} from '@react-native-google-signin/google-signin'; 
 import axios from 'axios';
-
+import {AsyncStorage} from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({navigation}) =>{
 
@@ -17,6 +17,7 @@ const LoginScreen = ({navigation}) =>{
     return false;
   };
 
+  
   const [password, setPassword] = useState('');
 
   const handlePasswordChange = (text) => {
@@ -33,20 +34,29 @@ const LoginScreen = ({navigation}) =>{
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      // navigation.navigate('Home');
+      navigation.navigate('Home');
 // -------------------- add the endpoint here --------------------
-      const response = await axios.post('/Login', {
-        email: userInfo.user.email,
-        name: userInfo.user.name,
-        phoneNumber: phoneNumber,
-        secretKey: password
-      });
-      
-      if (response.status === 200) {
-        navigation.navigate('Home');
-      } else {
-        Alert.alert('Login Failed', 'Please check your credentials and try again.');
-      }
+      // const response = await axios.post('https://5530-103-21-124-76.ngrok.io/api/v2/login', {
+      //   name: userInfo.user.name,
+      //   email: userInfo.user.email,
+      //   phone: phoneNumber,
+      //   secret: password
+      // });
+      // userObj = response.data;
+      // const storeData = async () => {
+      //   try {
+      //     await AsyncStorage.setItem('userid', userObj._id);
+      //   } catch (error) {
+      //     console.error('Error storing data:', error);
+      //   }
+      // };
+      // storeData();
+      // console.log(response.data);
+      // if (response.status === 200) {
+      //   navigation.navigate('Home');
+      // } else {
+      //   Alert.alert('Login Failed', 'Please check your credentials and try again.');
+      // }
 
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
@@ -101,7 +111,7 @@ const LoginScreen = ({navigation}) =>{
           value={password}
           placeholder="Enter secret key"
           placeholderTextColor="black"
-          secureTextEntry={true}
+          // secureTextEntry={False}
         />
       </View>
 
