@@ -2,7 +2,7 @@ import React, {useEffect,useState} from 'react';
 import { View, Text, Button, FlatList} from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getSaplingIds,getDBConnection } from './tree_db';
+import { getSaplingIds,getDBConnection,getTreesToUpload,updateUpload,getTreeImages } from './tree_db';
 
 const HomeScreen = ({navigation}) => {
     // const user_id = getUserId();
@@ -30,17 +30,70 @@ const HomeScreen = ({navigation}) => {
     
     const fetchHelperData =async () => {
         console.log('fetching helper data');
-        const helperData = await axios.post('https://d725-103-21-124-76.ngrok.io/api/v2/fetchHelperData',{
+        const helperData = await axios.post('https://ebcb-103-21-124-76.ngrok.io/v2/fetchHelperData',{
             userId: user_id
         });
         console.log(helperData.data);
     }
 
+    const upload = async () => {
+        try {
+            const db = await getDBConnection();
+            let res = await getTreesToUpload(db);
+            // console.log(res);
 
+            var final = [];
+            for (let index = 0; index < res.length; index++) {
+                var element = res[index];
+                // if lat or lng is null, change it to 0
+                if (element.lat === 'undefined') {
+                    element.lat = 0;
+                }
+                if (element.lng === 'undefined') {
+                    element.lng = 0;
+                }
+                console.log(element.lat, element.lng);
+                const db = await getDBConnection();
+                let images = await getTreeImages(db, element.sapling_id);
+                for (let index = 0; index < images.length; index++) {
+                console.log(images[index].name);
+                }
+          // console.log(element);
+                const tree = {
+                    sapling_id: element.sapling_id,
+                    type_id: element.type_id,
+                    plot_id: element.plot_id,
+                    user_id: user_id,
+                    coordinates: [element.lat,  element.lng],
+                    images: images,
+                };
+                final.push(tree);
+            }
+  
+            // console.log(final);
+          
+            let response = await axios.post(
+            'https://ebcb-103-21-124-76.ngrok.io/api/v2/uploadTrees',
+            final,
+            );
+            if (response.status === 200) {
+            
+            for(let index = 0; index < final.length; index++){
+                const element = final[index];
+                await updateUpload(db, element.sapling_id);
+            }
+            }
+            console.log(response.data);
+            // await fetch();
+        }
+        catch (error) {
+          console.error(error);
+        }
+      }; 
 
     return (
         <View style={{ backgroundColor:'black', height: '100%'}}>
-          <Text style={{fontSize: 20,color: '#ffffff',textAlign: 'center'}} > Home </Text>
+          <Text style={{fontSize: 20,color: '#ffffff',textAlign: 'center', marginBottom:40}} > Home </Text>
           <View style={{margin:20}}>
             <Button
               title="Add Tree"
@@ -52,13 +105,15 @@ const HomeScreen = ({navigation}) => {
               title="Fetch Helper Data"
               onPress={fetchHelperData}
           />
+
+         
         </View>
-        <Text style={{fontSize: 20,color: '#ffffff',textAlign: 'center'}} > Saplings </Text>
-        {/* <FlatList
-            data={saplings}
-            renderItem={({item}) => <Text style={{fontSize: 20,color: '#ffffff',textAlign: 'center'}}>{item}</Text>}
-            keyExtractor={item => item}
-        /> */}
+        <View style={{margin:20}}>
+          <Button
+              title="Upload"
+              onPress={upload}
+          />
+        </View>
           
         </View>
     );

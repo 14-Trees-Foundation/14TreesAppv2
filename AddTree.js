@@ -31,6 +31,7 @@ import {
 } from './tree_db';
 // import * as ImagePicker from 'react-native-image-picker';
 import {launchCamera} from 'react-native-image-picker';
+import { Location } from './get_location';
 const AddTreeScreen = ({navigation}) => {
 
     const [saplingid, setSaplingid] = React.useState(null);
@@ -121,18 +122,18 @@ const AddTreeScreen = ({navigation}) => {
       loadDataCallback();
     }, [loadDataCallback]);
 
-    const fetch = useCallback(async () => {
-      try {
-        const db = await getDBConnection();
-        let res = await getTreesToUpload(db);
-        // let res2 = await getAllTreeCount(db);
-        // setTotal(res2);
-        // setNotUploaded(res.length);
-        return res;
-      } catch (error) {
-        console.log(error);
-      }
-    }, []);
+    // const fetch = useCallback(async () => {
+    //   try {
+    //     const db = await getDBConnection();
+    //     let res = await getTreesToUpload(db);
+    //     // let res2 = await getAllTreeCount(db);
+    //     // setTotal(res2);
+    //     // setNotUploaded(res.length);
+    //     return res;
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // }, []);
 
     const requestLocation = async () => {
       try {
@@ -180,7 +181,7 @@ const AddTreeScreen = ({navigation}) => {
         }
         
         // await fetch();
-        requestLocation();
+        // requestLocation();
         // setSaplingid(null);
         // setSelectedTreeType({});
         // setSelectedPlot({});
@@ -192,54 +193,6 @@ const AddTreeScreen = ({navigation}) => {
         console.error(error);
       }
     };
-
-    const upload = async () => {
-      // try {
-        const db = await getDBConnection();
-        let res = await getTreesToUpload(db);
-        console.log(res);
-
-      var final = [];
-      for (let index = 0; index < res.length; index++) {
-        const element = res[index];
-        const db = await getDBConnection();
-        let images = await getTreeImages(db, element.sapling_id);
-        for (let index = 0; index < images.length; index++) {
-          console.log(images[index].name);
-        }
-        // console.log(element);
-        const tree = {
-          sapling_id: element.sapling_id,
-          type_id: element.type_id,
-          plot_id: element.plot_id,
-          user_id: element.user_id,
-          coordinates: [element.lat,  element.lng],
-          images: images,
-        };
-        final.push(tree.images);
-      }
-
-      console.log(final);
-        
-        // let response = await axios.post(
-        //   'https://4179-103-21-124-76.ngrok.io/api/v2/uploadTrees',
-          // res,
-        // );
-        // if (response.status === 200) {
-        
-        //   await updateUpload(db, element.saplingid);
-        // }
-        }
-        
-        // await fetch();
-      
-      // catch (error) {
-      //   console.error(error);
-      // }
-
-    // };
-
-      
 
     return (
     

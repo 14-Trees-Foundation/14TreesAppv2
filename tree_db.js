@@ -52,65 +52,9 @@ export const getTreesToUpload = async db => {
     results.forEach(result => {
       for (let index = 0; index < result.rows.length; index++) {
         trees.push(result.rows.item(index));
-        // const imgresults =  db.executeSql(`SELECT  imageid as name, image as data FROM sapling_images where saplingid='${result.rows.item(index).sapling_id}'`);
-        // imgresults.forEach(imgresult => {
-        //   for (let indexi = 0; indexi < imgresult.rows.length; indexi++) {
-        //     images.push(imgresult.rows.item(indexi));
-        //   }
-        // });
-        // const coordresults = db.executeSql(
-        //   `SELECT lat, lng FROM ${tableName} where saplingid='${result.rows.item(
-        //     index,
-        //   ).saplingid}'`,
-        // );
-        // coordresults.forEach(coordresult => {
-        //   for (let indexc = 0; indexc < coordresult.rows.length; indexc++) {
-        //     coordinates.push(coordresult.rows.item(indexc));
-        //   }
-        // }
-        // );
-        // trees[index].images = getTreeImages(db,trees[index].sapling_id); 
-        // trees[index].coordinates = getTreeCoordinates(db,trees[index].sapling_id);
       }
-
     });
-
-    // for(index = 0; index < trees.length; index++){
-      //fetch image and add to tree
-      // trees[index].images = await getTreeImages(db,trees[index].sapling_id);
-      // console.log(trees[index].sapling_id,' : ');
-      // console.log(trees[index].images);
-      //fetch coordinates and add to tree
-      // trees[index].coordinates = await getTreeCoordinates(db,trees[index].sapling_id);
-    // }
-
-
-
-    // convert trees to dictionary
-    // const treesDict = {};
-
-    // trees.forEach(tree => {
-
-    //   if (treesDict[tree.sapling_id] === undefined) {
-    //     treesDict[tree.sapling_id] = {
-    //       sapling_id: tree.sapling_id,
-    //       type_id: tree.type_id,
-    //       plot_id: tree.plot_id,
-    //       user_id: tree.user_id,
-    //       images: [],
-    //       coordinates: []
-    //     };
-    //   }
-    //   treesDict[tree.sapling_id].images.push(tree.images);
-    //   treesDict[tree.sapling_id].coordinates.push(tree.coordinates);
-    // }
-    // );
-    // console.log(treesDict);
-    // return treesDict;
-
     return trees;
-
-
   } catch (error) {
     console.error(error);
     throw Error('Failed to get treedata !!!');
