@@ -1,5 +1,5 @@
 import React, {useEffect,useState} from 'react';
-import { View, Text, Button, FlatList} from 'react-native';
+import { View, Text, Button, FlatList, Alert} from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getSaplingIds,getDBConnection,getTreesToUpload,updateUpload,getTreeImages } from './tree_db';
@@ -30,10 +30,15 @@ const HomeScreen = ({navigation}) => {
     
     const fetchHelperData =async () => {
         console.log('fetching helper data');
-        const helperData = await axios.post('https://ebcb-103-21-124-76.ngrok.io/v2/fetchHelperData',{
+        const helperData = await axios.post('https://47e1-103-21-124-76.ngrok.io/v2/fetchHelperData',{
             userId: user_id
         });
         console.log(helperData.data);
+
+        if (helperData.status === 200) {
+            Alert.alert('Helper data fetched successfully');
+        }
+
     }
 
     const upload = async () => {
@@ -73,7 +78,7 @@ const HomeScreen = ({navigation}) => {
             // console.log(final);
           
             let response = await axios.post(
-            'https://ebcb-103-21-124-76.ngrok.io/api/v2/uploadTrees',
+            'https://47e1-103-21-124-76.ngrok.io/api/v2/uploadTrees',
             final,
             );
             if (response.status === 200) {
@@ -81,7 +86,8 @@ const HomeScreen = ({navigation}) => {
             for(let index = 0; index < final.length; index++){
                 const element = final[index];
                 await updateUpload(db, element.sapling_id);
-            }
+                }
+                Alert.alert('Upload successful');
             }
             console.log(response.data);
             // await fetch();

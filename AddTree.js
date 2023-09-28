@@ -14,7 +14,6 @@ import {
   TextInput,
   Pressable,
 } from 'react-native';
-import axios from 'axios';
 import { Dropdown } from './DropDown';
 import {
   getDBConnection,
@@ -31,7 +30,8 @@ import {
 } from './tree_db';
 // import * as ImagePicker from 'react-native-image-picker';
 import {launchCamera} from 'react-native-image-picker';
-import { Location } from './get_location';
+import Geolocation from '@react-native-community/geolocation';
+
 const AddTreeScreen = ({navigation}) => {
 
     const [saplingid, setSaplingid] = React.useState(null);
@@ -135,30 +135,27 @@ const AddTreeScreen = ({navigation}) => {
     //   }
     // }, []);
 
+   
     const requestLocation = async () => {
-      try {
-        let loc = await Location();
-        setlat(loc.latitude);
-        setlng(loc.longitude);
-      } catch (code) {
-        if (code === 'CANCELLED') {
-          Alert.alert('Location cancelled by user or by another request');
-        }
-        if (code === 'UNAVAILABLE') {
-          Alert.alert('Location service is disabled or unavailable');
-        }
-        if (code === 'TIMEOUT') {
-          Alert.alert('Location request timed out');
-        }
-        if (code === 'UNAUTHORIZED') {
-          Alert.alert('Authorization denied! Restart and allow Location access');
-        }
-      }
+      
+          Geolocation.getCurrentPosition(
+            (position) => {
+              setlat(position.coords.latitude);
+              setlng(position.coords.longitude);
+              console.log(lat);
+              console.log(lng);
+            },
+            (error) => {
+              error => Alert.alert('Error', JSON.stringify(error));
+            },
+            { enableHighAccuracy: false, timeout: 20000, maximumAge: 10000 },
+          );
+       
     };
 
     const adddata = async () => {
       try {
-        requestLocation();
+        await requestLocation();
         const tree = {
           treeid: selectedTreeType.value,
           saplingid: saplingid,
@@ -263,8 +260,8 @@ const AddTreeScreen = ({navigation}) => {
           
           <View style={{ padding:12,borderRadius: 5}}>
         <Button
-              title="upload log"
-              onPress={() => upload()}
+              title="get location"
+              onPress={() => requestLocation()}
           />
         </View>
 

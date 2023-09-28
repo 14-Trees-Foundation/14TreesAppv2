@@ -41,7 +41,7 @@ const LoginScreen = ({navigation}) =>{
       const userInfo = await GoogleSignin.signIn();
       // navigation.navigate('Home');
 // -------------------- add the endpoint here --------------------
-      const response = await axios.post('https://ebcb-103-21-124-76.ngrok.io/api/v2/login', {
+      const response = await axios.post('https://47e1-103-21-124-76.ngrok.io/api/v2/login', {
         name: userInfo.user.name,
         email: userInfo.user.email,
         phone: phoneNumber,
