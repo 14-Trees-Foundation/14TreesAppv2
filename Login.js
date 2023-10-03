@@ -79,53 +79,66 @@ const LoginScreen = ({navigation}) =>{
 
 
   return (
-    <View style={{ backgroundColor: 'black', height: '100%' }}>
+    <View style={{ backgroundColor: 'white', height: '100%' }}>
       {/* // create a header with title as 14 trees */}
+        <View style={{backgroundColor:'#5DB075', borderBottomLeftRadius:10, borderBottomRightRadius:10}}>
+          <Text style={styles.headerText}>Log In</Text>
+        </View>
         
-        <Text style={{ fontSize: 30, color: 'white', textAlign: 'center', marginTop: 30, shadowRadius: 10 }}>Log In</Text>
-  
+      <View style={styles.pop}>
 
-      <View >  
-        <Text style={{ fontSize: 20, color: 'white',marginLeft: 35, marginTop: 70 }}>Enter your phone number</Text>
-        <PhoneInput
-          defaultValue={phoneNumber}
-          defaultCode="IN"
-          layout="first"
-          onChangeText={(text) => {
-            setPhoneNumber(text);
-          }}
-          onChangeFormattedText={(text) => {
-            setPhoneNumber(text);
-            
-          }}
+        <View >  
+          {/* <Text style={{ fontSize: 20, color: 'black',marginLeft: 35, marginTop: 70 }}>Enter your phone number</Text> */}
+          <PhoneInput
+            defaultValue={phoneNumber}
+            defaultCode="IN"
+            layout="first"
+            // placeholder='Enter phone number'
           
-          withDarkTheme
-          withShadow
-          autoFocus
-          containerStyle={{ marginTop: 20, marginLeft:35, marginRight: 20}}
-        />
-      </View>
+            filterProps={{autoFocus: true}}
+            containerStyle={{ // centre the phone number input
+              alignItems: 'center',
+              justifyContent: 'center',
+              alignSelf: 'center',
+              marginTop: 30,
+            }}
+            flagButtonStyle={{backgroundColor: '#F5F5F5', borderWidth: 1, borderColor: 'white', borderRadius: 10, padding: 10, color: 'black', fontSize: 16, fontWeight: 'bold',}}
+            textContainerStyle={{backgroundColor: '#F5F5F5', borderWidth: 1, borderColor: 'white', borderRadius: 10, padding: 10, color: 'black', fontSize: 16, fontWeight: 'bold',}}
+            onChangeText={(text) => {
+              setPhoneNumber(text);
+            }}
+            onChangeFormattedText={(text) => {
+              setPhoneNumber(text);
+              
+            }}
+            
+          
+            autoFocus
+            
+          />
+        </View>
 
-      <View style={{ marginTop: 20, marginLeft: 35, marginRight: 35 , marginBottom: 50}}>
-      
-        <TextInput
-          style={styles.textInput}
-          onChangeText={handlePasswordChange}
-          value={password}
-          placeholder="Enter secret key"
-          placeholderTextColor="black"
-          // secureTextEntry={False}
-        />
-      </View>
+        <View style={{ marginTop: 20, marginLeft: 35, marginRight: 35 , marginBottom: 50}}>
+        
+          <TextInput
+            style={styles.textInput}
+            onChangeText={handlePasswordChange}
+            value={password}
+            placeholder="Enter secret key"
+            placeholderTextColor="grey"
+            // secureTextEntry={False}
+          />
+        </View>
 
-      <View style={{ marginTop: 20, marginLeft: 35, marginRight: 35, marginTop: 20 , marginBottom: 20}}>
-        <GoogleSigninButton
-          style={{ width: '50%', height: 70, borderRadius: 40, alignItems: 'center', justifyContent: 'center', alignSelf: 'center'}}
-          size={GoogleSigninButton.Size.Standard}
-          color={GoogleSigninButton.Color.Light}
-          onPress={googleLogin}
-        />
-      </View>     
+        <View style={{marginBottom:30}}>
+          <GoogleSigninButton
+            style={{ width: '50%', height: 70, borderRadius: 40, alignItems: 'center', justifyContent: 'center', alignSelf: 'center'}}
+            size={GoogleSigninButton.Size.Standard}
+            color={GoogleSigninButton.Color.Light}
+            onPress={googleLogin}
+          />
+        </View>  
+      </View>   
     </View>
   );
 }
@@ -133,19 +146,34 @@ const LoginScreen = ({navigation}) =>{
 // { height: 70, backgroundColor: 'grey', borderWidth: 1, paddingLeft: 10, marginTop: 10, fontSize: 17 }
 const styles = StyleSheet.create({
   textInput: {
+    height: 75,
     width: 310,
-    height: 70,
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderColor: 'white',
-    backfaceVisibility: 'hidden',
-    backgroundColor: 'white',
-    borderRadius: 5,
+    backgroundColor: '#f5f5f5',
+   
     padding: 10,
     color: 'black', // Change font color here
     fontSize: 16,
-    fontWeight: 'bold',
-   
+    fontWeight: 'bold',  
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
   },
+  pop: {
+    backgroundColor: '#5DB075',
+    marginLeft: 20,
+    marginRight: 20,
+    marginTop: 30,
+    elevation: 10,
+    borderRadius: 10,
+  },
+
+  headerText: {
+    fontSize: 30, color: 'white', textAlign: 'center', marginTop: 30, marginBottom: 30, fontFamily:'cochin', fontWeight:'bold' , textShadowColor: 'rgba(0, 0, 0, 0.5)', 
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3, 
+  }
 });
 
 

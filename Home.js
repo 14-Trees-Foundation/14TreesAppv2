@@ -1,33 +1,29 @@
 import React, {useEffect,useState} from 'react';
-import { View, Text, Button, FlatList, Alert} from 'react-native';
+import { View, Text, Button,  Alert, StyleSheet, TouchableOpacity} from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getSaplingIds,getDBConnection,getTreesToUpload,updateUpload,getTreeImages } from './tree_db';
+import {getDBConnection,getTreesToUpload,updateUpload,getTreeImages } from './tree_db';
+
 
 const HomeScreen = ({navigation}) => {
     // const user_id = getUserId();
-    const [user_id, setUser_id] = React.useState(null);
+    const [user_id, setUser_id] = useState(null);
     const getUserId = async () => {
         const value = await AsyncStorage.getItem('userid');
+  
         setUser_id(value);
     }
     getUserId();
-    // console.log('at home, user id is:');
-    // console.log(user_id);
+    const [syncDate, setSyncDate] = useState('');
+    const getSyncDate = async () => {
+        const value = await AsyncStorage.getItem('date');
+        console.log(value);
+        setSyncDate(value);
+    }
+    useEffect(() => {
+        getSyncDate();
+    }, [syncDate]);
 
-    // const [saplings, setSaplings] = useState([]);
-    // const fetchSaplings = async () => {
-    //     const db = await getDBConnection();
-    //     const saplings = await getSaplingIds(db);
-    //     setSaplings(saplings);
-    // }
-    // display sapling ids in the component
-
-    // useEffect(() => {
-    //     fetchSaplings();
-    // },[saplings]);
-
-    
     const fetchHelperData =async () => {
         console.log('fetching helper data');
         const helperData = await axios.post('https://47e1-103-21-124-76.ngrok.io/v2/fetchHelperData',{
@@ -38,13 +34,14 @@ const HomeScreen = ({navigation}) => {
         if (helperData.status === 200) {
             Alert.alert('Helper data fetched successfully');
         }
-
     }
 
     const upload = async () => {
         try {
             const db = await getDBConnection();
             let res = await getTreesToUpload(db);
+            const currentTime = new Date().toString();
+            await AsyncStorage.setItem('date',currentTime );
             // console.log(res);
 
             var final = [];
@@ -90,7 +87,7 @@ const HomeScreen = ({navigation}) => {
                 Alert.alert('Upload successful');
             }
             console.log(response.data);
-            // await fetch();
+            await fetch();
         }
         catch (error) {
           console.error(error);
@@ -98,31 +95,65 @@ const HomeScreen = ({navigation}) => {
       }; 
 
     return (
-        <View style={{ backgroundColor:'black', height: '100%'}}>
-          <Text style={{fontSize: 20,color: '#ffffff',textAlign: 'center', marginBottom:40}} > Home </Text>
+        <View >
+          <View style={{backgroundColor:'#5DB075', borderBottomLeftRadius:10, borderBottomRightRadius:10}}>
+            <Text style={styles.headerText} > Home </Text>
+          </View>
+
+          <Text style={{fontSize:20, marginTop:20, alignContent:'center', justifyContent:'center', alignSelf:'center', color:'black'}}>Last Sync Data On : </Text>
+          <Text style={{fontSize:20, alignContent:'center', justifyContent:'center', alignSelf:'center', color:'black'}}>{syncDate}</Text>
+
           <View style={{margin:20}}>
             <Button
-              title="Add Tree"
-              onPress={() => navigation.navigate('AddTree')}
+                title="Sync Data"
+                onPress={upload}
+                color={'#5DB075'}
+                
             />
-        </View>
-        <View style={{margin:20}}>
-          <Button
-              title="Fetch Helper Data"
-              onPress={fetchHelperData}
-          />
+          </View>
 
+          {/* <View>
+            <TouchableOpacity
+              style={{
+                backgroundColor: 'blue',
+                padding: 10,
+                borderRadius: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ color: 'white', fontSize: 16 }}>Click Me</Text>
+            </TouchableOpacity>
+          </View> */}
+          
+          <View style={{margin:20, marginTop:50}}>
+            <Button
+              title="Add New Tree"
+              onPress={() => navigation.navigate('AddTree')}
+              color={'#5DB075'}
+            />
+          </View>
+          <View style={{margin:20}}>
+            <Button
+                title="Fetch Helper Data"
+                onPress={fetchHelperData}
+                color={'#5DB075'}
+                
+            />
+          </View>
          
-        </View>
-        <View style={{margin:20}}>
-          <Button
-              title="Upload"
-              onPress={upload}
-          />
-        </View>
           
         </View>
     );
 }
 
 export default HomeScreen;
+
+const styles = StyleSheet.create({
+    headerText: {
+      fontSize: 30, color: 'white', textAlign: 'center', marginTop: 30, marginBottom: 30, fontFamily:'cochin', fontWeight:'bold' , textShadowColor: 'rgba(0, 0, 0, 0.5)', 
+      textShadowOffset: { width: 1, height: 1 },
+      textShadowRadius: 3, 
+    }
+  });
+
+  

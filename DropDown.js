@@ -16,14 +16,21 @@ export const Dropdown = ({items, label, setSelectedItems, selectedItem}) => {
         selectedItems={selectedItem}
         //suggestion container style
         textInputStyle={{
-          paddingLeft: 20,
-          borderWidth: 1,
+          height: 60,
+          width: 310,
+          borderWidth: 0.5,
+          borderColor: 'grey',
           borderRadius: 10,
-          borderColor: '#000000',
-          backgroundColor: '#ffffff',
-          color: '#000000',
-          marginHorizontal: 10,
-          marginVertical: 3,
+          backgroundColor: '#f5f5f5',
+          marginTop: 10,
+          marginBottom: 10,
+          padding: 10,
+          color: 'black', // Change font color here
+          fontSize: 16,
+          fontWeight: 'bold',  
+          alignItems: 'center',
+          justifyContent: 'center',
+          alignSelf: 'center',
         }}
         itemStyle={{
           //single dropdown item style
