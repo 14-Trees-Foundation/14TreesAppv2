@@ -5,6 +5,8 @@ import PhoneInput, { isValidNumber } from 'react-native-phone-number-input';
 import {GoogleSignin,GoogleSigninButton,statusCodes,} from '@react-native-google-signin/google-signin'; 
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DataService } from './DataService';
+import { Constants } from './Utils';
 
 
 const LoginScreen = ({navigation}) =>{
@@ -41,24 +43,36 @@ const LoginScreen = ({navigation}) =>{
       const userInfo = await GoogleSignin.signIn();
       // navigation.navigate('Home');
 // -------------------- add the endpoint here --------------------
-      const response = await axios.post('https://47e1-103-21-124-76.ngrok.io/api/v2/login', {
+      const userDataPayload = {
         name: userInfo.user.name,
         email: userInfo.user.email,
         phone: phoneNumber,
         secret: password
-      });
+      };
+      console.log('Sending google data to server.')
+      const response = await DataService.loginUser(userDataPayload);
+      console.log('got a response');
       console.log('at login : ',response.data._id)
       // storeUserId(response.data._id);
-      await AsyncStorage.setItem('userid', response.data._id);
+      await AsyncStorage.setItem(Constants.userIdKey, response.data._id);
+      await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
       // const dummy = getUserId();
       console.log(response.status);
       // console.log(response.data);
       // console.log(userObj._id);
-      console.log(response.status);
-      if (response.status === 200) {
-        navigation.navigate('Home');
-      } else {
-        Alert.alert('Login Failed', 'Please check your credentials and try again.');
+      switch (response.status) {
+        case 200:
+          navigation.navigate('Home');
+          break;
+        case 400:
+          Alert.alert('Login Failed','Check phone number and secret.');
+          break;
+        case 401:
+          Alert.alert('Login Failed','Invalid secret');
+          break;
+        default:
+          Alert.alert('Login Failed','Unknown error. Consult an expert.');
+          break;
       }
 
     } catch (error) {

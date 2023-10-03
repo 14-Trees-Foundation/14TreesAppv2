@@ -42,12 +42,11 @@ export const createTable = async db => {
   await db.executeSql(query2);
 };
 
-
-export const getTreesToUpload = async db => {
+export const getAllTrees = async db=>{
   try {
     const trees = [];
     const results = await db.executeSql(
-      `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng FROM ${tableName} where uploaded=0`,
+      `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng, uploaded FROM ${tableName}`,
     );
     results.forEach(result => {
       for (let index = 0; index < result.rows.length; index++) {
@@ -56,6 +55,25 @@ export const getTreesToUpload = async db => {
     });
     return trees;
   } catch (error) {
+    //TODO: remove raw throw. Convert to Alert.
+    console.error(error);
+    throw Error('Failed to get treedata !!!');
+  }
+}
+export const getTreesByUploadStatus = async (db,uploaded) => {
+  try {
+    const trees = [];
+    const results = await db.executeSql(
+      `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng FROM ${tableName} where uploaded=${uploaded}`,
+    );
+    results.forEach(result => {
+      for (let index = 0; index < result.rows.length; index++) {
+        trees.push(result.rows.item(index));
+      }
+    });
+    return trees;
+  } catch (error) {
+    //TODO: remove raw throw. Convert to Alert.
     console.error(error);
     throw Error('Failed to get treedata !!!');
   }
@@ -65,13 +83,13 @@ export const getTreeImages = async (db, saplingid) => {
   try {
     const treesimgs = [];
     const results = await db.executeSql(
-      `SELECT imageid as name, image as Data FROM sapling_images where saplingid='${saplingid}'`,
+      `SELECT imageid as name, image as data FROM sapling_images where saplingid='${saplingid}'`,
     );
     results.forEach(result => {
       for (let index = 0; index < result.rows.length; index++) {
         const image = {
           name: result.rows.item(index).name,
-          data: result.rows.item(index).Data,
+          data: result.rows.item(index).data,
         };
         treesimgs.push(image);
       }

@@ -12,6 +12,9 @@ import {PERMISSIONS} from 'react-native-permissions';
 import NetInfo from '@react-native-community/netinfo';
 import {fetch_tree_and_plot} from './get_tree_plot';
 import {Location} from './get_location';
+import { Constants, Utils } from './Utils';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import LocalDataView from './LocalDataView';
 
 
 const Stack = createStackNavigator();
@@ -74,6 +77,8 @@ const App = () => {
         const isSignedIn = await GoogleSignin.isSignedIn();
         if (isSignedIn) {
           // User is signed in, navigate to HomeScreen
+          Utils.userId = await AsyncStorage.getItem(Constants.userIdKey);
+          console.log('Loaded userid: ',Utils.userId);
           navigationRef.current?.navigate('Home');
         }
         else {
@@ -96,6 +101,7 @@ const App = () => {
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="AddTree" component={AddTreeScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="LocalDataView" component={LocalDataView} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

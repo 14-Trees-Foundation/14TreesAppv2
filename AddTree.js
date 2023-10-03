@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import {
-  StyleSheet,Text,View,Image,Alert,Button,ScrollView,FlatList,TouchableOpacity,TextInput,Pressable,
+  StyleSheet,Text,View,Image,Alert,Button,ScrollView,FlatList,TouchableOpacity,TextInput,Pressable,ToastAndroid
 } from 'react-native';
 import { Dropdown } from './DropDown';
 import {
@@ -22,6 +22,8 @@ import {
 import {launchCamera} from 'react-native-image-picker';
 import Geolocation from '@react-native-community/geolocation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Constants, Utils } from './Utils';
+
 
 
 const AddTreeScreen = ({navigation}) => {
@@ -36,8 +38,11 @@ const AddTreeScreen = ({navigation}) => {
     const [userItems, setUserItems] = useState([]);
     const [selectedTreeType, setSelectedTreeType] = useState({});
     const [selectedPlot, setSelectedPlot] = useState({});
-    const [selectedUser, setSelectedUser] = useState({});
-    
+    let userId = Utils.userId;
+    //fetch userId from Async Storage.
+    // AsyncStorage.getItem(Constants.userIdKey).then((userid)=>{
+    //   userId = userid;
+    // })
     // image handle---------------------  
     const pickImage  = () => {
         const options = {
@@ -67,26 +72,28 @@ const AddTreeScreen = ({navigation}) => {
                 
                 const imageName = `${saplingid}_${timestamp}.jpg`;
                 
-                setImages([...images, { saplingid:  saplingid,Data:  base64Data, name: imageName }]);
+                setImages([...images, { saplingid:  saplingid,data:  base64Data, name: imageName }]);
             }
         });
     };
     
-    const renderImg = ({ item }) => (
-      <View  style={{margin:3, flexDirection:'row', flexWrap:'wrap'}}>
-        <Image
-          source={{ uri: `data:image/jpeg;base64,${item.Data}` }}
-          style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
-        />
-        {/* <TouchableOpacity onPress={() => onDeleteItem(item.id)}>*/}
-        <TouchableOpacity onPress={() => handleDeleteItem(item.name)}>
+    const renderImg = ({ item }) => {
+      return (
+        <View  style={{margin:3, flexDirection:'row', flexWrap:'wrap'}}>
           <Image
-            source={require('./assets/icondelete.png')} // Replace with your delete icon image
-            style={{ width: 20, height: 20,}} // Adjust the icon dimensions and margin
-          /> 
-        </TouchableOpacity>
-      </View>
-    );
+            source={{ uri: `data:image/jpeg;base64,${item.data}` }}
+            style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
+          />
+          {/* <TouchableOpacity onPress={() => onDeleteItem(item.id)}>*/}
+          <TouchableOpacity onPress={() => handleDeleteItem(item.name)}>
+            <Image
+              source={require('./assets/icondelete.png')} // Replace with your delete icon image
+              style={{ width: 20, height: 20,}} // Adjust the icon dimensions and margin
+            /> 
+          </TouchableOpacity>
+        </View>
+      );
+    }
 
     const handleDeleteItem = (name) => {
       const newImages = images.filter((item) => item.name !== name);
@@ -113,7 +120,7 @@ const AddTreeScreen = ({navigation}) => {
     useEffect(() => {
       loadDataCallback();
     }, [loadDataCallback]);
-
+    
     const requestLocation = async () => {
         console.log('requesting location');
           Geolocation.getCurrentPosition(
@@ -130,65 +137,7 @@ const AddTreeScreen = ({navigation}) => {
           );
        
     };
-
-    const upload = async () => {
-      try {
-          const db = await getDBConnection();
-          let res = await getTreesToUpload(db);
-          const currentTime = new Date().toLocaleTimeString();
-          await AsyncStorage.setItem('date',currentTime );
-          // console.log(res);
-
-          var final = [];
-          for (let index = 0; index < res.length; index++) {
-              var element = res[index];
-              // if lat or lng is null, change it to 0
-              if (element.lat === 'undefined') {
-                  element.lat = 0;
-              }
-              if (element.lng === 'undefined') {
-                  element.lng = 0;
-              }
-              console.log(element.lat, element.lng);
-              const db = await getDBConnection();
-              let images = await getTreeImages(db, element.sapling_id);
-              for (let index = 0; index < images.length; index++) {
-              console.log(images[index].name);
-              }
-        // console.log(element);
-              const tree = {
-                  sapling_id: element.sapling_id,
-                  type_id: element.type_id,
-                  plot_id: element.plot_id,
-                  user_id: user_id,
-                  coordinates: [element.lat,  element.lng],
-                  images: images,
-              };
-              final.push(tree);
-          }
-
-          // console.log(final);
-        
-          let response = await axios.post(
-          'https://47e1-103-21-124-76.ngrok.io/api/v2/uploadTrees',
-          final,
-          );
-          if (response.status === 200) {
-          
-          for(let index = 0; index < final.length; index++){
-              const element = final[index];
-              await updateUpload(db, element.sapling_id);
-              }
-              Alert.alert('Upload successful');
-          }
-          console.log(response.data);
-          // await fetch();
-      }
-      catch (error) {
-        console.error(error);
-      }
-    }; 
-
+    
     const adddata = async () => {
       if(saplingid === null || Object.keys(selectedTreeType).length === 0 || Object.keys(selectedPlot).length === 0){
         Alert.alert('Error', 'Please fill all the fields');
@@ -207,7 +156,7 @@ const AddTreeScreen = ({navigation}) => {
             lat: lat,
             lng: lng,
             plotid: selectedPlot.value,
-            user_id: selectedUser.user_id,
+            user_id: userId,
           };
           // call saveTreeImages for each image
           
@@ -216,7 +165,7 @@ const AddTreeScreen = ({navigation}) => {
           for (let index = 0; index < images.length; index++) {
             const element = {
               saplingid : images[index].saplingid,
-              image : images[index].Data,
+              image : images[index].data,
               imageid : images[index].name,
             };
             await saveTreeImages(db, element);
@@ -229,7 +178,8 @@ const AddTreeScreen = ({navigation}) => {
           // setSelectedPlot({});
           // setSelectedUser({});
           // setImages([]);
-          await upload();
+          // await Utils.upload();
+          ToastAndroid.show('Tree saved locally!',ToastAndroid.SHORT);
           navigation.navigate('Home');
         } catch (error) {
           console.error(error);
@@ -320,10 +270,10 @@ const AddTreeScreen = ({navigation}) => {
               </Pressable>
             </View> */}
           <View style={{ padding:12,borderRadius: 5}}>
-          <Button
+          {/* <Button
                 title="get location"
                 onPress={() => requestLocation()}
-            />
+            /> */}
           </View>
       </View>
    </View>
