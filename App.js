@@ -1,6 +1,6 @@
 
-import React, { useState,useEffect } from 'react';
-import {Alert, BackHandler,PermissionsAndroid,} from 'react-native';
+import React, { useState,useEffect} from 'react';
+import {Alert, BackHandler,PermissionsAndroid,Platform} from 'react-native';
 import HomeScreen from './Home';
 import LoginScreen from './Login';
 import AddTreeScreen from './AddTree';
@@ -16,38 +16,52 @@ import {Location} from './get_location';
 
 const Stack = createStackNavigator();
 const navigationRef = React.createRef();
-
+async function request() {
+  //https://developer.android.com/training/data-storage/shared/media#storage-permission
+  const androidVersion = Number.parseInt(Platform.constants['Release']);
+  const versionOfPermissionChange = 10;
+  const permissions = [
+    PERMISSIONS.ANDROID.CAMERA,
+    PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
+    PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+    PERMISSIONS.ANDROID.ACCESS_BACKGROUND_LOCATION,  
+  ];
+  if(androidVersion<versionOfPermissionChange){
+    permissions.push(...[
+      PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
+      PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE
+    ]);
+  }
+  else{
+    permissions.push(...[
+      PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
+      PERMISSIONS.ANDROID.READ_MEDIA_VIDEO,
+      PERMISSIONS.ANDROID.READ_MEDIA_AUDIO
+    ])
+  }
+  let res = await checkMultiplePermissions(permissions);
+  console.log(res);
+  if (!res) {
+    Alert.alert(
+      'Permissions required!',
+      'Please go to Settings and grant permissions',
+    );
+  }
+}
+async function netInfo() {
+  NetInfo.fetch().then(async state => {
+    if (state.isConnected) {
+      await fetch_tree_and_plot();
+    } else {
+      Alert.alert('No internet');
+    }
+  });
+}
 const App = () => {
 
-  useEffect(() => {
-    const permissions = [
-      PERMISSIONS.ANDROID.CAMERA,
-      PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
-      PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-      PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
-      PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
-      PERMISSIONS.ANDROID.ACCESS_BACKGROUND_LOCATION,
-    ];
-    
-    (async function request() {
-      let res = await checkMultiplePermissions(permissions);
-      console.log(res);
-      if (!res) {
-        Alert.alert(
-          'Permissions required!',
-          'Please go to Settings and grant permissions',
-        );
-      }
-    })();
-    (async function netInfo() {
-      NetInfo.fetch().then(async state => {
-        if (state.isConnected) {
-          await fetch_tree_and_plot();
-        } else {
-          Alert.alert('No internet');
-        }
-      });
-    })();
+  useEffect(() => {  
+    request();
+    netInfo();
   }, []);
 
   useEffect(() => {
