@@ -15,9 +15,11 @@ import {Location} from './get_location';
 import { Constants, Utils } from './Utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LocalDataView from './LocalDataView';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 
 
 const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
 const navigationRef = React.createRef();
 async function request() {
   //https://developer.android.com/training/data-storage/shared/media#storage-permission
@@ -97,12 +99,15 @@ const App = () => {
   
   return (
     <NavigationContainer ref={navigationRef}>
-      <Stack.Navigator initialRouteName="Login">
+      <Drawer.Navigator>
+        <Drawer.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}></Drawer.Screen>
+      </Drawer.Navigator>
+      {/* <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="AddTree" component={AddTreeScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="LocalDataView" component={LocalDataView} options={{ headerShown: false }}/>
-      </Stack.Navigator>
+      </Stack.Navigator> */}
     </NavigationContainer>
   );
 };
