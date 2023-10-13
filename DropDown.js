@@ -3,6 +3,7 @@ import {View} from 'react-native';
 import SearchableDropdown from 'react-native-searchable-dropdown';
 
 export const Dropdown = ({items, label, setSelectedItems, selectedItem}) => {
+  console.log(items);
   return (
     <View>
       <SearchableDropdown
@@ -36,22 +37,30 @@ export const Dropdown = ({items, label, setSelectedItems, selectedItem}) => {
           //single dropdown item style
           padding: 10,
           margin: 2,
-          backgroundColor: '#1f3625',
+          backgroundColor: '#5DB075',
           borderColor: '#9BC53D',
           borderWidth: 1,
           borderRadius: 10,
+          width: 310,
+          height: 60,
+          justifyContent: 'center',
+          alignSelf: 'center',
+          
         }}
         itemTextStyle={{
           //text style of a single dropdown item
           color: '#ffffff',
-          fontSize: 20,
+          fontSize: 16,
+          
         }}
         itemsContainerStyle={{
           //items container style you can pass maxHeight
           //to restrict the items dropdown hieght
           maxHeight: '70%',
+          
         }}
         items={items}
+        
         //mapping of item array
         defaultIndex={0}
         //default selected item index

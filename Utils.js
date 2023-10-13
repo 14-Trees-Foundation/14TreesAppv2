@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAllTrees, getDBConnection, getTreeImages, getTreesByUploadStatus, updateUpload } from "./tree_db";
+import { getAllTrees, getDBConnection, getTreeImages, getTreesByUploadStatus, updateUpload , getTreeNames,getPlotNames, getSaplingIds} from "./tree_db";
 import { DataService } from "./DataService";
 import { Alert } from "react-native";
 
@@ -78,6 +78,25 @@ export class Utils{
         }
         return final;
     }
+
+    static async fetchTreeNamesFromLocalDB() {
+        const db = await getDBConnection();
+        let res = await getTreeNames(db);
+        return res;
+    }
+
+    static async fetchPlotNamesFromLocalDB() {
+        const db = await getDBConnection();
+        let res = await getPlotNames(db);
+        return res;
+    }
+
+    static async fetchSaplingIdsFromLocalDB() {
+        const db = await getDBConnection();
+        let res = await getSaplingIds(db);
+        return res;
+    }
+    
 
     static async getUserId() {
         return await AsyncStorage.getItem(Constants.userIdKey);

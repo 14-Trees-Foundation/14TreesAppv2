@@ -4,6 +4,7 @@ import {Alert, BackHandler,PermissionsAndroid,Platform} from 'react-native';
 import HomeScreen from './Home';
 import LoginScreen from './Login';
 import AddTreeScreen from './AddTree';
+import EditTreeScreen from './EditTree';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
@@ -18,13 +19,14 @@ import LocalDataView from './LocalDataView';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 
 
+
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 const navigationRef = React.createRef();
 async function request() {
   //https://developer.android.com/training/data-storage/shared/media#storage-permission
   const androidVersion = Number.parseInt(Platform.constants['Release']);
-  const versionOfPermissionChange = 10;
+  const versionOfPermissionChange = 12;
   const permissions = [
     PERMISSIONS.ANDROID.CAMERA,
     PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
@@ -81,7 +83,7 @@ const App = () => {
           // User is signed in, navigate to HomeScreen
           Utils.userId = await AsyncStorage.getItem(Constants.userIdKey);
           console.log('Loaded userid: ',Utils.userId);
-          navigationRef.current?.navigate('Home');
+          navigationRef.current?.navigate('HomeScreen');
         }
         else {
           // User is not signed in, navigate to LoginScreen
@@ -95,19 +97,23 @@ const App = () => {
     checkSignInStatus();
   }, []);
 
+  const StackNavigator = () => (
+    <Stack.Navigator>
+      <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }}/>
+      <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
+    </Stack.Navigator>
+  );
+
   
   
   return (
     <NavigationContainer ref={navigationRef}>
       <Drawer.Navigator>
-        <Drawer.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}></Drawer.Screen>
+        <Drawer.Screen name="Home" component={StackNavigator} options={{ headerShown: false }}></Drawer.Screen>
+        <Drawer.Screen name="AddTree" component={AddTreeScreen} options={{ headerShown: false }}></Drawer.Screen>
+        <Drawer.Screen name="LocalDataView" component={LocalDataView} options={{ headerShown: false }}></Drawer.Screen>
+        <Drawer.Screen name="EditTree" component={EditTreeScreen} options={{ headerShown: false }}></Drawer.Screen>
       </Drawer.Navigator>
-      {/* <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}/>
-        <Stack.Screen name="AddTree" component={AddTreeScreen} options={{ headerShown: false }}/>
-        <Stack.Screen name="LocalDataView" component={LocalDataView} options={{ headerShown: false }}/>
-      </Stack.Navigator> */}
     </NavigationContainer>
   );
 };

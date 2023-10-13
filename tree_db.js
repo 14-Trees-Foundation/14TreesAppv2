@@ -184,6 +184,48 @@ export const updateTreetbl = async (db, tree) => {
   return db.executeSql(insertQuery);
 };
 
+// get tree names for given list of tree ids
+
+export const getTreeNames = async db => {
+  const selectQuery = `SELECT name FROM ${treetypeName} WHERE value IN (SELECT treeid FROM ${tableName})`;
+  const treeNames = [];
+
+  try {
+    let res = await db.executeSql(selectQuery);
+    res.forEach(result => {
+      for (let index = 0; index < result.rows.length; index++) {
+        treeNames.push(result.rows.item(index).name);
+      }
+    });
+    return treeNames;
+  }
+  catch (error) {
+    console.error(error);
+    throw Error('Failed to get tree names !!!');
+  }
+  
+};
+
+export const getPlotNames = async db => {
+  const selectQuery = `SELECT name FROM ${plotName} WHERE value IN (SELECT plotid FROM ${tableName})`;
+  const plotNames = [];
+
+  try {
+    let res = await db.executeSql(selectQuery);
+    res.forEach(result => {
+      for (let index = 0; index < result.rows.length; index++) {
+        plotNames.push(result.rows.item(index).name);
+      }
+    });
+    return plotNames;
+  }
+  catch (error) {
+    console.error(error);
+    throw Error('Failed to get plot names !!!');
+  }
+  
+}
+
 // get sapling ids of all trees from table 'tree'
 
 export const getSaplingIds = async db => {

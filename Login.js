@@ -21,39 +21,26 @@ const LoginScreen = ({navigation}) =>{
   };
 
   
-  const [password, setPassword] = useState('');
-
-  const handlePasswordChange = (text) => {
-    setPassword(text);
-  };
-
-  
-
-
   useEffect(() => {
     GoogleSignin.configure()
   }, [])
 
   
-
-
   const googleLogin = async () => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      // navigation.navigate('Home');
+      navigation.navigate('HomeScreen');
 // -------------------- add the endpoint here --------------------
       const userDataPayload = {
         name: userInfo.user.name,
         email: userInfo.user.email,
         phone: phoneNumber,
-        secret: password
       };
       console.log('Sending google data to server.')
       const response = await DataService.loginUser(userDataPayload);
       console.log('got a response');
       console.log('at login : ',response.data._id)
-      // storeUserId(response.data._id);
       await AsyncStorage.setItem(Constants.userIdKey, response.data._id);
       await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
       // const dummy = getUserId();
@@ -62,13 +49,10 @@ const LoginScreen = ({navigation}) =>{
       // console.log(userObj._id);
       switch (response.status) {
         case 200:
-          navigation.navigate('Home');
+          navigation.navigate('HomeScreen');
           break;
         case 400:
           Alert.alert('Login Failed','Check phone number and secret.');
-          break;
-        case 401:
-          Alert.alert('Login Failed','Invalid secret');
           break;
         default:
           Alert.alert('Login Failed','Unknown error. Consult an expert.');
@@ -129,18 +113,6 @@ const LoginScreen = ({navigation}) =>{
           
             autoFocus
             
-          />
-        </View>
-
-        <View style={{ marginTop: 20, marginLeft: 35, marginRight: 35 , marginBottom: 50}}>
-        
-          <TextInput
-            style={styles.textInput}
-            onChangeText={handlePasswordChange}
-            value={password}
-            placeholder="Enter secret key"
-            placeholderTextColor="grey"
-            // secureTextEntry={False}
           />
         </View>
 

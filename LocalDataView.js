@@ -6,10 +6,11 @@ import {
     Alert, Button,
     FlatList,
     Image,
-    StyleSheet, Text,
+    StyleSheet, Text,ScrollView,
     TextInput,
     ToastAndroid,
     TouchableOpacity,
+    Modal,
     View
 } from 'react-native';
 import { Dropdown } from './DropDown';
@@ -26,6 +27,7 @@ import {
 import Geolocation from '@react-native-community/geolocation';
 import { launchCamera } from 'react-native-image-picker';
 import { Utils } from './Utils';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 
 
@@ -33,12 +35,46 @@ const LocalDataView = ({navigation}) => {
 
     let userId = Utils.userId;
     const [treeList,setTreeList] = useState(null);
+    const [treeTypeList,setTreeTypeList] = useState(null);
+    const [plotList,setPlotList] = useState(null);
+    const [saplingIdList,setsaplingIdList] = useState(null);
+
+    const [selectedTreeType, setSelectedTreeType] = useState({});
+    const [selectedPlot, setSelectedPlot] = useState({});
+    const [selectedSaplingId, setSelectedSaplingId] = useState({});
     useEffect(()=>{
         Utils.fetchTreesFromLocalDB().then((trees)=>{
-            console.log(trees)
+            // console.log(trees)
             setTreeList(trees)
         })
+        Utils.fetchTreeNamesFromLocalDB().then((types)=>{
+            console.log(types)
+            setTreeTypeList(types)
+        })
+        Utils.fetchPlotNamesFromLocalDB().then((plots)=>{
+            console.log(plots)
+            setPlotList(plots)
+        })
+        Utils.fetchSaplingIdsFromLocalDB().then((ids)=>{
+            console.log(ids)
+            setsaplingIdList(ids)
+        })
+
+        console.log('local data view')
+    
+
     },[])
+    
+    const [modalVisible, setModalVisible] = useState(false);
+
+    const openModal = () => {
+      setModalVisible(true);
+    };
+
+    const closeModal = () => {
+      setModalVisible(false);
+    };
+
     //fetch userId from Async Storage.
     // AsyncStorage.getItem(Constants.userIdKey).then((userid)=>{
     //   userId = userid;
@@ -65,6 +101,8 @@ const LocalDataView = ({navigation}) => {
                 borderRadius: 10,
                 flexDirection:'row'
             }}>
+
+              
                 <View style={{padding: 20,}}>
                     <Text style={styles.text3}>Sapling ID: {tree.sapling_id}</Text>
                     <Text style={styles.text3}>Plot ID: {tree.plot_id}</Text>  
@@ -85,13 +123,59 @@ const LocalDataView = ({navigation}) => {
     
    <View style={{backgroundColor:'#5DB075', height:'100%'}}>
         <Text style={styles.headerText}>Local Trees</Text>
+        <View style={{margin:20}}>
+          <Button title="Filters" onPress={openModal} color={'#5DB075'} />
+        </View>
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={modalVisible}
+          onRequestClose={closeModal}
+        >
+          <View style={{backgroundColor:'#white', height:'100%'}}>
+            <View style={{margin:20}}>
+              <Text style={{...styles.text3, fontSize:20}}>Filters</Text>
+              {/* <View style={{margin:20}}>
+                <Text style={{...styles.headerText, fontSize:15}}>Plot ID</Text>
+                <Dropdown data={plotList} />
+              </View>*/}
+              <View style={{margin:20}}>
+                <Text style={{...styles.text3, fontSize:15}}>Sapling ID</Text>
+                <Dropdown 
+                  items={saplingIdList}
+                  label={'Sapling ID'}
+                  setSelectedItems={setSelectedSaplingId}
+                  selectedItems={selectedSaplingId}
+                />
+              </View> 
+              <View style={{margin:20}}>
+                <Text style={{...styles.text3, fontSize:15}}>Type ID</Text>
+                <Dropdown
+                items={treeTypeList}
+                label={'Tree Type '}
+                setSelectedItems={setSelectedTreeType}
+                selectedItems={selectedTreeType}
+                />
+              </View>
+              <View style={{margin:20}}>
+                <Button title="Apply" onPress={closeModal} color={'#5DB075'} />
+              </View>
+            </View>
+          </View>
+      </Modal>
+          
+       
         {
             treeList===null?<Text style={styles.text2}>Loading Trees...</Text>
             :
-            <FlatList data={treeList} renderItem={({item})=>renderTree(item)}>
+              
+            
+                <FlatList data={treeList} renderItem={({item})=>renderTree(item)}></FlatList>
 
-            </FlatList>
+            
+            
         }
+        
    </View>
     );
 }
@@ -144,7 +228,7 @@ const styles = StyleSheet.create({
     },
     text3: {
         fontSize: 14,
-        color: 'white',
+        color: 'black',
         fontSize:20,
         textAlign: 'left',
     },

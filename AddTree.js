@@ -35,10 +35,13 @@ const AddTreeScreen = ({navigation}) => {
     const [images, setImages] = useState([]);
     const [treeItems, setTreeItems] = useState([]);
     const [plotItems, setPlotItems] = useState([]);
-    const [userItems, setUserItems] = useState([]);
+
     const [selectedTreeType, setSelectedTreeType] = useState({});
     const [selectedPlot, setSelectedPlot] = useState({});
     let userId = Utils.userId;
+    if (userId === null) {
+      userId = 'dummy';
+    }
     //fetch userId from Async Storage.
     // AsyncStorage.getItem(Constants.userIdKey).then((userid)=>{
     //   userId = userid;
@@ -111,7 +114,7 @@ const AddTreeScreen = ({navigation}) => {
         let users = await getUsersList(db);
         setTreeItems(trees);
         setPlotItems(plots);
-        setUserItems(users);
+        // setUserItems(users);
       } catch (error) {
         console.error(error);
       }
@@ -173,11 +176,11 @@ const AddTreeScreen = ({navigation}) => {
           
           // await fetch();
           // requestLocation();
-          // setSaplingid(null);
-          // setSelectedTreeType({});
-          // setSelectedPlot({});
+          setSaplingid(null);
+          setSelectedTreeType({});
+          setSelectedPlot({});
           // setSelectedUser({});
-          // setImages([]);
+          setImages([]);
           // await Utils.upload();
           ToastAndroid.show('Tree saved locally!',ToastAndroid.SHORT);
           navigation.navigate('Home');
