@@ -3,7 +3,7 @@ import {View} from 'react-native';
 import SearchableDropdown from 'react-native-searchable-dropdown';
 
 export const Dropdown = ({items, label, setSelectedItems, selectedItem}) => {
-  console.log(items);
+  
   return (
     <View>
       <SearchableDropdown

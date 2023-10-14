@@ -35,6 +35,7 @@ const LocalDataView = ({navigation}) => {
 
     let userId = Utils.userId;
     const [treeList,setTreeList] = useState(null);
+    const[finalList,setFinalList] = useState(null);
     const [treeTypeList,setTreeTypeList] = useState([]);
     const [plotList,setPlotList] = useState([]);
     const [saplingIdList,setsaplingIdList] = useState([]);
@@ -65,6 +66,7 @@ const LocalDataView = ({navigation}) => {
         Utils.fetchTreesFromLocalDB().then((trees)=>{
             // console.log(trees)
             setTreeList(trees)
+            setFinalList(trees)
         })
         // // loadDataCallback();
         Utils.fetchTreeNamesFromLocalDB().then((types)=>{
@@ -84,17 +86,14 @@ const LocalDataView = ({navigation}) => {
     },[])
 
 
-    useEffect(()=>{
-        console.log('local data view')
-        console.log(selectedTreeType)
-        console.log(selectedPlot)
-        console.log(selectedSaplingId)
+    // useEffect(()=>{
+    //     console.log('local data view')
+    //     console.log(selectedTreeType)
+    //     console.log(selectedPlot)
+    //     console.log(selectedSaplingId)
       
-    }
-    ,[selectedTreeType,selectedPlot,selectedSaplingId])
-    
-
-
+    // }
+    // ,[selectedTreeType,selectedPlot,selectedSaplingId])
     
     const [modalVisible, setModalVisible] = useState(false);
 
@@ -105,6 +104,42 @@ const LocalDataView = ({navigation}) => {
     const closeModal = () => {
       setModalVisible(false);
     };
+
+    const applychanges = () => {
+      let tempfinalList = [];
+      console.log(selectedTreeType)
+      console.log(selectedPlot)
+      console.log(selectedSaplingId)
+      // how to check whether the selectedSaplingId is null or not
+      if(Object.keys(selectedSaplingId).length !== 0){
+        console.log('sapling id selected')
+        tempfinalList = treeList.filter((tree)=>tree.sapling_id===selectedSaplingId.name)
+      }
+      else if(Object.keys(selectedPlot).length === 0 && Object.keys(selectedTreeType).length !== 0){
+        console.log('only tree type selected')
+        tempfinalList = treeList.filter((tree)=>tree.type_id===selectedTreeType.value)
+      }
+      else if(Object.keys(selectedPlot).length !== 0 && Object.keys(selectedTreeType).length === 0){
+        console.log('only plot selected')
+        tempfinalList = treeList.filter((tree)=>tree.plot_id===selectedPlot.value)
+      }
+      else if(Object.keys(selectedPlot).length !== 0 && Object.keys(selectedTreeType).length !== 0){
+        console.log('both plot and tree type selected')
+        tempfinalList = treeList.filter((tree)=>tree.plot_id===selectedPlot.value && tree.type_id===selectedTreeType.value)
+      }
+      else{
+        console.log('nothing selected')
+        tempfinalList = treeList;
+      }
+      if (tempfinalList.length === 0){
+        ToastAndroid.show('No trees found with given filters', ToastAndroid.SHORT);
+      }
+      setFinalList(tempfinalList);
+      setSelectedPlot({});
+      setSelectedTreeType({});
+      setSelectedSaplingId({});
+      closeModal();
+    }
 
     //fetch userId from Async Storage.
     // AsyncStorage.getItem(Constants.userIdKey).then((userid)=>{
@@ -150,9 +185,10 @@ const LocalDataView = ({navigation}) => {
             </View>
         )
     }
+
     return (
     
-   <View style={{backgroundColor:'#5DB075', height:'100%'}}>
+    <View style={{backgroundColor:'#5DB075', height:'100%'}}>
         <Text style={styles.headerText}>Local Trees</Text>
         <View style={{margin:20}}>
           <Button title="Filters" onPress={openModal} color={'black'} />
@@ -162,8 +198,9 @@ const LocalDataView = ({navigation}) => {
           transparent={false}
           visible={modalVisible}
           onRequestClose={closeModal}
+          presentationStyle='formSheet'
         >
-          <View style={{backgroundColor:'#white', height:'100%'}}>
+          {/* <View style={{backgroundColor:'white'}}> */}
             <View style={{margin:20}}>
               <Text style={{...styles.text3, fontSize:20}}>Filters</Text>
             
@@ -173,9 +210,8 @@ const LocalDataView = ({navigation}) => {
                   items={saplingIdList}
                   label="Sapling ID"
                   setSelectedItems={setSelectedSaplingId}
-                  selectedItems={selectedSaplingId}
+                  selectedItem={selectedSaplingId}
                 />
-                 <Text style={{...styles.text3, fontSize:15}}>{selectedSaplingId.name}</Text> 
               </View> 
               <View style={{margin:20}}>
                 <Text style={{...styles.text3, fontSize:15}}>Tree Type </Text>
@@ -183,9 +219,8 @@ const LocalDataView = ({navigation}) => {
                 items={treeTypeList}
                 label={'Tree Type '}
                 setSelectedItems={setSelectedTreeType}
-                selectedItems={selectedTreeType}
+                selectedItem={selectedTreeType}
                 />
-                  <Text style={{...styles.text3, fontSize:15}}>{selectedTreeType.name}</Text> 
               </View>
               <View style={{margin:20}}>
                 <Text style={{...styles.text3, fontSize:15}}>Plot </Text>
@@ -193,30 +228,27 @@ const LocalDataView = ({navigation}) => {
                 items={plotList}
                 label={'Plot '}
                 setSelectedItems={setSelectedPlot}
-                selectedItems={selectedPlot}
-
+                selectedItem={selectedPlot}
                 />
               </View>
               <View style={{margin:20}}>
-                <Button title="Apply" onPress={closeModal} color={'#5DB075'} />
+                <Button title="Apply" onPress={applychanges} color={'#5DB075'} />
               </View>
             </View>
-          </View>
-      </Modal>
+          {/* </View> */}
+        </Modal>
           
        
         {
-            treeList===null?<Text style={styles.text2}>Loading Trees...</Text>
+            finalList===null?<Text style={styles.text2}>Loading Trees...</Text>
             :
-              
-            
-                <FlatList data={treeList} renderItem={({item})=>renderTree(item)}></FlatList>
+                <FlatList data={finalList} renderItem={({item})=>renderTree(item)}></FlatList>
 
             
             
         }
         
-   </View>
+      </View>
     );
 }
 
