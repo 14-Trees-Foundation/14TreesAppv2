@@ -187,14 +187,14 @@ export const updateTreetbl = async (db, tree) => {
 // get tree names for given list of tree ids
 
 export const getTreeNames = async db => {
-  const selectQuery = `SELECT name FROM ${treetypeName} WHERE value IN (SELECT treeid FROM ${tableName})`;
+  const selectQuery = `SELECT * FROM ${treetypeName} WHERE value IN (SELECT treeid FROM ${tableName})`;
   const treeNames = [];
 
   try {
     let res = await db.executeSql(selectQuery);
     res.forEach(result => {
       for (let index = 0; index < result.rows.length; index++) {
-        treeNames.push(result.rows.item(index).name);
+        treeNames.push(result.rows.item(index));
       }
     });
     return treeNames;
@@ -207,14 +207,14 @@ export const getTreeNames = async db => {
 };
 
 export const getPlotNames = async db => {
-  const selectQuery = `SELECT name FROM ${plotName} WHERE value IN (SELECT plotid FROM ${tableName})`;
+  const selectQuery = `SELECT * FROM ${plotName} WHERE value IN (SELECT plotid FROM ${tableName})`;
   const plotNames = [];
 
   try {
     let res = await db.executeSql(selectQuery);
     res.forEach(result => {
       for (let index = 0; index < result.rows.length; index++) {
-        plotNames.push(result.rows.item(index).name);
+        plotNames.push(result.rows.item(index));
       }
     });
     return plotNames;
@@ -231,10 +231,10 @@ export const getPlotNames = async db => {
 export const getSaplingIds = async db => {
   const saplings = [];
   try {
-    let res = await db.executeSql(`SELECT saplingid FROM ${tableName}`);
+    let res = await db.executeSql(`SELECT saplingid as name FROM ${tableName}`);
     res.forEach(result => {
       for (let index = 0; index < result.rows.length; index++) {
-        saplings.push(result.rows.item(index).saplingid);
+        saplings.push(result.rows.item(index));
       }
     });
     return saplings;

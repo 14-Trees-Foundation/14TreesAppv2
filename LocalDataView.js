@@ -35,18 +35,38 @@ const LocalDataView = ({navigation}) => {
 
     let userId = Utils.userId;
     const [treeList,setTreeList] = useState(null);
-    const [treeTypeList,setTreeTypeList] = useState(null);
-    const [plotList,setPlotList] = useState(null);
-    const [saplingIdList,setsaplingIdList] = useState(null);
+    const [treeTypeList,setTreeTypeList] = useState([]);
+    const [plotList,setPlotList] = useState([]);
+    const [saplingIdList,setsaplingIdList] = useState([]);
 
     const [selectedTreeType, setSelectedTreeType] = useState({});
     const [selectedPlot, setSelectedPlot] = useState({});
     const [selectedSaplingId, setSelectedSaplingId] = useState({});
+
+    // const loadDataCallback = useCallback(async () => {
+    //   try {
+    //     let treenames = await Utils.fetchTreeNamesFromLocalDB();
+    //     let plots = await Utils.fetchPlotNamesFromLocalDB();
+    //     let saplingids = await Utils.fetchSaplingIdsFromLocalDB();
+    //     setTreeTypeList(treenames);
+    //     setPlotList(plots);
+    //     setsaplingIdList(saplingids);
+    //     console.log('local data view')
+    //     console.log(treeTypeList)
+    //     console.log(plotList)
+    //     console.log(saplingIdList)
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // }, []);
+
+   
     useEffect(()=>{
         Utils.fetchTreesFromLocalDB().then((trees)=>{
             // console.log(trees)
             setTreeList(trees)
         })
+        // // loadDataCallback();
         Utils.fetchTreeNamesFromLocalDB().then((types)=>{
             console.log(types)
             setTreeTypeList(types)
@@ -60,10 +80,21 @@ const LocalDataView = ({navigation}) => {
             setsaplingIdList(ids)
         })
 
+        // console.log('local data view')
+    },[])
+
+
+    useEffect(()=>{
         console.log('local data view')
+        console.log(selectedTreeType)
+        console.log(selectedPlot)
+        console.log(selectedSaplingId)
+      
+    }
+    ,[selectedTreeType,selectedPlot,selectedSaplingId])
     
 
-    },[])
+
     
     const [modalVisible, setModalVisible] = useState(false);
 
@@ -124,7 +155,7 @@ const LocalDataView = ({navigation}) => {
    <View style={{backgroundColor:'#5DB075', height:'100%'}}>
         <Text style={styles.headerText}>Local Trees</Text>
         <View style={{margin:20}}>
-          <Button title="Filters" onPress={openModal} color={'#5DB075'} />
+          <Button title="Filters" onPress={openModal} color={'black'} />
         </View>
         <Modal
           animationType="slide"
@@ -135,26 +166,35 @@ const LocalDataView = ({navigation}) => {
           <View style={{backgroundColor:'#white', height:'100%'}}>
             <View style={{margin:20}}>
               <Text style={{...styles.text3, fontSize:20}}>Filters</Text>
-              {/* <View style={{margin:20}}>
-                <Text style={{...styles.headerText, fontSize:15}}>Plot ID</Text>
-                <Dropdown data={plotList} />
-              </View>*/}
+            
               <View style={{margin:20}}>
-                <Text style={{...styles.text3, fontSize:15}}>Sapling ID</Text>
+                <Text style={{...styles.text3, fontSize:15}}>Sapling ID</Text> 
                 <Dropdown 
                   items={saplingIdList}
-                  label={'Sapling ID'}
+                  label="Sapling ID"
                   setSelectedItems={setSelectedSaplingId}
                   selectedItems={selectedSaplingId}
                 />
+                 <Text style={{...styles.text3, fontSize:15}}>{selectedSaplingId.name}</Text> 
               </View> 
               <View style={{margin:20}}>
-                <Text style={{...styles.text3, fontSize:15}}>Type ID</Text>
+                <Text style={{...styles.text3, fontSize:15}}>Tree Type </Text>
                 <Dropdown
                 items={treeTypeList}
                 label={'Tree Type '}
                 setSelectedItems={setSelectedTreeType}
                 selectedItems={selectedTreeType}
+                />
+                  <Text style={{...styles.text3, fontSize:15}}>{selectedTreeType.name}</Text> 
+              </View>
+              <View style={{margin:20}}>
+                <Text style={{...styles.text3, fontSize:15}}>Plot </Text>
+                <Dropdown 
+                items={plotList}
+                label={'Plot '}
+                setSelectedItems={setSelectedPlot}
+                selectedItems={selectedPlot}
+
                 />
               </View>
               <View style={{margin:20}}>
