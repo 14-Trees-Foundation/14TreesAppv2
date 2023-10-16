@@ -135,7 +135,7 @@ const AddTreeScreen = ({navigation}) => {
                 style={styles.remark}
                 placeholder="Enter Remark"
                 placeholderTextColor={'#000000'}
-                onChangeText={(text) => changeimgremark()}
+                onChangeText={(text) => changeimgremark(text)}
                 value={item.meta.remark}
               />
             </View>
@@ -216,6 +216,8 @@ const AddTreeScreen = ({navigation}) => {
               saplingid : images[index].saplingid,
               image : images[index].data,
               imageid : images[index].name,
+              remark : images[index].meta.remark,
+              timestamp : images[index].meta.captureTimestamp,
             };
             await saveTreeImages(db, element);
           }
