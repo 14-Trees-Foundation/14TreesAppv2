@@ -82,7 +82,9 @@ export class Utils{
         }
         return final;
     }
-
+    static async treeTypeFromID(treeTypeID){
+        
+    }
     static async fetchTreeNamesFromLocalDB() {
         const db = await getDBConnection();
         let res = await getTreeNames(db);

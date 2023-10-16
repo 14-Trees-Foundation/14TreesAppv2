@@ -2,26 +2,22 @@ import React, {useEffect,useState} from 'react';
 import { View, Text,TextInput, Button,  Alert, StyleSheet, TouchableOpacity} from 'react-native';
 import { Dropdown } from './DropDown';
 import { DataService } from './DataService';
+import { Utils } from './Utils';
 
 const EditTreeScreen = ({navigation}) => {
     const [saplingid, setSaplingid] = useState('');
-    const [selectedTreeType, setSelectedTreeType] = useState('');
-    const [selectedPlot, setSelectedPlot] = useState('');
+    const [details,setDetails] = useState(null);
     const [treeItems, setTreeItems] = useState([]);
     const [plotItems, setPlotItems] = useState([]);
 
     const fetchTreeDetails = async () => {
         // console.log('fetching tree details');
-        // const treeDetails = await DataService.fetchTreeDetails(saplingid);
-        // setSelectedTreeType(treeDetails.data.treeType);
-        // setSelectedPlot(treeDetails.data.plot);
+        const adminID = Utils.getAdminId();
+        const treeDetails = await DataService.fetchTreeDetails(saplingid,adminID);
+        setDetails(treeDetails);
         // let trees = await getTreesList(db);
         // let plots = await getPlotsList(db);
-        // setTreeItems(trees);
-        // setPlotItems(plots);
     }
-    
-
     return (
         <View style={{backgroundColor:'#5DB075', height:'100%'}}>
            <Text style={styles.headerText} > Edit tree  </Text>
@@ -41,10 +37,22 @@ const EditTreeScreen = ({navigation}) => {
                         color={'#5DB075'}
                     />
                 </View>
-                <Text style={{color:'black', marginLeft:20, margin:10, fontSize:18}}> Details : </Text>
-                <Text style={{color:'black', marginLeft:25, margin:10, fontSize:18}}> Current Tree Type : {selectedTreeType} </Text>
-                <Text style={{color:'black', marginLeft:25, margin:10, fontSize:18}}> Current Plot : {selectedPlot} </Text>
-                <Dropdown
+                {
+                    details?
+                    <View>
+                        <Text style={{color:'black', marginLeft:20, margin:10, fontSize:18}}> Details : </Text>
+                        <Text style={{color:'black', marginLeft:25, margin:10, fontSize:18}}> Current Tree Type : {details.tree_id} </Text>
+                        <Text style={{color:'black', marginLeft:25, margin:10, fontSize:18}}> Current Plot : {details.plot_id} </Text>
+                    </View>
+                    :
+                    <View>
+                        <Text>
+                            Enter a sapling ID and hit search to view its details.
+                        </Text>
+                    </View>
+
+                }
+                {/* <Dropdown
                     items={treeItems}
                     label= "Edit Tree Type"
                     setSelectedItems={setSelectedTreeType}
@@ -55,7 +63,7 @@ const EditTreeScreen = ({navigation}) => {
                     label="Edit Plot"
                     setSelectedItems={setSelectedPlot}
                     selectedItem={selectedPlot}
-                />
+                /> */}
             </View>
             
         </View>

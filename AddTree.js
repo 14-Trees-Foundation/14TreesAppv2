@@ -135,7 +135,7 @@ const AddTreeScreen = ({navigation}) => {
                 style={styles.remark}
                 placeholder="Enter Remark"
                 placeholderTextColor={'#000000'}
-                onChangeText={(text) => changeimgremark()}
+                onChangeText={(text) => changeimgremark(text)}
                 value={item.meta.remark}
               />
             </View>
@@ -293,9 +293,6 @@ const AddTreeScreen = ({navigation}) => {
                   renderItem={renderImg}
               />
             </View>
-            
-          
-          
             <View style={{marginHorizontal:30,marginTop:25,marginBottom:10}}>
               <Button
                   title="Submit"
