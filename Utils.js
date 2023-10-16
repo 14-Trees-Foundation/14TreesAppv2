@@ -94,7 +94,7 @@ export class Utils{
     static async treeTypeFromID(treeTypeID){
         await this.setDBConnection()
         const treeNames = await getTreeTypes(this.db);
-        console.log(treeNames)
+        //TODO: api needs modification.
     }
     static async fetchTreeNamesFromLocalDB() {
         await this.setDBConnection()
