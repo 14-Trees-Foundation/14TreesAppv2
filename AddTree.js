@@ -23,6 +23,7 @@ import {launchCamera} from 'react-native-image-picker';
 import Geolocation from '@react-native-community/geolocation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Constants, Utils } from './Utils';
+import { ScreenContainer } from 'react-native-screens';
 
 
 
@@ -33,9 +34,11 @@ const AddTreeScreen = ({navigation}) => {
     const [lng, setlng] = useState(0);
     // array of images
     const [images, setImages] = useState([]);
+    const [imgMetaData, setImgMetaData] = useState([]);
+    const [remark, setRemark] = useState('');
     const [treeItems, setTreeItems] = useState([]);
     const [plotItems, setPlotItems] = useState([]);
-
+    
     const [selectedTreeType, setSelectedTreeType] = useState({});
     const [selectedPlot, setSelectedPlot] = useState({});
     let userId = Utils.userId;
@@ -46,7 +49,9 @@ const AddTreeScreen = ({navigation}) => {
     // AsyncStorage.getItem(Constants.userIdKey).then((userid)=>{
     //   userId = userid;
     // })
-    // image handle---------------------  
+    // image handle--------------------- 
+    
+    
     const pickImage  = () => {
         const options = {
             mediaType: 'photo',
@@ -62,39 +67,79 @@ const AddTreeScreen = ({navigation}) => {
                 console.log('ImagePicker Error: ', response.error);
             } else {
                 const timestamp = new Date().toISOString();
-                // const imagePath = response.uri.replace('file://', '');
-                const base64Data = response.assets[0].base64;
+                // only show time and not date
                 
-                // ImgToBase64.getBase64String(imagePath)
-                //     .then(base64String => {
-                //         // console.log(base64String);
-                //         return base64String;
-                //     })
-                //     .catch(err => console.log(err));
-                // const base64Data = 'data:image/jpeg;base64,'+await ImgToBase64.getBase64String(imagePath);
-                
+                const base64Data = response.assets[0].base64;               
                 const imageName = `${saplingid}_${timestamp}.jpg`;
                 
-                setImages([...images, { saplingid:  saplingid,data:  base64Data, name: imageName }]);
+                setImages([...images, { saplingid:  saplingid,
+                                        data:  base64Data, 
+                                        name: imageName,
+                                        meta: {
+                                          captureTimestamp: timestamp,
+                                          remark : 'default remark',
+                                        }  
+                                      }
+                          ]);
             }
         });
     };
-    
+
     const renderImg = ({ item }) => {
+      const changeimgremark = (text) => {
+        const newImages = images.map((image) => {
+          if (image.name === item.name) {
+            return {
+              ...image,
+              meta: {
+                ...image.meta,
+                remark: text,
+              },
+            };
+          }
+          return image;
+        });
+        setImages(newImages);
+        console.log('remark changed');
+        for (let index = 0; index < images.length; index++) {
+          console.log(images[index].meta.remark);
+        }
+      }
       return (
-        <View  style={{margin:3, flexDirection:'row', flexWrap:'wrap'}}>
-          <Image
-            source={{ uri: `data:image/jpeg;base64,${item.data}` }}
-            style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
-          />
-          {/* <TouchableOpacity onPress={() => onDeleteItem(item.id)}>*/}
-          <TouchableOpacity onPress={() => handleDeleteItem(item.name)}>
-            <Image
+          <View style={{
+              marginHorizontal:10,
+              marginVertical:4,
+              borderWidth: 2,
+              borderColor: '#5DB075',
+              borderRadius: 10,
+              flexDirection:'row',
+          }}>
+            
+            <View  style={{margin:0, flexDirection:'row', flexWrap:'wrap'}}>
+                <Image
+                  source={{ uri: `data:image/jpeg;base64,${item.data}` }}
+                  style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
+                />
+            </View>
+            
+            <View>
+              <Text style={styles.text3}> time captured : {item.captureTimestamp} </Text>
+              <TextInput
+                style={styles.remark}
+                placeholder="Enter Remark"
+                placeholderTextColor={'#000000'}
+                onChangeText={(text) => changeimgremark()}
+                value={item.meta.remark}
+              />
+            </View>
+
+            <TouchableOpacity onPress={() => handleDeleteItem(item.name)}>
+              <Image
               source={require('./assets/icondelete.png')} // Replace with your delete icon image
-              style={{ width: 20, height: 20,}} // Adjust the icon dimensions and margin
-            /> 
-          </TouchableOpacity>
-        </View>
+              style={{ width: 20, height: 20,marginLeft:10}} // Adjust the icon dimensions and margin
+              /> 
+            </TouchableOpacity>
+          </View>
       );
     }
 
@@ -190,9 +235,16 @@ const AddTreeScreen = ({navigation}) => {
       };
       }
       
+      useEffect(() => {
+        // console all images remark
+        for (let index = 0; index < images.length; index++) {
+          console.log(images[index].meta.remark);
+        }
+      }
+      , [images]);
 
     return (
-    
+   
    <View style={{backgroundColor:'#5DB075', height:'100%'}}>
         <View style={{backgroundColor:'#5DB075', borderBottomLeftRadius:10, borderBottomRightRadius:10}}> 
         <Text style={styles.headerText}> Add Tree </Text>
@@ -233,58 +285,45 @@ const AddTreeScreen = ({navigation}) => {
                 color={'#5DB075'}
             />
           </View>
-          
-          <View style={{flexDirection:'row', flexWrap:'wrap' }}> 
+            <View style={{height:200,margin:2, borderColor: '#5DB075',borderRadius: 5,flexDirection:'column',}}>
             <FlatList
-                data={images}
-                numColumns={3}
-                renderItem={renderImg}
-            />
-          </View>
+                  data={images}
+                  renderItem={renderImg}
+              />
+            </View>
+            
+          
+          
+            <View style={{marginHorizontal:30,marginTop:25,marginBottom:10}}>
+              <Button
+                  title="Submit"
+                  onPress={adddata}
+                  color={'#5DB075'}
+                  
+              />
+            </View>
 
-          <View style={{margin:30, marginTop:60, marginBottom:40}}>
-            <Button
-                title="Submit"
-                onPress={adddata}
-                color={'#5DB075'}
-                
-            />
-          </View>
+          
 
-          {/* <View style={styles.btnview}>
-              <Pressable
-                android_ripple={{ color: '#5DB071', borderless: false }}
-                style={
-                  saplingid !== null &&
-                    Object.keys(selectedTreeType).length !== 0 &&
-                    Object.keys(selectedPlot).length !== 0
-                    ? styles.btn
-                    : styles.btndisabled
-                }
-                onPress={() => adddata()}
-                disabled={
-                  saplingid !== null &&
-                    Object.keys(selectedTreeType).length !== 0 &&
-                    Object.keys(selectedPlot).length !== 0
-                    ? false
-                    : true
-                }>
-                <Text style={styles.btntxt}>Submit</Text>
-              </Pressable>
-            </View> */}
-          <View style={{ padding:12,borderRadius: 5}}>
-          {/* <Button
-                title="get location"
-                onPress={() => requestLocation()}
-            /> */}
-          </View>
       </View>
    </View>
-
+  
     );
 }
 
 const styles = StyleSheet.create({
+    remark: {
+      height: 70,
+      width: 200,
+      borderWidth: 0.5,
+      borderColor: 'grey',
+      borderRadius: 10,
+      backgroundColor: '#f5f5f5',
+      margin: 4,
+      padding: 10,
+      color: 'black', // Change font color here
+      fontSize: 16,
+    },
     btnview: {
       justifyContent: 'center',
       elevation: 3,
@@ -331,6 +370,11 @@ const styles = StyleSheet.create({
       color: '#ffffff',
       textAlign: 'center',
     },
+    text3: {
+      fontSize: 17,
+      color: 'black',
+      textAlign: 'left',
+  },
     txtInput: {
       height: 60,
       width: 310,

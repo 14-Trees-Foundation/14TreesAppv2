@@ -6,11 +6,13 @@ import {GoogleSignin,GoogleSigninButton,statusCodes,} from '@react-native-google
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DataService } from './DataService';
-import { Constants } from './Utils';
+import { Constants, Utils } from './Utils';
 
 
 const LoginScreen = ({navigation}) =>{
-
+  const usr = Constants.userId;
+  console.log('user id at login screen : ',usr)
+  console.log('admin id at login screen : ',Constants.adminId)
   const [phoneNumber, setPhoneNumber] = useState('');
 
   const checkPhoneNumber = () => {
@@ -30,7 +32,7 @@ const LoginScreen = ({navigation}) =>{
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      navigation.navigate('HomeScreen');
+      // navigation.navigate('HomeScreen');
 // -------------------- add the endpoint here --------------------
       const userDataPayload = {
         name: userInfo.user.name,
@@ -40,13 +42,34 @@ const LoginScreen = ({navigation}) =>{
       console.log('Sending google data to server.')
       const response = await DataService.loginUser(userDataPayload);
       console.log('got a response');
+      // console.log(response.data);
       console.log('at login : ',response.data._id)
-      await AsyncStorage.setItem(Constants.userIdKey, response.data._id);
-      await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
+      // check whether adminId field exist in the response
+      // if exist, then store it in the async storage
+
+      if (response.data.adminId) {
+        await AsyncStorage.setItem(Constants.adminIdKey, response.data.adminId);
+        console.log('adminId stored');
+        console.log('adminId : ',Utils.adminId)
+      }
+      else{
+        console.log('adminId not stored')
+      }
+
+      try {
+        await AsyncStorage.setItem(Constants.userIdKey, response.data._id);
+        await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
+        console.log('userId stored');
+        console.log('userId : ',Constants.userIdKey)
+      } catch (error) {
+        console.log('Error storing userId', error);
+      }
+
       // const dummy = getUserId();
       console.log(response.status);
       // console.log(response.data);
       // console.log(userObj._id);
+      console.log('user id : ',Constants.userId)
       switch (response.status) {
         case 200:
           navigation.navigate('HomeScreen');
@@ -116,7 +139,7 @@ const LoginScreen = ({navigation}) =>{
           />
         </View>
 
-        <View style={{marginBottom:30}}>
+        <View style={{marginVertical:30}}>
           <GoogleSigninButton
             style={{ width: '50%', height: 70, borderRadius: 40, alignItems: 'center', justifyContent: 'center', alignSelf: 'center'}}
             size={GoogleSigninButton.Size.Standard}

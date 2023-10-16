@@ -26,7 +26,7 @@ const navigationRef = React.createRef();
 async function request() {
   //https://developer.android.com/training/data-storage/shared/media#storage-permission
   const androidVersion = Number.parseInt(Platform.constants['Release']);
-  const versionOfPermissionChange = 12;
+  const versionOfPermissionChange = 13;
   const permissions = [
     PERMISSIONS.ANDROID.CAMERA,
     PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
@@ -97,12 +97,37 @@ const App = () => {
     checkSignInStatus();
   }, []);
 
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const StackNavigator = () => (
     <Stack.Navigator>
       <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }}/>
       <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
+
+  // check dynamically adminIdkey is stored in the async storage after login
+  // if yes, then set the isAdmin to true
+  // else set it to false
+
+  useEffect(() => {
+
+    const checkAdminId = async () => {
+      const adminId = await AsyncStorage.getItem(Constants.adminIdKey);
+      console.log('adminId : ',adminId)
+      if(adminId){
+        setIsAdmin(true);
+      }
+      else{
+        setIsAdmin(false);
+      }
+    }
+    checkAdminId();
+  }
+  , [Constants.adminIdKey]);
+  
+
+
 
   
   
@@ -112,7 +137,7 @@ const App = () => {
         <Drawer.Screen name="Home" component={StackNavigator} options={{ headerShown: false }}></Drawer.Screen>
         <Drawer.Screen name="AddTree" component={AddTreeScreen} options={{ headerShown: false }}></Drawer.Screen>
         <Drawer.Screen name="LocalDataView" component={LocalDataView} options={{ headerShown: false }}></Drawer.Screen>
-        <Drawer.Screen name="EditTree" component={EditTreeScreen} options={{ headerShown: false }}></Drawer.Screen>
+        {!isAdmin && <Drawer.Screen name="EditTree" component={EditTreeScreen} options={{ headerShown: false }}></Drawer.Screen>}
       </Drawer.Navigator>
     </NavigationContainer>
   );

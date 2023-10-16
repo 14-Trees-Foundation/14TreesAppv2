@@ -7,7 +7,8 @@ import { Constants, Utils } from './Utils';
 
 
 const HomeScreen = ({navigation}) => {
-    // const user_id = getUserId();
+    const usr = Utils.userId;
+    console.log('user id at home screen : ',usr)
     const [syncDate, setSyncDate] = useState('');
     const getSyncDate = async () => {
         const value = await AsyncStorage.getItem('date');
@@ -65,13 +66,13 @@ const HomeScreen = ({navigation}) => {
               color={'#5DB075'}
             />
           </View>
-          <View style={{margin:20, marginTop:50}}>
+          {/* <View style={{margin:20, marginTop:50}}>
             <Button
               title="View Local Trees"
               onPress={() => navigation.navigate('LocalDataView')}
               color={'#5DB075'}
             />
-          </View>
+          </View> */}
           <View style={{margin:20}}>
             <Button
                 title="Fetch Helper Data"
