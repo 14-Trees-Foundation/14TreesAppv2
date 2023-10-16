@@ -9,10 +9,20 @@ const EditTreeScreen = ({navigation}) => {
     const [details,setDetails] = useState(null);
     const [treeItems, setTreeItems] = useState([]);
     const [plotItems, setPlotItems] = useState([]);
-
+    const [treeType,setTreeType] = useState('');
+    const [plotType,setPlotType] = useState('');
+    useEffect(()=>{
+        //human readable details update.
+        if(details){
+            const treeType = Utils.treeTypeFromID(details.tree_id);
+        }
+        // setTreeType(await Utils.treeTypeFromID(details.tree_id))
+        // setTreeType(await Utils.plot(details.tree_id))
+    },[details])
     const fetchTreeDetails = async () => {
         // console.log('fetching tree details');
-        const adminID = Utils.getAdminId();
+        const adminID = await Utils.getAdminId();
+        console.log(adminID)
         const treeDetails = await DataService.fetchTreeDetails(saplingid,adminID);
         setDetails(treeDetails);
         // let trees = await getTreesList(db);
@@ -25,7 +35,7 @@ const EditTreeScreen = ({navigation}) => {
                 <Text style={{color:'black', marginLeft:20, margin:10, fontSize:18}}> Enter the Sapling ID</Text>
                 <TextInput
                     style={styles.txtInput}
-                    placeholder="sapling id"
+                    placeholder="Sapling ID"
                     placeholderTextColor={'#808080'}
                     onChangeText={(text) => setSaplingid(text)}
                     value={saplingid}
@@ -45,11 +55,7 @@ const EditTreeScreen = ({navigation}) => {
                         <Text style={{color:'black', marginLeft:25, margin:10, fontSize:18}}> Current Plot : {details.plot_id} </Text>
                     </View>
                     :
-                    <View>
-                        <Text>
-                            Enter a sapling ID and hit search to view its details.
-                        </Text>
-                    </View>
+                    <View></View>
 
                 }
                 {/* <Dropdown

@@ -185,7 +185,22 @@ export const updateTreetbl = async (db, tree) => {
 };
 
 // get tree names for given list of tree ids
-
+export const getTreeTypes = async db =>{
+  const selectQuery = `SELECT * FROM ${treetypeName}`;
+  const treeTypes = []
+  try{
+    let res = await db.executeSql(selectQuery);
+    for(let result of res){
+      for (let index = 0; index < result.rows.length; index++) {
+        treeTypes.push(result.rows.item(index));
+      }
+    }
+    return treeTypes;
+  }
+  catch(err){
+    console.log(err)
+  }
+}
 export const getTreeNames = async db => {
   const selectQuery = `SELECT * FROM ${treetypeName} WHERE value IN (SELECT treeid FROM ${tableName})`;
   const treeNames = [];

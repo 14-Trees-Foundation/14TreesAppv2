@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAllTrees, getDBConnection, getTreeImages, getTreesByUploadStatus, updateUpload , getTreeNames,getPlotNames, getSaplingIds} from "./tree_db";
+import { getAllTrees, getDBConnection, getTreeImages, getTreesByUploadStatus, updateUpload , getTreeNames,getPlotNames, getSaplingIds, getTreeTypes} from "./tree_db";
 import { DataService } from "./DataService";
 import { Alert } from "react-native";
 import { createDrawerNavigator } from '@react-navigation/drawer';
@@ -29,22 +29,23 @@ export class Utils{
     }; 
     static userId;
     static adminId;
+    static db;
     static async setTreeSyncStatus(final) {
-        const db = await getDBConnection();
+        await this.setDBConnection()
         for (let index = 0; index < final.length; index++) {
             const element = final[index];
-            await updateUpload(db, element.sapling_id);
+            await updateUpload(this.db, element.sapling_id);
         }
     }
 
     static async fetchTreesFromLocalDB(uploaded=undefined) {
-        const db = await getDBConnection();
+        await this.setDBConnection()
         let res;
         if(uploaded){
-            res = await getTreesByUploadStatus(db,uploaded);
+            res = await getTreesByUploadStatus(this.db,uploaded);
         }
         else{
-            res = await getAllTrees(db);
+            res = await getAllTrees(this.db);
             console.log(res)
         }
         const currentTime = new Date().toString();
@@ -61,8 +62,10 @@ export class Utils{
                 element.lng = 0;
             }
             console.log(element.lat, element.lng);
-            const db = await getDBConnection(); //TODO: Do we need a new connection?
-            let images = await getTreeImages(db, element.sapling_id);
+            if(!this.db){
+                this.db = await getDBConnection();
+            }
+            let images = await getTreeImages(this.db, element.sapling_id);
             for (let index = 0; index < images.length; index++) {
                 console.log(images[index].name);
             }
@@ -82,24 +85,32 @@ export class Utils{
         }
         return final;
     }
+    static async setDBConnection(){
+        if(!this.db){
+            this.db = await getDBConnection();
+        }
+        return;
+    }
     static async treeTypeFromID(treeTypeID){
-        
+        await this.setDBConnection()
+        const treeNames = await getTreeTypes(this.db);
+        console.log(treeNames)
     }
     static async fetchTreeNamesFromLocalDB() {
-        const db = await getDBConnection();
-        let res = await getTreeNames(db);
+        await this.setDBConnection()
+        let res = await getTreeNames(this.db);
         return res;
     }
 
     static async fetchPlotNamesFromLocalDB() {
-        const db = await getDBConnection();
-        let res = await getPlotNames(db);
+        await this.setDBConnection()
+        let res = await getPlotNames(this.db);
         return res;
     }
 
     static async fetchSaplingIdsFromLocalDB() {
-        const db = await getDBConnection();
-        let res = await getSaplingIds(db);
+        await this.setDBConnection()
+        let res = await getSaplingIds(this.db);
         return res;
     }
     

@@ -17,6 +17,7 @@ import { Constants, Utils } from './Utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LocalDataView from './LocalDataView';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { DataService } from './DataService';
 
 
 
@@ -82,7 +83,13 @@ const App = () => {
         if (isSignedIn) {
           // User is signed in, navigate to HomeScreen
           Utils.userId = await AsyncStorage.getItem(Constants.userIdKey);
+          Utils.adminId = await AsyncStorage.getItem(Constants.adminIdKey);
           console.log('Loaded userid: ',Utils.userId);
+          console.log('Loaded adminId: ',Utils.adminId);
+          if(Utils.adminId){
+            setIsAdmin(true);
+          }
+          
           navigationRef.current?.navigate('HomeScreen');
         }
         else {
@@ -108,36 +115,15 @@ const App = () => {
 
   // check dynamically adminIdkey is stored in the async storage after login
   // if yes, then set the isAdmin to true
-  // else set it to false
-
-  useEffect(() => {
-
-    const checkAdminId = async () => {
-      const adminId = await AsyncStorage.getItem(Constants.adminIdKey);
-      console.log('adminId : ',adminId)
-      if(adminId){
-        setIsAdmin(true);
-      }
-      else{
-        setIsAdmin(false);
-      }
-    }
-    checkAdminId();
-  }
-  , [Constants.adminIdKey]);
-  
-
-
-
-  
-  
+  // else set it to false  
+  console.log('isadmin: ',isAdmin);
   return (
     <NavigationContainer ref={navigationRef}>
       <Drawer.Navigator>
         <Drawer.Screen name="Home" component={StackNavigator} options={{ headerShown: false }}></Drawer.Screen>
         <Drawer.Screen name="AddTree" component={AddTreeScreen} options={{ headerShown: false }}></Drawer.Screen>
         <Drawer.Screen name="LocalDataView" component={LocalDataView} options={{ headerShown: false }}></Drawer.Screen>
-        {!isAdmin && <Drawer.Screen name="EditTree" component={EditTreeScreen} options={{ headerShown: false }}></Drawer.Screen>}
+        {isAdmin && <Drawer.Screen name="EditTree" component={EditTreeScreen} options={{ headerShown: false }}></Drawer.Screen>}
       </Drawer.Navigator>
     </NavigationContainer>
   );
