@@ -105,6 +105,7 @@ const AddTreeScreen = ({navigation}) => {
           console.log(images[index].meta.remark);
         }
       }
+      const captureString = 'Captured at:\n'+item.meta.captureTimestamp.split('T').join('\n'); 
       return (
           <View style={{
               marginHorizontal:10,
@@ -112,18 +113,24 @@ const AddTreeScreen = ({navigation}) => {
               borderWidth: 2,
               borderColor: '#5DB075',
               borderRadius: 10,
-              flexDirection:'row',
+              flexDirection:'column',
           }}>
             
-            <View  style={{margin:0, flexDirection:'row', flexWrap:'wrap'}}>
+            <View  style={{margin:5, flexDirection:'row', flexWrap:'wrap',              justifyContent:'space-between'}}>
                 <Image
                   source={{ uri: `data:image/jpeg;base64,${item.data}` }}
                   style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
                 />
+                <Text style={{...styles.text3,textAlign:'center'}}>{captureString}</Text>
+                <TouchableOpacity onPress={() => handleDeleteItem(item.name)}>
+                  <Image
+                  source={require('./assets/icondelete.png')} // Replace with your delete icon image
+                  style={{ width: 20, height: 20,marginLeft:10}} // Adjust the icon dimensions and margin
+                  /> 
+                </TouchableOpacity>
             </View>
             
-            <View>
-              <Text style={styles.text3}> time captured : {item.captureTimestamp} </Text>
+            <View style={{}}>
               <TextInput
                 style={styles.remark}
                 placeholder="Enter Remark"
@@ -132,13 +139,6 @@ const AddTreeScreen = ({navigation}) => {
                 value={item.meta.remark}
               />
             </View>
-
-            <TouchableOpacity onPress={() => handleDeleteItem(item.name)}>
-              <Image
-              source={require('./assets/icondelete.png')} // Replace with your delete icon image
-              style={{ width: 20, height: 20,marginLeft:10}} // Adjust the icon dimensions and margin
-              /> 
-            </TouchableOpacity>
           </View>
       );
     }
@@ -153,12 +153,13 @@ const AddTreeScreen = ({navigation}) => {
         const db = await getDBConnection();
         await createTable(db);
         // await fetch();
-        requestLocation();
         let trees = await getTreesList(db);
         let plots = await getPlotsList(db);
         let users = await getUsersList(db);
         setTreeItems(trees);
         setPlotItems(plots);
+        requestLocation();
+
         // setUserItems(users);
       } catch (error) {
         console.error(error);
@@ -287,7 +288,8 @@ const AddTreeScreen = ({navigation}) => {
           </View>
             <View style={{height:200,margin:2, borderColor: '#5DB075',borderRadius: 5,flexDirection:'column',}}>
             <FlatList
-                  data={images}
+            
+            data={images}
                   renderItem={renderImg}
               />
             </View>
@@ -314,13 +316,12 @@ const AddTreeScreen = ({navigation}) => {
 const styles = StyleSheet.create({
     remark: {
       height: 70,
-      width: 200,
       borderWidth: 0.5,
       borderColor: 'grey',
       borderRadius: 10,
       backgroundColor: '#f5f5f5',
-      margin: 4,
-      padding: 10,
+      margin: 5,
+      padding: 5,
       color: 'black', // Change font color here
       fontSize: 16,
     },
