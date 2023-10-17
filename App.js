@@ -17,6 +17,7 @@ import { Constants, Utils } from './Utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LocalDataView from './LocalDataView';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { DataService } from './DataService';
 import VerifyusersScreen from './VerifyUsers';
 
 
@@ -86,7 +87,11 @@ const App = () => {
           Utils.adminId = await AsyncStorage.getItem(Constants.adminIdKey);
           Utils.lastHash = await AsyncStorage.getItem(Constants.lastHashKey);
           console.log('Loaded userid: ',Utils.userId);
-          console.log('Loaded adminid: ',Utils.adminId);
+          console.log('Loaded adminId: ',Utils.adminId);
+          if(Utils.adminId){
+            setIsAdmin(true);
+          }
+          
           navigationRef.current?.navigate('HomeScreen');
         }
         else {
@@ -112,23 +117,8 @@ const App = () => {
 
   // check dynamically adminIdkey is stored in the async storage after login
   // if yes, then set the isAdmin to true
-  // else set it to false
-
-  useEffect(() => {
-
-    const checkAdminId = async () => {
-      
-      if(Utils.adminId !== null){
-        setIsAdmin(true);
-      }
-      else{
-        setIsAdmin(false);
-      }
-    }
-    checkAdminId();
-  }
-  , []);
-  
+  // else set it to false  
+  console.log('isadmin: ',isAdmin);
   return (
     <NavigationContainer ref={navigationRef}>
       <Drawer.Navigator>

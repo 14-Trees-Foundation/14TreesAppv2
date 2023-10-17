@@ -1,9 +1,10 @@
 import axios from 'axios';
 export class DataService{
-    // serverBase = 'https://47e1-103-21-124-76.ngrok.io';
-    static serverBase = 'https://vk061k4q-7000.inc1.devtunnels.ms'
+    static hostName = 'https://vk061k4q-7000.inc1.devtunnels.ms'
+    // static hostName = 'http://localhost:7000'
+    static serverBase = `${this.hostName}/api/v2`
     static async loginUser(userDataPayload){
-        const url = `${DataService.serverBase}/api/v2/login`;
+        const url = `${DataService.serverBase}/login`;
         return await axios.post(url, userDataPayload);
     }
       static async fetchHelperData(user_id,lasthash){
@@ -32,5 +33,12 @@ export class DataService{
     static async uploadTrees(treeList){
         const url = `${DataService.serverBase}/api/v2/uploadTrees`;
         return await axios.post(url,treeList);
+    }
+    static async fetchTreeDetails(saplingID, adminID){
+      const url = `${DataService.serverBase}/getSapling`
+      return (await axios.post(url,{
+        adminID:adminID,
+        saplingID:saplingID
+      })).data
     }
 }

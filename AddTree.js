@@ -294,9 +294,6 @@ const AddTreeScreen = ({navigation}) => {
                 renderItem={renderImg}
               />
             </View>
-            
-          
-          
             <View style={{marginHorizontal:30,marginTop:25,marginBottom:10}}>
               <Button
                   title="Submit"

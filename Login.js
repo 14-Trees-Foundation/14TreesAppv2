@@ -44,9 +44,10 @@ const LoginScreen = ({navigation}) =>{
       console.log('at login : ',response.data._id)
       // check whether adminId field exist in the response
       // if exist, then store it in the async storage
-
+      console.log(response.data)
+      console.log(response.data.adminID)
       if (response.data.adminID) {
-        await AsyncStorage.setItem(Constants.adminIdKey, response.data.adminId);
+        await AsyncStorage.setItem(Constants.adminIdKey, response.data.adminID);
         console.log('adminId stored');
         console.log('adminId : ',Utils.adminId)
       }
