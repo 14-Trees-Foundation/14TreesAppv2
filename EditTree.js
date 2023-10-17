@@ -1,5 +1,5 @@
 import React, {useEffect,useState} from 'react';
-import { View, Text,TextInput, Button,  Alert, StyleSheet, TouchableOpacity} from 'react-native';
+import { View, Text,TextInput, Button,  Alert, StyleSheet, TouchableOpacity, ToastAndroid} from 'react-native';
 import { Dropdown } from './DropDown';
 import { DataService } from './DataService';
 import { Utils } from './Utils';
@@ -9,13 +9,32 @@ const EditTreeScreen = ({navigation}) => {
     const [details,setDetails] = useState(null);
     const [treeItems, setTreeItems] = useState([]);
     const [plotItems, setPlotItems] = useState([]);
-    const [treeType,setTreeType] = useState('');
-    const [plotType,setPlotType] = useState('');
+    const [treeType,setTreeType] = useState({name:'',value:''});
+    const [plot,setPlot] = useState({name:'',value:''});
+    const makeDetailsHumanReadable = async()=>{
+        if(details){
+            const treeType =await Utils.treeTypeFromID(details.tree_id);
+            setTreeType(treeType);
+            const plot = await Utils.plotFromPlotID(details.plot_id);
+            setPlot(plot);
+        }
+    }
+    const updateDetails = async()=>{
+        ToastAndroid.show('Send request to server',ToastAndroid.SHORT);
+    }
+    const setDropDownItems = async()=>{
+        const treetypes = await Utils.fetchTreeTypesFromLocalDB();
+        const plots = await Utils.fetchPlotNamesFromLocalDB();
+        setTreeItems(treetypes);
+        setPlotItems(plots);
+        console.log(plots.length,treetypes.length, 'set plots and treetypes')
+    }
+    useEffect(()=>{
+        setDropDownItems();        
+    },[])
     useEffect(()=>{
         //human readable details update.
-        if(details){
-            const treeType = Utils.treeTypeFromID(details.tree_id);
-        }
+        makeDetailsHumanReadable();
         // setTreeType(await Utils.treeTypeFromID(details.tree_id))
         // setTreeType(await Utils.plot(details.tree_id))
     },[details])
@@ -51,25 +70,25 @@ const EditTreeScreen = ({navigation}) => {
                     details?
                     <View>
                         <Text style={{color:'black', marginLeft:20, margin:10, fontSize:18}}> Details : </Text>
-                        <Text style={{color:'black', marginLeft:25, margin:10, fontSize:18}}> Current Tree Type : {details.tree_id} </Text>
-                        <Text style={{color:'black', marginLeft:25, margin:10, fontSize:18}}> Current Plot : {details.plot_id} </Text>
+                        <Dropdown
+                            items={treeItems}
+                            label="Select Tree Type"
+                            setSelectedItems={setTreeType}
+                            selectedItem={treeType}
+                            
+                        />
+                        <Dropdown
+                            items={plotItems}
+                            label="Select Plot"
+                            setSelectedItems={setPlot}
+                            selectedItem={plot}
+                        />
+                        <Button title="Update Tree" onPress={updateDetails}></Button>
                     </View>
                     :
                     <View></View>
 
                 }
-                {/* <Dropdown
-                    items={treeItems}
-                    label= "Edit Tree Type"
-                    setSelectedItems={setSelectedTreeType}
-                    selectedItem={selectedTreeType}
-                />
-                <Dropdown
-                    items={plotItems}
-                    label="Edit Plot"
-                    setSelectedItems={setSelectedPlot}
-                    selectedItem={selectedPlot}
-                /> */}
             </View>
             
         </View>

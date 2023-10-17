@@ -1,12 +1,20 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAllTrees, getDBConnection, getTreeImages, getTreesByUploadStatus, updateUpload , getTreeNames,getPlotNames, getSaplingIds, getTreeTypes} from "./tree_db";
+import { getAllTrees, getDBConnection, getTreeImages, getTreesByUploadStatus, updateUpload , getTreeNames,getPlotNames, getSaplingIds, getTreeTypes, getPlotsList} from "./tree_db";
 import { DataService } from "./DataService";
 import { Alert } from "react-native";
 import { createDrawerNavigator } from '@react-navigation/drawer';
 
 
 export class Utils{
+    static async fetchAndStoreHelperData(){
+        console.log('fetching helper data');
+        const helperData = await DataService.fetchHelperData(Utils.userId);
+        console.log(helperData.data);
 
+        if (helperData.status === 200) {
+            Alert.alert('Helper data fetched successfully');
+        }
+    }
     static async upload(){
         try {
             const final = await Utils.fetchTreesFromLocalDB(0);
@@ -92,11 +100,21 @@ export class Utils{
         return;
     }
     static async treeTypeFromID(treeTypeID){
+        //both ids are numbers of type string.
         await this.setDBConnection()
         const treeNames = await getTreeTypes(this.db);
-        //TODO: api needs modification.
+        const requiredTreeType = treeNames.find((tree)=>(tree.value===treeTypeID));
+        return requiredTreeType;
     }
-    static async fetchTreeNamesFromLocalDB() {
+    static async plotFromPlotID(plotID){
+        //both ids are numbers of type string.
+        await this.setDBConnection()
+        const plots = await getPlotsList(this.db);
+        const requiredPlot = plots.find((plot)=>(plot.value===plotID));
+        console.log(requiredPlot)
+        return requiredPlot;
+    }
+    static async fetchTreeTypesFromLocalDB() {
         await this.setDBConnection()
         let res = await getTreeNames(this.db);
         return res;

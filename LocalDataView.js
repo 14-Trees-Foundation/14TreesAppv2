@@ -69,7 +69,7 @@ const LocalDataView = ({navigation}) => {
             setFinalList(trees)
         })
         // // loadDataCallback();
-        Utils.fetchTreeNamesFromLocalDB().then((types)=>{
+        Utils.fetchTreeTypesFromLocalDB().then((types)=>{
             console.log(types)
             setTreeTypeList(types)
         })

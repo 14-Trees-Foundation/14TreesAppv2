@@ -69,7 +69,7 @@ const App = () => {
 
   useEffect(() => {  
     request();
-    netInfo();
+    Utils.fetchAndStoreHelperData();
   }, []);
 
   useEffect(() => {

@@ -19,15 +19,7 @@ const HomeScreen = ({navigation}) => {
         getSyncDate();
     }, [syncDate]);
 
-    const fetchHelperData =async () => {
-        console.log('fetching helper data');
-        const helperData = await DataService.fetchHelperData(Utils.userId);
-        console.log(helperData.data);
 
-        if (helperData.status === 200) {
-            Alert.alert('Helper data fetched successfully');
-        }
-    }
 
     return (
         <View >
@@ -76,7 +68,7 @@ const HomeScreen = ({navigation}) => {
           <View style={{margin:20}}>
             <Button
                 title="Fetch Helper Data"
-                onPress={fetchHelperData}
+                onPress={Utils.fetchAndStoreHelperData}
                 color={'#5DB075'}
                 
             />
