@@ -17,6 +17,7 @@ import { Constants, Utils } from './Utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LocalDataView from './LocalDataView';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import VerifyusersScreen from './VerifyUsers';
 
 
 
@@ -82,7 +83,10 @@ const App = () => {
         if (isSignedIn) {
           // User is signed in, navigate to HomeScreen
           Utils.userId = await AsyncStorage.getItem(Constants.userIdKey);
+          Utils.adminId = await AsyncStorage.getItem(Constants.adminIdKey);
+          Utils.lastHash = await AsyncStorage.getItem(Constants.lastHashKey);
           console.log('Loaded userid: ',Utils.userId);
+          console.log('Loaded adminid: ',Utils.adminId);
           navigationRef.current?.navigate('HomeScreen');
         }
         else {
@@ -113,9 +117,8 @@ const App = () => {
   useEffect(() => {
 
     const checkAdminId = async () => {
-      const adminId = await AsyncStorage.getItem(Constants.adminIdKey);
-      console.log('adminId : ',adminId)
-      if(adminId){
+      
+      if(Utils.adminId !== null){
         setIsAdmin(true);
       }
       else{
@@ -124,12 +127,7 @@ const App = () => {
     }
     checkAdminId();
   }
-  , [Constants.adminIdKey]);
-  
-
-
-
-  
+  , []);
   
   return (
     <NavigationContainer ref={navigationRef}>
@@ -137,7 +135,12 @@ const App = () => {
         <Drawer.Screen name="Home" component={StackNavigator} options={{ headerShown: false }}></Drawer.Screen>
         <Drawer.Screen name="AddTree" component={AddTreeScreen} options={{ headerShown: false }}></Drawer.Screen>
         <Drawer.Screen name="LocalDataView" component={LocalDataView} options={{ headerShown: false }}></Drawer.Screen>
-        {!isAdmin && <Drawer.Screen name="EditTree" component={EditTreeScreen} options={{ headerShown: false }}></Drawer.Screen>}
+        {/* {!isAdmin &&  */}
+        <Drawer.Screen name="EditTree" component={EditTreeScreen} options={{ headerShown: false }}></Drawer.Screen>
+        {/* } */}
+        {/* {!isAdmin &&  */}
+        <Drawer.Screen name="VerifyUsers" component={VerifyusersScreen} options={{ headerShown: false }}></Drawer.Screen>
+        {/* } */}
       </Drawer.Navigator>
     </NavigationContainer>
   );

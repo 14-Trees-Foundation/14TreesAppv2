@@ -7,8 +7,7 @@ import { Constants, Utils } from './Utils';
 
 
 const HomeScreen = ({navigation}) => {
-    const usr = Utils.userId;
-    console.log('user id at home screen : ',usr)
+    console.log('last hash HomeScreen : ' , Utils.lastHash);
     const [syncDate, setSyncDate] = useState('');
     const getSyncDate = async () => {
         const value = await AsyncStorage.getItem('date');
@@ -21,7 +20,7 @@ const HomeScreen = ({navigation}) => {
 
     const fetchHelperData =async () => {
         console.log('fetching helper data');
-        const helperData = await DataService.fetchHelperData(Utils.userId);
+        const helperData = await DataService.fetchHelperData(Utils.userId,Utils.lastHash);
         console.log(helperData.data);
 
         if (helperData.status === 200) {

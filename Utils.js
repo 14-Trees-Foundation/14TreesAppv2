@@ -2,8 +2,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAllTrees, getDBConnection, getTreeImages, getTreesByUploadStatus, updateUpload , getTreeNames,getPlotNames, getSaplingIds} from "./tree_db";
 import { DataService } from "./DataService";
 import { Alert } from "react-native";
-import { createDrawerNavigator } from '@react-navigation/drawer';
-
 
 export class Utils{
 
@@ -29,6 +27,7 @@ export class Utils{
     }; 
     static userId;
     static adminId;
+    static lastHash;
     static async setTreeSyncStatus(final) {
         const db = await getDBConnection();
         for (let index = 0; index < final.length; index++) {
@@ -109,10 +108,15 @@ export class Utils{
     static async getAdminId() {
         return await AsyncStorage.getItem(Constants.adminIdKey);
     }
+
+    static async getLastHash() {
+        return await AsyncStorage.getItem(Constants.lastHashKey);
+    }
 }
 
 export class Constants{
     static userIdKey = 'userid';
     static userDetailsKey = 'userobj';
     static adminIdKey = 'adminid';
+    static lastHashKey = 'lasthash';
 }

@@ -10,9 +10,7 @@ import { Constants, Utils } from './Utils';
 
 
 const LoginScreen = ({navigation}) =>{
-  const usr = Constants.userId;
-  console.log('user id at login screen : ',usr)
-  console.log('admin id at login screen : ',Constants.adminId)
+ 
   const [phoneNumber, setPhoneNumber] = useState('');
 
   const checkPhoneNumber = () => {
@@ -47,7 +45,7 @@ const LoginScreen = ({navigation}) =>{
       // check whether adminId field exist in the response
       // if exist, then store it in the async storage
 
-      if (response.data.adminId) {
+      if (response.data.adminID) {
         await AsyncStorage.setItem(Constants.adminIdKey, response.data.adminId);
         console.log('adminId stored');
         console.log('adminId : ',Utils.adminId)
@@ -59,8 +57,10 @@ const LoginScreen = ({navigation}) =>{
       try {
         await AsyncStorage.setItem(Constants.userIdKey, response.data._id);
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
-        console.log('userId stored');
-        console.log('userId : ',Constants.userIdKey)
+        await AsyncStorage.setItem(Constants.lastHashKey, "0");
+        Utils.userId = await AsyncStorage.getItem(Constants.userIdKey);
+        Utils.adminId = await AsyncStorage.getItem(Constants.adminIdKey);
+        Utils.lastHash = await AsyncStorage.getItem(Constants.lastHashKey);
       } catch (error) {
         console.log('Error storing userId', error);
       }
