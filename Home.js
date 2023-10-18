@@ -10,8 +10,12 @@ const HomeScreen = ({navigation}) => {
     const [syncDate, setSyncDate] = useState('');
     const getSyncDate = async () => {
         const value = await AsyncStorage.getItem(Constants.syncDateKey);
-        console.log(value);
-        setSyncDate(value);
+        if(value){
+          setSyncDate(value);
+        }
+        else{
+          setSyncDate('Never');
+        }
     }
     useEffect(() => {
         getSyncDate();

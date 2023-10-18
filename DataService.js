@@ -4,14 +4,28 @@ axios.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
   let errorMsg;
+  let requestDescriptor=null;
+  if(error.request){
+    const request = error.request;
+    requestDescriptor = `${request._method} ${request.responseURL}.`
+  }
   if(error.response){
-    errorMsg = `Request failed at server: ${error.response.data}`
+    if(error.response.data){
+      errorMsg = `Request failed at server: ${error.response.data}`
+    }
+    else{
+      errorMsg = error.message;
+    }
+
   }
   else if(error.request){
     errorMsg = `Request to be sent: ${error.request}`
   }
   else{
     errorMsg = error.message;
+  }
+  if(requestDescriptor){
+    errorMsg += ` (${requestDescriptor})`;
   }
   ToastAndroid.show(errorMsg,ToastAndroid.LONG);
   console.log(errorMsg);

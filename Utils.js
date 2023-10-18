@@ -1,28 +1,106 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAllTrees, getDBConnection, getTreeImages, getTreesByUploadStatus, updateUpload , getTreeNames,getPlotNames, getSaplingIds, getTreeTypes, getPlotsList} from "./tree_db";
+import { getAllTrees, getDBConnection, getTreeImages, getTreesByUploadStatus, updateUpload , getTreeNames,getPlotNames, getSaplingIds, getTreeTypes, getPlotsList, updateTreeTypeTbl, updatePlotTbl, createTreesTable, createTreetTypesTbl, createPlotTbl} from "./tree_db";
 import { DataService } from "./DataService";
-import { Alert } from "react-native";
+import { Alert,ToastAndroid } from "react-native";
 
 export class Utils{
+    static async createLocalTablesIfNeeded(){
+        await this.setDBConnection();
+        await createTreetTypesTbl(this.db);
+        await createPlotTbl(this.db);
+        await createTreesTable(this.db);
+    }
     static async fetchAndStoreHelperData(){
         console.log('fetching helper data');
         let lastHash = await AsyncStorage.getItem(Constants.lastHashKey);
         lastHash = String(lastHash);//take care of null values.
-        const helperData = await DataService.fetchHelperData(Utils.userId,lastHash);
-        // console.log(helperData.data);
+        let userId = await Utils.getUserId();
+        console.log('requesting: ',userId,lastHash)
+        const helperData = await DataService.fetchHelperData(userId,lastHash);
+        if(!helperData){
+            return;//error display, logging done by DataService.
 
-        // if (helperData.status === 200) {
-        //     Alert.alert('Helper data fetched successfully');
-        // }
+        }
+        console.log('received: ',helperData.data);
+        const data = helperData.data['data'];
+        const newHash = helperData.data['hash'];
+        if(newHash==lastHash){
+            ToastAndroid.show('Tree types and plot already up to date.',ToastAndroid.LONG)
+            return;
+        }
+        if(data){
+            await Utils.storeTreeTypes(data['treeTypes']);
+            await Utils.storePlots(data['plots']);
+            await AsyncStorage.setItem(Constants.lastHashKey,newHash);
+        }
+        else{
+            console.log('data was null.');
+        }
+    }
+    static async storeTreeTypes(treeTypes){
+        // console.log(treeTypes[0])
+        const treeTypesInLocalDBFormat = treeTypes.map((treeType)=>{
+            return {
+                name:treeType.name,
+                tree_id:treeType.tree_id
+            }
+        })
+        await this.setDBConnection();
+        let failure = false;
+        for(let dbTreeType of treeTypesInLocalDBFormat){
+            try{
+                await updateTreeTypeTbl(this.db,dbTreeType);
+            }
+            catch(err){
+                console.log('Failed to save treeType: ',dbTreeType);
+                console.log(err)
+                failure = true;
+            }
+        }
+        if(failure){
+            ToastAndroid.show('Failed to save some tree types. See logs.');
+        }
+        else{
+            console.log('All tree types saved successfully.')
+        }
+    }
+    static async storePlots(plots){
+        // console.log(plots[0])
+        const plotsInLocalDBFormat = plots.map((plot)=>{
+            if(plot.name){
+                plot.name = plot.name.replace("'","''");
+            }
+            return {
+                name:plot.name,
+                plot_id:plot.plot_id
+            }
+        })
+        await this.setDBConnection();
+        let failure = false;
+        for(let dbPlot of plotsInLocalDBFormat){
+            try{
+                await updatePlotTbl(this.db,dbPlot);
+            }
+            catch(err){
+                console.log('Failed to save plot: ',dbPlot);
+                console.log(err)
+                failure = true;
+            }
+        }
+        if(failure){
+            ToastAndroid.show('Failed to save some plots. See logs.');
+        }
+        else{
+            console.log('All plots saved successfully.')
+        }
     }
     static async upload(){
         try {
             const final = await Utils.fetchTreesFromLocalDB(0);
             console.log(final);
-            console.log(Utils.userId);
             let response = await DataService.uploadTrees(final);
             console.log(response.data);
-            if (response.status === 200) {
+            if (response) {
                 await Utils.setTreeSyncStatus(final);
                 Alert.alert('Sync Successful!', 'See local tree list to check statuses.')
             }

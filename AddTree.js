@@ -7,7 +7,7 @@ import {
 import { Dropdown } from './DropDown';
 import {
   getDBConnection,
-  createTable,
+  createTreesTable,
   getTreesToUpload,
   saveTrees,
   updateUpload,
@@ -41,10 +41,7 @@ const AddTreeScreen = ({navigation}) => {
     
     const [selectedTreeType, setSelectedTreeType] = useState({});
     const [selectedPlot, setSelectedPlot] = useState({});
-    let userId = Utils.userId;
-    if (userId === null) {
-      userId = 'dummy';
-    }
+    const [userId,setUserId] = useState('');
     //fetch userId from Async Storage.
     // AsyncStorage.getItem(Constants.userIdKey).then((userid)=>{
     //   userId = userid;
@@ -150,12 +147,14 @@ const AddTreeScreen = ({navigation}) => {
 
     const loadDataCallback = useCallback(async () => {
       try {
+        let userId  = await Utils.getUserId();
+        setUserId(userId);
+
         const db = await getDBConnection();
-        await createTable(db);
+        await createTreesTable(db);
         // await fetch();
         let trees = await getTreesList(db);
         let plots = await getPlotsList(db);
-        let users = await getUsersList(db);
         setTreeItems(trees);
         setPlotItems(plots);
         requestLocation();
@@ -168,7 +167,7 @@ const AddTreeScreen = ({navigation}) => {
   
     useEffect(() => {
       loadDataCallback();
-    }, [loadDataCallback]);
+    }, []);
     
     const requestLocation = async () => {
         console.log('requesting location');

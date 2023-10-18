@@ -11,7 +11,6 @@ import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-si
 import {checkMultiplePermissions} from './check_permissions';
 import {PERMISSIONS} from 'react-native-permissions';
 import NetInfo from '@react-native-community/netinfo';
-import {fetch_tree_and_plot} from './get_tree_plot';
 import {Location} from './get_location';
 import { Constants, Utils } from './Utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -25,7 +24,7 @@ import VerifyusersScreen from './VerifyUsers';
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 const navigationRef = React.createRef();
-async function request() {
+async function requestPermissions() {
   //https://developer.android.com/training/data-storage/shared/media#storage-permission
   const androidVersion = Number.parseInt(Platform.constants['Release']);
   const versionOfPermissionChange = 13;
@@ -67,33 +66,41 @@ const App = () => {
       const isSignedIn = await GoogleSignin.isSignedIn();
       if (isSignedIn) {
         // User is signed in, navigate to HomeScreen
-        Utils.userId = await AsyncStorage.getItem(Constants.userIdKey);
-        Utils.adminId = await AsyncStorage.getItem(Constants.adminIdKey);
-        console.log('Loaded userid: ',Utils.userId);
-        console.log('Loaded adminId: ',Utils.adminId);
-        if(Utils.adminId){
+        const userId = await AsyncStorage.getItem(Constants.userIdKey);
+        const adminId = await AsyncStorage.getItem(Constants.adminIdKey);
+        console.log('Loaded userid: ',userId);
+        console.log('Loaded adminId: ',adminId);
+        if(adminId){
           setIsAdmin(true);
         }
-        
         navigationRef.current?.navigate('HomeScreen');
+        return true;
       }
       else {
         // User is not signed in, navigate to LoginScreen
         navigationRef.current?.navigate('Login');
+        return false;
       } 
     } catch (error) {
       console.error('Error checking sign-in status:', error);
+      return false;
     }
   };
+  const initTasks = async()=>{
+    const loggedIn = await checkSignInStatus();
+    await Utils.createLocalTablesIfNeeded();
+    if(loggedIn){
+      await Utils.fetchAndStoreHelperData();
+    }
+  }
   useEffect(() => {
     // GoogleSignin.configure({
     // });
     // Check if the user is already signed in
-    checkSignInStatus();
+    initTasks();
   }, []);
   useEffect(() => {  
-    request();
-    Utils.fetchAndStoreHelperData();
+    requestPermissions();
   }, []);
   const StackNavigator = () => (
     <Stack.Navigator>

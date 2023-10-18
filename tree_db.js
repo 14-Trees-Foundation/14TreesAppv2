@@ -17,7 +17,7 @@ export const deleteTable = async db => {
 
 // add lat lng later !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-export const createTable = async db => {
+export const createTreesTable = async db => {
   // create table if not exists
   const query = `CREATE TABLE IF NOT EXISTS ${tableName}(
           treeid TEXT NOT NULL,
@@ -174,7 +174,7 @@ export const updateUpload = async (db, id) => {
   await db.executeSql(updateQuery);
 };
 
-export const createTreeTbl = async db => {
+export const createTreetTypesTbl = async db => {
   // create table if not exists
   const query = `CREATE TABLE IF NOT EXISTS ${treetypeName}(
     name TEXT NOT NULL,
@@ -183,7 +183,7 @@ export const createTreeTbl = async db => {
   await db.executeSql(query);
 };
 
-export const updateTreetbl = async (db, tree) => {
+export const updateTreeTypeTbl = async (db, tree) => {
   const insertQuery =
     `INSERT OR REPLACE INTO ${treetypeName}(name, value) values` +
     `('${tree.name}', '${tree.tree_id}')`;

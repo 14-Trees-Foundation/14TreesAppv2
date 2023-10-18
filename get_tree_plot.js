@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {
-  createTreeTbl,
-  updateTreetbl,
+  createTreetTypesTbl,
+  updateTreeTypeTbl,
   getDBConnection,
   createPlotTbl,
   updatePlotTbl,
@@ -13,13 +13,13 @@ const failedPlotIds = [];
 export async function fetch_tree_and_plot() {
   try {
     const db = await getDBConnection();
-    await createTreeTbl(db);
+    await createTreetTypesTbl(db);
     await createPlotTbl(db);
     await createUsersTbl(db);
     console.log('tables created')
     let res = await axios.get('http://13.235.20.199/api/trees/treetypes');
     res.data.forEach(async tree => {
-      await updateTreetbl(db, tree);
+      await updateTreeTypeTbl(db, tree);
     });
     let plotRes = await axios.get('http://13.235.20.199/api/plots');
     plotRes.data.forEach(async plot => {

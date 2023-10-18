@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { Dropdown } from './DropDown';
 import {
-    createTable,
+    createTreesTable,
     getDBConnection,
     getPlotsList,
     getTreesList,
@@ -33,13 +33,12 @@ import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 const LocalDataView = ({navigation}) => {
 
-    let userId = Utils.userId;
     const [treeList,setTreeList] = useState(null);
     const[finalList,setFinalList] = useState(null);
     const [treeTypeList,setTreeTypeList] = useState([]);
     const [plotList,setPlotList] = useState([]);
     const [saplingIdList,setsaplingIdList] = useState([]);
-
+    const [userId,setUserId] = useState('');
     const [selectedTreeType, setSelectedTreeType] = useState({});
     const [selectedPlot, setSelectedPlot] = useState({});
     const [selectedSaplingId, setSelectedSaplingId] = useState({});
@@ -63,6 +62,9 @@ const LocalDataView = ({navigation}) => {
 
    
     useEffect(()=>{
+        Utils.getUserId().then((id)=>{
+          setUserId(id);
+        })
         Utils.fetchTreesFromLocalDB().then((trees)=>{
             // console.log(trees)
             setTreeList(trees)

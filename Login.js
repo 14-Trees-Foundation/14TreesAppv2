@@ -46,7 +46,7 @@ const LoginScreen = ({navigation}) =>{
       if (response.data.adminID) {
         await AsyncStorage.setItem(Constants.adminIdKey, response.data.adminID);
         console.log('adminId stored');
-        console.log('adminId : ',Utils.adminId)
+        console.log('adminId : ',response.data.adminID)
       }
       else{
         console.log('adminId not stored')
@@ -56,8 +56,8 @@ const LoginScreen = ({navigation}) =>{
         await AsyncStorage.setItem(Constants.userIdKey, response.data._id);
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
         await AsyncStorage.setItem(Constants.lastHashKey, "0");
-        Utils.userId = await AsyncStorage.getItem(Constants.userIdKey);
-        Utils.adminId = await AsyncStorage.getItem(Constants.adminIdKey);
+        const userId = await AsyncStorage.getItem(Constants.userIdKey);
+        const adminId = await AsyncStorage.getItem(Constants.adminIdKey);
       } catch (error) {
         console.log('Error storing userId', error);
       }
@@ -66,7 +66,6 @@ const LoginScreen = ({navigation}) =>{
       console.log(response.status);
       // console.log(response.data);
       // console.log(userObj._id);
-      console.log('user id : ',Constants.userId)
       switch (response.status) {
         case 200:
           navigation.navigate('HomeScreen');
