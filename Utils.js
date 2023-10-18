@@ -6,12 +6,14 @@ import { Alert } from "react-native";
 export class Utils{
     static async fetchAndStoreHelperData(){
         console.log('fetching helper data');
-        const helperData = await DataService.fetchHelperData(Utils.userId);
-        console.log(helperData.data);
+        let lastHash = await AsyncStorage.getItem(Constants.lastHashKey);
+        lastHash = String(lastHash);//take care of null values.
+        const helperData = await DataService.fetchHelperData(Utils.userId,lastHash);
+        // console.log(helperData.data);
 
-        if (helperData.status === 200) {
-            Alert.alert('Helper data fetched successfully');
-        }
+        // if (helperData.status === 200) {
+        //     Alert.alert('Helper data fetched successfully');
+        // }
     }
     static async upload(){
         try {
@@ -35,7 +37,6 @@ export class Utils{
     }; 
     static userId;
     static adminId;
-    static lastHash;
     static db;
     static async setTreeSyncStatus(final) {
         await this.setDBConnection()
@@ -56,7 +57,7 @@ export class Utils{
             console.log(res)
         }
         const currentTime = new Date().toString();
-        await AsyncStorage.setItem('date', currentTime);
+        await AsyncStorage.setItem(Constants.syncDateKey, currentTime);
         // console.log(res);
         var final = [];
         for (let index = 0; index < res.length; index++) {
@@ -150,4 +151,5 @@ export class Constants{
     static userDetailsKey = 'userobj';
     static adminIdKey = 'adminid';
     static lastHashKey = 'lasthash';
+    static syncDateKey = 'date';
 }

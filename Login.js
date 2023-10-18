@@ -14,10 +14,7 @@ const LoginScreen = ({navigation}) =>{
   const [phoneNumber, setPhoneNumber] = useState('');
 
   const checkPhoneNumber = () => {
-    if (isValidNumber(phoneNumber)) {
-      return true;
-    }
-    return false;
+    return isValidNumber(phoneNumber);
   };
 
   
@@ -61,7 +58,6 @@ const LoginScreen = ({navigation}) =>{
         await AsyncStorage.setItem(Constants.lastHashKey, "0");
         Utils.userId = await AsyncStorage.getItem(Constants.userIdKey);
         Utils.adminId = await AsyncStorage.getItem(Constants.adminIdKey);
-        Utils.lastHash = await AsyncStorage.getItem(Constants.lastHashKey);
       } catch (error) {
         console.log('Error storing userId', error);
       }

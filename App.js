@@ -58,56 +58,43 @@ async function request() {
   }
 }
 async function netInfo() {
-  NetInfo.fetch().then(async state => {
-    if (state.isConnected) {
-      await fetch_tree_and_plot();
-    } else {
-      Alert.alert('No internet');
-    }
-  });
 }
 const App = () => {
 
+  const [isAdmin, setIsAdmin] = useState(false);
+  const checkSignInStatus = async () => {
+    try {
+      const isSignedIn = await GoogleSignin.isSignedIn();
+      if (isSignedIn) {
+        // User is signed in, navigate to HomeScreen
+        Utils.userId = await AsyncStorage.getItem(Constants.userIdKey);
+        Utils.adminId = await AsyncStorage.getItem(Constants.adminIdKey);
+        console.log('Loaded userid: ',Utils.userId);
+        console.log('Loaded adminId: ',Utils.adminId);
+        if(Utils.adminId){
+          setIsAdmin(true);
+        }
+        
+        navigationRef.current?.navigate('HomeScreen');
+      }
+      else {
+        // User is not signed in, navigate to LoginScreen
+        navigationRef.current?.navigate('Login');
+      } 
+    } catch (error) {
+      console.error('Error checking sign-in status:', error);
+    }
+  };
+  useEffect(() => {
+    // GoogleSignin.configure({
+    // });
+    // Check if the user is already signed in
+    checkSignInStatus();
+  }, []);
   useEffect(() => {  
     request();
     Utils.fetchAndStoreHelperData();
   }, []);
-
-  useEffect(() => {
-    GoogleSignin.configure({
-    });
-
-    // Check if the user is already signed in
-    const checkSignInStatus = async () => {
-      try {
-        const isSignedIn = await GoogleSignin.isSignedIn();
-        if (isSignedIn) {
-          // User is signed in, navigate to HomeScreen
-          Utils.userId = await AsyncStorage.getItem(Constants.userIdKey);
-          Utils.adminId = await AsyncStorage.getItem(Constants.adminIdKey);
-          Utils.lastHash = await AsyncStorage.getItem(Constants.lastHashKey);
-          console.log('Loaded userid: ',Utils.userId);
-          console.log('Loaded adminId: ',Utils.adminId);
-          if(Utils.adminId){
-            setIsAdmin(true);
-          }
-          
-          navigationRef.current?.navigate('HomeScreen');
-        }
-        else {
-          // User is not signed in, navigate to LoginScreen
-          navigationRef.current?.navigate('Login');
-        } 
-      } catch (error) {
-        console.error('Error checking sign-in status:', error);
-      }
-    };
-
-    checkSignInStatus();
-  }, []);
-
-  const [isAdmin, setIsAdmin] = useState(false);
-
   const StackNavigator = () => (
     <Stack.Navigator>
       <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }}/>
