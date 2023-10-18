@@ -35,6 +35,8 @@ export const createTable = async db => {
           saplingid TEXT NOT NULL,
           image TEXT NOT NULL,
           imageid TEXT NOT NULL PRIMARY KEY,
+          remark TEXT,
+          timestamp TEXT NOT NULL,
           Foreign Key (saplingid) references ${tableName}(saplingid)
       );`;
 
@@ -83,13 +85,17 @@ export const getTreeImages = async (db, saplingid) => {
   try {
     const treesimgs = [];
     const results = await db.executeSql(
-      `SELECT imageid as name, image as data FROM sapling_images where saplingid='${saplingid}'`,
+      `SELECT imageid as name, image as data,remark,timestamp as captureTimestamp FROM sapling_images where saplingid='${saplingid}'`,
     );
     results.forEach(result => {
       for (let index = 0; index < result.rows.length; index++) {
         const image = {
           name: result.rows.item(index).name,
           data: result.rows.item(index).data,
+          meta: {
+            remark: result.rows.item(index).remark,
+            captureTimestamp: result.rows.item(index).captureTimestamp,
+          },
         };
         treesimgs.push(image);
       }
@@ -157,8 +163,8 @@ export const saveTrees = async (db, i, uploaded) => {
 export const saveTreeImages = async (db, i) => {
     
     const insertQuery =
-        `INSERT OR REPLACE INTO sapling_images(saplingid, image, imageid) values` +
-        `('${i.saplingid}', '${i.image}', '${i.imageid}')`;
+        `INSERT OR REPLACE INTO sapling_images(saplingid, image, imageid, remark, timestamp) values` +
+        `('${i.saplingid}', '${i.image}', '${i.imageid}', '${i.remark}', '${i.timestamp}')`;
     console.log('image stored!')
     return db.executeSql(insertQuery);
 };

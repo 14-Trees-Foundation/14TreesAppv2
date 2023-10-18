@@ -216,6 +216,8 @@ const AddTreeScreen = ({navigation}) => {
               saplingid : images[index].saplingid,
               image : images[index].data,
               imageid : images[index].name,
+              remark : images[index].meta.remark,
+              timestamp : images[index].meta.captureTimestamp,
             };
             await saveTreeImages(db, element);
           }
@@ -288,9 +290,8 @@ const AddTreeScreen = ({navigation}) => {
           </View>
             <View style={{height:200,margin:2, borderColor: '#5DB075',borderRadius: 5,flexDirection:'column',}}>
             <FlatList
-            
-            data={images}
-                  renderItem={renderImg}
+                data={images}
+                renderItem={renderImg}
               />
             </View>
             <View style={{marginHorizontal:30,marginTop:25,marginBottom:10}}>

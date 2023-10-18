@@ -7,8 +7,7 @@ import { Constants, Utils } from './Utils';
 
 
 const HomeScreen = ({navigation}) => {
-    const usr = Utils.userId;
-    console.log('user id at home screen : ',usr)
+    console.log('last hash HomeScreen : ' , Utils.lastHash);
     const [syncDate, setSyncDate] = useState('');
     const getSyncDate = async () => {
         const value = await AsyncStorage.getItem('date');
@@ -19,8 +18,11 @@ const HomeScreen = ({navigation}) => {
         getSyncDate();
     }, [syncDate]);
 
-
-
+    const fetchHelperData =async () => {
+        console.log('fetching helper data');
+        const helperData = await DataService.fetchHelperData(Utils.userId,Utils.lastHash);
+        console.log(helperData.data);
+    }
     return (
         <View >
           <View style={{backgroundColor:'#5DB075', borderBottomLeftRadius:10, borderBottomRightRadius:10}}>
