@@ -1,8 +1,6 @@
-import React, {useEffect,useState} from 'react';
-import { View, Text, Button,  Alert, StyleSheet, TouchableOpacity} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getDBConnection,getTreesByUploadStatus,updateUpload,getTreeImages } from './tree_db';
-import { DataService } from './DataService';
+import React, { useEffect, useState } from 'react';
+import { Button, StyleSheet, Text, View } from 'react-native';
 import { Constants, Utils } from './Utils';
 
 

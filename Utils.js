@@ -1,14 +1,16 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAllTrees, getDBConnection, getTreeImages, getTreesByUploadStatus, updateUpload , getTreeNames,getPlotNames, getSaplingIds, getTreeTypes, getPlotsList, updateTreeTypeTbl, updatePlotTbl, createTreesTable, createTreetTypesTbl, createPlotTbl} from "./tree_db";
+import { Alert, ToastAndroid } from "react-native";
 import { DataService } from "./DataService";
-import { Alert,ToastAndroid } from "react-native";
+import { LocalDatabase } from "./tree_db";
 
 export class Utils{
+    static ldb = new LocalDatabase();
     static async createLocalTablesIfNeeded(){
-        await this.setDBConnection();
-        await createTreetTypesTbl(this.db);
-        await createPlotTbl(this.db);
-        await createTreesTable(this.db);
+        // await this.setDBConnection();
+        
+        await this.ldb.createTreetTypesTbl();
+        await this.ldb.createPlotTbl();
+        await this.ldb.createTreesTable();
     }
     static async fetchAndStoreHelperData(){
         console.log('fetching helper data');
@@ -45,11 +47,11 @@ export class Utils{
                 tree_id:treeType.tree_id
             }
         })
-        await this.setDBConnection();
+        // await this.setDBConnection();
         let failure = false;
         for(let dbTreeType of treeTypesInLocalDBFormat){
             try{
-                await updateTreeTypeTbl(this.db,dbTreeType);
+                await this.ldb.updateTreeTypeTbl(dbTreeType);
             }
             catch(err){
                 console.log('Failed to save treeType: ',dbTreeType);
@@ -75,11 +77,11 @@ export class Utils{
                 plot_id:plot.plot_id
             }
         })
-        await this.setDBConnection();
+        // await this.setDBConnection();
         let failure = false;
         for(let dbPlot of plotsInLocalDBFormat){
             try{
-                await updatePlotTbl(this.db,dbPlot);
+                await this.ldb.updatePlotTbl(dbPlot);
             }
             catch(err){
                 console.log('Failed to save plot: ',dbPlot);
@@ -115,12 +117,12 @@ export class Utils{
     }; 
     static userId;
     static adminId;
-    static db;
+    static ldb;
     static async setTreeSyncStatus(final) {
         await this.setDBConnection()
         for (let index = 0; index < final.length; index++) {
             const element = final[index];
-            await updateUpload(this.db, element.sapling_id);
+            await this.ldb.updateUpload(element.sapling_id);
         }
     }
 
@@ -128,10 +130,10 @@ export class Utils{
         await this.setDBConnection()
         let res;
         if(uploaded){
-            res = await getTreesByUploadStatus(this.db,uploaded);
+            res = await this.ldb.getTreesByUploadStatus(uploaded);
         }
         else{
-            res = await getAllTrees(this.db);
+            res = await this.ldb.getAllTrees();
             console.log(res)
         }
         const currentTime = new Date().toString();
@@ -148,10 +150,7 @@ export class Utils{
                 element.lng = 0;
             }
             console.log(element.lat, element.lng);
-            if(!this.db){
-                this.db = await getDBConnection();
-            }
-            let images = await getTreeImages(this.db, element.sapling_id);
+            let images = await this.ldb.getTreeImages(element.sapling_id);
             for (let index = 0; index < images.length; index++) {
                 console.log(images[index].name);
             }
@@ -172,41 +171,35 @@ export class Utils{
         return final;
     }
     static async setDBConnection(){
-        if(!this.db){
-            this.db = await getDBConnection();
+        if(!this.ldb){
         }
         return;
     }
     static async treeTypeFromID(treeTypeID){
         //both ids are numbers of type string.
-        await this.setDBConnection()
-        const treeNames = await getTreeTypes(this.db);
+        const treeNames = await this.ldb.getTreeTypes();
         const requiredTreeType = treeNames.find((tree)=>(tree.value===treeTypeID));
         return requiredTreeType;
     }
     static async plotFromPlotID(plotID){
         //both ids are numbers of type string.
-        await this.setDBConnection()
-        const plots = await getPlotsList(this.db);
+        const plots = await this.ldb.getPlotsList();
         const requiredPlot = plots.find((plot)=>(plot.value===plotID));
         console.log(requiredPlot)
         return requiredPlot;
     }
     static async fetchTreeTypesFromLocalDB() {
-        await this.setDBConnection()
-        let res = await getTreeNames(this.db);
+        let res = await this.ldb.getTreeNames();
         return res;
     }
 
     static async fetchPlotNamesFromLocalDB() {
-        await this.setDBConnection()
-        let res = await getPlotNames(this.db);
+        let res = await this.ldb.getPlotNames();
         return res;
     }
 
     static async fetchSaplingIdsFromLocalDB() {
-        await this.setDBConnection()
-        let res = await getSaplingIds(this.db);
+        let res = await this.ldb.getSaplingIds();
         return res;
     }
     

@@ -1,33 +1,20 @@
 //TODO: user_id not stored in tree table for some reason. Check it, fix it.
 // add tree screen
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    Alert, Button,
-    FlatList,
-    Image,
-    StyleSheet, Text,ScrollView,
-    TextInput,
-    ToastAndroid,
-    TouchableOpacity,
-    Modal,
-    View
+  Button,
+  FlatList,
+  Image,
+  Modal,
+  StyleSheet, Text,
+  ToastAndroid,
+  View
 } from 'react-native';
 import { Dropdown } from './DropDown';
-import {
-    createTreesTable,
-    getDBConnection,
-    getPlotsList,
-    getTreesList,
-    getUsersList,
-    saveTreeImages,
-    saveTrees
-} from './tree_db';
 // import * as ImagePicker from 'react-native-image-picker';
-import Geolocation from '@react-native-community/geolocation';
-import { launchCamera } from 'react-native-image-picker';
 import { Utils } from './Utils';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 
@@ -42,33 +29,16 @@ const LocalDataView = ({navigation}) => {
     const [selectedTreeType, setSelectedTreeType] = useState({});
     const [selectedPlot, setSelectedPlot] = useState({});
     const [selectedSaplingId, setSelectedSaplingId] = useState({});
-
-    // const loadDataCallback = useCallback(async () => {
-    //   try {
-    //     let treenames = await Utils.fetchTreeNamesFromLocalDB();
-    //     let plots = await Utils.fetchPlotNamesFromLocalDB();
-    //     let saplingids = await Utils.fetchSaplingIdsFromLocalDB();
-    //     setTreeTypeList(treenames);
-    //     setPlotList(plots);
-    //     setsaplingIdList(saplingids);
-    //     console.log('local data view')
-    //     console.log(treeTypeList)
-    //     console.log(plotList)
-    //     console.log(saplingIdList)
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // }, []);
-
-   
+    const fetchTreesFromLocalDB = ()=>{
+      Utils.fetchTreesFromLocalDB().then((trees)=>{
+          // console.log(trees)
+          setTreeList(trees)
+          setFinalList(trees)
+      })
+    }
     useEffect(()=>{
         Utils.getUserId().then((id)=>{
           setUserId(id);
-        })
-        Utils.fetchTreesFromLocalDB().then((trees)=>{
-            // console.log(trees)
-            setTreeList(trees)
-            setFinalList(trees)
         })
         // // loadDataCallback();
         Utils.fetchTreeTypesFromLocalDB().then((types)=>{
@@ -83,20 +53,11 @@ const LocalDataView = ({navigation}) => {
             console.log(ids)
             setsaplingIdList(ids)
         })
-
         // console.log('local data view')
-    },[])
-
-
-    // useEffect(()=>{
-    //     console.log('local data view')
-    //     console.log(selectedTreeType)
-    //     console.log(selectedPlot)
-    //     console.log(selectedSaplingId)
-      
-    // }
-    // ,[selectedTreeType,selectedPlot,selectedSaplingId])
-    
+      },[])  
+    useFocusEffect(React.useCallback(()=>{
+      fetchTreesFromLocalDB();
+    },[]))    
     const [modalVisible, setModalVisible] = useState(false);
 
     const openModal = () => {

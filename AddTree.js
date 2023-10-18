@@ -17,6 +17,7 @@ import {
   getUsersList,
   getTreeImages,
   saveTreeImages,
+  LocalDatabase,
 } from './tree_db';
 // import * as ImagePicker from 'react-native-image-picker';
 import {launchCamera} from 'react-native-image-picker';
@@ -28,7 +29,7 @@ import { ScreenContainer } from 'react-native-screens';
 
 
 const AddTreeScreen = ({navigation}) => {
-
+    const ldb = new LocalDatabase();
     const [saplingid, setSaplingid] = React.useState(null);
     const [lat, setlat] = useState(0);
     const [lng, setlng] = useState(0);
@@ -150,11 +151,9 @@ const AddTreeScreen = ({navigation}) => {
         let userId  = await Utils.getUserId();
         setUserId(userId);
 
-        const db = await getDBConnection();
-        await createTreesTable(db);
         // await fetch();
-        let trees = await getTreesList(db);
-        let plots = await getPlotsList(db);
+        let trees = await ldb.getTreesList();
+        let plots = await ldb.getPlotsList();
         setTreeItems(trees);
         setPlotItems(plots);
         requestLocation();
@@ -208,8 +207,7 @@ const AddTreeScreen = ({navigation}) => {
           };
           // call saveTreeImages for each image
           
-          const db = await getDBConnection();
-          await saveTrees(db, tree, 0);
+          await ldb.saveTrees(tree, 0);
           for (let index = 0; index < images.length; index++) {
             const element = {
               saplingid : images[index].saplingid,
@@ -218,7 +216,7 @@ const AddTreeScreen = ({navigation}) => {
               remark : images[index].meta.remark,
               timestamp : images[index].meta.captureTimestamp,
             };
-            await saveTreeImages(db, element);
+            await ldb.saveTreeImages(element);
           }
           
           // await fetch();

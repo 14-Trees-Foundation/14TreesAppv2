@@ -1,23 +1,20 @@
 
-import React, { useState,useEffect} from 'react';
-import {Alert, BackHandler,PermissionsAndroid,Platform} from 'react-native';
-import HomeScreen from './Home';
-import LoginScreen from './Login';
-import AddTreeScreen from './AddTree';
-import EditTreeScreen from './EditTree';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
-import {checkMultiplePermissions} from './check_permissions';
-import {PERMISSIONS} from 'react-native-permissions';
-import NetInfo from '@react-native-community/netinfo';
-import {Location} from './get_location';
-import { Constants, Utils } from './Utils';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from 'react';
+import { Alert, Platform } from 'react-native';
+import { PERMISSIONS } from 'react-native-permissions';
+import AddTreeScreen from './AddTree';
+import EditTreeScreen from './EditTree';
+import HomeScreen from './Home';
 import LocalDataView from './LocalDataView';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { DataService } from './DataService';
+import LoginScreen from './Login';
+import { Constants, Utils } from './Utils';
 import VerifyusersScreen from './VerifyUsers';
+import { checkMultiplePermissions } from './check_permissions';
 
 
 

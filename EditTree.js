@@ -35,8 +35,6 @@ const EditTreeScreen = ({navigation}) => {
     useEffect(()=>{
         //human readable details update.
         makeDetailsHumanReadable();
-        // setTreeType(await Utils.treeTypeFromID(details.tree_id))
-        // setTreeType(await Utils.plot(details.tree_id))
     },[details])
     const fetchTreeDetails = async () => {
         // console.log('fetching tree details');
@@ -44,8 +42,6 @@ const EditTreeScreen = ({navigation}) => {
         console.log(adminID)
         const treeDetails = await DataService.fetchTreeDetails(saplingid,adminID);
         setDetails(treeDetails);
-        // let trees = await getTreesList(db);
-        // let plots = await getPlotsList(db);
     }
     return (
         <View style={{backgroundColor:'#5DB075', height:'100%'}}>

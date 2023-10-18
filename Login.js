@@ -1,12 +1,11 @@
 
-import React, { useState,useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import PhoneInput, { isValidNumber } from 'react-native-phone-number-input';
-import {GoogleSignin,GoogleSigninButton,statusCodes,} from '@react-native-google-signin/google-signin'; 
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GoogleSignin, GoogleSigninButton, statusCodes, } from '@react-native-google-signin/google-signin';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import PhoneInput, { isValidNumber } from 'react-native-phone-number-input';
 import { DataService } from './DataService';
-import { Constants, Utils } from './Utils';
+import { Constants } from './Utils';
 
 
 const LoginScreen = ({navigation}) =>{
