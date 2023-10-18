@@ -54,10 +54,13 @@ const LoginScreen = ({navigation}) =>{
       try {
         await AsyncStorage.setItem(Constants.userIdKey, response.data._id);
         response.data = {...response.data,image:userInfo.user.photo}
+        if(!response.data.image){
+          response.data.image = Constants.imagePlaceholder;
+        }
+        console.log('storing: ',response.data)
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
         await AsyncStorage.setItem(Constants.lastHashKey, "0");
-        const userId = await AsyncStorage.getItem(Constants.userIdKey);
-        const adminId = await AsyncStorage.getItem(Constants.adminIdKey);
+        console.log(await AsyncStorage.getItem(Constants.userDetailsKey));
       } catch (error) {
         console.log('Error storing userId', error);
       }

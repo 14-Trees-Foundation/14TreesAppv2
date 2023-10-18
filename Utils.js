@@ -221,4 +221,5 @@ export class Constants{
     static adminIdKey = 'adminid';
     static lastHashKey = 'lasthash';
     static syncDateKey = 'date';
+    static imagePlaceholder = 'https://i.imgur.com/vxP6SFl.png'
 }
