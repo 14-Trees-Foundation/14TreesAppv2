@@ -53,6 +53,7 @@ const LoginScreen = ({navigation}) =>{
 
       try {
         await AsyncStorage.setItem(Constants.userIdKey, response.data._id);
+        response.data = {...response.data,image:userInfo.user.photo}
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
         await AsyncStorage.setItem(Constants.lastHashKey, "0");
         const userId = await AsyncStorage.getItem(Constants.userIdKey);

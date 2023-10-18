@@ -23,7 +23,6 @@ export class Utils{
             return;//error display, logging done by DataService.
 
         }
-        console.log('received: ',helperData.data);
         const data = helperData.data['data'];
         const newHash = helperData.data['hash'];
         if(newHash==lastHash){
@@ -119,7 +118,6 @@ export class Utils{
     static adminId;
     static ldb;
     static async setTreeSyncStatus(final) {
-        await this.setDBConnection()
         for (let index = 0; index < final.length; index++) {
             const element = final[index];
             await this.ldb.updateUpload(element.sapling_id);
@@ -127,7 +125,6 @@ export class Utils{
     }
 
     static async fetchTreesFromLocalDB(uploaded=undefined) {
-        await this.setDBConnection()
         let res;
         if(uploaded){
             res = await this.ldb.getTreesByUploadStatus(uploaded);
@@ -171,7 +168,8 @@ export class Utils{
         return final;
     }
     static async setDBConnection(){
-        if(!this.ldb){
+        if(!(this.ldb.db)){
+            await this.ldb.getDBConnection();
         }
         return;
     }
