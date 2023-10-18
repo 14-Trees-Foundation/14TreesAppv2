@@ -48,17 +48,22 @@ export class DataService{
       });
     }
 
+    // remove the hardcoded adminID later
     static async fetchUsers(adminID){
+      console.log('fetching users')
         const url = `${DataService.serverBase}/getUnverifiedUsers`;
         return await axios.post(url,{
-          adminID : adminID
+          // adminID : adminID
+          adminID: "61596d30e78e3cc6282560d0"
       });
     }
 
+    // remove the hardcoded adminID later
     static async verifyUser(user_id){
+      console.log('verifying user')
         const url = `${DataService.serverBase}/verifyUser`;
         return await axios.post(url,{
-            adminID: Utils.adminId,
+            adminID: "61596d30e78e3cc6282560d0",
             staffID: user_id
         });
     }

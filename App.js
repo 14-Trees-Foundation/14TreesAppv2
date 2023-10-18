@@ -54,8 +54,8 @@ async function requestPermissions() {
     );
   }
 }
-async function netInfo() {
-}
+// async function netInfo() {
+// }
 const App = () => {
 
   const [isAdmin, setIsAdmin] = useState(false);
@@ -78,7 +78,13 @@ const App = () => {
         if (adminId) {
           setIsAdmin(true);
         }
-        navigationRef.current?.navigate('HomeScreen');
+        if (userId !== null) {
+          navigationRef.current?.navigate('HomeScreen');
+        }
+        else {
+          GoogleSignin.signOut();
+          navigationRef.current?.navigate('Login');
+        }
         return true;
       }
       else {
@@ -145,10 +151,10 @@ const App = () => {
         <Drawer.Screen name="Home" component={StackNavigator} options={{ headerShown: false }}></Drawer.Screen>
         <Drawer.Screen name="AddTree" component={AddTreeScreen} options={{ headerShown: false }}></Drawer.Screen>
         <Drawer.Screen name="LocalDataView" component={LocalDataView} options={{ headerShown: false }}></Drawer.Screen>
-        {/* {!isAdmin &&  */}
+        {/* {isAdmin &&  */}
         <Drawer.Screen name="EditTree" component={EditTreeScreen} options={{ headerShown: false }}></Drawer.Screen>
         {/* } */}
-        {/* {!isAdmin &&  */}
+        {/* {isAdmin &&  */}
         <Drawer.Screen name="VerifyUsers" component={VerifyusersScreen} options={{ headerShown: false }}></Drawer.Screen>
         {/* } */}
       </Drawer.Navigator>

@@ -183,8 +183,8 @@ export class LocalDatabase {
     createTreetTypesTbl = async () => {
         // create table if not exists
         const query = `CREATE TABLE IF NOT EXISTS ${treetypeName}(
-      name TEXT NOT NULL,
-      value TEXT NOT NULL PRIMARY KEY
+        name TEXT NOT NULL,
+        value TEXT NOT NULL PRIMARY KEY
     );`;
         await this.db.executeSql(query);
     };

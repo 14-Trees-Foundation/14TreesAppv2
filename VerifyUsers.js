@@ -1,5 +1,5 @@
 import React, {useEffect,useState} from 'react';
-import { View, Text,TextInput, Button,  Alert, StyleSheet, TouchableOpacity} from 'react-native';
+import { View, Text,TextInput, Button,  Alert, StyleSheet, TouchableOpacity, ToastAndroid} from 'react-native';
 import { Dropdown } from './DropDown';
 import { DataService } from './DataService';
 import { FlatList } from 'react-native-gesture-handler';
@@ -11,20 +11,18 @@ const VerifyusersScreen = ({navigation}) => {
     
     const fetchUsers = async () => {
         const userlist = await DataService.fetchUsers(Utils.adminId);
-        // console.log(users.data);
-        setUsers(userlist);
+        setUsers(userlist.data);
     }
 
     
     const verifyUser = async (id) => {
         const response = await DataService.verifyUser(id);
-        console.log(response);
-        // if (response.status === 200) {
-        //     Alert.alert('User Verified Successfully');
-        // }
-        // else{
-        //     Alert.alert('User Verification Failed');
-        // }
+        console.log(response.data);
+        if(response.status == 200){
+            ToastAndroid.show('User Verified',ToastAndroid.LONG);
+            fetchUsers();
+        }
+       
     }
 
     useEffect(() => {
@@ -36,16 +34,23 @@ const VerifyusersScreen = ({navigation}) => {
     const renderelement = ({item}) => {
         // console.log(item);
         return (
-            <View style={{flexDirection:'column', margin:10}}>
-                <Text style={styles.text3}> {item.name} </Text>
-                <Text style={styles.text3}> {item.email} </Text>
-                <Text style={styles.text3}> {item.phone} </Text>
-                <View style={{margin:20}}>
+            <View style={{flexDirection:'column', margin:5}}>
+                <View style={{borderBottomWidth:2,}}>
+                   
+                
+                <View >
+                    <Text style={styles.text3}> Name : {item.name} </Text>
+                    <Text style={styles.text3}> Email : {item.email} </Text>
+                </View>
+                
+                
+                <View style={{margin:8, marginBottom:8, width:'50%', alignSelf:'center'}}>
                     <Button
                         title="Verify"
                         onPress={() => verifyUser(item._id)}
                         color={'#5DB075'}
                     />
+                </View>
                 </View>
             </View>
         )
@@ -57,7 +62,7 @@ const VerifyusersScreen = ({navigation}) => {
                 <Text style={styles.headerText} > Verify Users </Text>
             </View>
             <Text style={styles.text2}> List of Unverified Users </Text>
-            <View style={{height:200,margin:2, borderColor: '#5DB075',borderRadius: 5,flexDirection:'column',}}>
+            <View style={{height:500,margin:2, marginTop:10,borderWidth:2,borderColor: '#5DB075',borderRadius: 5,flexDirection:'column',}}>
             <FlatList
                 data = {users}
                 renderItem={renderelement}
@@ -81,12 +86,14 @@ const styles = StyleSheet.create({
         color: 'black',
         fontSize:20,
         textAlign: 'left',
-        marginTop: 10,
+        marginTop: 15,
+        marginBottom: 30
+        
     },
     text3: {
         color: 'black',
         fontSize:18,
         textAlign: 'left',
-        margin:10,
+        margin:2,
     }
   });

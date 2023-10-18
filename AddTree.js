@@ -114,7 +114,7 @@ const AddTreeScreen = ({navigation}) => {
               flexDirection:'column',
           }}>
             
-            <View  style={{margin:5, flexDirection:'row', flexWrap:'wrap',              justifyContent:'space-between'}}>
+            <View  style={{margin:5, flexDirection:'row', flexWrap:'wrap',justifyContent:'space-between'}}>
                 <Image
                   source={{ uri: `data:image/jpeg;base64,${item.data}` }}
                   style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
