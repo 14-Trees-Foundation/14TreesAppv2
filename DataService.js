@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ToastAndroid } from 'react-native';
+import { ToastAndroid} from 'react-native';
 axios.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
@@ -24,10 +24,11 @@ axios.interceptors.response.use(function (response) {
   else{
     errorMsg = error.message;
   }
-  if(requestDescriptor){
-    errorMsg += ` (${requestDescriptor})`;
-  }
   ToastAndroid.show(errorMsg,ToastAndroid.LONG);
+  if(requestDescriptor){
+    requestDescriptor = ` (${requestDescriptor})`;
+    ToastAndroid.show(requestDescriptor,ToastAndroid.LONG);
+  }
   console.log(errorMsg);
   return null;
 });
