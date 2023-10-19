@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Alert, ToastAndroid } from "react-native";
+import { Alert, ToastAndroid,StyleSheet } from "react-native";
 import { DataService } from "./DataService";
 import { LocalDatabase } from "./tree_db";
 
@@ -171,7 +171,7 @@ export class Utils{
         if(!(this.ldb.db)){
             await this.ldb.getDBConnection();
         }
-        return;
+        return this.ldb;
     }
     static async treeTypeFromID(treeTypeID){
         //both ids are numbers of type string.
@@ -223,3 +223,92 @@ export class Constants{
     static syncDateKey = 'date';
     static imagePlaceholder = 'https://i.imgur.com/vxP6SFl.png'
 }
+
+
+export const styles = StyleSheet.create({
+    remark: {
+      height: 70,
+      borderWidth: 0.5,
+      borderColor: 'grey',
+      borderRadius: 10,
+      backgroundColor: '#f5f5f5',
+      margin: 5,
+      padding: 5,
+      color: 'black', // Change font color here
+      fontSize: 16,
+    },
+    btnview: {
+      justifyContent: 'center',
+      elevation: 3,
+      marginHorizontal: 20,
+      marginVertical: 10,
+    },
+    btn: {
+      paddingHorizontal: 20,
+      borderRadius: 9,
+      backgroundColor: '#1f3625',
+      alignItems: 'center',
+      paddingVertical: 12,
+      height: 50,
+    },
+    btndisabled: {
+      paddingHorizontal: 20,
+      borderRadius: 9,
+      backgroundColor: '#686868',
+      alignItems: 'center',
+      paddingVertical: 12,
+      height: 50,
+    },
+    text: {
+      fontSize: 14,
+      color: '#1f3625',
+      textAlign: 'center',
+    },
+    text2: {
+      fontSize: 25,
+      color: 'white',
+      textAlign: 'center',
+      marginVertical: 5,
+      marginBottom: 40,
+    },
+    recordTxt: {
+      fontSize: 18,
+      color: '#1f3625',
+      marginTop: 5,
+      marginBottom: 5,
+      textAlign: 'center',
+    },
+    btntxt: {
+      fontSize: 18,
+      color: '#ffffff',
+      textAlign: 'center',
+    },
+    text3: {
+      fontSize: 17,
+      color: 'black',
+      textAlign: 'left',
+    },
+    txtInput: {
+      height: 60,
+      width: 310,
+      borderWidth: 0.5,
+      borderColor: 'grey',
+      borderRadius: 10,
+      backgroundColor: '#f5f5f5',
+      marginTop: 30,
+      marginBottom: 10,
+      padding: 10,
+      color: 'black', // Change font color here
+      fontSize: 16,
+      fontWeight: 'bold',
+      alignItems: 'center',
+      justifyContent: 'center',
+      alignSelf: 'center',
+    },
+    headerText: {
+      fontSize: 30, color: 'white', textAlign: 'center', marginTop: 30, marginBottom: 30, fontFamily: 'cochin', fontWeight: 'bold', textShadowColor: 'rgba(0, 0, 0, 0.5)',
+      textShadowOffset: { width: 1, height: 1 },
+      textShadowRadius: 3,
+    }
+  });
+  
