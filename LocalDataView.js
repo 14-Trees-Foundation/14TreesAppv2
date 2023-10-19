@@ -109,7 +109,7 @@ const LocalDataView = ({navigation}) => {
     //   userId = userid;
     // })
     // image handle---------------------  
-    const renderImg = ({ item }) => {
+    const renderImg = (item) => {
         // console.log(item)
         // console.log(item.data.slice(0,30));
         return (
@@ -143,7 +143,7 @@ const LocalDataView = ({navigation}) => {
                 <Text style={{...styles.danger,...styles.label}}>Local</Text>}
                 </View>
                 <View style={{padding:10}}>
-                    {renderImg({item:tree.images[0]})}
+                    {renderImg(tree.images[0])}
                 </View>
             </View>
         )
