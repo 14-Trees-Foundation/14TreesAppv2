@@ -244,6 +244,7 @@ export class Constants{
     static lastHashKey = 'lasthash';
     static syncDateKey = 'date';
     static imagePlaceholder = 'https://i.imgur.com/vxP6SFl.png'
+    static treeFormTemplateData = {inSaplingId:null,inLat:0,inLng:0,inImages:[],inPlot:{},inTreeType:{},inUserId:''}
 }
 
 

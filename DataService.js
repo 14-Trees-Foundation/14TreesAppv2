@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Buffer } from "buffer";
 import { ToastAndroid} from 'react-native';
 axios.interceptors.response.use(function (response) {
   return response;
@@ -69,9 +70,25 @@ export class DataService{
     }
     static async fetchTreeDetails(saplingID, adminID){
       const url = `${DataService.serverBase}/getSapling`
-      return (await axios.post(url,{
+      const response = (await axios.post(url,{
         adminID:adminID,
         saplingID:saplingID
-      })).data
+      }))
+      if(response){
+        return response.data;
+      }
+    }
+    static async fileURLToBase64(url) {
+      try {
+        // Send a GET request to the URL
+        const response = await axios.get(url, { responseType: 'arraybuffer' });
+    
+        // Convert the response data to a Base64 string
+        const base64String = Buffer.from(response.data, 'binary').toString('base64');
+    
+        return base64String;
+      } catch (error) {
+        console.error('Error:', error);
+      }
     }
 }

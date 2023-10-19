@@ -3,8 +3,8 @@
 import React, { useEffect } from 'react';
 // import * as ImagePicker from 'react-native-image-picker';
 import { TreeForm } from './TreeForm';
-import { Utils } from './Utils';
-
+import { Constants, Utils } from './Utils';
+import {ToastAndroid} from 'react-native';
 
 
 const AddTreeScreen = ({ navigation }) => {
@@ -26,9 +26,11 @@ const AddTreeScreen = ({ navigation }) => {
         };
         await ldb.saveTreeImages(element);
       }
+      ToastAndroid.show('Tree saved locally!', ToastAndroid.SHORT);
+      navigation.navigate('Home');
     }
-    const inputTreeData = {inSaplingId:null,inLat:0,inLng:0,inImages:[],inPlot:{},inTreeType:{},inUserId:''};
-  return <TreeForm treeData={inputTreeData} updateUserId={true} onVerifiedSave={onVerifiedSave} navigation={navigation}/>;
+    const inputTreeData = {...Constants.treeFormTemplateData};
+  return <TreeForm treeData={inputTreeData} updateUserId={true} onVerifiedSave={onVerifiedSave}/>;
 }
 
 export default AddTreeScreen;

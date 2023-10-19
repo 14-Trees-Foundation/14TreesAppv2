@@ -4,7 +4,9 @@ import {KeyboardAvoidingView,Alert,Text,Image,View,ToastAndroid,TouchableOpacity
 import Geolocation from '@react-native-community/geolocation';
 import { Dropdown } from "./DropDown";
 import {launchCamera} from 'react-native-image-picker';
-export const TreeForm = ({ treeData:{inSaplingId,inLng,inLat,inImages,inTreeType,inPlot,inUserId}, onVerifiedSave, updateUserId,navigation }) => {
+import { CustomButton } from "./Components";
+export const TreeForm = ({ treeData, onVerifiedSave, updateUserId,onCancel }) => {
+    const {inSaplingId,inLng,inLat,inImages,inTreeType,inPlot,inUserId} = treeData;
     const [saplingid, setSaplingid] = useState(inSaplingId);
     const [lat, setlat] = useState(inLng);
     const [lng, setlng] = useState(inLat);
@@ -43,8 +45,7 @@ export const TreeForm = ({ treeData:{inSaplingId,inLng,inLat,inImages,inTreeType
                 };
                 // call saveTreeImages for each image
 
-                await onVerifiedSave(tree, images);
-
+                
                 // await fetch();
                 // requestLocation();
                 setSaplingid(null);
@@ -52,9 +53,8 @@ export const TreeForm = ({ treeData:{inSaplingId,inLng,inLat,inImages,inTreeType
                 setSelectedPlot({});
                 // setSelectedUser({});
                 setImages([]);
+                await onVerifiedSave(tree, images);
                 // await Utils.upload();
-                ToastAndroid.show('Tree saved locally!', ToastAndroid.SHORT);
-                navigation.navigate('Home');
             } catch (error) {
                 console.error(error);
             }
@@ -85,7 +85,7 @@ export const TreeForm = ({ treeData:{inSaplingId,inLng,inLat,inImages,inTreeType
                     data: base64Data,
                     name: imageName,
                     meta: {
-                        captureTimestamp: timestamp,
+                        capturetimestamp: timestamp,
                         remark: 'default remark',
                     }
                 }
@@ -115,7 +115,8 @@ export const TreeForm = ({ treeData:{inSaplingId,inLng,inLat,inImages,inTreeType
             }
         }
         const indexString = `(${index+1} of ${images.length})\n`
-        const captureString = 'Captured at:\n' + item.meta.captureTimestamp.split('T').join('\n');
+        console.log(item.meta);
+        const captureString = 'Captured at:\n' + item.meta.capturetimestamp.split('T').join('\n');
         const displayString = `${indexString} ${captureString}`
         return (
             <View style={{
@@ -175,7 +176,11 @@ export const TreeForm = ({ treeData:{inSaplingId,inLng,inLat,inImages,inTreeType
         }
     }, []);
 
-    useEffect(()=>{loadDataCallback()}, []);
+    useEffect(()=>{
+        loadDataCallback();
+        console.log(treeData)
+        console.log(selectedTreeType);
+    }, []);
 
     const requestLocation = async () => {
         console.log('requesting location');
@@ -211,7 +216,6 @@ export const TreeForm = ({ treeData:{inSaplingId,inLng,inLat,inImages,inTreeType
                         label="Select Tree Type"
                         setSelectedItems={setSelectedTreeType}
                         selectedItem={selectedTreeType}
-
                     />
                     <Dropdown
                         items={plotItems}
@@ -237,12 +241,15 @@ export const TreeForm = ({ treeData:{inSaplingId,inLng,inLat,inImages,inTreeType
                         />
                     </View>
                     </KeyboardAvoidingView>
-                    <View style={{ marginHorizontal: 30, marginTop: 25, marginBottom: 10 }}>
-                        <Button
-                            title="Submit"
+                    <View style={{ flexDirection:'row',justifyContent:'space-around',marginHorizontal: 30, marginTop: 25, marginBottom: 10 }}>
+                        {
+                            (onCancel!==undefined)
+                            &&
+                            <CustomButton text='Cancel' onPress={onCancel} opacityStyle={{backgroundColor:'red'}}/>
+                        }
+                        <CustomButton
+                            text="Submit"
                             onPress={onSave}
-                            color={'#5DB075'}
-
                         />
                     </View>
 
