@@ -5,6 +5,24 @@ import { LocalDatabase } from "./tree_db";
 
 export class Utils{
     static ldb = new LocalDatabase();
+    static async confirmAction(onConfirm,title=undefined,message=undefined){
+        if(!title){
+            title = 'Are you sure?';
+        }
+        if(!message){
+            message = 'Please confirm the action.'
+        }
+        Alert.alert(title,message,[
+            {
+                text:'Yes',
+                onPress:()=>onConfirm()
+            },
+            {
+                text:'No',
+                onPress:()=>null
+            }
+        ])
+    }
     static async createLocalTablesIfNeeded(){
         // await this.setDBConnection();
         
@@ -94,6 +112,10 @@ export class Utils{
         else{
             console.log('All plots saved successfully.')
         }
+    }
+    static async deleteSyncedTrees(){
+        //TODO implement.
+        ToastAndroid.show('Deleted synced trees',ToastAndroid.SHORT);
     }
     static async upload(){
         try {
@@ -226,6 +248,29 @@ export class Constants{
 
 
 export const styles = StyleSheet.create({
+    defaultButtonStyle:{
+        flexDirection:'row',
+        alignContent:'center',
+        alignItems:'center',
+        fontSize:40,
+        borderColor:'gray',
+        borderWidth:3,
+        backgroundColor:'green',
+        margin:5,
+        padding:10,
+        borderRadius:5,
+        shadowColor:'black',
+        elevation:3,
+        shadowOffset:{
+            width:50,
+            height:50
+        },
+        shadowOpacity:1
+    },
+    defaultButtonTextStyle:{
+        color:'white',
+        textAlign:'center'
+    },
     drawerHeader:{
         backgroundColor:'#5DB075',
     },

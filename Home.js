@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
 import { Constants, Utils } from './Utils';
+import { CustomButton } from './Components';
 
 
 const HomeScreen = ({navigation}) => {
@@ -20,7 +21,6 @@ const HomeScreen = ({navigation}) => {
     }, []);
     return (
         <View >
-
           <Text style={{fontSize:20, marginTop:20, alignContent:'center', justifyContent:'center', alignSelf:'center', color:'black'}}>Last Sync Data On : </Text>
           <Text style={{fontSize:20, alignContent:'center', justifyContent:'center', alignSelf:'center', color:'black'}}>{syncDate}</Text>
 

@@ -96,7 +96,7 @@ const App = () => {
     await AsyncStorage.removeItem(Constants.adminIdKey);
     await AsyncStorage.removeItem(Constants.userIdKey);
     await AsyncStorage.removeItem(Constants.userDetailsKey);
-    Navigation
+    navigationRef.current?.navigate('Login');
   }
   const initTasks = async () => {
     const loggedIn = await checkSignInStatus();
@@ -116,6 +116,7 @@ const App = () => {
       <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
+
   const DrawerContent = (props) => {
     return (<DrawerContentScrollView {...props}>
       <View style={{flexDirection:'column',alignItems:'center',marginTop:50,bottom:0}}>
@@ -140,9 +141,9 @@ const App = () => {
         }
       </View>
       <DrawerItemList {...props} />
-      {/* <View style={{flexDirection:'column',position:'relative',marginTop:100,alignSelf:'center'}}>
-        <Button title='Log out' onPress={()=>logout()} style={styles.logOutButton} color='red' ></Button>
-      </View> */}
+      <View style={{flexDirection:'column',position:'relative',marginTop:100,alignSelf:'center'}}>
+        <Button title='Log out' onPress={()=>Utils.confirmAction(logout,undefined,'Do you want to log out?')} style={styles.logOutButton} color='red' ></Button>
+      </View>
     </DrawerContentScrollView>)
   }
   // check dynamically adminIdkey is stored in the async storage after login
@@ -153,8 +154,8 @@ const App = () => {
     <NavigationContainer ref={navigationRef}>
       <Drawer.Navigator drawerContent={DrawerContent}>
         <Drawer.Screen name="Home" component={StackNavigator} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
-        <Drawer.Screen name="AddTree" component={AddTreeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
         <Drawer.Screen name="LocalDataView" component={LocalDataView} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
+        <Drawer.Screen name="AddTree" component={AddTreeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
         {isAdmin && 
         <Drawer.Screen name="EditTree" component={EditTreeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
         }
