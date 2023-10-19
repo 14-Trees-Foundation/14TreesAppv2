@@ -101,9 +101,6 @@ const LoginScreen = ({navigation}) =>{
   return (
     <View style={{ backgroundColor: 'white', height: '100%' }}>
       {/* // create a header with title as 14 trees */}
-        <View style={{backgroundColor:'#5DB075', borderBottomLeftRadius:10, borderBottomRightRadius:10}}>
-          <Text style={styles.headerText}>Log In</Text>
-        </View>
         
       <View style={styles.pop}>
 

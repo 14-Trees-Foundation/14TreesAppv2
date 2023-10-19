@@ -232,6 +232,10 @@ export const styles = StyleSheet.create({
     headerTitleStyle:{
         color:'white'
     },
+    logOutButton:{
+        color:'white',
+        bottom:0
+    },
     remark: {
       height: 70,
       borderWidth: 0.5,
