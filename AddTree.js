@@ -22,7 +22,7 @@ const AddTreeScreen = ({ navigation }) => {
           image: images[index].data,
           imageid: images[index].name,
           remark: images[index].meta.remark,
-          timestamp: images[index].meta.captureTimestamp,
+          timestamp: images[index].meta.capturetimestamp,
         };
         await ldb.saveTreeImages(element);
       }

@@ -5,7 +5,7 @@ import Geolocation from '@react-native-community/geolocation';
 import { Dropdown } from "./DropDown";
 import {launchCamera} from 'react-native-image-picker';
 import { CustomButton } from "./Components";
-export const TreeForm = ({ treeData, onVerifiedSave, updateUserId,onCancel }) => {
+export const TreeForm = ({ treeData, onVerifiedSave, updateUserId, onCancel, onNewImage, onDeleteImage }) => {
     const {inSaplingId,inLng,inLat,inImages,inTreeType,inPlot,inUserId} = treeData;
     const [saplingid, setSaplingid] = useState(inSaplingId);
     const [lat, setlat] = useState(inLng);
@@ -20,10 +20,19 @@ export const TreeForm = ({ treeData, onVerifiedSave, updateUserId,onCancel }) =>
     const [selectedPlot, setSelectedPlot] = useState(inPlot);
     const [userId, setUserId] = useState(inUserId);
     let ldb;
-    const handleDeleteItem = (name) => {
+    const handleDeleteItem = async (name) => {
         const newImages = images.filter((item) => item.name !== name);
+        if(onDeleteImage){
+            await onDeleteImage(name);
+        }
         setImages(newImages);
     };
+    const handleAddImage = async (image)=>{
+        if(onNewImage){
+            await onNewImage(image);
+        }
+        setImages([...images, image]);
+    }
     const onSave = async () => {
         if (saplingid === null || Object.keys(selectedTreeType).length === 0 || Object.keys(selectedPlot).length === 0) {
             Alert.alert('Error', 'Please fill all the fields');
@@ -79,8 +88,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, updateUserId,onCancel }) =>
 
                 const base64Data = response.assets[0].base64;
                 const imageName = `${saplingid}_${timestamp}.jpg`;
-
-                setImages([...images, {
+                const newImage = {
                     saplingid: saplingid,
                     data: base64Data,
                     name: imageName,
@@ -88,8 +96,8 @@ export const TreeForm = ({ treeData, onVerifiedSave, updateUserId,onCancel }) =>
                         capturetimestamp: timestamp,
                         remark: 'default remark',
                     }
-                }
-                ]);
+                };
+                await handleAddImage(newImage);
             }
         });
     };
@@ -133,7 +141,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, updateUserId,onCancel }) =>
                         style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
                     />
                     <Text style={{ ...styles.text3, textAlign: 'center' }}>{displayString}</Text>
-                    <TouchableOpacity onPress={() => handleDeleteItem(item.name)}>
+                    <TouchableOpacity onPress={() => Utils.confirmAction(()=>handleDeleteItem(item.name),'Delete image?')}>
                         <Image
                             source={require('./assets/icondelete.png')} // Replace with your delete icon image
                             style={{ width: 20, height: 20, marginLeft: 10 }} // Adjust the icon dimensions and margin

@@ -10,8 +10,47 @@ const EditTreeScreen = ({navigation}) => {
     const [details,setDetails] = useState(null);
     const [treeItems, setTreeItems] = useState([]);
     const [plotItems, setPlotItems] = useState([]);
-    const updateDetails = async()=>{
+    const [newImages,setNewImages] = useState([]);
+    const [deletedImages,setDeletedImages] = useState([]);
+    const updateDetails = async(tree, images)=>{
+        const saplingData = {
+            data:{}
+        };
+        const adminID = await Utils.getAdminId();
+        /*"sapling":{
+            "data":{
+                "location": {
+                    "type": "Point",
+                    "coordinates": [
+                        20.1339558,
+                        72.9084718
+                    ]
+                },
+                "sapling_id": "10001",
+                "tree_id": "6167bd19626aac8a8f44799d",
+                "plot_id": "61bc101f969efcff564fb581",
+                "user_id": "65102cc57b1e356268276ad3",
+                "tags": []
+            },
+            "newImages":[
+                // {} use david mitchell image from uploadTrees.
+                {
+                    "meta":{
+                        "captureTimestamp":"2023-10-09T16:29:50.240Z",//obtained in JS using (new Date()).toISOString()
+                        "remark":"Looks alright."
+                    },
+                    "name":"DavidMitchellNew2.png",
+                    "data":""
+                }
+            ],
+            "deletedImages":[
+                "https://14treesplants.s3.ap-south-1.amazonaws.com/dev/trees/10001_2023-10-03T17%3A54%3A34.832Z.jpg"
+            ]
+        }*/
         ToastAndroid.show('Send request to server',ToastAndroid.SHORT);
+        //Format saplingData using tree,newIamges, deletedImages.
+        // Dataservice.updateSapling call...
+        // check reply.
         setDetails(null);
     }
     const fetchTreeDetails = async () => {
@@ -36,7 +75,14 @@ const EditTreeScreen = ({navigation}) => {
             "plot_id": "777-bomble",
             "user_id": "65102cc57b1e356268276ad3",
             "image": [
-                "https://14treesplants.s3.ap-south-1.amazonaws.com/dev/trees/20000001_2023-10-03T18%3A25%3A01.654Z.jpg"
+                {
+                    data: generate on spot,
+                    name: s3url,
+                    meta: {
+                        capturetimestamp: timestamp,
+                        remark: 'default remark',
+                    }
+                }
             ],
             "date_added": "2023-10-03T18:25:16.026Z",
             "tags": [],
@@ -54,7 +100,7 @@ const EditTreeScreen = ({navigation}) => {
             data: generate on spot,
             name: s3url,
             meta: {
-                captureTimestamp: timestamp,
+                capturetimestamp: timestamp,
                 remark: 'default remark',
             }
         }
@@ -78,7 +124,14 @@ const EditTreeScreen = ({navigation}) => {
         <View style={{backgroundColor:'#5DB075', height:'100%'}}>
             {
                 details?
-                <TreeForm treeData={details} onCancel={()=>setDetails(null)} updateUserId={false} onVerifiedSave={updateDetails}></TreeForm>
+                <TreeForm
+                 treeData={details}
+                 onCancel={()=>setDetails(null)}
+                 updateUserId={false}
+                 onVerifiedSave={updateDetails}
+                 onNewImage={(image)=>{setNewImages([...newImages,image]);}}
+                 onDeleteImage={(name)=>{setDeletedImages([...deletedImages,name]);}}
+                 />
                 :
                 <View style={{backgroundColor:'white', margin: 10,borderRadius:10}}>
                 <Text style={{color:'black', marginLeft:20, margin:10, fontSize:18}}> Enter the Sapling ID</Text>

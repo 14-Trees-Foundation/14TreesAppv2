@@ -63,7 +63,10 @@ export class DataService{
             staffID: user_id
         });
     }
-
+    static async updateSapling(adminID,sapling){
+      const url = `${DataService.serverBase}/updateSapling`;
+      return await axios.post(url,{adminID:adminID,sapling:sapling});
+    }
     static async uploadTrees(treeList){
         const url = `${DataService.serverBase}/uploadTrees`;
         return await axios.post(url,treeList);
