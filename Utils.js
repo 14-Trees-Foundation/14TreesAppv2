@@ -226,6 +226,12 @@ export class Constants{
 
 
 export const styles = StyleSheet.create({
+    drawerHeader:{
+        backgroundColor:'#5DB075',
+    },
+    headerTitleStyle:{
+        color:'white'
+    },
     remark: {
       height: 70,
       borderWidth: 0.5,
@@ -311,4 +317,10 @@ export const styles = StyleSheet.create({
       textShadowRadius: 3,
     }
   });
-  
+  export const styleConfigs = {
+    drawerHeaderOptions: {
+        headerStyle: styles.drawerHeader,
+        headerTitleStyle: styles.headerTitleStyle,
+        headerTintColor: styles.headerTitleStyle.color
+    }
+}

@@ -198,9 +198,6 @@ export const TreeForm = ({ treeData:{inSaplingId,inLng,inLat,inImages,inTreeType
     return (
         <KeyboardAvoidingView behavior='height' style={{ backgroundColor: '#5DB075' }} keyboardVerticalOffset={100}>
             <View style={{ backgroundColor: '#5DB075', height: '100%' }}>
-                <View style={{ backgroundColor: '#5DB075', borderBottomLeftRadius: 10, borderBottomRightRadius: 10 }}>
-                    <Text style={styles.headerText}> Add Tree </Text>
-                </View>
                 <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
                     <TextInput
                         style={styles.txtInput}

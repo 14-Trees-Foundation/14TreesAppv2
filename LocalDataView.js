@@ -110,7 +110,6 @@ const LocalDataView = ({navigation}) => {
     // })
     // image handle---------------------  
     const renderImg = (item) => {
-        // console.log(item)
         // console.log(item.data.slice(0,30));
         return (
             <View  style={{margin:0, flexDirection:'row', flexWrap:'wrap'}}>
@@ -122,13 +121,14 @@ const LocalDataView = ({navigation}) => {
           );
     }
     const renderTree = (tree)=>{
-        return (
+      return (
             <View style={{
                 margin:10,
                  borderWidth: 2,
                 borderColor: 'white',
                 borderRadius: 10,
-                flexDirection:'row'
+                flexDirection:'row',
+                alignItems:'center'
             }}>
 
               
@@ -142,9 +142,14 @@ const LocalDataView = ({navigation}) => {
                 :
                 <Text style={{...styles.danger,...styles.label}}>Local</Text>}
                 </View>
-                <View style={{padding:10}}>
-                    {renderImg(tree.images[0])}
-                </View>
+                {
+                  tree.images.length?
+                  <View style={{padding:10}}>
+                      {renderImg(tree.images[0])}
+                  </View>
+                  :
+                    <Text style={{flex:1,flexWrap:'wrap',flexShrink:1,color:'black',fontSize:20,textAlign:'center',backgroundColor:'white',margin:5,textAlignVertical:'center'}}>No images found</Text>
+                }
             </View>
         )
     }
@@ -152,7 +157,6 @@ const LocalDataView = ({navigation}) => {
     return (
     
     <View style={{backgroundColor:'#5DB075', height:'100%'}}>
-        <Text style={styles.headerText}>Local Trees</Text>
         <View style={{margin:20}}>
           <Button title="Filters" onPress={openModal} color={'black'} />
         </View>

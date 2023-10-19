@@ -20,9 +20,6 @@ const HomeScreen = ({navigation}) => {
     }, []);
     return (
         <View >
-          <View style={{backgroundColor:'#5DB075', borderBottomLeftRadius:10, borderBottomRightRadius:10}}>
-            <Text style={styles.headerText} > Home </Text>
-          </View>
 
           <Text style={{fontSize:20, marginTop:20, alignContent:'center', justifyContent:'center', alignSelf:'center', color:'black'}}>Last Sync Data On : </Text>
           <Text style={{fontSize:20, alignContent:'center', justifyContent:'center', alignSelf:'center', color:'black'}}>{syncDate}</Text>

@@ -12,7 +12,7 @@ import EditTreeScreen from './EditTree';
 import HomeScreen from './Home';
 import LocalDataView from './LocalDataView';
 import LoginScreen from './Login';
-import { Constants, Utils, styleConfigs } from './Utils';
+import { Constants, Utils, styleConfigs, styles } from './Utils';
 import VerifyusersScreen from './VerifyUsers';
 import { checkMultiplePermissions } from './check_permissions';
 import { LocalDatabase } from './tree_db';
@@ -105,8 +105,8 @@ const App = () => {
   }, []);
   const StackNavigator = () => (
     <Stack.Navigator>
-      <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Login" component={LoginScreen} options={{headerShown:false }} />
+      <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown:false}} />
     </Stack.Navigator>
   );
   const DrawerContent = (props) => {
@@ -142,14 +142,14 @@ const App = () => {
   return (
     <NavigationContainer ref={navigationRef}>
       <Drawer.Navigator drawerContent={DrawerContent}>
-        <Drawer.Screen name="Home" component={StackNavigator} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
-        <Drawer.Screen name="AddTree" component={AddTreeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
-        <Drawer.Screen name="LocalDataView" component={LocalDataView} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
+        <Drawer.Screen name="Home" component={StackNavigator} ></Drawer.Screen>
+        <Drawer.Screen name="AddTree" component={AddTreeScreen} ></Drawer.Screen>
+        <Drawer.Screen name="LocalDataView" component={LocalDataView} ></Drawer.Screen>
         {isAdmin && 
-        <Drawer.Screen name="EditTree" component={EditTreeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
+        <Drawer.Screen name="EditTree" component={EditTreeScreen} ></Drawer.Screen>
         }
         {isAdmin && 
-        <Drawer.Screen name="VerifyUsers" component={VerifyusersScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
+        <Drawer.Screen name="VerifyUsers" component={VerifyusersScreen} ></Drawer.Screen>
         }
       </Drawer.Navigator>
     </NavigationContainer>
