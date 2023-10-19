@@ -28,7 +28,7 @@ const AddTreeScreen = ({ navigation }) => {
       }
     }
     const inputTreeData = {inSaplingId:null,inLat:0,inLng:0,inImages:[],inPlot:{},inTreeType:{},inUserId:''};
-  return <TreeForm treeData={inputTreeData} updateUserId={true} onVerifiedSave={onVerifiedSave} />;
+  return <TreeForm treeData={inputTreeData} updateUserId={true} onVerifiedSave={onVerifiedSave} navigation={navigation}/>;
 }
 
 export default AddTreeScreen;

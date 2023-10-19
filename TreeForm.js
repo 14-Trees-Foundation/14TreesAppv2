@@ -94,7 +94,7 @@ export const TreeForm = ({ treeData:{inSaplingId,inLng,inLat,inImages,inTreeType
         });
     };
 
-    const renderImg = ({ item }) => {
+    const renderImg = ({ item, index }) => {
         const changeimgremark = (text) => {
             const newImages = images.map((image) => {
                 if (image.name === item.name) {
@@ -114,7 +114,9 @@ export const TreeForm = ({ treeData:{inSaplingId,inLng,inLat,inImages,inTreeType
                 console.log(images[index].meta.remark);
             }
         }
+        const indexString = `(${index+1} of ${images.length})\n`
         const captureString = 'Captured at:\n' + item.meta.captureTimestamp.split('T').join('\n');
+        const displayString = `${indexString} ${captureString}`
         return (
             <View style={{
                 marginHorizontal: 10,
@@ -129,7 +131,7 @@ export const TreeForm = ({ treeData:{inSaplingId,inLng,inLat,inImages,inTreeType
                         source={{ uri: `data:image/jpeg;base64,${item.data}` }}
                         style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
                     />
-                    <Text style={{ ...styles.text3, textAlign: 'center' }}>{captureString}</Text>
+                    <Text style={{ ...styles.text3, textAlign: 'center' }}>{displayString}</Text>
                     <TouchableOpacity onPress={() => handleDeleteItem(item.name)}>
                         <Image
                             source={require('./assets/icondelete.png')} // Replace with your delete icon image
