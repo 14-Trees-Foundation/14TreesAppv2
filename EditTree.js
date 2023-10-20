@@ -56,6 +56,13 @@ const EditTreeScreen = ({navigation}) => {
         saplingData.sapling_id = tree.saplingid;
         saplingData.plot_id = tree.plotid;
         saplingData.tree_id = tree.treeid;//tree type.
+        for(let image of images){
+            let newImageIndex = newImages.findIndex((item)=>item.name===image.name);
+            if(newImageIndex!==-1){
+                newImages[newImageIndex].meta.remark = image.meta.remark;
+                setNewImages(newImages);
+            }
+        }
         const requestData = {
             data:saplingData,
             newImages:newImages,
@@ -73,14 +80,6 @@ const EditTreeScreen = ({navigation}) => {
         //Format saplingData using tree,newIamges, deletedImages.
         // Dataservice.updateSapling call...
         // check reply.
-    }
-    const updateRemark = async(remark,imageName)=>{
-        const imageList = newImages;
-        let index = imageList.findIndex((image)=>image.name===imageName);
-        if(index!==-1){
-            imageList[index].meta.remark = remark;
-            setNewImages(imageList);
-        }
     }
     const fetchTreeDetails = async () => {
         // console.log('fetching tree details');
@@ -125,12 +124,12 @@ const EditTreeScreen = ({navigation}) => {
             {
                 details?
                 <TreeForm
+                 editMode={true}
                  treeData={details}
                  onCancel={()=>setDetails(null)}
                  updateUserId={false}
                  updateLocation={false}
                  onVerifiedSave={updateDetails}
-                 onRemarkChange={(remark,imageName)=>{updateRemark(remark,imageName);}}
                  onNewImage={(image)=>{setNewImages([...newImages,image]);}}
                  onDeleteImage={(name)=>{setDeletedImages([...deletedImages,name]);}}
                  />

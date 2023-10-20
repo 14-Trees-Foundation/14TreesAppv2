@@ -5,14 +5,15 @@ import Geolocation from '@react-native-community/geolocation';
 import { Dropdown } from "./DropDown";
 import {launchCamera} from 'react-native-image-picker';
 import { CustomButton } from "./Components";
-export const TreeForm = ({ treeData,onRemarkChange, onVerifiedSave, updateUserId, updateLocation, onCancel, onNewImage, onDeleteImage }) => {
+export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewImage, onDeleteImage }) => {
     const {inSaplingId,inLng,inLat,inImages,inTreeType,inPlot,inUserId} = treeData;
     const [saplingid, setSaplingid] = useState(inSaplingId);
     const [lat, setlat] = useState(inLng);
     const [lng, setlng] = useState(inLat);
     const [keyboardAvoidingViewEnabled,setKeyboardAvoidingViewEnabled] = useState(false);
     // array of images
-    const [images, setImages] = useState(inImages);
+    const [exisitingImages,setExistingImages] = useState(inImages)
+    const [images, setImages] = useState([]);
     const [treeItems, setTreeItems] = useState([]);
     const [plotItems, setPlotItems] = useState([]);
 
@@ -20,11 +21,15 @@ export const TreeForm = ({ treeData,onRemarkChange, onVerifiedSave, updateUserId
     const [selectedPlot, setSelectedPlot] = useState(inPlot);
     const [userId, setUserId] = useState(inUserId);
     let ldb;
-    const handleDeleteItem = async (name) => {
-        const newImages = images.filter((item) => item.name !== name);
+    const handleDeleteExistingItem = async (name)=>{
+        const newSetImages = exisitingImages.filter((item)=>item.name!==name);
         if(onDeleteImage){
             await onDeleteImage(name);
         }
+        setExistingImages(newSetImages);
+    }
+    const handleDeleteItem = async (name) => {
+        const newImages = images.filter((item) => item.name !== name);
         setImages(newImages);
     };
     const handleAddImage = async (image)=>{
@@ -38,7 +43,7 @@ export const TreeForm = ({ treeData,onRemarkChange, onVerifiedSave, updateUserId
             Alert.alert('Error', 'Please fill all the fields');
             return;
         }
-        else if (images.length === 0) {
+        else if (images.length+exisitingImages.length === 0) {
             Alert.alert('Error', 'Please add atleast one image');
             return;
         }
@@ -101,6 +106,42 @@ export const TreeForm = ({ treeData,onRemarkChange, onVerifiedSave, updateUserId
             }
         });
     };
+    const renderExistingImage = ({item,index})=>{
+        const indexString = `(${index+1} of ${exisitingImages.length+images.length})\n`
+        console.log(item.meta);
+        const captureString = 'Captured at:\n' + item.meta.capturetimestamp.split('T').join('\n');
+        const displayString = `${indexString} ${captureString}`
+        return (
+            <View style={{
+                marginHorizontal: 10,
+                marginVertical: 4,
+                borderWidth: 2,
+                borderColor: '#5DB075',
+                borderRadius: 10,
+                flexDirection: 'column',
+            }}>
+                <View style={{ margin: 5, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                    <Image
+                        source={{ uri: `data:image/jpeg;base64,${item.data}` }}
+                        style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
+                    />
+                    <Text style={{ ...styles.text3, textAlign: 'center' }}>{displayString}</Text>
+                    <TouchableOpacity onPress={() => Utils.confirmAction(()=>handleDeleteExistingItem(item.name),'Delete image?')}>
+                        <Image
+                            source={require('./assets/icondelete.png')} // Replace with your delete icon image
+                            style={{ width: 20, height: 20, marginLeft: 10 }} // Adjust the icon dimensions and margin
+                        />
+                    </TouchableOpacity>
+                </View>
+
+                <View style={{}}>
+                    <Text style={styles.text4}>
+                        Remark: {item.meta.remark}
+                    </Text>
+                </View>
+            </View>
+        );
+    }
 
     const renderImg = ({ item, index }) => {
         const changeimgremark = (text) => {
@@ -117,11 +158,8 @@ export const TreeForm = ({ treeData,onRemarkChange, onVerifiedSave, updateUserId
                 return image;
             });
             setImages(newImages);
-            if(onRemarkChange){
-                onRemarkChange(text,item.name);
-            }
         }
-        const indexString = `(${index+1} of ${images.length})\n`
+        const indexString = `(${index+1} of ${exisitingImages.length+images.length})\n`
         console.log(item.meta);
         const captureString = 'Captured at:\n' + item.meta.capturetimestamp.split('T').join('\n');
         const displayString = `${indexString} ${captureString}`
@@ -168,12 +206,17 @@ export const TreeForm = ({ treeData,onRemarkChange, onVerifiedSave, updateUserId
             </View>
         );
     }
-
+    const commonRenderFunction = ({item,index})=>{
+        if(index<exisitingImages.length){
+            return renderExistingImage({item,index});
+        }
+        return renderImg({item,index});
+    }
 
     const loadDataCallback = useCallback(async () => {
         try {
             ldb = await Utils.setDBConnection();
-            if(updateUserId){
+            if(editMode!==true){
                 let userId = await Utils.getUserId();
                 setUserId(userId);
             }
@@ -181,7 +224,7 @@ export const TreeForm = ({ treeData,onRemarkChange, onVerifiedSave, updateUserId
             let plots = await ldb.getPlotsList();
             setTreeItems(trees);
             setPlotItems(plots);
-            if(updateLocation){
+            if(editMode!==true){
                 requestLocation();
             }
             // setUserItems(users);
@@ -217,13 +260,19 @@ export const TreeForm = ({ treeData,onRemarkChange, onVerifiedSave, updateUserId
         <KeyboardAvoidingView behavior='height' style={{ backgroundColor: '#5DB075' }} keyboardVerticalOffset={100}>
             <View style={{ backgroundColor: '#5DB075', height: '100%' }}>
                 <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
-                    <TextInput
+                    {
+                        editMode===true?
+                        <Text style={{...styles.text4,textAlign:'center'}}>
+                            Sapling ID: {saplingid}
+                        </Text>
+                        :<TextInput
                         style={styles.txtInput}
                         placeholder="sapling id"
                         placeholderTextColor={'#000000'}
                         onChangeText={(text) => setSaplingid(text)}
                         value={saplingid}
                     />
+                    }
                     <Dropdown
                         items={treeItems}
                         label="Select Tree Type"
@@ -249,8 +298,8 @@ export const TreeForm = ({ treeData,onRemarkChange, onVerifiedSave, updateUserId
                     <KeyboardAvoidingView behavior="position" style={{}} keyboardVerticalOffset={150} enabled={keyboardAvoidingViewEnabled}>
                     <View style={{ height: 200, margin: 2, borderColor: '#5DB075', borderRadius: 5, flexDirection: 'column', backgroundColor:'white'}}>
                         <FlatList
-                            data={images}
-                            renderItem={renderImg}
+                            data={[...exisitingImages,...images]}
+                            renderItem={commonRenderFunction}
                         />
                     </View>
                     </KeyboardAvoidingView>
