@@ -5,7 +5,7 @@ import Geolocation from '@react-native-community/geolocation';
 import { Dropdown } from "./DropDown";
 import {launchCamera} from 'react-native-image-picker';
 import { CustomButton } from "./Components";
-export const TreeForm = ({ treeData, onVerifiedSave, updateUserId, onCancel, onNewImage, onDeleteImage }) => {
+export const TreeForm = ({ treeData,onRemarkChange, onVerifiedSave, updateUserId, updateLocation, onCancel, onNewImage, onDeleteImage }) => {
     const {inSaplingId,inLng,inLat,inImages,inTreeType,inPlot,inUserId} = treeData;
     const [saplingid, setSaplingid] = useState(inSaplingId);
     const [lat, setlat] = useState(inLng);
@@ -117,9 +117,8 @@ export const TreeForm = ({ treeData, onVerifiedSave, updateUserId, onCancel, onN
                 return image;
             });
             setImages(newImages);
-            console.log('remark changed');
-            for (let index = 0; index < images.length; index++) {
-                console.log(images[index].meta.remark);
+            if(onRemarkChange){
+                onRemarkChange(text,item.name);
             }
         }
         const indexString = `(${index+1} of ${images.length})\n`
@@ -150,7 +149,12 @@ export const TreeForm = ({ treeData, onVerifiedSave, updateUserId, onCancel, onN
                 </View>
 
                 <View style={{}}>
-                    <TextInput
+                    {
+                        item.name.startsWith('http')?
+                        <Text style={styles.text4}>
+                            Remark: {item.meta.remark}
+                        </Text>
+                        :<TextInput
                         style={styles.remark}
                         placeholder="Enter Remark"
                         placeholderTextColor={'#000000'}
@@ -159,6 +163,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, updateUserId, onCancel, onN
                         onFocus={(e)=>{setKeyboardAvoidingViewEnabled(true);}}
                         onBlur={(e)=>{setKeyboardAvoidingViewEnabled(false);}}
                     />
+                    }
                 </View>
             </View>
         );
@@ -176,8 +181,9 @@ export const TreeForm = ({ treeData, onVerifiedSave, updateUserId, onCancel, onN
             let plots = await ldb.getPlotsList();
             setTreeItems(trees);
             setPlotItems(plots);
-            requestLocation();
-
+            if(updateLocation){
+                requestLocation();
+            }
             // setUserItems(users);
         } catch (error) {
             console.error(error);
@@ -186,7 +192,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, updateUserId, onCancel, onN
 
     useEffect(()=>{
         loadDataCallback();
-        console.log(treeData)
         console.log(selectedTreeType);
     }, []);
 

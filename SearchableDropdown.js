@@ -55,15 +55,16 @@ export default class SearchableDropDown extends Component {
   };
 
   componentDidMount = () => {
+    console.log('component mounted')
     const listItems = this.props.items;
     const defaultIndex = this.props.defaultIndex;
-    const initValue = this.props.initValue;
+    const currentValue = this.props.currentValue;
     let item = null;
     if(defaultIndex && listItems.length > defaultIndex){
         item = listItems[defaultIndex];
     }
-    else if(initValue){
-        item = initValue;
+    else if(currentValue){
+        item = currentValue;
     }
     if (item) {
       this.setState({
@@ -90,44 +91,9 @@ export default class SearchableDropDown extends Component {
       name: searchedText
     };
     this.setState({ listItems: ac, item: item });
-    const onTextChange = this.props.onTextChange || this.props.textInputProps.onTextChange || this.props.onChangeText || this.props.textInputProps.onChangeText;
-    if (onTextChange && typeof onTextChange === 'function') {
-      setTimeout(() => {
-        onTextChange(searchedText);
-      }, 0);
-    }
   };
 
   renderItems = (item, index) => {
-    if(this.props.multi && this.props.selectedItems && this.props.selectedItems.length > 0) {
-      return (
-          this.props.selectedItems.find(sitem => sitem.id === item.id) 
-          ? 
-          <TouchableOpacity style={{ ...this.props.itemStyle, flex: 1, flexDirection: 'row' }}>
-            <View style={{ flex: 0.9, flexDirection: 'row', alignItems: 'flex-start' }}>
-              <Text>{ item.name }</Text>
-            </View>
-            <View style={{ flex: 0.1, flexDirection: 'row', alignItems: 'flex-end' }}>
-              <TouchableOpacity onPress={() => setTimeout(() => { this.props.onRemoveItem(item, index) }, 0) } style={{ backgroundColor: '#f16d6b', alignItems: 'center', justifyContent: 'center', width: 25, height: 25, borderRadius: 100, marginLeft: 10}}>
-                <Text>X</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-         :
-          <TouchableOpacity
-          onPress={() => {
-            this.setState({ item: item });
-            setTimeout(() => {
-              this.props.onItemSelect(item);
-            }, 0);
-          }}
-          style={{ ...this.props.itemStyle, flex: 1, flexDirection: 'row' }}>
-            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-start' }}>
-              <Text>{ item.name }</Text>
-            </View>
-          </TouchableOpacity>
-      )
-    } else {
       return (
         <TouchableOpacity
           style={{ ...this.props.itemStyle }}
@@ -136,15 +102,14 @@ export default class SearchableDropDown extends Component {
             Keyboard.dismiss();
             setTimeout(() => {
               this.props.onItemSelect(item);
-              if (this.props.resetValue) {
-                this.setState({ focus: true, item: defaultItemValue });
-                this.input.focus();
-              }
+              const newState = {...this.state,item:item}
+              this.setState(newState);
+              console.log('Set state to: ',newState.item)
             }, 0);
           }}
         >
           { 
-            this.props.selectedItems && this.props.selectedItems.length > 0 && this.props.selectedItems.find(x => x.id === item.id) 
+            this.props.selectedItems && this.props.selectedItems.find(x => x.id === this.state.item.id) 
             ?
               <Text style={{ ...this.props.itemTextStyle }}>{item.name}</Text>
             :
@@ -152,7 +117,6 @@ export default class SearchableDropDown extends Component {
           }
         </TouchableOpacity>
       );
-    }
   };
 
   renderListType = () => {
@@ -161,6 +125,7 @@ export default class SearchableDropDown extends Component {
 
   renderTextInput = () => {
     const textInputProps = { ...this.props.textInputProps };
+    console.log('rendering ti',this.state.item)
     const oldSupport = [
       { key: 'ref', val: e => (this.input = e) }, 
       { key: 'onTextChange', val: (text) => { this.searchedItems(text) } }, 
@@ -180,7 +145,7 @@ export default class SearchableDropDown extends Component {
         key: 'onBlur',
         val: () => {
           this.props.onBlur && this.props.onBlur(this);
-          this.setState({ focus: false, item: this.props.selectedItems });
+          this.setState({ ...this.state,focus: false });
         }
       },
       {
@@ -223,7 +188,7 @@ export default class SearchableDropDown extends Component {
         if (this.props.textInputProps && this.props.textInputProps.onBlur) {
           this.props.textInputProps.onBlur(e);
         }
-        this.setState({ focus: false, item: this.props.selectedItems });
+        this.setState({ ...this.state,focus: false });
       }
       }
       />

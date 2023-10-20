@@ -8,16 +8,21 @@ import { TreeForm } from './TreeForm';
 const EditTreeScreen = ({navigation}) => {
     const [saplingid, setSaplingid] = useState('');
     const [details,setDetails] = useState(null);
-    const [treeItems, setTreeItems] = useState([]);
-    const [plotItems, setPlotItems] = useState([]);
     const [newImages,setNewImages] = useState([]);
     const [deletedImages,setDeletedImages] = useState([]);
     const updateDetails = async(tree, images)=>{
         const saplingData = {
-            data:{}
+            location:{
+                type:"Point",
+                coordinates:[0,0]
+            },
+            sapling_id:"",
+            image:details.inImages.map((image)=>image.name),
+            tree_id:"",//tree type id.
+            plot_id:"",//plot id
         };
         const adminID = await Utils.getAdminId();
-        /*"sapling":{
+        let a = {"sapling":{
             "data":{
                 "location": {
                     "type": "Point",
@@ -27,10 +32,8 @@ const EditTreeScreen = ({navigation}) => {
                     ]
                 },
                 "sapling_id": "10001",
-                "tree_id": "6167bd19626aac8a8f44799d",
+                "tree_id": "tree_id",
                 "plot_id": "61bc101f969efcff564fb581",
-                "user_id": "65102cc57b1e356268276ad3",
-                "tags": []
             },
             "newImages":[
                 // {} use david mitchell image from uploadTrees.
@@ -46,12 +49,38 @@ const EditTreeScreen = ({navigation}) => {
             "deletedImages":[
                 "https://14treesplants.s3.ap-south-1.amazonaws.com/dev/trees/10001_2023-10-03T17%3A54%3A34.832Z.jpg"
             ]
-        }*/
-        ToastAndroid.show('Send request to server',ToastAndroid.SHORT);
+        }}
+        saplingData.location.coordinates = [
+                tree.lat, tree.lng
+            ];
+        saplingData.sapling_id = tree.saplingid;
+        saplingData.plot_id = tree.plotid;
+        saplingData.tree_id = tree.treeid;//tree type.
+        const requestData = {
+            data:saplingData,
+            newImages:newImages,
+            deletedImages:deletedImages,
+        }
+        const response = await DataService.updateSapling(adminID,requestData);
+        if(!response){
+            return;
+        }
+        console.log(requestData);
+        ToastAndroid.show(`Tree with ${response.data.sapling_id} updated!`,ToastAndroid.LONG);
+        setDetails(null);
+        setNewImages([]);
+        setDeletedImages([]);
         //Format saplingData using tree,newIamges, deletedImages.
         // Dataservice.updateSapling call...
         // check reply.
-        setDetails(null);
+    }
+    const updateRemark = async(remark,imageName)=>{
+        const imageList = newImages;
+        let index = imageList.findIndex((image)=>image.name===imageName);
+        if(index!==-1){
+            imageList[index].meta.remark = remark;
+            setNewImages(imageList);
+        }
     }
     const fetchTreeDetails = async () => {
         // console.log('fetching tree details');
@@ -60,35 +89,6 @@ const EditTreeScreen = ({navigation}) => {
         const treeDetails = await DataService.fetchTreeDetails(saplingid,adminID);
         if(!treeDetails){return;}
         const detailsForTreeForm = {...Constants.treeFormTemplateData};
-        /*
-        {
-            "location": {
-                "type": "Point",
-                "coordinates": [
-                    19.133972,
-                    72.9085088
-                ]
-            },
-            "_id": "651c5c8c38ddafa84e7d2728",
-            "sapling_id": "20000001",
-            "tree_id": "30",
-            "plot_id": "777-bomble",
-            "user_id": "65102cc57b1e356268276ad3",
-            "image": [
-                {
-                    data: generate on spot,
-                    name: s3url,
-                    meta: {
-                        capturetimestamp: timestamp,
-                        remark: 'default remark',
-                    }
-                }
-            ],
-            "date_added": "2023-10-03T18:25:16.026Z",
-            "tags": [],
-            "__v": 0
-        }
-        */
        const treeType = await Utils.treeTypeFromID(treeDetails.tree_id);
        const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
        detailsForTreeForm.inImages = treeDetails.image;//TODO: server should return:
@@ -128,7 +128,9 @@ const EditTreeScreen = ({navigation}) => {
                  treeData={details}
                  onCancel={()=>setDetails(null)}
                  updateUserId={false}
+                 updateLocation={false}
                  onVerifiedSave={updateDetails}
+                 onRemarkChange={(remark,imageName)=>{updateRemark(remark,imageName);}}
                  onNewImage={(image)=>{setNewImages([...newImages,image]);}}
                  onDeleteImage={(name)=>{setDeletedImages([...deletedImages,name]);}}
                  />

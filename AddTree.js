@@ -30,7 +30,7 @@ const AddTreeScreen = ({ navigation }) => {
       navigation.navigate('Home');
     }
     const inputTreeData = {...Constants.treeFormTemplateData};
-  return <TreeForm treeData={inputTreeData} updateUserId={true} onVerifiedSave={onVerifiedSave}/>;
+  return <TreeForm treeData={inputTreeData} updateUserId={true} updateLocation={true} onVerifiedSave={onVerifiedSave}/>;
 }
 
 export default AddTreeScreen;

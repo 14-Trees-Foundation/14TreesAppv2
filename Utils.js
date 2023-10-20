@@ -339,6 +339,12 @@ export const styles = StyleSheet.create({
       color: '#ffffff',
       textAlign: 'center',
     },
+    text4:{
+        fontSize: 17,
+        color: 'black',
+        textAlign: 'left',  
+        padding:5,
+    },
     text3: {
       fontSize: 17,
       color: 'black',
