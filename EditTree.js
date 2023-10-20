@@ -85,6 +85,10 @@ const EditTreeScreen = ({navigation}) => {
         // console.log('fetching tree details');
         const adminID = await Utils.getAdminId();
         console.log(adminID)
+        setDetails(null);
+        setNewImages([]);
+        setDeletedImages([]);
+        
         const treeDetails = await DataService.fetchTreeDetails(saplingid,adminID);
         if(!treeDetails){return;}
         const detailsForTreeForm = {...Constants.treeFormTemplateData};
