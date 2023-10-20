@@ -2,7 +2,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { createDrawerNavigator, DrawerItemList, DrawerContentScrollView } from '@react-navigation/drawer';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useFocusEffect } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
 import { Alert, Platform, View, Image, Text } from 'react-native';
@@ -57,7 +57,7 @@ async function requestPermissions() {
 // async function netInfo() {
 // }
 const App = () => {
-
+  
   const [isAdmin, setIsAdmin] = useState(false);
   const [userDetails,setUserDetails] = useState(null);
   const checkSignInStatus = async () => {
@@ -68,11 +68,11 @@ const App = () => {
         const userId = await AsyncStorage.getItem(Constants.userIdKey);
         const adminId = await AsyncStorage.getItem(Constants.adminIdKey);
         let storedUserDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
-        if(storedUserDetails){
-          storedUserDetails = JSON.parse(storedUserDetails);
-          setUserDetails(storedUserDetails);
-          console.log(storedUserDetails)
-        }
+          if(storedUserDetails){
+            console.log(storedUserDetails)
+            storedUserDetails = JSON.parse(storedUserDetails);
+            setUserDetails(storedUserDetails);
+          }
         console.log('Loaded userid: ', userId);
         console.log('Loaded adminId: ', adminId);
         if (adminId) {
@@ -144,19 +144,19 @@ const App = () => {
   // check dynamically adminIdkey is stored in the async storage after login
   // if yes, then set the isAdmin to true
   // else set it to false  
-  console.log('isadmin: ', isAdmin);
+  //TODO: navigation image load in first time login.
   return (
     <NavigationContainer ref={navigationRef}>
       <Drawer.Navigator drawerContent={DrawerContent}>
         <Drawer.Screen name="Home" component={StackNavigator} options={{ headerShown: false }}></Drawer.Screen>
         <Drawer.Screen name="AddTree" component={AddTreeScreen} options={{ headerShown: false }}></Drawer.Screen>
         <Drawer.Screen name="LocalDataView" component={LocalDataView} options={{ headerShown: false }}></Drawer.Screen>
-        {/* {isAdmin &&  */}
+        {isAdmin && 
         <Drawer.Screen name="EditTree" component={EditTreeScreen} options={{ headerShown: false }}></Drawer.Screen>
-        {/* } */}
-        {/* {isAdmin &&  */}
+        }
+        {isAdmin && 
         <Drawer.Screen name="VerifyUsers" component={VerifyusersScreen} options={{ headerShown: false }}></Drawer.Screen>
-        {/* } */}
+        }
       </Drawer.Navigator>
     </NavigationContainer>
   );
