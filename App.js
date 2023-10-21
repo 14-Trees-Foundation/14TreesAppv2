@@ -1,7 +1,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { createDrawerNavigator, DrawerItemList, DrawerContentScrollView } from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerItemList, DrawerContentScrollView, useDrawerProgress } from '@react-navigation/drawer';
 import { NavigationContainer, createNavigationContainerRef, useFocusEffect, useNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
@@ -98,27 +98,51 @@ const App = () => {
     navigationRef.current?.navigate('Login');
   }
   const initTasks = async () => {
+    GoogleSignin.configure();
     const loggedIn = await checkSignInStatus();
     await Utils.setDBConnection();
     await Utils.createLocalTablesIfNeeded();
     if (loggedIn) {
-      await Utils.fetchAndStoreHelperData();
       // navigationRef.current?.navigate('Login')
+      Utils.fetchAndStoreHelperData();
       navigationRef.current?.navigate('HomeScreen');
     }
     else{
       navigationRef.current?.navigate('Login');
     }
   }
+  const fetchUserDetails = async()=>{
+    console.log('refreshing details');
+    let storedUserDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
+    if(storedUserDetails){
+      storedUserDetails = JSON.parse(storedUserDetails);
+      console.log('existing details: ',userDetails);
+      console.log('received details:', storedUserDetails);
+      if((userDetails===null)){
+        console.log(userDetails);
+        setUserDetails(storedUserDetails);
+      }
+      else if(storedUserDetails.email!==userDetails.email){
+        console.log(userDetails.email,storedUserDetails.email);
+        setUserDetails(storedUserDetails);
+      }
+    }
+  }
+  const setNavigationListener = ()=>{
+    if(navigationRef.isReady()){
+      navigationRef.addListener('state',(e)=>{
+        // fetchUserDetails();
+      })
+    }
+  }
   useEffect(() => {
     initTasks();
     requestPermissions();
-    setTimeout(() => {
-
-    }, 3000);
+    setNavigationListener();
   }, []);
 
   const DrawerContent = (props) => {
+    const userDetails = props.user;
     return (<DrawerContentScrollView {...props}>
       <View style={{flexDirection:'column',alignItems:'center',marginTop:50,bottom:0}}>
         <Image
@@ -147,9 +171,9 @@ const App = () => {
       </View>
     </DrawerContentScrollView>)
   }
-  const DrawerNavigator = ()=>{
+  const DrawerNavigator = ({navigation,route})=>{
     return (
-      <Drawer.Navigator drawerContent={DrawerContent}>
+      <Drawer.Navigator drawerContent={(props)=><DrawerContent user={route.params.userDetails} {...props}/>}>
         <Drawer.Screen name="Home" component={HomeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
         <Drawer.Screen name="LocalDataView" component={LocalDataView} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
         <Drawer.Screen name="AddTree" component={AddTreeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
@@ -173,7 +197,7 @@ const App = () => {
       <Stack.Navigator>
         <Stack.Screen name="Start" component={LoadingScreen} options={{headerShown:false}}></Stack.Screen>
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerLeft:()=>null,...styleConfigs.drawerHeaderOptions }} />
-        <Stack.Screen name="HomeScreen" component={DrawerNavigator} options={{ headerShown: false }} />
+        <Stack.Screen name="HomeScreen" component={DrawerNavigator} initialParams={{userDetails:userDetails}} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
     )

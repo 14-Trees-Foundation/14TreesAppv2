@@ -5,37 +5,30 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import PhoneInput, { isValidNumber } from 'react-native-phone-number-input';
 import { DataService } from './DataService';
-import { Constants } from './Utils';
+import { Constants, Utils } from './Utils';
 
 
 const LoginScreen = ({navigation}) =>{
-  let loggedIn = false;
   const [phoneNumber, setPhoneNumber] = useState('');
 
   const checkPhoneNumber = () => {
     return isValidNumber(phoneNumber);
   };
-
-  
   useEffect(() => {
-    loggedIn = true;
-    GoogleSignin.configure()
-    navigation.addListener('beforeRemove', (e) => {
+    navigation.addListener('beforeRemove', async (e) => {
+      const userId = await Utils.getUserId();
+      console.log('userId fetched: ',userId);
+      if(!(userId && userId.length>0)){
         e.preventDefault();
-        if(loggedIn){
-          navigation.dispatch(e.data.action);
-        }
       }
-    )  
+    }
+  )
   }, [])
-
   
   const googleLogin = async () => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      // navigation.navigate('HomeScreen');
-// -------------------- add the endpoint here --------------------
       const userDataPayload = {
         name: userInfo.user.name,
         email: userInfo.user.email,
@@ -67,7 +60,6 @@ const LoginScreen = ({navigation}) =>{
         }
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
         await AsyncStorage.setItem(Constants.lastHashKey, "0");
-        loggedIn = true;
       } catch (error) {
         console.log('Error storing userId', error);
       }

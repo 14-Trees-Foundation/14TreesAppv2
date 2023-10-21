@@ -7,6 +7,7 @@ import { CustomButton } from './Components';
 
 const HomeScreen = ({navigation}) => {
     const [syncDate, setSyncDate] = useState('');
+    console.log('here')
     const getSyncDate = async () => {
         const value = await AsyncStorage.getItem(Constants.syncDateKey);
         if(value){
