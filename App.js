@@ -2,7 +2,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { createDrawerNavigator, DrawerItemList, DrawerContentScrollView } from '@react-navigation/drawer';
-import { NavigationContainer, useFocusEffect } from '@react-navigation/native';
+import { NavigationContainer, createNavigationContainerRef, useFocusEffect, useNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
 import { Alert, Platform, View, Image, Text, Button } from 'react-native';
@@ -12,16 +12,16 @@ import EditTreeScreen from './EditTree';
 import HomeScreen from './Home';
 import LocalDataView from './LocalDataView';
 import LoginScreen from './Login';
-import { Constants, Utils, styleConfigs,styles } from './Utils';
+import { Constants, Utils, styleConfigs,commonStyles } from './Utils';
 import VerifyusersScreen from './VerifyUsers';
 import { checkMultiplePermissions } from './check_permissions';
 import { LocalDatabase } from './tree_db';
+import LoadingScreen from './LoadingScreen';
 
 
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
-const navigationRef = React.createRef();
 async function requestPermissions() {
   //https://developer.android.com/training/data-storage/shared/media#storage-permission
   const androidVersion = Number.parseInt(Platform.constants['Release']);
@@ -46,7 +46,6 @@ async function requestPermissions() {
     ])
   }
   let res = await checkMultiplePermissions(permissions);
-  console.log(res);
   if (!res) {
     Alert.alert(
       'Permissions required!',
@@ -56,8 +55,8 @@ async function requestPermissions() {
 }
 // async function netInfo() {
 // }
+const navigationRef = createNavigationContainerRef();
 const App = () => {
-  
   const [isAdmin, setIsAdmin] = useState(false);
   const [userDetails,setUserDetails] = useState(null);
   const checkSignInStatus = async () => {
@@ -69,21 +68,15 @@ const App = () => {
         const adminId = await AsyncStorage.getItem(Constants.adminIdKey);
         let storedUserDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
           if(storedUserDetails){
-            console.log(storedUserDetails)
             storedUserDetails = JSON.parse(storedUserDetails);
             setUserDetails(storedUserDetails);
           }
-        console.log('Loaded userid: ', userId);
-        console.log('Loaded adminId: ', adminId);
         if (adminId) {
           setIsAdmin(true);
         }
-        if (userId !== null) {
-          navigationRef.current?.navigate('HomeScreen');
-        }
-        else {
-          GoogleSignin.signOut();
-          navigationRef.current?.navigate('Login');
+        if (userId === null) {
+            GoogleSignin.signOut();
+            return false;
         }
         return true;
       }
@@ -110,18 +103,20 @@ const App = () => {
     await Utils.createLocalTablesIfNeeded();
     if (loggedIn) {
       await Utils.fetchAndStoreHelperData();
+      // navigationRef.current?.navigate('Login')
+      navigationRef.current?.navigate('HomeScreen');
+    }
+    else{
+      navigationRef.current?.navigate('Login');
     }
   }
   useEffect(() => {
     initTasks();
     requestPermissions();
+    setTimeout(() => {
+
+    }, 3000);
   }, []);
-  const StackNavigator = () => (
-    <Stack.Navigator>
-      <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
-    </Stack.Navigator>
-  );
 
   const DrawerContent = (props) => {
     return (<DrawerContentScrollView {...props}>
@@ -148,18 +143,14 @@ const App = () => {
       </View>
       <DrawerItemList {...props} />
       <View style={{flexDirection:'column',position:'relative',marginTop:100,alignSelf:'center'}}>
-        <Button title='Log out' onPress={()=>Utils.confirmAction(logout,undefined,'Do you want to log out?')} style={styles.logOutButton} color='red' ></Button>
+        <Button title='Log out' onPress={()=>Utils.confirmAction(logout,undefined,'Do you want to log out?')} style={commonStyles.logOutButton} color='red' ></Button>
       </View>
     </DrawerContentScrollView>)
   }
-  // check dynamically adminIdkey is stored in the async storage after login
-  // if yes, then set the isAdmin to true
-  // else set it to false  
-  //TODO: navigation image load in first time login.
-  return (
-    <NavigationContainer ref={navigationRef}>
+  const DrawerNavigator = ()=>{
+    return (
       <Drawer.Navigator drawerContent={DrawerContent}>
-        <Drawer.Screen name="Home" component={StackNavigator} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
+        <Drawer.Screen name="Home" component={HomeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
         <Drawer.Screen name="LocalDataView" component={LocalDataView} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
         <Drawer.Screen name="AddTree" component={AddTreeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
         {isAdmin && 
@@ -169,8 +160,23 @@ const App = () => {
         <Drawer.Screen name="VerifyUsers" component={VerifyusersScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
         }
       </Drawer.Navigator>
-    </NavigationContainer>
   );
+  }
+  // check dynamically adminIdkey is stored in the async storage after login
+  // if yes, then set the isAdmin to true
+  // else set it to false  
+  //TODO: navigation image load in first time login.
+
+
+  return (
+    <NavigationContainer ref={navigationRef}>
+      <Stack.Navigator>
+        <Stack.Screen name="Start" component={LoadingScreen} options={{headerShown:false}}></Stack.Screen>
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerLeft:()=>null,...styleConfigs.drawerHeaderOptions }} />
+        <Stack.Screen name="HomeScreen" component={DrawerNavigator} options={{ headerShown: false }} />
+      </Stack.Navigator>
+    </NavigationContainer>
+    )
 };
 
 export default App;

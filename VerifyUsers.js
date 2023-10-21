@@ -4,33 +4,40 @@ import { Dropdown } from './DropDown';
 import { DataService } from './DataService';
 import { FlatList } from 'react-native-gesture-handler';
 import { Utils } from './Utils';
+import { CustomButton } from './Components';
 
 const VerifyusersScreen = ({navigation}) => {
   
     const [users, setUsers] = useState([]);
-    
-    const fetchUsers = async () => {
-        const userlist = await DataService.fetchUsers(Utils.adminId);
+    const [adminID,setAdminID] = useState('');
+    const fetchUsers = async (adminIDValue) => {
+        const userlist = await DataService.fetchUsers(adminIDValue);
         setUsers(userlist.data);
     }
 
-    
     const verifyUser = async (id) => {
-        const response = await DataService.verifyUser(id);
-        console.log(response.data);
+        console.log(id,adminID);
+        const response = await DataService.verifyUser(id,adminID);
+        if(!response){
+            return;
+        }
         if(response.status == 200){
             ToastAndroid.show('User Verified',ToastAndroid.LONG);
-            fetchUsers();
+            fetchUsers(adminID);
         }
        
     }
 
     useEffect(() => {
-        fetchUsers();
-        // setUsers(userList);
-        // console.log(users);
+        Utils.getAdminId().then((value)=>{
+            setAdminID(value);
+        })
     }, []);
-
+    useEffect(()=>{
+        if(adminID){
+            fetchUsers(adminID);
+        }
+    },[adminID])
     const renderelement = ({item}) => {
         // console.log(item);
         return (
@@ -58,11 +65,11 @@ const VerifyusersScreen = ({navigation}) => {
    
     return (
         <View style={{backgroundColor:'white', height:'100%'}}>
-            <View style={{backgroundColor:'#5DB075', borderBottomLeftRadius:10, borderBottomRightRadius:10}}>
-                <Text style={styles.headerText} > Verify Users </Text>
-            </View>
+            <View style={{marginTop:5,flexDirection:'row',justifyContent:'space-around'}}>
             <Text style={styles.text2}> List of Unverified Users </Text>
-            <View style={{height:500,margin:2, marginTop:10,borderWidth:2,borderColor: '#5DB075',borderRadius: 5,flexDirection:'column',}}>
+            <CustomButton text={'Refresh'} onPress={()=>fetchUsers(adminID)}></CustomButton>
+            </View>
+            <View style={{height:500,margin:5,borderWidth:2,borderColor: '#5DB075',borderRadius: 5,flexDirection:'column',}}>
             <FlatList
                 data = {users}
                 renderItem={renderelement}

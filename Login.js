@@ -9,7 +9,7 @@ import { Constants } from './Utils';
 
 
 const LoginScreen = ({navigation}) =>{
- 
+  let loggedIn = false;
   const [phoneNumber, setPhoneNumber] = useState('');
 
   const checkPhoneNumber = () => {
@@ -18,7 +18,15 @@ const LoginScreen = ({navigation}) =>{
 
   
   useEffect(() => {
+    loggedIn = true;
     GoogleSignin.configure()
+    navigation.addListener('beforeRemove', (e) => {
+        e.preventDefault();
+        if(loggedIn){
+          navigation.dispatch(e.data.action);
+        }
+      }
+    )  
   }, [])
 
   
@@ -57,10 +65,9 @@ const LoginScreen = ({navigation}) =>{
         if(!response.data.image){
           response.data.image = Constants.imagePlaceholder;
         }
-        console.log('storing: ',response.data)
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
         await AsyncStorage.setItem(Constants.lastHashKey, "0");
-        console.log(await AsyncStorage.getItem(Constants.userDetailsKey));
+        loggedIn = true;
       } catch (error) {
         console.log('Error storing userId', error);
       }
@@ -96,8 +103,6 @@ const LoginScreen = ({navigation}) =>{
       }
     }
   };
-
-
   return (
     <View style={{ backgroundColor: 'white', height: '100%' }}>
       {/* // create a header with title as 14 trees */}
@@ -128,10 +133,6 @@ const LoginScreen = ({navigation}) =>{
               setPhoneNumber(text);
               
             }}
-            
-          
-            autoFocus
-            
           />
         </View>
 

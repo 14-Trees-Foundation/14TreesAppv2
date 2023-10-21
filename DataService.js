@@ -60,11 +60,11 @@ export class DataService{
     }
 
     // remove the hardcoded adminID later
-    static async verifyUser(user_id){
+    static async verifyUser(user_id,adminID){
       console.log('verifying user')
         const url = `${DataService.serverBase}/verifyUser`;
         return await axios.post(url,{
-            adminID: "61596d30e78e3cc6282560d0",
+            adminID: adminID,
             staffID: user_id
         });
     }

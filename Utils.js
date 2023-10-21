@@ -114,8 +114,8 @@ export class Utils{
         }
     }
     static async deleteSyncedTrees(){
-        //TODO implement.
-        ToastAndroid.show('Deleted synced trees',ToastAndroid.SHORT);
+        const newTreesList = await this.ldb.deleteSyncedTrees();
+        return newTreesList;
     }
     static async upload(){
         try {
@@ -248,7 +248,7 @@ export class Constants{
 }
 
 
-export const styles = StyleSheet.create({
+export const commonStyles = StyleSheet.create({
     defaultButtonStyle:{
         flexDirection:'row',
         alignContent:'center',
@@ -375,8 +375,8 @@ export const styles = StyleSheet.create({
   });
   export const styleConfigs = {
     drawerHeaderOptions: {
-        headerStyle: styles.drawerHeader,
-        headerTitleStyle: styles.headerTitleStyle,
-        headerTintColor: styles.headerTitleStyle.color
+        headerStyle: commonStyles.drawerHeader,
+        headerTitleStyle: commonStyles.headerTitleStyle,
+        headerTintColor: commonStyles.headerTitleStyle.color
     }
 }

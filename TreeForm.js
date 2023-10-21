@@ -1,4 +1,4 @@
-import { Utils, styles } from "./Utils";
+import { Utils, commonStyles } from "./Utils";
 import { useEffect,useState,useCallback } from 'react';
 import {KeyboardAvoidingView,Alert,Text,Image,View,ToastAndroid,TouchableOpacity,TextInput, Button, FlatList} from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
@@ -125,7 +125,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                         source={{ uri: `data:image/jpeg;base64,${item.data}` }}
                         style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
                     />
-                    <Text style={{ ...styles.text3, textAlign: 'center' }}>{displayString}</Text>
+                    <Text style={{ ...commonStyles.text3, textAlign: 'center' }}>{displayString}</Text>
                     <TouchableOpacity onPress={() => Utils.confirmAction(()=>handleDeleteExistingItem(item.name),'Delete image?')}>
                         <Image
                             source={require('./assets/icondelete.png')} // Replace with your delete icon image
@@ -135,7 +135,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                 </View>
 
                 <View style={{}}>
-                    <Text style={styles.text4}>
+                    <Text style={commonStyles.text4}>
                         Remark: {item.meta.remark}
                     </Text>
                 </View>
@@ -177,7 +177,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                         source={{ uri: `data:image/jpeg;base64,${item.data}` }}
                         style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
                     />
-                    <Text style={{ ...styles.text3, textAlign: 'center' }}>{displayString}</Text>
+                    <Text style={{ ...commonStyles.text3, textAlign: 'center' }}>{displayString}</Text>
                     <TouchableOpacity onPress={() => Utils.confirmAction(()=>handleDeleteItem(item.name),'Delete image?')}>
                         <Image
                             source={require('./assets/icondelete.png')} // Replace with your delete icon image
@@ -189,11 +189,11 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                 <View style={{}}>
                     {
                         item.name.startsWith('http')?
-                        <Text style={styles.text4}>
+                        <Text style={commonStyles.text4}>
                             Remark: {item.meta.remark}
                         </Text>
                         :<TextInput
-                        style={styles.remark}
+                        style={commonStyles.remark}
                         placeholder="Enter Remark"
                         placeholderTextColor={'#000000'}
                         onChangeText={(text) => changeimgremark(text)}
@@ -262,11 +262,11 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                 <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
                     {
                         editMode===true?
-                        <Text style={{...styles.text4,textAlign:'center'}}>
+                        <Text style={{...commonStyles.text4,textAlign:'center'}}>
                             Sapling ID: {saplingid}
                         </Text>
                         :<TextInput
-                        style={styles.txtInput}
+                        style={commonStyles.txtInput}
                         placeholder="sapling id"
                         placeholderTextColor={'#000000'}
                         onChangeText={(text) => setSaplingid(text)}

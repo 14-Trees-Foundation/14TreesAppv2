@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Dropdown } from './DropDown';
 // import * as ImagePicker from 'react-native-image-picker';
-import { Utils } from './Utils';
+import { Utils, commonStyles } from './Utils';
 import { useFocusEffect } from '@react-navigation/native';
 import { CustomButton } from './Components';
 
@@ -171,7 +171,9 @@ const LocalDataView = ({ navigation }) => {
     setSelectedUploadStatus(uploadStatuses[0]);
   }
   const deleteSyncedTrees = async () => {
-    Utils.deleteSyncedTrees();
+    const leftoverTrees = await Utils.deleteSyncedTrees();
+    setFinalList(leftoverTrees);
+    setTreeList(leftoverTrees);
   }
   return (
 
@@ -230,19 +232,22 @@ const LocalDataView = ({ navigation }) => {
         finalList === null ? <Text style={styles.text2}>Loading Trees...</Text>
           :
           <FlatList
+            ListEmptyComponent={
+              <Text style={commonStyles.text2}>No trees found on phone</Text>
+            }
             ListHeaderComponent={
-              <View>
-                <View>
-                  <CustomButton text="Delete Synced Trees" opacityStyle={{backgroundColor:'red',margin:20,marginBottom:0}} onPress={() => Utils.confirmAction(deleteSyncedTrees)}></CustomButton>
+              (treeList&&treeList.length>0)&&<View>
+                  <View>
+                    <CustomButton text="Delete Synced Trees" opacityStyle={{ backgroundColor: 'red', margin: 20, marginBottom: 0 }} onPress={() => Utils.confirmAction(deleteSyncedTrees)}></CustomButton>
+                  </View>
+                  <View style={{ margin: 20, marginBottom: 5 }}>
+                    <CustomButton text="Filters" onPress={openModal} color={'black'} />
+                  </View>
+                  {(finalList !== treeList) && <View style={{ margin: 20, marginBottom: 5 }}>
+                    <Button title="Clear Filters" onPress={clearFilters} color={'black'} />
+                  </View>
+                  }
                 </View>
-                <View style={{ margin: 20, marginBottom: 5 }}>
-                  <CustomButton text="Filters" onPress={openModal} color={'black'} />
-                </View>
-                {(finalList !== treeList) && <View style={{ margin: 20, marginBottom: 5 }}>
-                  <Button title="Clear Filters" onPress={clearFilters} color={'black'} />
-                </View>}
-
-              </View>
             }
             data={finalList} renderItem={({ item }) => renderTree(item)}></FlatList>
 

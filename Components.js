@@ -1,11 +1,11 @@
 import { TouchableOpacity,Text,View } from "react-native";
-import { styles } from "./Utils";
+import { commonStyles } from "./Utils";
 export const CustomButton = ({ text, opacityStyle,textStyle, onPress }) => {
-    let finalOpacityStyle = styles.defaultButtonStyle;
+    let finalOpacityStyle = commonStyles.defaultButtonStyle;
     if(opacityStyle){
         finalOpacityStyle = {...finalOpacityStyle,...opacityStyle};
     }
-    let finalTextStyle = styles.defaultButtonTextStyle;
+    let finalTextStyle = commonStyles.defaultButtonTextStyle;
     if(textStyle){
         finalTextStyle = {...finalTextStyle,...textStyle};
     }

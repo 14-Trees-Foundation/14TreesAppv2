@@ -1,6 +1,6 @@
 import { enablePromise, openDatabase } from 'react-native-sqlite-storage';
 
-const tableName = 'tree';
+const treeTableName = 'tree';
 const treetypeName = 'treetype';
 const plotName = 'plot';
 const users = 'users';
@@ -17,7 +17,7 @@ export class LocalDatabase {
         return this.db;
     };
     deleteTable = async () => {
-        const query = `drop table ${tableName}`;
+        const query = `drop table ${treeTableName}`;
         await this.db.executeSql(query);
     };
 
@@ -25,7 +25,7 @@ export class LocalDatabase {
 
     createTreesTable = async () => {
         // create table if not exists
-        const query = `CREATE TABLE IF NOT EXISTS ${tableName}(
+        const query = `CREATE TABLE IF NOT EXISTS ${treeTableName}(
             treeid TEXT NOT NULL,
             saplingid TEXT NOT NULL PRIMARY KEY,
             lat TEXT ,
@@ -43,7 +43,7 @@ export class LocalDatabase {
             imageid TEXT NOT NULL PRIMARY KEY,
             remark TEXT,
             timestamp TEXT NOT NULL,
-            Foreign Key (saplingid) references ${tableName}(saplingid)
+            Foreign Key (saplingid) references ${treeTableName}(saplingid)
         );`;
 
         await this.db.executeSql(query);
@@ -54,7 +54,7 @@ export class LocalDatabase {
         try {
             const trees = [];
             const results = await this.db.executeSql(
-                `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng, uploaded FROM ${tableName}`,
+                `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng, uploaded FROM ${treeTableName}`,
             );
             results.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {
@@ -72,7 +72,7 @@ export class LocalDatabase {
         try {
             const trees = [];
             const results = await this.db.executeSql(
-                `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng FROM ${tableName} where uploaded=${uploaded}`,
+                `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng FROM ${treeTableName} where uploaded=${uploaded}`,
             );
             results.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {
@@ -86,7 +86,12 @@ export class LocalDatabase {
             throw Error('Failed to get treedata !!!');
         }
     };
-
+    deleteSyncedTrees = async()=>{
+        const query = `DELETE FROM ${treeTableName} where uploaded = ?`;
+        console.log(query);
+        await this.db.executeSql(query,[1]);
+        return await this.getAllTrees();
+    }
     getTreeImages = async (saplingid) => {
         try {
             const treesimgs = [];
@@ -136,7 +141,7 @@ export class LocalDatabase {
 
     getAllTreeCount = async () => {
         try {
-            let res = await this.db.executeSql(`SELECT * FROM ${tableName}`);
+            let res = await this.db.executeSql(`SELECT * FROM ${treeTableName}`);
             return res[0].rows.length;
         } catch (error) {
             console.error(error);
@@ -146,7 +151,7 @@ export class LocalDatabase {
 
     setFalse = async () => {
         try {
-            let res = await this.db.executeSql(`update ${tableName} set uploaded=0`);
+            let res = await this.db.executeSql(`update ${treeTableName} set uploaded=0`);
             return res[0].rows.length;
         } catch (error) {
             console.error(error);
@@ -157,7 +162,7 @@ export class LocalDatabase {
     saveTrees = async (tree, uploaded) => {
 
         const insertQuery =
-            `INSERT OR REPLACE INTO ${tableName}(treeid, saplingid, lat, lng, plotid, uploaded, user_id) values` +
+            `INSERT OR REPLACE INTO ${treeTableName}(treeid, saplingid, lat, lng, plotid, uploaded, user_id) values` +
             `('${tree.treeid}', '${tree.saplingid}', '${tree.lat}', '${tree.lng}', '${tree.plotid}', ${uploaded}, '${tree.user_id}')`;
         console.log('insterting tree');
         return this.db.executeSql(insertQuery);
@@ -176,7 +181,7 @@ export class LocalDatabase {
     };
 
     updateUpload = async (id) => {
-        const updateQuery = `update ${tableName} set uploaded=1 where saplingid = '${id}'`;
+        const updateQuery = `update ${treeTableName} set uploaded=1 where saplingid = '${id}'`;
         await this.db.executeSql(updateQuery);
     };
 
@@ -214,7 +219,7 @@ export class LocalDatabase {
         }
     }
     getTreeNames = async () => {
-        const selectQuery = `SELECT * FROM ${treetypeName} WHERE value IN (SELECT treeid FROM ${tableName})`;
+        const selectQuery = `SELECT * FROM ${treetypeName} WHERE value IN (SELECT treeid FROM ${treeTableName})`;
         const treeNames = [];
 
         try {
@@ -234,7 +239,7 @@ export class LocalDatabase {
     };
 
     getPlotNames = async () => {
-        const selectQuery = `SELECT * FROM ${plotName} WHERE value IN (SELECT plotid FROM ${tableName})`;
+        const selectQuery = `SELECT * FROM ${plotName} WHERE value IN (SELECT plotid FROM ${treeTableName})`;
         const plotNames = [];
 
         try {
@@ -258,7 +263,7 @@ export class LocalDatabase {
     getSaplingIds = async () => {
         const saplings = [];
         try {
-            let res = await this.db.executeSql(`SELECT saplingid as name FROM ${tableName}`);
+            let res = await this.db.executeSql(`SELECT saplingid as name FROM ${treeTableName}`);
             res.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {
                     saplings.push(result.rows.item(index));
