@@ -2,51 +2,143 @@ import React, {useEffect,useState} from 'react';
 import { View, Text,TextInput, Button,  Alert, StyleSheet, TouchableOpacity, ToastAndroid} from 'react-native';
 import { Dropdown } from './DropDown';
 import { DataService } from './DataService';
-import { Utils } from './Utils';
+import { Constants, Utils } from './Utils';
+import { TreeForm } from './TreeForm';
 
 const EditTreeScreen = ({navigation}) => {
     const [saplingid, setSaplingid] = useState('');
     const [details,setDetails] = useState(null);
-    const [treeItems, setTreeItems] = useState([]);
-    const [plotItems, setPlotItems] = useState([]);
-    const [treeType,setTreeType] = useState({name:'',value:''});
-    const [plot,setPlot] = useState({name:'',value:''});
-    const makeDetailsHumanReadable = async()=>{
-        if(details){
-            const treeType =await Utils.treeTypeFromID(details.tree_id);
-            setTreeType(treeType);
-            const plot = await Utils.plotFromPlotID(details.plot_id);
-            setPlot(plot);
+    const [newImages,setNewImages] = useState([]);
+    const [deletedImages,setDeletedImages] = useState([]);
+    const updateDetails = async(tree, images)=>{
+        const saplingData = {
+            location:{
+                type:"Point",
+                coordinates:[0,0]
+            },
+            sapling_id:"",
+            image:details.inImages.map((image)=>image.name),
+            tree_id:"",//tree type id.
+            plot_id:"",//plot id
+        };
+        const adminID = await Utils.getAdminId();
+        let a = {"sapling":{
+            "data":{
+                "location": {
+                    "type": "Point",
+                    "coordinates": [
+                        20.1339558,
+                        72.9084718
+                    ]
+                },
+                "sapling_id": "10001",
+                "tree_id": "tree_id",
+                "plot_id": "61bc101f969efcff564fb581",
+            },
+            "newImages":[
+                // {} use david mitchell image from uploadTrees.
+                {
+                    "meta":{
+                        "captureTimestamp":"2023-10-09T16:29:50.240Z",//obtained in JS using (new Date()).toISOString()
+                        "remark":"Looks alright."
+                    },
+                    "name":"DavidMitchellNew2.png",
+                    "data":""
+                }
+            ],
+            "deletedImages":[
+                "https://14treesplants.s3.ap-south-1.amazonaws.com/dev/trees/10001_2023-10-03T17%3A54%3A34.832Z.jpg"
+            ]
+        }}
+        saplingData.location.coordinates = [
+                tree.lat, tree.lng
+            ];
+        saplingData.sapling_id = tree.saplingid;
+        saplingData.plot_id = tree.plotid;
+        saplingData.tree_id = tree.treeid;//tree type.
+        for(let image of images){
+            let newImageIndex = newImages.findIndex((item)=>item.name===image.name);
+            if(newImageIndex!==-1){
+                newImages[newImageIndex].meta.remark = image.meta.remark;
+                setNewImages(newImages);
+            }
         }
+        const requestData = {
+            data:saplingData,
+            newImages:newImages,
+            deletedImages:deletedImages,
+        }
+        const response = await DataService.updateSapling(adminID,requestData);
+        if(!response){
+            return;
+        }
+        console.log(requestData);
+        ToastAndroid.show(`Tree with ${response.data.sapling_id} updated!`,ToastAndroid.LONG);
+        setDetails(null);
+        setNewImages([]);
+        setDeletedImages([]);
+        //Format saplingData using tree,newIamges, deletedImages.
+        // Dataservice.updateSapling call...
+        // check reply.
     }
-    const updateDetails = async()=>{
-        ToastAndroid.show('Send request to server',ToastAndroid.SHORT);
-    }
-    const setDropDownItems = async()=>{
-        const treetypes = await Utils.fetchTreeTypesFromLocalDB();
-        const plots = await Utils.fetchPlotNamesFromLocalDB();
-        setTreeItems(treetypes);
-        setPlotItems(plots);
-        console.log(plots.length,treetypes.length, 'set plots and treetypes')
-    }
-    useEffect(()=>{
-        setDropDownItems();        
-    },[])
-    useEffect(()=>{
-        //human readable details update.
-        makeDetailsHumanReadable();
-    },[details])
     const fetchTreeDetails = async () => {
         // console.log('fetching tree details');
         const adminID = await Utils.getAdminId();
         console.log(adminID)
+        setDetails(null);
+        setNewImages([]);
+        setDeletedImages([]);
+        
         const treeDetails = await DataService.fetchTreeDetails(saplingid,adminID);
-        setDetails(treeDetails);
+        if(!treeDetails){return;}
+        const detailsForTreeForm = {...Constants.treeFormTemplateData};
+       const treeType = await Utils.treeTypeFromID(treeDetails.tree_id);
+       const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
+       detailsForTreeForm.inImages = treeDetails.image;//TODO: server should return:
+       for(let image of detailsForTreeForm.inImages){
+        image.data = await DataService.fileURLToBase64(image.name);
+       }
+       /*
+        {
+            data: generate on spot,
+            name: s3url,
+            meta: {
+                capturetimestamp: timestamp,
+                remark: 'default remark',
+            }
+        }
+       */
+    //   console.log(detailsForTreeForm);
+    //   detailsForTreeForm.inImages = [];
+       detailsForTreeForm.inLat = 0;
+       detailsForTreeForm.inLng = 0;
+        if(treeDetails.location){
+            detailsForTreeForm.inLat = treeDetails.location.coordinates[0];
+            detailsForTreeForm.inLng = treeDetails.location.coordinates[1];
+        }
+        detailsForTreeForm.inSaplingId = treeDetails.sapling_id;
+        detailsForTreeForm.inTreeType = treeType;
+        detailsForTreeForm.inPlot = plot;
+        detailsForTreeForm.inUserId = treeDetails.user_id;
+        console.log(detailsForTreeForm);
+        setDetails(detailsForTreeForm);
     }
     return (
         <View style={{backgroundColor:'#5DB075', height:'100%'}}>
-           <Text style={styles.headerText} > Edit tree  </Text>
-           <View style={{backgroundColor:'white', margin: 10,borderRadius:10}}>
+            {
+                details?
+                <TreeForm
+                 editMode={true}
+                 treeData={details}
+                 onCancel={()=>setDetails(null)}
+                 updateUserId={false}
+                 updateLocation={false}
+                 onVerifiedSave={updateDetails}
+                 onNewImage={(image)=>{setNewImages([...newImages,image]);}}
+                 onDeleteImage={(name)=>{setDeletedImages([...deletedImages,name]);}}
+                 />
+                :
+                <View style={{backgroundColor:'white', margin: 10,borderRadius:10}}>
                 <Text style={{color:'black', marginLeft:20, margin:10, fontSize:18}}> Enter the Sapling ID</Text>
                 <TextInput
                     style={styles.txtInput}
@@ -62,30 +154,9 @@ const EditTreeScreen = ({navigation}) => {
                         color={'#5DB075'}
                     />
                 </View>
-                {
-                    details?
-                    <View>
-                        <Text style={{color:'black', marginLeft:20, margin:10, fontSize:18}}> Details : </Text>
-                        <Dropdown
-                            items={treeItems}
-                            label="Select Tree Type"
-                            setSelectedItems={setTreeType}
-                            selectedItem={treeType}
-                            
-                        />
-                        <Dropdown
-                            items={plotItems}
-                            label="Select Plot"
-                            setSelectedItems={setPlot}
-                            selectedItem={plot}
-                        />
-                        <Button title="Update Tree" onPress={updateDetails}></Button>
-                    </View>
-                    :
-                    <View></View>
-
-                }
             </View>
+
+            }
             
         </View>
     )

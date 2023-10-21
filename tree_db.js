@@ -100,7 +100,7 @@ export class LocalDatabase {
                         data: result.rows.item(index).data,
                         meta: {
                             remark: result.rows.item(index).remark,
-                            captureTimestamp: result.rows.item(index).captureTimestamp,
+                            capturetimestamp: result.rows.item(index).captureTimestamp,
                         },
                     };
                     treesimgs.push(image);

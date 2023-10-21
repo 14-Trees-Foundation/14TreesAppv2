@@ -1,20 +1,19 @@
 import React from 'react';
 import {View} from 'react-native';
-import SearchableDropdown from 'react-native-searchable-dropdown';
+import SearchableDropdown from './SearchableDropdown';
 
 export const Dropdown = ({items, label, setSelectedItems, selectedItem}) => {
   
   return (
     <View>
       <SearchableDropdown
-        onTextChange={text => console.log(text)}
         //On text change listner on the searchable input
         onItemSelect={item => {
           setSelectedItems(item);
         }}
         // onItemSelect={item => setplotid(item.value)}
         //onItemSelect called after the selection from the dropdown
-        selectedItems={selectedItem}
+        currentValue={selectedItem}
         //suggestion container style
         textInputStyle={{
           height: 60,
