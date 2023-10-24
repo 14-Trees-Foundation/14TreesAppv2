@@ -3,7 +3,8 @@ import { useEffect,useState,useCallback } from 'react';
 import {KeyboardAvoidingView,Alert,Text,Image,View,ToastAndroid,ScrollView,TouchableOpacity,TextInput, Button, FlatList,StyleSheet} from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import {launchCamera} from 'react-native-image-picker';
-import { CustomButton } from "./Components";
+import { CustomButton, MyIcon, MyIconButton } from "./Components";
+import MapView,{PROVIDER_GOOGLE,Marker} from "react-native-maps";
 import { CustomDropdown } from "./CustomDropdown";
 import { Strings } from "./Strings";
 import { CoordinateSetter } from "./CoordinateSetter";
@@ -237,6 +238,28 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
         loadDataCallback();
         console.log(selectedTreeType);
     }, []);
+    const requestLocation = async () => {
+        console.log('requesting location');
+        // TODO: handler
+        Geolocation.getCurrentPosition(
+            (position) => {
+                setlat(position.coords.latitude);
+                setlng(position.coords.longitude);
+                console.log(lat);
+                console.log(lng);
+            },
+            (error) => {
+                Alert.alert('Error', 'Have you turned on the location (GPS) on your phone?');
+            },
+            { enableHighAccuracy: false, timeout: 2000 },
+        );
+
+    };
+    const getReadableLocation = (lat,lng)=>{
+        const latval = Math.round(lat*100)/100
+        const lngval = Math.round(lng*100)/100
+        return `${latval},${lngval}`
+    }
 
     return (
         <KeyboardAvoidingView behavior='height' style={{ backgroundColor: '#5DB075' }} keyboardVerticalOffset={100}>
@@ -266,13 +289,31 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                         onSelectItem={setSelectedPlot}
                     />
                     {/* <Text style={styles.text2}> Add photos</Text> */}
-                    <CoordinateSetter
-                    editMode={editMode}
-                    lat={lat}
-                    lng={lng}
-                    onSetLat={setlat}
-                    onSetLng={setlng}
-                    ></CoordinateSetter>
+                    <View style={{flexDirection:'column'}}>
+                        <View style={{flexDirection:'row'}}>
+                        <Text style={{ color: 'black', marginLeft: 20, margin: 10, fontSize: 18 }}> Location : {getReadableLocation(lat,lng)}</Text>
+                        <MyIconButton name={"search-location"} size={30}
+                        color={'green'} onPress={()=>{}}></MyIconButton>
+                        <MyIconButton name={"edit"} size={30}
+                        color={'green'} onPress={()=>{}}></MyIconButton>
+                        </View>
+                        {/* {((lat+lng)>0 )&&<MapView
+                        showsCompass={true}
+                        rotateEnabled={false}
+                        provider={PROVIDER_GOOGLE}
+                        style={{height:200,margin:10}}
+                        showsUserLocation={true}
+                        region={{
+                            latitude: lat,
+                            longitude: lng,
+                            latitudeDelta: 0.001,
+                            longitudeDelta: 0.001,
+                          }}
+                        >
+                            <Marker coordinate={{latitude:lat,longitude:lng}}>
+                            </Marker>
+                        </MapView>} */}
+                    </View>
                     <View style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 15 }}>
                         <Button
                             title="Add Photo"
