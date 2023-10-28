@@ -46,14 +46,14 @@ const VerifyusersScreen = ({navigation}) => {
                    
                 
                 <View >
-                    <Text style={styles.text3}> Name : {item.name} </Text>
-                    <Text style={styles.text3}> Email : {item.email} </Text>
+                    <Text style={styles.text3}>{Utils.languages.Name} {item.name} </Text>
+                    <Text style={styles.text3}>{Utils.languages.Email} {item.email} </Text>
                 </View>
                 
                 
                 <View style={{margin:8, marginBottom:8, width:'50%', alignSelf:'center'}}>
                     <Button
-                        title="Verify"
+                        title={Utils.languages.Verify}
                         onPress={() => verifyUser(item._id)}
                         color={'#5DB075'}
                     />
@@ -66,8 +66,8 @@ const VerifyusersScreen = ({navigation}) => {
     return (
         <View style={{backgroundColor:'white', height:'100%'}}>
             <View style={{marginTop:5,flexDirection:'row',justifyContent:'space-around'}}>
-            <Text style={styles.text2}> List of Unverified Users </Text>
-            <CustomButton text={'Refresh'} onPress={()=>fetchUsers(adminID)}></CustomButton>
+            <Text style={styles.text2}> {Utils.languages.ListUnverifiedUsers} </Text>
+            <CustomButton text={Utils.languages.Refresh} onPress={()=>fetchUsers(adminID)}></CustomButton>
             </View>
             <View style={{height:500,margin:5,borderWidth:2,borderColor: '#5DB075',borderRadius: 5,flexDirection:'column',}}>
             <FlatList

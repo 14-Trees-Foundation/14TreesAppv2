@@ -144,14 +144,14 @@ const LocalDataView = ({ navigation }) => {
 
 
         <View style={{ padding: 20, }}>
-          <Text style={styles.text3}>Sapling ID: {tree.sapling_id}</Text>
-          <Text style={styles.text3}>Plot ID: {tree.plot_id}</Text>
-          <Text style={styles.text3}>Type ID: {tree.type_id}</Text>
+          <Text style={styles.text3}>{Utils.languages.SaplingNo} {tree.sapling_id}</Text>
+          <Text style={styles.text3}>{Utils.languages.PlotId}{tree.plot_id}</Text>
+          <Text style={styles.text3}> {Utils.languages.TypeId} {tree.type_id}</Text>
 
           {(tree.uploaded) ?
-            <Text style={{ ...styles.success, ...styles.label }}>Synced</Text>
+            <Text style={{ ...styles.success, ...styles.label }}>{Utils.languages.Synced}</Text>
             :
-            <Text style={{ ...styles.danger, ...styles.label }}>Local</Text>}
+            <Text style={{ ...styles.danger, ...styles.label }}>{Utils.languages.Local}</Text>}
         </View>
         {
           tree.images.length ?
@@ -159,7 +159,7 @@ const LocalDataView = ({ navigation }) => {
               {renderImg(tree.images[0])}
             </View>
             :
-            <Text style={{ flex: 1, flexWrap: 'wrap', flexShrink: 1, color: 'black', fontSize: 20, textAlign: 'center', backgroundColor: 'white', margin: 5, textAlignVertical: 'center' }}>No images found</Text>
+            <Text style={{ flex: 1, flexWrap: 'wrap', flexShrink: 1, color: 'black', fontSize: 20, textAlign: 'center', backgroundColor: 'white', margin: 5, textAlignVertical: 'center' }}>{Utils.languages.NoImageFound} </Text>
         }
       </View>
     )
@@ -187,11 +187,11 @@ const LocalDataView = ({ navigation }) => {
         presentationStyle='formSheet'
       >
         <View style={{ margin: 20 }}>
-          <Text style={{ ...styles.text3, fontSize: 20 }}>Filters</Text>
+          <Text style={{ ...styles.text3, fontSize: 20 }}>{Utils.languages.Filters}</Text>
           <View style={{ margin: 5 }}>
             <CustomDropdown
               items={uploadStatusList}
-              label="Upload Status"
+              label={Utils.languages.UploadStatus}
               onSelectItem={setSelectedUploadStatus}
               initItem={selectedUploadStatus}
             />
@@ -200,7 +200,7 @@ const LocalDataView = ({ navigation }) => {
           <View style={{ margin: 5 }}>
             <CustomDropdown
               items={saplingIdList}
-              label="Sapling ID"
+              label={Utils.languages.SaplingId}
               onSelectItem={setSelectedSaplingId}
               initItem={selectedSaplingId}
             />
@@ -208,7 +208,7 @@ const LocalDataView = ({ navigation }) => {
           <View style={{ margin: 5 }}>
             <CustomDropdown
               items={treeTypeList}
-              label={'Tree Type '}
+              label={Utils.languages.TreeType}
               onSelectItem={setSelectedTreeType}
               initItem={selectedTreeType}
             />
@@ -216,13 +216,13 @@ const LocalDataView = ({ navigation }) => {
           <View style={{ margin: 5 }}>
             <CustomDropdown
               items={plotList}
-              label={'Plot '}
+              label={Utils.languages.Plot}
               onSelectItem={setSelectedPlot}
               initItem={selectedPlot}
             />
           </View>
           <View style={{ margin: 20 }}>
-            <Button title="Apply" onPress={applychanges} color={'#5DB075'} />
+            <Button title={Utils.languages.Apply} onPress={applychanges} color={'#5DB075'} />
           </View>
         </View>
         {/* </View> */}
@@ -230,22 +230,22 @@ const LocalDataView = ({ navigation }) => {
 
 
       {
-        finalList === null ? <Text style={styles.text2}>Loading Trees...</Text>
+        finalList === null ? <Text style={styles.text2}>{Utils.languages.LoadingTrees}</Text>
           :
           <FlatList
             ListEmptyComponent={
-              <Text style={commonStyles.text2}>No trees found on phone</Text>
+              <Text style={commonStyles.text2}>{Utils.languages.NoTreesFound}</Text>
             }
             ListHeaderComponent={
               (treeList&&treeList.length>0)&&<View>
                   <View>
-                    <CustomButton text="Delete Synced Trees" opacityStyle={{ backgroundColor: 'red', margin: 20, marginBottom: 0 }} onPress={() => Utils.confirmAction(deleteSyncedTrees)}></CustomButton>
+                    <CustomButton text={Utils.languages.DeleteSyncedTrees}opacityStyle={{ backgroundColor: 'red', margin: 20, marginBottom: 0 }} onPress={() => Utils.confirmAction(deleteSyncedTrees)}></CustomButton>
                   </View>
                   <View style={{ margin: 20, marginBottom: 5 }}>
-                    <CustomButton text="Filters" onPress={openModal} color={'black'} />
+                    <CustomButton text={Utils.languages.Filters} onPress={openModal} color={'black'} />
                   </View>
                   {(finalList !== treeList) && <View style={{ margin: 20, marginBottom: 5 }}>
-                    <Button title="Clear Filters" onPress={clearFilters} color={'black'} />
+                    <Button title={Utils.languages.ClearFilters} onPress={clearFilters} color={'black'} />
                   </View>
                   }
                 </View>

@@ -27,6 +27,7 @@
     "react-native-get-location": "^4.0.0",
     "react-native-image-base64": "^0.1.4",
     "react-native-image-picker": "^7.0.0",
+    "react-native-localization": "^2.3.2",
     "react-native-maps": "^1.8.0",
     "react-native-modal": "^13.0.1",
     "react-native-permissions": "^3.9.2",

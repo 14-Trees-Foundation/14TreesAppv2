@@ -2,18 +2,21 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin, GoogleSigninButton, statusCodes, } from '@react-native-google-signin/google-signin';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View , TouchableOpacity} from 'react-native';
 import PhoneInput, { isValidNumber } from 'react-native-phone-number-input';
 import { DataService } from './DataService';
 import { Constants, Utils } from './Utils';
-
+import LanguageModal from './Languagemodal';
 
 const LoginScreen = ({navigation}) =>{
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [langModalVisible, setLangModalVisible] = useState(false);
+  const [signInText, setSignInText] = useState('');
+  const [something, setSomething] = useState(true); // to re-render the component(jugaad)
+  useEffect(() => {
+    console.log('I am here ')
+  }, [Utils.languages.SignIn]);
 
-  const checkPhoneNumber = () => {
-    return isValidNumber(phoneNumber);
-  };
   useEffect(() => {
     navigation.addListener('beforeRemove', async (e) => {
       const userId = await Utils.getUserId();
@@ -27,58 +30,59 @@ const LoginScreen = ({navigation}) =>{
   
   const googleLogin = async () => {
     try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      const userDataPayload = {
-        name: userInfo.user.name,
-        email: userInfo.user.email,
-        phone: phoneNumber,
-      };
-      console.log('Sending google data to server.')
-      const response = await DataService.loginUser(userDataPayload);
-      console.log('got a response');
-      // console.log(response.data);
-      console.log('at login : ',response.data._id)
-      // check whether adminId field exist in the response
-      // if exist, then store it in the async storage
-      console.log(response.data)
-      console.log(response.data.adminID)
-      if (response.data.adminID) {
-        await AsyncStorage.setItem(Constants.adminIdKey, response.data.adminID);
-        console.log('adminId stored');
-        console.log('adminId : ',response.data.adminID)
-      }
-      else{
-        console.log('adminId not stored')
-      }
+      navigation.navigate('HomeScreen');
+      // await GoogleSignin.hasPlayServices();
+      // const userInfo = await GoogleSignin.signIn();
+      // const userDataPayload = {
+      //   name: userInfo.user.name,
+      //   email: userInfo.user.email,
+      //   phone: phoneNumber,
+      // };
+      // console.log('Sending google data to server.')
+      // const response = await DataService.loginUser(userDataPayload);
+      // console.log('got a response');
+      // // console.log(response.data);
+      // console.log('at login : ',response.data._id)
+      // // check whether adminId field exist in the response
+      // // if exist, then store it in the async storage
+      // console.log(response.data)
+      // console.log(response.data.adminID)
+      // if (response.data.adminID) {
+      //   await AsyncStorage.setItem(Constants.adminIdKey, response.data.adminID);
+      //   console.log('adminId stored');
+      //   console.log('adminId : ',response.data.adminID)
+      // }
+      // else{
+      //   console.log('adminId not stored')
+      // }
 
-      try {
-        await AsyncStorage.setItem(Constants.userIdKey, response.data._id);
-        response.data = {...response.data,image:userInfo.user.photo}
-        if(!response.data.image){
-          response.data.image = Constants.imagePlaceholder;
-        }
-        await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
-        await AsyncStorage.setItem(Constants.lastHashKey, "0");
-      } catch (error) {
-        console.log('Error storing userId', error);
-      }
+      // try {
+      //   await AsyncStorage.setItem(Constants.userIdKey, response.data._id);
+      //   response.data = {...response.data,image:userInfo.user.photo}
+      //   if(!response.data.image){
+      //     response.data.image = Constants.imagePlaceholder;
+      //   }
+      //   await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
+      //   await AsyncStorage.setItem(Constants.lastHashKey, "0");
+      // } catch (error) {
+      //   console.log('Error storing userId', error);
+      // }
 
       // const dummy = getUserId();
-      console.log(response.status);
-      // console.log(response.data);
-      // console.log(userObj._id);
-      switch (response.status) {
-        case 200:
-          navigation.navigate('HomeScreen');
-          break;
-        case 400:
-          Alert.alert('Login Failed','Check phone number and secret.');
-          break;
-        default:
-          Alert.alert('Login Failed','Unknown error. Consult an expert.');
-          break;
-      }
+      // console.log(response.status);
+      // // console.log(response.data);
+      // // console.log(userObj._id);
+      // switch (response.status) {
+      //   case 200:
+      //     navigation.navigate('HomeScreen');
+      //     break;
+      //   case 400:
+      //     Alert.alert('Login Failed','Check phone number and secret.');
+      //     break;
+      //   default:
+      //     Alert.alert('Login Failed','Unknown error. Consult an expert.');
+      //     break;
+      // }
 
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
@@ -96,10 +100,11 @@ const LoginScreen = ({navigation}) =>{
     }
   };
   return (
-    <View style={{ backgroundColor: 'white', height: '100%' }}>
+    
+     <View style={{ backgroundColor: 'white', height: '100%' }}>
       {/* // create a header with title as 14 trees */}
         
-      <View style={styles.pop}>
+       <View style={styles.pop}>
 
         <View >  
           {/* <Text style={{ fontSize: 20, color: 'black',marginLeft: 35, marginTop: 70 }}>Enter your phone number</Text> */}
@@ -127,7 +132,7 @@ const LoginScreen = ({navigation}) =>{
             }}
           />
         </View>
-
+        <Text style={{ fontSize: 20, color: 'white',marginLeft: 35, marginTop: 30 }}> {Utils.languages.SignIn}</Text>
         <View style={{marginVertical:30}}>
           <GoogleSigninButton
             style={{ width: '50%', height: 70, borderRadius: 40, alignItems: 'center', justifyContent: 'center', alignSelf: 'center'}}
@@ -135,9 +140,23 @@ const LoginScreen = ({navigation}) =>{
             color={GoogleSigninButton.Color.Light}
             onPress={googleLogin}
           />
-        </View>  
+        </View>
       </View>   
+      <TouchableOpacity style={styles.selLang} onPress={()=> {
+        setLangModalVisible(!langModalVisible)
+      }}>
+        <Text style={{color:'#36454F', fontWeight:'bold'}}>{Utils.languages.SelectLanguage}</Text>
+      </TouchableOpacity> 
+      <LanguageModal 
+        langModalVisible={langModalVisible} 
+        setLangModalVisible={setLangModalVisible}
+        onSelectLang={async (x)=>{
+          await Utils.setLanguage(x);
+          setSomething(!something); // to re-render the component(jugaad)
+          // console.log('language changed to ',Utils.languages.SignIn);
+        }}/>
     </View>
+   
   );
 }
 
@@ -171,6 +190,19 @@ const styles = StyleSheet.create({
     fontSize: 30, color: 'white', textAlign: 'center', marginTop: 30, marginBottom: 30, fontFamily:'cochin', fontWeight:'bold' , textShadowColor: 'rgba(0, 0, 0, 0.5)', 
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3, 
+  },
+
+  selLang:{
+    width:'50%',
+    height:50,
+    borderWidth:0.5,
+    borderRadius:10,
+    justifyContent:'center',
+    alignItems:'center',
+    marginTop:50,
+    alignSelf:'center',
+    backgroundColor:'#D3D3D3',
+    borderColor:'#A9A9A9' 
   }
 });
 

@@ -139,17 +139,17 @@ const EditTreeScreen = ({navigation}) => {
                  />
                 :
                 <View style={{backgroundColor:'white', margin: 10,borderRadius:10}}>
-                <Text style={{color:'black', marginLeft:20, margin:10, fontSize:18}}> Enter the Sapling ID</Text>
+                <Text style={{color:'black', marginLeft:20, margin:10, fontSize:18}}>{Utils.languages.EnterSaplingId}</Text>
                 <TextInput
                     style={styles.txtInput}
-                    placeholder="Sapling ID"
+                    placeholder={Utils.languages.SaplingId}
                     placeholderTextColor={'#808080'}
                     onChangeText={(text) => setSaplingid(text)}
                     value={saplingid}
                 />
                 <View style={{margin:20}}>
                     <Button
-                        title="Search"
+                        title={Utils.languages.Search}
                         onPress={() => fetchTreeDetails()}
                         color={'#5DB075'}
                     />

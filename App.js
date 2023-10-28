@@ -18,6 +18,7 @@ import { checkMultiplePermissions } from './check_permissions';
 import { LocalDatabase } from './tree_db';
 import LoadingScreen from './LoadingScreen';
 import { enableLatestRenderer } from 'react-native-maps';
+import { utils } from '@react-native-firebase/app';
 enableLatestRenderer();
 
 const Stack = createStackNavigator();
@@ -59,6 +60,7 @@ const navigationRef = createNavigationContainerRef();
 const App = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userDetails,setUserDetails] = useState(null);
+
   const checkSignInStatus = async () => {
     try {
       const isSignedIn = await GoogleSignin.isSignedIn();
@@ -98,6 +100,15 @@ const App = () => {
     navigationRef.current?.navigate('Login');
   }
   const initTasks = async () => {
+    let storedlang = await Utils.getLanguage();
+      console.log('stored lang: ', storedlang);
+      if (storedlang === null) {
+        Utils.languages.setLanguage('en');
+        // Utils.lang = 'en';
+      }
+      else {
+        Utils.languages.setLanguage(storedlang);
+      }
     GoogleSignin.configure();
     const loggedIn = await checkSignInStatus();
     await Utils.setDBConnection();

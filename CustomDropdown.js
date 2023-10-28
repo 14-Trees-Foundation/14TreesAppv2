@@ -40,6 +40,7 @@ export const CustomDropdown = ({items, onSelectItem, initItem, scrollEnabled, la
             style={{...commonStyles.txtInput}}
             defaultValue= {selectedItem.value===-1?'':selectedItem.name}
             placeholder={label}
+            placeholderTextColor={'black'}
             onChangeText={updateFilteredOptions}
             onFocus={(e)=>{setOptionsVisible(true);}}
             onBlur={(e)=>{}}

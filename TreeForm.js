@@ -111,7 +111,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
     const renderExistingImage = ({item,index})=>{
         const indexString = `(${index+1} of ${exisitingImages.length+images.length})\n`
         console.log(item.meta);
-        const captureString = 'Captured at:\n' + item.meta.capturetimestamp.split('T').join('\n');
+        const captureString = Utils.languages.CapturedAt + ' :\n' + item.meta.capturetimestamp.split('T').join('\n');
         const displayString = `${indexString} ${captureString}`
         return (
             <View style={{
@@ -272,7 +272,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                         </Text>
                         :<TextInput
                         style={commonStyles.txtInput}
-                        placeholder="sapling id"
+                        placeholder={Utils.languages.SaplingId}
                         placeholderTextColor={'#000000'}
                         onChangeText={(text) => setSaplingid(text)}
                         value={saplingid}
@@ -280,18 +280,18 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                     }
                     <CustomDropdown
                         items={treeItems}
-                        label="Select Tree Type"
+                        label={Utils.languages.SelectTreeType}
                         onSelectItem={setSelectedTreeType}
                     />
                     <CustomDropdown
                         items={plotItems}
-                        label="Select Plot"
+                        label={Utils.languages.SelectPlot}
                         onSelectItem={setSelectedPlot}
                     />
                     {/* <Text style={styles.text2}> Add photos</Text> */}
                     <View style={{flexDirection:'column'}}>
                         <View style={{flexDirection:'row'}}>
-                        <Text style={{ color: 'black', marginLeft: 20, margin: 10, fontSize: 18 }}> Location : {getReadableLocation(lat,lng)}</Text>
+                        <Text style={{ color: 'black', marginLeft: 20, margin: 10, fontSize: 18 }}> {Utils.languages.Location} : {getReadableLocation(lat,lng)}</Text>
                         <MyIconButton name={"search-location"} size={30}
                         color={'green'} onPress={()=>{}}></MyIconButton>
                         <MyIconButton name={"edit"} size={30}
@@ -316,7 +316,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                     </View>
                     <View style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 15 }}>
                         <Button
-                            title="Add Photo"
+                            title={Utils.languages.ClickPhoto}
                             onPress={() => pickImage()}
                             color={'#5DB075'}
                         />
@@ -338,7 +338,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                             <CustomButton text='Cancel' onPress={onCancel} opacityStyle={{backgroundColor:'red'}}/>
                         }
                         <CustomButton
-                            text="Submit"
+                            text={Utils.languages.Submit}
                             onPress={onSave}
                         />
                     </View>
