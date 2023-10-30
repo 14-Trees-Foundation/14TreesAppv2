@@ -1,11 +1,22 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Alert, ToastAndroid,StyleSheet } from "react-native";
+import { Alert, ToastAndroid,StyleSheet, RootTagContext } from "react-native";
 import { DataService } from "./DataService";
 import { LocalDatabase } from "./tree_db";
-import LocalizedStrings from 'react-native-localization';
+import { AppRegistry } from 'react-native';
+import {name as appName} from './app.json';
+
+// Your app's root component
+import App from './App'; // Replace with the actual path to your app's root component
 
 export class Utils{
     static ldb = new LocalDatabase();
+
+// Function to force reload the app
+    static async reloadApp() {
+        const rootTag = Number.parseInt(await AsyncStorage.getItem(Constants.appRootTagKey));
+        console.log('app root tag:',(rootTag))
+        AppRegistry.runApplication(appName,{rootTag: rootTag}); 
+    }
     static async confirmAction(onConfirm,title=undefined,message=undefined){
         if(!title){
             title = 'Are you sure?';
@@ -240,121 +251,6 @@ export class Utils{
 
     // Language related functions
 
-    static languages = new LocalizedStrings({
-        "en": {
-            HomePage:"Home",
-            LogIn:"Login",
-            SignIn:"Sign In",
-            // home
-            Never:"Never",
-            LastSyncDataOn:"Last Sync Data On : ",
-            SyncData:"Sync Data",
-            AddNewTree:"Add New Tree",
-            FetchHelperData:"Fetch Helper Data",
-            SelectLanguage:"Select Language",
-            // add tree
-            SaplingId:"Sapling Id",
-            SelectTreeType:"Select Tree Type",
-            SelectPlot:"Select Plot",
-            Location:"Location",
-            ClickPhoto:"Click Photo",
-            Submit:"Submit",
-            CapturedAt:"Captured At",
-            // local data view
-            NoTreesFound:"No Trees Found on phone",
-            DeleteSyncedTrees:"Delete Synced Trees",
-            Filters:"Filters",
-            ClearFilters:"Clear Filters",
-            UploadStatus:"Upload Status",
-            TreeType: "Tree Type",
-            Plot: "Plot",
-            Apply:"Apply",
-            LoadingTrees:"Loading Trees...",
-            SaplingNo:"Sapling ID: ",
-            TypeId : "Type ID: ",
-            PlotId : "Plot ID: ",
-            Synced:"Synced",
-            Local:"Local",
-            NoImageFound:"No Image Found",
-            //verify users
-            ListUnverifiedUsers:"List of Unverified Users",
-            Refresh:"Refresh",
-            Name:"Name: ",
-            Email:"Email: ",
-            Verify:"Verify",
-            //Edit tree
-            EnterSaplingId:" Enter the Sapling ID",
-            Search:"Search",
-        },
-        "mr": {
-            SignIn:"साइन इन करा",
-            HomePage:"मुख्य पृष्ठ",
-            // home
-            LogIn:"लॉग इन",
-            Never:"कधीच नाही",
-            LastSyncDataOn:"शेवटचा सिंक केलेला डेटा : ",
-            SyncData:"डेटा सिंक करा",
-            AddNewTree:"नवीन झाड जोडा",
-            FetchHelperData:"मदतकारी डेटा तयार करा",
-            SelectLanguage:"भाषा निवडा",
-            // add tree
-            SaplingId:"रोपांची संख्या ",
-            SelectTreeType:"झाडाचा प्रकार निवडा",
-            SelectPlot:"भूमि निवडा",
-            Location:"स्थान",
-            ClickPhoto:"फोटो घ्या",
-            Submit:"सबमिट करा",
-            CapturedAt:"फोटो घेतले तारीख",
-            // local data view
-            NoTreesFound:"फोनवर झाडे आढळली नाहीत",
-            DeleteSyncedTrees:"सिंक केलेले झाडे हटवा",
-            Filters:"फिल्टर",
-            ClearFilters:"फिल्टर काढा",
-            UploadStatus:"अपलोड स्थिती",
-            TreeType: "झाडाचा प्रकार",
-            Plot: "प्लॉटचे नाव ",
-            Apply:"लागू करा",
-            LoadingTrees:"झाडे लोड होत आहेत...",
-            SaplingNo:"रोप क्र: ",
-            TypeId : "प्रकार क्र: ",
-            PlotId : "प्लॉट क्र: ",
-            Synced:"सिंक केले गेले",
-            Local:"लोकल",
-            NoImageFound:"फोटो नाही",
-            //verify users
-            ListUnverifiedUsers:"असत्यापित वापरकर्त्यांची यादी",
-            Refresh:"रिफ्रेश करा",
-            Name:"नाव : ",
-            Email:"ईमेल : ",
-            Verify:"सत्यापित करा",
-            //Edit tree
-            EnterSaplingId:"रोपाची संख्या लिहा",
-            Search:"शोधा",
-        },
-      });
-
-    static setLanguage = async (langidx) => {
-        // console.log('langidx is to: ',langidx);
-        var lang = 'en';
-        if(langidx===1){
-            lang = 'mr';
-        } 
-        await AsyncStorage.setItem(Constants.selectedLangKey, lang);
-        this.languages.setLanguage(lang);
-        // this.lang = lang;
-        // console.log('language set to: ',lang);
-        // console.log('sing in : ', Utils.languages.SignIn)
-    }
-
-    // get currently set language
-
-    static getLanguage = async () => {
-        var lang = await AsyncStorage.getItem(Constants.selectedLangKey);
-        // console.log('language fetched: ',lang);
-       return lang;
-    }
-
-
     // display the string in currently set language
 
     
@@ -365,6 +261,7 @@ export class Constants{
     static userDetailsKey = 'userobj';
     static adminIdKey = 'adminid';
     static lastHashKey = 'lasthash';
+    static appRootTagKey = 'rootTag';
     static syncDateKey = 'date';
     static imagePlaceholder = 'https://i.imgur.com/vxP6SFl.png'
     static treeFormTemplateData = {inSaplingId:null,inLat:0,inLng:0,inImages:[],inPlot:{},inTreeType:{},inUserId:''}

@@ -4,6 +4,7 @@ import { Dropdown } from './DropDown';
 import { DataService } from './DataService';
 import { Constants, Utils } from './Utils';
 import { TreeForm } from './TreeForm';
+import { Strings } from './Strings';
 
 const EditTreeScreen = ({navigation}) => {
     const [saplingid, setSaplingid] = useState('');
@@ -22,34 +23,6 @@ const EditTreeScreen = ({navigation}) => {
             plot_id:"",//plot id
         };
         const adminID = await Utils.getAdminId();
-        let a = {"sapling":{
-            "data":{
-                "location": {
-                    "type": "Point",
-                    "coordinates": [
-                        20.1339558,
-                        72.9084718
-                    ]
-                },
-                "sapling_id": "10001",
-                "tree_id": "tree_id",
-                "plot_id": "61bc101f969efcff564fb581",
-            },
-            "newImages":[
-                // {} use david mitchell image from uploadTrees.
-                {
-                    "meta":{
-                        "captureTimestamp":"2023-10-09T16:29:50.240Z",//obtained in JS using (new Date()).toISOString()
-                        "remark":"Looks alright."
-                    },
-                    "name":"DavidMitchellNew2.png",
-                    "data":""
-                }
-            ],
-            "deletedImages":[
-                "https://14treesplants.s3.ap-south-1.amazonaws.com/dev/trees/10001_2023-10-03T17%3A54%3A34.832Z.jpg"
-            ]
-        }}
         saplingData.location.coordinates = [
                 tree.lat, tree.lng
             ];
@@ -139,17 +112,17 @@ const EditTreeScreen = ({navigation}) => {
                  />
                 :
                 <View style={{backgroundColor:'white', margin: 10,borderRadius:10}}>
-                <Text style={{color:'black', marginLeft:20, margin:10, fontSize:18}}>{Utils.languages.EnterSaplingId}</Text>
+                <Text style={{color:'black', marginLeft:20, margin:10, fontSize:18}}>{Strings.languages.EnterSaplingId}</Text>
                 <TextInput
                     style={styles.txtInput}
-                    placeholder={Utils.languages.SaplingId}
+                    placeholder={Strings.languages.SaplingId}
                     placeholderTextColor={'#808080'}
                     onChangeText={(text) => setSaplingid(text)}
                     value={saplingid}
                 />
                 <View style={{margin:20}}>
                     <Button
-                        title={Utils.languages.Search}
+                        title={Strings.languages.Search}
                         onPress={() => fetchTreeDetails()}
                         color={'#5DB075'}
                     />

@@ -17,6 +17,7 @@ import { Utils, commonStyles } from './Utils';
 import { useFocusEffect } from '@react-navigation/native';
 import { CustomButton } from './Components';
 import { CustomDropdown } from './CustomDropdown';
+import { Strings } from './Strings';
 
 
 
@@ -144,14 +145,14 @@ const LocalDataView = ({ navigation }) => {
 
 
         <View style={{ padding: 20, }}>
-          <Text style={styles.text3}>{Utils.languages.SaplingNo} {tree.sapling_id}</Text>
-          <Text style={styles.text3}>{Utils.languages.PlotId}{tree.plot_id}</Text>
-          <Text style={styles.text3}> {Utils.languages.TypeId} {tree.type_id}</Text>
+          <Text style={styles.text3}>{Strings.languages.SaplingNo} {tree.sapling_id}</Text>
+          <Text style={styles.text3}>{Strings.languages.PlotId}{tree.plot_id}</Text>
+          <Text style={styles.text3}> {Strings.languages.TypeId} {tree.type_id}</Text>
 
           {(tree.uploaded) ?
-            <Text style={{ ...styles.success, ...styles.label }}>{Utils.languages.Synced}</Text>
+            <Text style={{ ...styles.success, ...styles.label }}>{Strings.languages.Synced}</Text>
             :
-            <Text style={{ ...styles.danger, ...styles.label }}>{Utils.languages.Local}</Text>}
+            <Text style={{ ...styles.danger, ...styles.label }}>{Strings.languages.Local}</Text>}
         </View>
         {
           tree.images.length ?
@@ -159,7 +160,7 @@ const LocalDataView = ({ navigation }) => {
               {renderImg(tree.images[0])}
             </View>
             :
-            <Text style={{ flex: 1, flexWrap: 'wrap', flexShrink: 1, color: 'black', fontSize: 20, textAlign: 'center', backgroundColor: 'white', margin: 5, textAlignVertical: 'center' }}>{Utils.languages.NoImageFound} </Text>
+            <Text style={{ flex: 1, flexWrap: 'wrap', flexShrink: 1, color: 'black', fontSize: 20, textAlign: 'center', backgroundColor: 'white', margin: 5, textAlignVertical: 'center' }}>{Strings.languages.NoImageFound} </Text>
         }
       </View>
     )
@@ -187,11 +188,11 @@ const LocalDataView = ({ navigation }) => {
         presentationStyle='formSheet'
       >
         <View style={{ margin: 20 }}>
-          <Text style={{ ...styles.text3, fontSize: 20 }}>{Utils.languages.Filters}</Text>
+          <Text style={{ ...styles.text3, fontSize: 20 }}>{Strings.languages.Filters}</Text>
           <View style={{ margin: 5 }}>
             <CustomDropdown
               items={uploadStatusList}
-              label={Utils.languages.UploadStatus}
+              label={Strings.languages.UploadStatus}
               onSelectItem={setSelectedUploadStatus}
               initItem={selectedUploadStatus}
             />
@@ -200,7 +201,7 @@ const LocalDataView = ({ navigation }) => {
           <View style={{ margin: 5 }}>
             <CustomDropdown
               items={saplingIdList}
-              label={Utils.languages.SaplingId}
+              label={Strings.languages.SaplingId}
               onSelectItem={setSelectedSaplingId}
               initItem={selectedSaplingId}
             />
@@ -208,7 +209,7 @@ const LocalDataView = ({ navigation }) => {
           <View style={{ margin: 5 }}>
             <CustomDropdown
               items={treeTypeList}
-              label={Utils.languages.TreeType}
+              label={Strings.languages.TreeType}
               onSelectItem={setSelectedTreeType}
               initItem={selectedTreeType}
             />
@@ -216,13 +217,13 @@ const LocalDataView = ({ navigation }) => {
           <View style={{ margin: 5 }}>
             <CustomDropdown
               items={plotList}
-              label={Utils.languages.Plot}
+              label={Strings.languages.Plot}
               onSelectItem={setSelectedPlot}
               initItem={selectedPlot}
             />
           </View>
           <View style={{ margin: 20 }}>
-            <Button title={Utils.languages.Apply} onPress={applychanges} color={'#5DB075'} />
+            <Button title={Strings.languages.Apply} onPress={applychanges} color={'#5DB075'} />
           </View>
         </View>
         {/* </View> */}
@@ -230,22 +231,22 @@ const LocalDataView = ({ navigation }) => {
 
 
       {
-        finalList === null ? <Text style={styles.text2}>{Utils.languages.LoadingTrees}</Text>
+        finalList === null ? <Text style={styles.text2}>{Strings.languages.LoadingTrees}</Text>
           :
           <FlatList
             ListEmptyComponent={
-              <Text style={commonStyles.text2}>{Utils.languages.NoTreesFound}</Text>
+              <Text style={commonStyles.text2}>{Strings.languages.NoTreesFound}</Text>
             }
             ListHeaderComponent={
               (treeList&&treeList.length>0)&&<View>
                   <View>
-                    <CustomButton text={Utils.languages.DeleteSyncedTrees}opacityStyle={{ backgroundColor: 'red', margin: 20, marginBottom: 0 }} onPress={() => Utils.confirmAction(deleteSyncedTrees)}></CustomButton>
+                    <CustomButton text={Strings.languages.DeleteSyncedTrees}opacityStyle={{ backgroundColor: 'red', margin: 20, marginBottom: 0 }} onPress={() => Utils.confirmAction(deleteSyncedTrees)}></CustomButton>
                   </View>
                   <View style={{ margin: 20, marginBottom: 5 }}>
-                    <CustomButton text={Utils.languages.Filters} onPress={openModal} color={'black'} />
+                    <CustomButton text={Strings.languages.Filters} onPress={openModal} color={'black'} />
                   </View>
                   {(finalList !== treeList) && <View style={{ margin: 20, marginBottom: 5 }}>
-                    <Button title={Utils.languages.ClearFilters} onPress={clearFilters} color={'black'} />
+                    <Button title={Strings.languages.ClearFilters} onPress={clearFilters} color={'black'} />
                   </View>
                   }
                 </View>

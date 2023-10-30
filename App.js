@@ -4,8 +4,8 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { createDrawerNavigator, DrawerItemList, DrawerContentScrollView, useDrawerProgress } from '@react-navigation/drawer';
 import { NavigationContainer, createNavigationContainerRef, useFocusEffect, useNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import React, { useEffect, useState } from 'react';
-import { Alert, Platform, View, Image, Text, Button } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { Alert, Platform, View, Image, Text, Button, RootTagContext } from 'react-native';
 import { PERMISSIONS } from 'react-native-permissions';
 import AddTreeScreen from './AddTree';
 import EditTreeScreen from './EditTree';
@@ -19,6 +19,7 @@ import { LocalDatabase } from './tree_db';
 import LoadingScreen from './LoadingScreen';
 import { enableLatestRenderer } from 'react-native-maps';
 import { utils } from '@react-native-firebase/app';
+import { Strings } from './Strings';
 enableLatestRenderer();
 
 const Stack = createStackNavigator();
@@ -60,7 +61,9 @@ const navigationRef = createNavigationContainerRef();
 const App = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userDetails,setUserDetails] = useState(null);
-
+  const rootTag = useContext(RootTagContext);
+  console.log('app roottag: ',rootTag)
+  AsyncStorage.setItem(Constants.appRootTagKey,rootTag.toString());
   const checkSignInStatus = async () => {
     try {
       const isSignedIn = await GoogleSignin.isSignedIn();
@@ -84,7 +87,7 @@ const App = () => {
       }
       else {
         // User is not signed in, navigate to LoginScreen
-        navigationRef.current?.navigate('Login');
+        navigationRef.current?.navigate(Strings.screenNames.LogIn);
         return false;
       }
     } catch (error) {
@@ -97,17 +100,16 @@ const App = () => {
     await AsyncStorage.removeItem(Constants.adminIdKey);
     await AsyncStorage.removeItem(Constants.userIdKey);
     await AsyncStorage.removeItem(Constants.userDetailsKey);
-    navigationRef.current?.navigate('Login');
+    navigationRef.current?.navigate(Strings.screenNames.LogIn);
   }
   const initTasks = async () => {
-    let storedlang = await Utils.getLanguage();
+    let storedlang = await Strings.getLanguage();
       console.log('stored lang: ', storedlang);
       if (storedlang === null) {
-        Utils.languages.setLanguage('en');
-        // Utils.lang = 'en';
+        Strings.setLanguage(Strings.english);
       }
       else {
-        Utils.languages.setLanguage(storedlang);
+        Strings.setLanguage(storedlang);
       }
     GoogleSignin.configure();
     const loggedIn = await checkSignInStatus();
@@ -119,7 +121,7 @@ const App = () => {
       navigationRef.current?.navigate('HomeScreen');
     }
     else{
-      navigationRef.current?.navigate('Login');
+      navigationRef.current?.navigate(Strings.screenNames.LogIn);
     }
   }
   const fetchUserDetails = async()=>{
@@ -185,14 +187,14 @@ const App = () => {
   const DrawerNavigator = ({navigation,route})=>{
     return (
       <Drawer.Navigator drawerContent={(props)=><DrawerContent user={route.params.userDetails} {...props}/>}>
-        <Drawer.Screen name="Home" component={HomeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
-        <Drawer.Screen name="LocalDataView" component={LocalDataView} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
-        <Drawer.Screen name="AddTree" component={AddTreeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
+        <Drawer.Screen name={Strings.screenNames.HomePage} component={HomeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
+        <Drawer.Screen name={Strings.screenNames.localDataView} component={LocalDataView} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
+        <Drawer.Screen name={Strings.screenNames.AddTree} component={AddTreeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
         {isAdmin && 
-        <Drawer.Screen name="EditTree" component={EditTreeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
+        <Drawer.Screen name={Strings.screenNames.EditTree} component={EditTreeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
         }
         {isAdmin && 
-        <Drawer.Screen name="VerifyUsers" component={VerifyusersScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
+        <Drawer.Screen name={Strings.screenNames.VerifyUsers} component={VerifyusersScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
         }
       </Drawer.Navigator>
   );
@@ -207,7 +209,7 @@ const App = () => {
     <NavigationContainer ref={navigationRef}>
       <Stack.Navigator>
         <Stack.Screen name="Start" component={LoadingScreen} options={{headerShown:false}}></Stack.Screen>
-        <Stack.Screen name="Login" component={LoginScreen} options={{ headerLeft:()=>null,...styleConfigs.drawerHeaderOptions }} />
+        <Stack.Screen name={Strings.screenNames.LogIn}  component={LoginScreen} options={{ headerLeft:()=>null,...styleConfigs.drawerHeaderOptions }} />
         <Stack.Screen name="HomeScreen" component={DrawerNavigator} initialParams={{userDetails:userDetails}} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
