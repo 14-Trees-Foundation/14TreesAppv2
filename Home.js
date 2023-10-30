@@ -48,7 +48,7 @@ const HomeScreen = ({ navigation }) => {
       {/* TODO: separate to sync component with progress bar and batch processing. */}
       <View style={{ margin: 20 }}>
         <Button
-          title={Strings.languages.SyncData}
+          title={Strings.buttonLabels.SyncData}
           onPress={Utils.upload}
           color={'#5DB075'}
         />
@@ -69,8 +69,8 @@ const HomeScreen = ({ navigation }) => {
 
       <View style={{ margin: 20, marginTop: 50 }}>
         <Button
-          title={Strings.languages.AddNewTree}
-          onPress={() => navigation.navigate(Strings.screenNames.getString('AddTree',Strings.english))}
+          title={Strings.buttonLabels.AddNewTree}
+          onPress={() => navigation.navigate(Strings.screenNames.AddTree)}
           color={'#5DB075'}
         />
       </View>
@@ -83,7 +83,7 @@ const HomeScreen = ({ navigation }) => {
           </View> */}
       <View style={{ margin: 20 }}>
         <Button
-          title={Strings.languages.FetchHelperData}
+          title={Strings.buttonLabels.FetchHelperData}
           onPress={Utils.fetchAndStoreHelperData}
           color={'#5DB075'}
         />
@@ -92,7 +92,7 @@ const HomeScreen = ({ navigation }) => {
         console.log('set your language')
         setLangModalVisible(!langModalVisible)
       }}>
-        <Text style={{ color: '#36454F', fontWeight: 'bold' }}>{Strings.languages.SelectLanguage}</Text>
+        <Text style={{ color: '#36454F', fontWeight: 'bold' }}>{Strings.buttonLabels.SelectLanguage}</Text>
       </TouchableOpacity>
       <LanguageModal
         navigation={navigation}

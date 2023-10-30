@@ -54,7 +54,7 @@ const VerifyusersScreen = ({navigation}) => {
                 
                 <View style={{margin:8, marginBottom:8, width:'50%', alignSelf:'center'}}>
                     <Button
-                        title={Strings.languages.Verify}
+                        title={Strings.buttonLabels.Verify}
                         onPress={() => verifyUser(item._id)}
                         color={'#5DB075'}
                     />
@@ -68,7 +68,7 @@ const VerifyusersScreen = ({navigation}) => {
         <View style={{backgroundColor:'white', height:'100%'}}>
             <View style={{marginTop:5,flexDirection:'row',justifyContent:'space-around'}}>
             <Text style={styles.text2}> {Strings.languages.ListUnverifiedUsers} </Text>
-            <CustomButton text={Strings.languages.Refresh} onPress={()=>fetchUsers(adminID)}></CustomButton>
+            <CustomButton text={Strings.buttonLabels.Refresh} onPress={()=>fetchUsers(adminID)}></CustomButton>
             </View>
             <View style={{height:500,margin:5,borderWidth:2,borderColor: '#5DB075',borderRadius: 5,flexDirection:'column',}}>
             <FlatList

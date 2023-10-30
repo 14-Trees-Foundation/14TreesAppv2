@@ -19,15 +19,15 @@ export class Strings{
         "mr":{
 
             HomePage:"मुख्य पृष्ठ",
-            AddTree:"Add Tree (MR)",
-            localDataView:"Local Data (MR)",
-            VerifyUsers:"Verify Users (MR)",
-            EditTree:"Edit Tree (MR)",
-            LogIn:'Log In',
-            DrawerScreen:'Homescreen (MR)',
-            startScreen:'start',
+            AddTree:"झाड जोडा",
+            localDataView:"लोकल डेटा",
+            VerifyUsers:"वापरकर्ते सत्यापित करा",
+            EditTree:"झाड संपादित करा",
+            LogIn:'Log In',//TODO, need to resolve a bug here, do NOT add translation yet.
         }
     })
+
+    // text strings
     static languages = new LocalizedStrings({
         "en": {
             LogIn:"Login",
@@ -35,27 +35,12 @@ export class Strings{
             // home
             Never:"Never",
             LastSyncDataOn:"Last Sync Data On : ",
-            SyncData:"Sync Data",
-            AddNewTree:"Add New Tree",
-            FetchHelperData:"Fetch Helper Data",
-            SelectLanguage:"Select Language",
             // add tree
-            SaplingId:"Sapling Id",
-            SelectTreeType:"Select Tree Type",
-            SelectPlot:"Select Plot",
-            Location:"Location",
-            ClickPhoto:"Click Photo",
-            Submit:"Submit",
+            Location:"Location",   
             CapturedAt:"Captured At",
             // local data view
             NoTreesFound:"No Trees Found on phone",
-            DeleteSyncedTrees:"Delete Synced Trees",
-            Filters:"Filters",
-            ClearFilters:"Clear Filters",
-            UploadStatus:"Upload Status",
-            TreeType: "Tree Type",
-            Plot: "Plot",
-            Apply:"Apply",
+            Filters:"Filters",  
             LoadingTrees:"Loading Trees...",
             SaplingNo:"Sapling ID: ",
             TypeId : "Type ID: ",
@@ -65,41 +50,23 @@ export class Strings{
             NoImageFound:"No Image Found",
             //verify users
             ListUnverifiedUsers:"List of Unverified Users",
-            Refresh:"Refresh",
             Name:"Name: ",
             Email:"Email: ",
-            Verify:"Verify",
             //Edit tree
             EnterSaplingId:" Enter the Sapling ID",
-            Search:"Search",
         },
         "mr": {
             SignIn:"साइन इन करा",
-            // home
             LogIn:"लॉग इन",
+            // home
             Never:"कधीच नाही",
             LastSyncDataOn:"शेवटचा सिंक केलेला डेटा : ",
-            SyncData:"डेटा सिंक करा",
-            AddNewTree:"नवीन झाड जोडा",
-            FetchHelperData:"मदतकारी डेटा तयार करा",
-            SelectLanguage:"भाषा निवडा",
             // add tree
-            SaplingId:"रोपांची संख्या ",
-            SelectTreeType:"झाडाचा प्रकार निवडा",
-            SelectPlot:"भूमि निवडा",
             Location:"स्थान",
-            ClickPhoto:"फोटो घ्या",
-            Submit:"सबमिट करा",
             CapturedAt:"फोटो घेतले तारीख",
             // local data view
             NoTreesFound:"फोनवर झाडे आढळली नाहीत",
-            DeleteSyncedTrees:"सिंक केलेले झाडे हटवा",
             Filters:"फिल्टर",
-            ClearFilters:"फिल्टर काढा",
-            UploadStatus:"अपलोड स्थिती",
-            TreeType: "झाडाचा प्रकार",
-            Plot: "प्लॉटचे नाव ",
-            Apply:"लागू करा",
             LoadingTrees:"झाडे लोड होत आहेत...",
             SaplingNo:"रोप क्र: ",
             TypeId : "प्रकार क्र: ",
@@ -109,29 +76,75 @@ export class Strings{
             NoImageFound:"फोटो नाही",
             //verify users
             ListUnverifiedUsers:"असत्यापित वापरकर्त्यांची यादी",
-            Refresh:"रिफ्रेश करा",
             Name:"नाव : ",
             Email:"ईमेल : ",
-            Verify:"सत्यापित करा",
             //Edit tree
             EnterSaplingId:"रोपाची संख्या लिहा",
-            Search:"शोधा",
+            
         },
     });
     static buttonLabels = new LocalizedStrings({
         "en":{
-
+            // home
+            SyncData:"Sync Data",
+            AddNewTree:"Add New Tree",
+            FetchHelperData:"Fetch Helper Data",
+            SelectLanguage:"Select Language",
+            // add tree
+            ClickPhoto:"Click Photo",
+            Submit:"Submit",
+            // local data view
+            DeleteSyncedTrees:"Delete Synced Trees",
+            Filters:"Filters",
+            ClearFilters:"Clear Filters",
+            Apply:"Apply",
+            //verify users
+            Refresh:"Refresh",
+            Verify:"Verify",
+            //edit tree
+            Search:"Search",
         },
         "mr":{
-
+            // home
+            SyncData:"डेटा सिंक करा",
+            AddNewTree:"नवीन झाड जोडा",
+            FetchHelperData:"मदतकारी डेटा तयार करा",
+            SelectLanguage:"भाषा निवडा",
+            // add tree
+            ClickPhoto:"फोटो घ्या",
+            Submit:"सबमिट करा",
+            // local data view
+            DeleteSyncedTrees:"सिंक केलेले झाडे हटवा",
+            Filters:"फिल्टर",
+            ClearFilters:"फिल्टर काढा",
+            Apply:"लागू करा",
+            //verify users
+            Refresh:"रिफ्रेश करा",
+            Verify:"सत्यापित करा",
+            //edit tree
+            Search:"शोधा",
         }
     })
     static labels = new LocalizedStrings({
         "en":{
-
+            //add tree
+            SaplingId:"Sapling Id",
+            SelectTreeType:"Select Tree Type",
+            SelectPlot:"Select Plot",
+            //local data view
+            UploadStatus:"Upload Status",
+            TreeType: "Tree Type",
+            Plot: "Plot",
         },
         "mr":{
-
+            //add tree
+            SaplingId:"रोपाची संख्या",
+            SelectTreeType:"झाडाचा प्रकार निवडा",
+            SelectPlot:"प्लॉट निवडा",
+            //local data view
+            UploadStatus:"अपलोड स्थिती",
+            TreeType: "झाडाचा प्रकार",
+            Plot: "प्लॉट",
         }
     })
     static english  = 'en';

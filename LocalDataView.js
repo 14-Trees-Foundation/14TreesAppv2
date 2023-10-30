@@ -192,7 +192,7 @@ const LocalDataView = ({ navigation }) => {
           <View style={{ margin: 5 }}>
             <CustomDropdown
               items={uploadStatusList}
-              label={Strings.languages.UploadStatus}
+              label={Strings.labels.UploadStatus}
               onSelectItem={setSelectedUploadStatus}
               initItem={selectedUploadStatus}
             />
@@ -201,7 +201,7 @@ const LocalDataView = ({ navigation }) => {
           <View style={{ margin: 5 }}>
             <CustomDropdown
               items={saplingIdList}
-              label={Strings.languages.SaplingId}
+              label={Strings.labels.SaplingId}
               onSelectItem={setSelectedSaplingId}
               initItem={selectedSaplingId}
             />
@@ -209,7 +209,7 @@ const LocalDataView = ({ navigation }) => {
           <View style={{ margin: 5 }}>
             <CustomDropdown
               items={treeTypeList}
-              label={Strings.languages.TreeType}
+              label={Strings.labels.TreeType}
               onSelectItem={setSelectedTreeType}
               initItem={selectedTreeType}
             />
@@ -217,13 +217,13 @@ const LocalDataView = ({ navigation }) => {
           <View style={{ margin: 5 }}>
             <CustomDropdown
               items={plotList}
-              label={Strings.languages.Plot}
+              label={Strings.labels.Plot}
               onSelectItem={setSelectedPlot}
               initItem={selectedPlot}
             />
           </View>
           <View style={{ margin: 20 }}>
-            <Button title={Strings.languages.Apply} onPress={applychanges} color={'#5DB075'} />
+            <Button title={Strings.buttonLabels.Apply} onPress={applychanges} color={'#5DB075'} />
           </View>
         </View>
         {/* </View> */}
@@ -240,13 +240,13 @@ const LocalDataView = ({ navigation }) => {
             ListHeaderComponent={
               (treeList&&treeList.length>0)&&<View>
                   <View>
-                    <CustomButton text={Strings.languages.DeleteSyncedTrees}opacityStyle={{ backgroundColor: 'red', margin: 20, marginBottom: 0 }} onPress={() => Utils.confirmAction(deleteSyncedTrees)}></CustomButton>
+                    <CustomButton text={Strings.buttonLabels.DeleteSyncedTrees}opacityStyle={{ backgroundColor: 'red', margin: 20, marginBottom: 0 }} onPress={() => Utils.confirmAction(deleteSyncedTrees)}></CustomButton>
                   </View>
                   <View style={{ margin: 20, marginBottom: 5 }}>
-                    <CustomButton text={Strings.languages.Filters} onPress={openModal} color={'black'} />
+                    <CustomButton text={Strings.buttonLabels.Filters} onPress={openModal} color={'black'} />
                   </View>
                   {(finalList !== treeList) && <View style={{ margin: 20, marginBottom: 5 }}>
-                    <Button title={Strings.languages.ClearFilters} onPress={clearFilters} color={'black'} />
+                    <Button title={Strings.buttonLabels.ClearFilters} onPress={clearFilters} color={'black'} />
                   </View>
                   }
                 </View>

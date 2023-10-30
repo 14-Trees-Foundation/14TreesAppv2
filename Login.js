@@ -39,7 +39,7 @@ const LoginScreen = ({navigation}) =>{
   
   const googleLogin = async () => {
     try {
-      navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
+      // navigation.navigate('HomeScreen');
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       const userDataPayload = {
@@ -142,7 +142,7 @@ const LoginScreen = ({navigation}) =>{
             }}
           />
         </View>
-        <Text style={{ fontSize: 20, color: 'white',marginLeft: 35, marginTop: 30 }}> {Strings.languages.SignIn}</Text>
+        {/* <Text style={{ fontSize: 20, color: 'white',marginLeft: 35, marginTop: 30 }}> {Strings.languages.SignIn}</Text> */}
         <View style={{marginVertical:30}}>
           <GoogleSigninButton
             style={{ width: '50%', height: 70, borderRadius: 40, alignItems: 'center', justifyContent: 'center', alignSelf: 'center'}}
@@ -155,7 +155,7 @@ const LoginScreen = ({navigation}) =>{
       <TouchableOpacity style={styles.selLang} onPress={()=> {
         setLangModalVisible(!langModalVisible)
       }}>
-        <Text style={{color:'#36454F', fontWeight:'bold'}}>{Strings.languages.SelectLanguage}</Text>
+        <Text style={{color:'#36454F', fontWeight:'bold'}}>{Strings.buttonLabels.SelectLanguage}</Text>
       </TouchableOpacity> 
       <LanguageModal 
         navigation={navigation}

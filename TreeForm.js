@@ -271,7 +271,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                         </Text>
                         :<TextInput
                         style={commonStyles.txtInput}
-                        placeholder={Strings.languages.SaplingId}
+                        placeholder={Strings.labels.SaplingId}
                         placeholderTextColor={'#000000'}
                         onChangeText={(text) => setSaplingid(text)}
                         value={saplingid}
@@ -279,12 +279,12 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                     }
                     <CustomDropdown
                         items={treeItems}
-                        label={Strings.languages.SelectTreeType}
+                        label={Strings.labels.SelectTreeType}
                         onSelectItem={setSelectedTreeType}
                     />
                     <CustomDropdown
                         items={plotItems}
-                        label={Strings.languages.SelectPlot}
+                        label={Strings.labels.SelectPlot}
                         onSelectItem={setSelectedPlot}
                     />
                     {/* <Text style={styles.text2}> Add photos</Text> */}
@@ -315,7 +315,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                     </View>
                     <View style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 15 }}>
                         <Button
-                            title={Strings.languages.ClickPhoto}
+                            title={Strings.buttonLabels.ClickPhoto}
                             onPress={() => pickImage()}
                             color={'#5DB075'}
                         />
@@ -337,7 +337,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                             <CustomButton text='Cancel' onPress={onCancel} opacityStyle={{backgroundColor:'red'}}/>
                         }
                         <CustomButton
-                            text={Strings.languages.Submit}
+                            text={Strings.buttonLabels.Submit}
                             onPress={onSave}
                         />
                     </View>
