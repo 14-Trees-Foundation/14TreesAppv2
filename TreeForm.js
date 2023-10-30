@@ -4,8 +4,9 @@ import {KeyboardAvoidingView,Alert,Text,Image,View,ToastAndroid,ScrollView,Touch
 import Geolocation from '@react-native-community/geolocation';
 import {launchCamera} from 'react-native-image-picker';
 import { CustomButton } from "./Components";
-import MapView,{PROVIDER_GOOGLE,Marker} from "react-native-maps";
 import { CustomDropdown } from "./CustomDropdown";
+import { Strings } from "./Strings";
+import { CoordinateSetter } from "./CoordinateSetter";
 export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewImage, onDeleteImage }) => {
     const {inSaplingId,inLng,inLat,inImages,inTreeType,inPlot,inUserId} = treeData;
     const [saplingid, setSaplingid] = useState(inSaplingId);
@@ -62,7 +63,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
 
                 
                 // await fetch();
-                // requestLocation();
                 setSaplingid(null);
                 setSelectedTreeType({});
                 setSelectedPlot({});
@@ -226,9 +226,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
             setTreeItems(trees);
             setPlotItems(plots);
             console.log(editMode, 'editmode');
-            if(editMode!==true){
-                requestLocation();
-            }
             console.log('options loaded: ',trees.length,plots.length)
             // setUserItems(users);
         } catch (error) {
@@ -240,24 +237,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
         loadDataCallback();
         console.log(selectedTreeType);
     }, []);
-    const requestLocation = async () => {
-        console.log('requesting location');
-        // TODO: handler
-        Geolocation.getCurrentPosition(
-            (position) => {
-                setlat(position.coords.latitude);
-                setlng(position.coords.longitude);
-                console.log(lat);
-                console.log(lng);
-            },
-            (error) => {
-                Alert.alert('Error', 'Have you turned on the location (GPS) on your phone?');
-            },
-            { enableHighAccuracy: false, timeout: 2000 },
-        );
-
-    };
-
 
     return (
         <KeyboardAvoidingView behavior='height' style={{ backgroundColor: '#5DB075' }} keyboardVerticalOffset={100}>
@@ -287,30 +266,13 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                         onSelectItem={setSelectedPlot}
                     />
                     {/* <Text style={styles.text2}> Add photos</Text> */}
-                    <View style={{flexDirection:'column'}}>
-                        <View style={{flexDirection:'row'}}>
-                        <Text style={{ color: 'black', marginLeft: 20, margin: 10, fontSize: 18 }}> Location : {Math.round(lat,4)},{Math.round(lng,4)}</Text>
-                        <TouchableOpacity>
-                            <Text>R</Text>
-                        </TouchableOpacity>
-                        </View>
-                        {((lat+lng)>0 )&&<MapView
-                        showsCompass={true}
-                        rotateEnabled={false}
-                        provider={PROVIDER_GOOGLE}
-                        style={{height:200,margin:10}}
-                        showsUserLocation={true}
-                        region={{
-                            latitude: lat,
-                            longitude: lng,
-                            latitudeDelta: 0.001,
-                            longitudeDelta: 0.001,
-                          }}
-                        >
-                            <Marker coordinate={{latitude:lat,longitude:lng}}>
-                            </Marker>
-                        </MapView>}
-                    </View>
+                    <CoordinateSetter
+                    editMode={editMode}
+                    lat={lat}
+                    lng={lng}
+                    onSetLat={setlat}
+                    onSetLng={setlng}
+                    ></CoordinateSetter>
                     <View style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 15 }}>
                         <Button
                             title="Add Photo"
