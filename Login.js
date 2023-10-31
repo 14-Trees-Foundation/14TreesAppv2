@@ -39,7 +39,7 @@ const LoginScreen = ({navigation}) =>{
   
   const googleLogin = async () => {
     try {
-      navigation.navigate('HomeScreen');
+      navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       const userDataPayload = {
@@ -84,7 +84,7 @@ const LoginScreen = ({navigation}) =>{
       // console.log(userObj._id);
       switch (response.status) {
         case 200:
-          navigation.navigate('HomeScreen');
+          navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
           break;
         case 400:
           Alert.alert('Login Failed','Check phone number and secret.');

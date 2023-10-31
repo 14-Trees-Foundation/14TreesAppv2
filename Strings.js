@@ -13,6 +13,8 @@ export class Strings{
             VerifyUsers:"Verify Users",
             EditTree:"Edit Tree",
             LogIn:'Log In',
+            DrawerScreen:'Homescreen',
+            startScreen:'start',
         },
         "mr":{
 
@@ -21,7 +23,9 @@ export class Strings{
             localDataView:"Local Data (MR)",
             VerifyUsers:"Verify Users (MR)",
             EditTree:"Edit Tree (MR)",
-            LogIn:'Log In',//TODO, need to resolve a bug here, do NOT add translation yet.
+            LogIn:'Log In',
+            DrawerScreen:'Homescreen (MR)',
+            startScreen:'start',
         }
     })
     static languages = new LocalizedStrings({

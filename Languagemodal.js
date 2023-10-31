@@ -93,12 +93,12 @@ const LanguageModal = ({ navigation, langModalVisible, setLangModalVisible, onSe
                 setLangModalVisible(false);
                 await Strings.setLanguage(selectedLang);
                 if (navigation.openDrawer) {
-                  navigation.openDrawer();
-                  navigation.closeDrawer();
+                  // navigation.openDrawer();
+                  // navigation.closeDrawer();
+                  Utils.reloadApp();
                 }
                 else {
                   console.log('reloading app')
-                  Utils.reloadApp();
                 }
               }}>
               <Text style={{ color: '#fff' }}>Apply</Text>

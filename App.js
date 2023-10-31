@@ -5,7 +5,7 @@ import { createDrawerNavigator, DrawerItemList, DrawerContentScrollView, useDraw
 import { NavigationContainer, createNavigationContainerRef, useFocusEffect, useNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useContext, useEffect, useState } from 'react';
-import { Alert, Platform, View, Image, Text, Button, RootTagContext } from 'react-native';
+import { Alert, Platform, View, Image, Text, Button, RootTagContext, BackHandler } from 'react-native';
 import { PERMISSIONS } from 'react-native-permissions';
 import AddTreeScreen from './AddTree';
 import EditTreeScreen from './EditTree';
@@ -63,6 +63,7 @@ const App = () => {
   const [userDetails,setUserDetails] = useState(null);
   const rootTag = useContext(RootTagContext);
   console.log('app roottag: ',rootTag)
+  
   AsyncStorage.setItem(Constants.appRootTagKey,rootTag.toString());
   const checkSignInStatus = async () => {
     try {
@@ -87,7 +88,7 @@ const App = () => {
       }
       else {
         // User is not signed in, navigate to LoginScreen
-        navigationRef.current?.navigate(Strings.screenNames.LogIn);
+        navigationRef.current?.navigate(Strings.screenNames.getString('LogIn',Strings.english));
         return false;
       }
     } catch (error) {
@@ -100,9 +101,10 @@ const App = () => {
     await AsyncStorage.removeItem(Constants.adminIdKey);
     await AsyncStorage.removeItem(Constants.userIdKey);
     await AsyncStorage.removeItem(Constants.userDetailsKey);
-    navigationRef.current?.navigate(Strings.screenNames.LogIn);
+    navigationRef.current?.navigate(Strings.screenNames.getString('LogIn',Strings.english));
   }
   const initTasks = async () => {
+    
     let storedlang = await Strings.getLanguage();
       console.log('stored lang: ', storedlang);
       if (storedlang === null) {
@@ -116,12 +118,11 @@ const App = () => {
     await Utils.setDBConnection();
     await Utils.createLocalTablesIfNeeded();
     if (loggedIn) {
-      // navigationRef.current?.navigate('Login')
       Utils.fetchAndStoreHelperData();
-      navigationRef.current?.navigate('HomeScreen');
+      navigationRef.current?.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
     }
     else{
-      navigationRef.current?.navigate(Strings.screenNames.LogIn);
+      navigationRef.current?.navigate(Strings.screenNames.getString('LogIn',Strings.english));
     }
   }
   const fetchUserDetails = async()=>{
@@ -148,10 +149,17 @@ const App = () => {
       })
     }
   }
+  const backHandler = ()=>{
+    return true;
+  }
   useEffect(() => {
     initTasks();
+    BackHandler.addEventListener('hardwareBackPress',backHandler)//disables back button presses.
     requestPermissions();
     setNavigationListener();
+    return ()=>{
+      BackHandler.removeEventListener('hardwareBackPress',backHandler);
+    }
   }, []);
 
   const DrawerContent = (props) => {
@@ -187,14 +195,44 @@ const App = () => {
   const DrawerNavigator = ({navigation,route})=>{
     return (
       <Drawer.Navigator drawerContent={(props)=><DrawerContent user={route.params.userDetails} {...props}/>}>
-        <Drawer.Screen name={Strings.screenNames.HomePage} component={HomeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
-        <Drawer.Screen name={Strings.screenNames.localDataView} component={LocalDataView} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
-        <Drawer.Screen name={Strings.screenNames.AddTree} component={AddTreeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
+        <Drawer.Screen
+          name={Strings.screenNames.getString('HomePage',Strings.english)}
+          component={HomeScreen}
+          options={{
+            ...styleConfigs.drawerHeaderOptions,
+            title:Strings.screenNames.HomePage
+          }} />
+        <Drawer.Screen
+        name={Strings.screenNames.getString('localDataView',Strings.english)}
+        component={LocalDataView}
+        options={{
+          ...styleConfigs.drawerHeaderOptions,
+          title:Strings.screenNames.localDataView
+        }} />
+        <Drawer.Screen
+        name={Strings.screenNames.getString('AddTree',Strings.english)}
+        component={AddTreeScreen}
+        options={{
+          ...styleConfigs.drawerHeaderOptions,
+          title:Strings.screenNames.AddTree
+        }}/>
         {isAdmin && 
-        <Drawer.Screen name={Strings.screenNames.EditTree} component={EditTreeScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
+        <Drawer.Screen
+        name={Strings.screenNames.getString('EditTree',Strings.english)}
+        component={EditTreeScreen}
+        options={{
+          ...styleConfigs.drawerHeaderOptions,
+          title:Strings.screenNames.EditTree
+        }}/>
         }
         {isAdmin && 
-        <Drawer.Screen name={Strings.screenNames.VerifyUsers} component={VerifyusersScreen} options={{...styleConfigs.drawerHeaderOptions}}></Drawer.Screen>
+        <Drawer.Screen
+        name={Strings.screenNames.getString('VerifyUsers',Strings.english)}
+        component={VerifyusersScreen}
+        options={{
+          ...styleConfigs.drawerHeaderOptions,
+          title:Strings.screenNames.VerifyUsers
+        }}/>
         }
       </Drawer.Navigator>
   );
@@ -208,9 +246,26 @@ const App = () => {
   return (
     <NavigationContainer ref={navigationRef}>
       <Stack.Navigator>
-        <Stack.Screen name="Start" component={LoadingScreen} options={{headerShown:false}}></Stack.Screen>
-        <Stack.Screen name={Strings.screenNames.LogIn}  component={LoginScreen} options={{ headerLeft:()=>null,...styleConfigs.drawerHeaderOptions }} />
-        <Stack.Screen name="HomeScreen" component={DrawerNavigator} initialParams={{userDetails:userDetails}} options={{ headerShown: false }} />
+        <Stack.Screen
+          name={Strings.screenNames.getString('startScreen',Strings.english)}
+          component={LoadingScreen}
+          options={{headerShown:false}}/>
+        <Stack.Screen
+          name={Strings.screenNames.getString('LogIn',Strings.english)}
+           component={LoginScreen}
+           options={{
+            headerLeft:()=>null,
+            ...styleConfigs.drawerHeaderOptions,
+            title:Strings.screenNames.LogIn
+            }} />
+        <Stack.Screen
+          name={Strings.screenNames.getString('DrawerScreen',Strings.english)}
+          component={DrawerNavigator}
+          initialParams={{userDetails:userDetails}}
+          options={{
+            headerLeft:()=>null,
+            headerShown: false
+            }} />
       </Stack.Navigator>
     </NavigationContainer>
     )

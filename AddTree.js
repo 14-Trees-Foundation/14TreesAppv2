@@ -5,6 +5,7 @@ import React, { useEffect } from 'react';
 import { TreeForm } from './TreeForm';
 import { Constants, Utils } from './Utils';
 import {ToastAndroid} from 'react-native';
+import { Strings } from './Strings';
 
 
 const AddTreeScreen = ({ navigation }) => {
@@ -27,7 +28,7 @@ const AddTreeScreen = ({ navigation }) => {
         await ldb.saveTreeImages(element);
       }
       ToastAndroid.show('Tree saved locally!', ToastAndroid.SHORT);
-      navigation.navigate('Home');
+      navigation.navigate(Strings.screenNames.getString('HomePage',Strings.english));
     }
     const inputTreeData = {...Constants.treeFormTemplateData};
   return <TreeForm treeData={inputTreeData} updateUserId={true} updateLocation={true} onVerifiedSave={onVerifiedSave}/>;

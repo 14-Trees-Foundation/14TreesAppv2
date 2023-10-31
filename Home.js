@@ -45,7 +45,7 @@ const HomeScreen = ({ navigation }) => {
     <View >
       <Text style={{ fontSize: 20, marginTop: 20, alignContent: 'center', justifyContent: 'center', alignSelf: 'center', color: 'black' }}>{Strings.languages.LastSyncDataOn}</Text>
       <Text style={{ fontSize: 20, alignContent: 'center', justifyContent: 'center', alignSelf: 'center', color: 'black' }}>{syncDate}</Text>
-
+      {/* TODO: separate to sync component with progress bar and batch processing. */}
       <View style={{ margin: 20 }}>
         <Button
           title={Strings.languages.SyncData}
@@ -70,14 +70,14 @@ const HomeScreen = ({ navigation }) => {
       <View style={{ margin: 20, marginTop: 50 }}>
         <Button
           title={Strings.languages.AddNewTree}
-          onPress={() => navigation.navigate('AddTree')}
+          onPress={() => navigation.navigate(Strings.screenNames.getString('AddTree',Strings.english))}
           color={'#5DB075'}
         />
       </View>
       {/* <View style={{margin:20, marginTop:50}}>
             <Button
               title="View Local Trees"
-              onPress={() => navigation.navigate('LocalDataView')}
+              onPress={() => {}}
               color={'#5DB075'}
             />
           </View> */}
