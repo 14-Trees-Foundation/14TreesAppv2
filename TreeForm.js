@@ -288,31 +288,13 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                         onSelectItem={setSelectedPlot}
                     />
                     {/* <Text style={styles.text2}> Add photos</Text> */}
-                    <View style={{flexDirection:'column'}}>
-                        <View style={{flexDirection:'row'}}>
-                        <Text style={{ color: 'black', marginLeft: 20, margin: 10, fontSize: 18 }}> {Strings.languages.Location} : {getReadableLocation(lat,lng)}</Text>
-                        <MyIconButton name={"search-location"} size={30}
-                        color={'green'} onPress={()=>{}}></MyIconButton>
-                        <MyIconButton name={"edit"} size={30}
-                        color={'green'} onPress={()=>{}}></MyIconButton>
-                        </View>
-                        {/* {((lat+lng)>0 )&&<MapView
-                        showsCompass={true}
-                        rotateEnabled={false}
-                        provider={PROVIDER_GOOGLE}
-                        style={{height:200,margin:10}}
-                        showsUserLocation={true}
-                        region={{
-                            latitude: lat,
-                            longitude: lng,
-                            latitudeDelta: 0.001,
-                            longitudeDelta: 0.001,
-                          }}
-                        >
-                            <Marker coordinate={{latitude:lat,longitude:lng}}>
-                            </Marker>
-                        </MapView>} */}
-                    </View>
+                    <CoordinateSetter
+                    editMode={editMode}
+                    inLat={inLat}
+                    inLng={inLng}
+                    onSetLat={setlat}
+                    onSetLng={setlng}
+                    ></CoordinateSetter>
                     <View style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 15 }}>
                         <Button
                             title={Strings.buttonLabels.ClickPhoto}
