@@ -53,34 +53,13 @@ const HomeScreen = ({ navigation }) => {
           color={'#5DB075'}
         />
       </View>
-
-      {/* <View>
-            <TouchableOpacity
-              style={{
-                backgroundColor: 'blue',
-                padding: 10,
-                borderRadius: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ color: 'white', fontSize: 16 }}>Click Me</Text>
-            </TouchableOpacity>
-          </View> */}
-
       <View style={{ margin: 20, marginTop: 50 }}>
         <Button
           title={Strings.buttonLabels.AddNewTree}
-          onPress={() => navigation.navigate(Strings.screenNames.AddTree)}
+          onPress={() => navigation.navigate(Strings.screenNames.getString('AddTree',Strings.english))}
           color={'#5DB075'}
         />
       </View>
-      {/* <View style={{margin:20, marginTop:50}}>
-            <Button
-              title="View Local Trees"
-              onPress={() => {}}
-              color={'#5DB075'}
-            />
-          </View> */}
       <View style={{ margin: 20 }}>
         <Button
           title={Strings.buttonLabels.FetchHelperData}
