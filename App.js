@@ -20,6 +20,7 @@ import LoadingScreen from './LoadingScreen';
 import { enableLatestRenderer } from 'react-native-maps';
 import { utils } from '@react-native-firebase/app';
 import { Strings } from './Strings';
+import { DrawerContent } from './Components';
 enableLatestRenderer();
 
 const Stack = createStackNavigator();
@@ -60,7 +61,6 @@ async function requestPermissions() {
 const navigationRef = createNavigationContainerRef();
 const App = () => {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [userDetails,setUserDetails] = useState(null);
   const rootTag = useContext(RootTagContext);
   console.log('app roottag: ',rootTag)
   
@@ -75,7 +75,6 @@ const App = () => {
         let storedUserDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
           if(storedUserDetails){
             storedUserDetails = JSON.parse(storedUserDetails);
-            setUserDetails(storedUserDetails);
           }
         if (adminId) {
           setIsAdmin(true);
@@ -96,13 +95,6 @@ const App = () => {
       return false;
     }
   };
-  const logout = async()=>{
-    await GoogleSignin.signOut();
-    await AsyncStorage.removeItem(Constants.adminIdKey);
-    await AsyncStorage.removeItem(Constants.userIdKey);
-    await AsyncStorage.removeItem(Constants.userDetailsKey);
-    navigationRef.current?.navigate(Strings.screenNames.getString('LogIn',Strings.english));
-  }
   const initTasks = async () => {
     
     let storedlang = await Strings.getLanguage();
@@ -113,10 +105,10 @@ const App = () => {
       else {
         Strings.setLanguage(storedlang);
       }
-    Alert.alert('going to call GoogleSignin configure.')
+    // Alert.alert('going to call GoogleSignin configure.')
     console.log('going to call GoogleSignin configure.')
     GoogleSignin.configure();
-    Alert.alert('GoogleSignin configure called.')
+    // Alert.alert('GoogleSignin configure called.')
     console.log('GoogleSignin configure called.')
     const loggedIn = await checkSignInStatus();
     await Utils.setDBConnection();
@@ -129,23 +121,7 @@ const App = () => {
       navigationRef.current?.navigate(Strings.screenNames.getString('LogIn',Strings.english));
     }
   }
-  const fetchUserDetails = async()=>{
-    console.log('refreshing details');
-    let storedUserDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
-    if(storedUserDetails){
-      storedUserDetails = JSON.parse(storedUserDetails);
-      console.log('existing details: ',userDetails);
-      console.log('received details:', storedUserDetails);
-      if((userDetails===null)){
-        console.log(userDetails);
-        setUserDetails(storedUserDetails);
-      }
-      else if(storedUserDetails.email!==userDetails.email){
-        console.log(userDetails.email,storedUserDetails.email);
-        setUserDetails(storedUserDetails);
-      }
-    }
-  }
+
   const setNavigationListener = ()=>{
     if(navigationRef.isReady()){
       navigationRef.addListener('state',(e)=>{
@@ -166,57 +142,9 @@ const App = () => {
     }
   }, []);
 
-  const DrawerContent = (props) => {
-    // const [isAdmin, setIsAdmin] = useState(false);
-    // const [userDetails,setUserDetails] = useState(null);
-    const fillInUserDetails = async ()=>{
-      // let storedUserDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
-      // if(storedUserDetails){
-        // storedUserDetails = JSON.parse(storedUserDetails);
-        // setUserDetails(storedUserDetails);
-      //   if(storedUserDetails.adminID){
-      //     if(!isAdmin){
-      //       setIsAdmin(true);
-      //     }
-      //   }
-      // }
-    }
-    useFocusEffect(()=>{
-      console.log('in focus',isAdmin)
-      fillInUserDetails();
-      return ()=>null
-    })
-    return (<DrawerContentScrollView {...props}>
-      <View style={{flexDirection:'column',alignItems:'center',marginTop:50,bottom:0}}>
-        <Image
-          source={require('./assets/logo.png')} // Replace with your delete icon image
-          style={{ width: 100, height: 100, marginLeft: 10 }} // Adjust the icon dimensions and margin
-        />
-        <Text style={{fontSize:20,fontWeight:'bold',color:'black'}}>14 Trees</Text>
-        {
-        userDetails
-        ?
-        <View style={{flexDirection:'row',alignItems:'center',alignSelf:'flex-start',margin:10,justifyContent:'space-around'}}>
-          <Image source={{uri:userDetails.image}} style={{width:75,height:75,borderRadius:37.5}}>
-          </Image>
-          <View style={{flexDirection:'column',marginLeft:5}}>
-            <Text style={{fontSize:15,color:'black'}}>{userDetails.name}</Text>
-            <Text>{isAdmin?'Admin':'Logger'}</Text>
-          </View>
-        </View>
-        :
-        <Text>Loading user details...</Text>
-        }
-      </View>
-      <DrawerItemList {...props} />
-      <View style={{flexDirection:'column',position:'relative',marginTop:100,alignSelf:'center'}}>
-        <Button title='Log out' onPress={()=>Utils.confirmAction(logout,undefined,'Do you want to log out?')} style={commonStyles.logOutButton} color='red' ></Button>
-      </View>
-    </DrawerContentScrollView>)
-  }
   const DrawerNavigator = ({navigation,route})=>{
     return (
-      <Drawer.Navigator drawerContent={DrawerContent}>
+      <Drawer.Navigator drawerContent={(props)=> <DrawerContent navigationRef={navigationRef} {...props}/>}>
                 <Drawer.Screen
           name={Strings.screenNames.getString('HomePage',Strings.english)}
           component={HomeScreen}
@@ -260,8 +188,6 @@ const App = () => {
   );
   }
   // check dynamically adminIdkey is stored in the async storage after login
-  // if yes, then set the isAdmin to true
-  // else set it to false  
   //TODO: navigation image load in first time login.
 
 
@@ -283,7 +209,6 @@ const App = () => {
         <Stack.Screen
           name={Strings.screenNames.getString('DrawerScreen',Strings.english)}
           component={DrawerNavigator}
-          initialParams={{userDetails:userDetails}}
           options={{
             headerLeft:()=>null,
             headerShown: false

@@ -1,7 +1,13 @@
-import { TouchableOpacity,Text,View } from "react-native";
-import { Utils, commonStyles, fontAwesome5List, materialCommunityList } from "./Utils";
+import { TouchableOpacity,View, Image, Text, Button, RootTagContext, BackHandler } from "react-native";
+import { Constants, Utils, commonStyles, fontAwesome5List, materialCommunityList } from "./Utils";
 import Fa5Icon from 'react-native-vector-icons/FontAwesome5';
+import { NavigationContainer, createNavigationContainerRef, useFocusEffect, useNavigationContainerRef } from '@react-navigation/native';
+import {useState,useEffect} from 'react';
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { Strings } from "./Strings";
 export const CustomButton = ({ text, opacityStyle,textStyle, onPress }) => {
     let finalOpacityStyle = commonStyles.defaultButtonStyle;
     if(opacityStyle){
@@ -35,4 +41,59 @@ export function MyIconButton({name,size,color,onPress,iconColor='white',text=und
             <MyIcon name={name} size={size} color={iconColor}></MyIcon>
             </TouchableOpacity>
 }
-
+const fillInUserDetails = async (setIsAdmin, setUserDetails) => {
+    let storedUserDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
+    if (storedUserDetails) {
+        storedUserDetails = JSON.parse(storedUserDetails);
+        setUserDetails(storedUserDetails);
+        if (storedUserDetails.adminID) {
+            setIsAdmin(true);
+        }
+        else {
+            setIsAdmin(false);
+        }
+    }
+}
+const logout = async(navigationRef)=>{
+    await GoogleSignin.signOut();
+    await AsyncStorage.removeItem(Constants.adminIdKey);
+    await AsyncStorage.removeItem(Constants.userIdKey);
+    await AsyncStorage.removeItem(Constants.userDetailsKey);
+    navigationRef.current?.navigate(Strings.screenNames.getString('LogIn',Strings.english));
+}
+export const DrawerContent = (props) => {
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [userDetails,setUserDetails] = useState(null);
+    useEffect(()=>{
+        console.log('in effect')
+        fillInUserDetails(setIsAdmin,setUserDetails);
+        return ()=>null
+    },[])
+    return (<DrawerContentScrollView {...props}>
+      <View style={{flexDirection:'column',alignItems:'center',marginTop:50,bottom:0}}>
+        <Image
+          source={require('./assets/logo.png')} // Replace with your delete icon image
+          style={{ width: 100, height: 100, marginLeft: 10 }} // Adjust the icon dimensions and margin
+        />
+        <Text style={{fontSize:20,fontWeight:'bold',color:'black'}}>14 Trees</Text>
+        {
+        userDetails
+        ?
+        <View style={{flexDirection:'row',alignItems:'center',alignSelf:'flex-start',margin:10,justifyContent:'space-around'}}>
+          <Image source={{uri:userDetails.image}} style={{width:75,height:75,borderRadius:37.5}}>
+          </Image>
+          <View style={{flexDirection:'column',marginLeft:5}}>
+            <Text style={{fontSize:15,color:'black'}}>{userDetails.name}</Text>
+            <Text>{isAdmin?'Admin':'Logger'}</Text>
+          </View>
+        </View>
+        :
+        <Text>Loading user details...</Text>
+        }
+      </View>
+      <DrawerItemList {...props} />
+      <View style={{flexDirection:'column',position:'relative',marginTop:100,alignSelf:'center'}}>
+        <Button title='Log out' onPress={()=>Utils.confirmAction(()=>logout(props.navigationRef),undefined,'Do you want to log out?')} style={commonStyles.logOutButton} color='red' ></Button>
+      </View>
+    </DrawerContentScrollView>)
+  }
