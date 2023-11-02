@@ -10,9 +10,8 @@ import { Strings } from "./Strings";
 export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewImage, onDeleteImage }) => {
     const {inSaplingId,inLng,inLat,inImages,inTreeType,inPlot,inUserId} = treeData;
     const [saplingid,setSaplingId] = useState(inSaplingId);
-    const [lat, setlat] = useState(inLng);
-    const [lng, setlng] = useState(inLat);
-    const [keyboardAvoidingViewEnabled,setKeyboardAvoidingViewEnabled] = useState(false);
+    const [lat, setlat] = useState(inLat);
+    const [lng, setlng] = useState(inLng);
     // array of images
     const [exisitingImages,setExistingImages] = useState(inImages)
     const [images, setImages] = useState([]);
@@ -262,75 +261,67 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
     }
 
     return (
-        <KeyboardAvoidingView behavior='height' style={{ backgroundColor: '#5DB075' }} keyboardVerticalOffset={100}>
-            <ScrollView  style={{ backgroundColor: '#5DB075', height: '100%' }}>
-                <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
-                    {
-                        editMode===true?
-                        <Text style={{...commonStyles.text4,textAlign:'center'}}>
+        <ScrollView style={{ backgroundColor: '#5DB075', height: '100%' }}>
+            <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
+                {
+                    editMode === true ?
+                        <Text style={{ ...commonStyles.text4, textAlign: 'center' }}>
                             Sapling ID: {saplingid}
                         </Text>
-                        :<TextInput
-                        style={commonStyles.txtInput}
-                        placeholder={Strings.labels.SaplingId}
-                        placeholderTextColor={'#000000'}
-                        onChangeText={(text) => {setSaplingId(text)}}
-                    />
-                    }
-                    <CustomDropdown
-                        initItem={selectedTreeType}
-                        items={treeItems}
-                        label={Strings.labels.SelectTreeType}
-                        onSelectItem={setSelectedTreeType}
-                    />
-                    <CustomDropdown
-                        initItem={selectedPlot}
-                        items={plotItems}
-                        label={Strings.labels.SelectPlot}
-                        onSelectItem={setSelectedPlot}
-                    />
-                    {/* <Text style={styles.text2}> Add photos</Text> */}
-                    <CoordinateSetter
+                        : <TextInput
+                            style={commonStyles.txtInput}
+                            placeholder={Strings.labels.SaplingId}
+                            placeholderTextColor={'#000000'}
+                            onChangeText={(text) => { setSaplingId(text) }}
+                        />
+                }
+                <CustomDropdown
+                    initItem={selectedTreeType}
+                    items={treeItems}
+                    label={Strings.labels.SelectTreeType}
+                    onSelectItem={setSelectedTreeType}
+                />
+                <CustomDropdown
+                    initItem={selectedPlot}
+                    items={plotItems}
+                    label={Strings.labels.SelectPlot}
+                    onSelectItem={setSelectedPlot}
+                />
+                {/* <Text style={styles.text2}> Add photos</Text> */}
+                <CoordinateSetter
                     editMode={editMode}
                     inLat={inLat}
                     inLng={inLng}
                     onSetLat={setlat}
                     onSetLng={setlng}
-                    ></CoordinateSetter>
-                    <View style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 15 }}>
-                        <Button
-                            title={Strings.buttonLabels.ClickPhoto}
-                            onPress={() => pickImage()}
-                            color={'#5DB075'}
-                        />
-                    </View>
-
-                    <KeyboardAvoidingView behavior="position" style={{}} keyboardVerticalOffset={150} enabled={keyboardAvoidingViewEnabled}>
-                    <View style={{ margin: 2, borderColor: '#5DB075', borderRadius: 5, flexDirection: 'column', backgroundColor:'white'}}>
+                ></CoordinateSetter>
+                <View style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 15 }}>
+                    <Button
+                        title={Strings.buttonLabels.ClickPhoto}
+                        onPress={() => pickImage()}
+                        color={'#5DB075'}
+                    />
+                </View>
+                    <View style={{ margin: 2, borderColor: '#5DB075', borderRadius: 5, flexDirection: 'column', backgroundColor: 'white' }}>
                         <FlatList
                             scrollEnabled={false}
-                            data={[...exisitingImages,...images]}
+                            data={[...exisitingImages, ...images]}
                             renderItem={commonRenderFunction}
                         />
                     </View>
-                    </KeyboardAvoidingView>
-                    <View style={{ flexDirection:'row',justifyContent:'space-around',marginHorizontal: 30, marginTop: 25, marginBottom: 10 }}>
-                        {
-                            (onCancel!==undefined)
-                            &&
-                            <CustomButton text='Cancel' onPress={onCancel} opacityStyle={{backgroundColor:'red'}}/>
-                        }
-                        <CustomButton
-                            text={Strings.buttonLabels.Submit}
-                            onPress={onSave}
-                        />
-                    </View>
-
-
-
+                <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: 30, marginTop: 25, marginBottom: 10 }}>
+                    {
+                        (onCancel !== undefined)
+                        &&
+                        <CustomButton text='Cancel' onPress={onCancel} opacityStyle={{ backgroundColor: 'red' }} />
+                    }
+                    <CustomButton
+                        text={Strings.buttonLabels.Submit}
+                        onPress={onSave}
+                    />
                 </View>
-            </ScrollView>
-        </KeyboardAvoidingView>
+            </View>
+        </ScrollView>
     )
 
 }

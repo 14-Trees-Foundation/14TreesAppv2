@@ -45,7 +45,7 @@ const EditTreeScreen = ({navigation}) => {
         if(!response){
             return;
         }
-        console.log(requestData);
+        // console.log(requestData);
         ToastAndroid.show(`Tree with ${response.data.sapling_id} updated!`,ToastAndroid.LONG);
         setDetails(null);
         setNewImages([]);
@@ -93,14 +93,11 @@ const EditTreeScreen = ({navigation}) => {
         detailsForTreeForm.inTreeType = treeType;
         detailsForTreeForm.inPlot = plot;
         detailsForTreeForm.inUserId = treeDetails.user_id;
-        console.log(detailsForTreeForm);
+        // console.log(detailsForTreeForm);
         setDetails(detailsForTreeForm);
     }
-    return (
-        <View style={{backgroundColor:'#5DB075'}}>
-            {
-                details?
-                <TreeForm
+    if(details){
+        return <TreeForm
                  editMode={true}
                  treeData={details}
                  onCancel={()=>setDetails(null)}
@@ -110,29 +107,31 @@ const EditTreeScreen = ({navigation}) => {
                  onNewImage={(image)=>{setNewImages([...newImages,image]);}}
                  onDeleteImage={(name)=>{setDeletedImages([...deletedImages,name]);}}
                  />
-                :
+    }
+    else{
+        return (
+            <View style={{backgroundColor:'#5DB075',height:'100%'}}>
                 <View style={{backgroundColor:'white', margin: 10,borderRadius:10}}>
-                <Text style={{color:'black', marginLeft:20, margin:10, fontSize:18}}>{Strings.languages.EnterSaplingId}</Text>
-                <TextInput
-                    style={styles.txtInput}
-                    placeholder={Strings.labels.SaplingId}
-                    placeholderTextColor={'#808080'}
-                    onChangeText={(text) => setSaplingid(text)}
-                    value={saplingid}
-                />
-                <View style={{margin:20}}>
-                    <Button
-                        title={Strings.buttonLabels.Search}
-                        onPress={() => fetchTreeDetails()}
-                        color={'#5DB075'}
+                    <Text style={{color:'black', marginLeft:20, margin:10, fontSize:18}}>{Strings.languages.EnterSaplingId}</Text>
+                    <TextInput
+                        style={styles.txtInput}
+                        placeholder={Strings.labels.SaplingId}
+                        placeholderTextColor={'#808080'}
+                        onChangeText={(text) => setSaplingid(text)}
+                        value={saplingid}
                     />
+                    <View style={{margin:20}}>
+                        <Button
+                            title={Strings.buttonLabels.Search}
+                            onPress={() => fetchTreeDetails()}
+                            color={'#5DB075'}
+                        />
+                    </View>
                 </View>
             </View>
+        )
+    }
 
-            }
-            
-        </View>
-    )
 }
 
 export default EditTreeScreen;

@@ -4,7 +4,7 @@ import { Text, View,Alert,ToastAndroid } from "react-native";
 import { MyIconButton } from "./Components";
 import { useEffect,useState } from "react";
 import { Strings } from "./Strings";
-import { commonStyles } from "./Utils";
+import { Utils, commonStyles } from "./Utils";
 
 export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode})=>{
     const [lat,setLat] = useState(inLat);
@@ -39,7 +39,7 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode})=>{
                     Alert.alert('Error','Have you turned on the location (GPS) on your phone?');
                 }
             },
-            { enableHighAccuracy: true, timeout: 20000 },
+            { enableHighAccuracy: false, timeout: 20000},
         );
 
     };
@@ -50,7 +50,7 @@ return <View style={{flexDirection:'column',padding:20}}>
         <Text style={commonStyles.text3}>{getReadableLocation(lat,lng)}</Text>
         <View style={{flexDirection:'row'}}>
         <MyIconButton name={"refresh"} size={30}
-        color={'green'} onPress={()=>{}}></MyIconButton>
+        color={'green'} onPress={()=>Utils.confirmAction(()=>requestLocation(),'Refresh?','Update location current GPS coordinates?')}></MyIconButton>
         <MyIconButton name={"edit"} size={30}
         color={'green'} onPress={()=>{}}></MyIconButton>
         <MyIconButton name={"hand-rock"} size={30}
