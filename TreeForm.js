@@ -59,17 +59,11 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
         }
         else {
             try {
-                const tree = {
-                    treeid: selectedTreeType.value,
-                    saplingid: saplingid,
-                    lat: lat,
-                    lng: lng,
-                    plotid: selectedPlot.value,
-                    user_id: userId,
-                };
-               
 
-                setSaplingid(null);
+                // call saveTreeImages for each image
+
+                // await fetch();
+                setSaplingId('');
                 setSelectedTreeType({});
                 setSelectedPlot({});
                 // setSelectedUser({});
