@@ -23,7 +23,7 @@ const VerifyusersScreen = ({navigation}) => {
             return;
         }
         if(response.status == 200){
-            ToastAndroid.show('User Verified',ToastAndroid.LONG);
+            ToastAndroid.show(Strings.alertMessages.UserVerified,ToastAndroid.LONG);
             fetchUsers(adminID);
         }
        

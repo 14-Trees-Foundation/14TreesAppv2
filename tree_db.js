@@ -1,5 +1,6 @@
 import { enablePromise, openDatabase } from 'react-native-sqlite-storage';
-
+import { Alert } from 'react-native';
+import { Strings } from './Strings';
 const treeTableName = 'tree';
 const treetypeName = 'treetype';
 const plotName = 'plot';
@@ -65,7 +66,7 @@ export class LocalDatabase {
         } catch (error) {
             //TODO: remove raw throw. Convert to Alert.
             console.error(error);
-            throw Error('Failed to get treedata !!!');
+            Alert.alert(Strings.alertMessages.FailedGetTreedata);
         }
     }
     getTreesByUploadStatus = async (uploaded) => {
@@ -83,7 +84,7 @@ export class LocalDatabase {
         } catch (error) {
             //TODO: remove raw throw. Convert to Alert.
             console.error(error);
-            throw Error('Failed to get treedata !!!');
+            Alert.alert(Strings.alertMessages.FailedGetTreedata);
         }
     };
     deleteSyncedTrees = async()=>{
@@ -114,30 +115,9 @@ export class LocalDatabase {
             return treesimgs;
         } catch (error) {
             console.error(error);
-            throw Error('Failed to get treeimgdata !!!');
+            Alert.alert(Strings.alertMessages.FailedGetTreeImgdata);
         }
     };
-
-    // get coordinates of all trees from table 'tree'
-
-    getTreeCoordinates = async (saplingid) => {
-        try {
-            const coordinates = [];
-            const results = await this.db.executeSql(
-                `SELECT   where saplingid='${saplingid}'`,
-            );
-            results.forEach(result => {
-                for (let index = 0; index < result.rows.length; index++) {
-                    treesimgs.push(result.rows.item(index));
-                }
-            });
-            return treesimgs;
-        } catch (error) {
-            console.error(error);
-            throw Error('Failed to get treeimgdata !!!');
-        }
-    };
-
 
     getAllTreeCount = async () => {
         try {
@@ -145,7 +125,7 @@ export class LocalDatabase {
             return res[0].rows.length;
         } catch (error) {
             console.error(error);
-            throw Error('Failed to get tree count !!!');
+            Alert.alert(Strings.alertMessages.FailedTreeCount);
         }
     };
 
@@ -155,7 +135,7 @@ export class LocalDatabase {
             return res[0].rows.length;
         } catch (error) {
             console.error(error);
-            throw Error('Failed to get tree count !!!');
+            Alert.alert(Strings.alertMessages.ErrorSetFalse);
         }
     };
 
@@ -233,7 +213,7 @@ export class LocalDatabase {
         }
         catch (error) {
             console.error(error);
-            throw Error('Failed to get tree names !!!');
+            Alert.alert(Strings.alertMessages.FailedTreeNames);
         }
 
     };
@@ -253,7 +233,7 @@ export class LocalDatabase {
         }
         catch (error) {
             console.error(error);
-            throw Error('Failed to get plot names !!!');
+            Alert.alert(Strings.alertMessages.FailedPlotNames);
         }
 
     }
@@ -272,7 +252,7 @@ export class LocalDatabase {
             return saplings;
         } catch (error) {
             console.error(error);
-            throw Error('Failed to get saplingids !!!');
+            Alert.alert(Strings.alertMessages.FailedSaplingIds);
         }
     };
 
@@ -290,7 +270,6 @@ export class LocalDatabase {
             return trees;
         } catch (error) {
             console.error(error);
-            throw Error('Failed to get tree !!!');
         }
     };
 
@@ -323,7 +302,6 @@ export class LocalDatabase {
             return plots;
         } catch (error) {
             console.error(error);
-            throw Error('Failed to get plots !!!');
         }
     };
 
@@ -359,7 +337,6 @@ export class LocalDatabase {
             return retRes;
         } catch (error) {
             console.error(error);
-            throw Error('Failed to get Users !!!');
         }
     };
 }

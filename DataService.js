@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Buffer } from "buffer";
 import { ToastAndroid} from 'react-native';
+import { Strings } from './Strings';
 axios.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
@@ -12,7 +13,7 @@ axios.interceptors.response.use(function (response) {
   }
   if(error.response){
     if(error.response.data){
-      errorMsg = `Request failed at server: ${error.response.data}`
+      errorMsg =  Strings.alertMessages.FailedAtServer + error.response.data
     }
     else{
       errorMsg = error.message;

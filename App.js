@@ -50,8 +50,8 @@ async function requestPermissions() {
   let res = await checkMultiplePermissions(permissions);
   if (!res) {
     Alert.alert(
-      'Permissions required!',
-      'Please go to Settings and grant permissions',
+      Strings.alertMessages.PermissionsRequired,
+      Strings.alertMessages.Settings,
     );
   }
 }

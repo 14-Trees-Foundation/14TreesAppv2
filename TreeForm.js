@@ -50,20 +50,26 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
         };
         console.log(tree);
         if (saplingid === null || Object.keys(selectedTreeType).length === 0 || Object.keys(selectedPlot).length === 0) {
-            Alert.alert('Error', 'Please fill all the fields');
+            Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
             return;
         }
         else if (images.length+exisitingImages.length === 0) {
-            Alert.alert('Error', 'Please add atleast one image');
+            Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.NoImage);
             return;
         }
         else {
             try {
+                const tree = {
+                    treeid: selectedTreeType.value,
+                    saplingid: saplingid,
+                    lat: lat,
+                    lng: lng,
+                    plotid: selectedPlot.value,
+                    user_id: userId,
+                };
+               
 
-                // call saveTreeImages for each image
-
-                // await fetch();
-                setSaplingId('');
+                setSaplingid(null);
                 setSelectedTreeType({});
                 setSelectedPlot({});
                 // setSelectedUser({});

@@ -4,7 +4,7 @@ import { Text, View,Alert,ToastAndroid } from "react-native";
 import { MyIconButton } from "./Components";
 import { useEffect,useState } from "react";
 import { Strings } from "./Strings";
-import { Utils, commonStyles } from "./Utils";
+import { Alert } from "react-native";
 
 export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode})=>{
     const [lat,setLat] = useState(inLat);
@@ -30,14 +30,7 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode})=>{
                 setAccuracy(position.coords.accuracy);
             },
             (error) => {
-                console.log(error)
-                if(error.code===error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE){
-                    ToastAndroid.show('Error: Request timed out. GPS not available right now.',ToastAndroid.LONG);
-                }
-                // else if(error.code===error.PERMISSION_DENIED){
-                else{
-                    Alert.alert('Error','Have you turned on the location (GPS) on your phone?');
-                }
+                Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.LocationError);
             },
             { enableHighAccuracy: false, timeout: 20000},
         );

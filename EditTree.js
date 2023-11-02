@@ -45,8 +45,9 @@ const EditTreeScreen = ({navigation}) => {
         if(!response){
             return;
         }
-        // console.log(requestData);
-        ToastAndroid.show(`Tree with ${response.data.sapling_id} updated!`,ToastAndroid.LONG);
+        console.log(requestData);
+        let toastmsg = Strings.alertMessages.TreeUpdatedfirsthalf + response.data.sapling_id + Strings.alertMessages.TreeUpdatedsecondhalf;
+        ToastAndroid.show(toastmsg,ToastAndroid.LONG);
         setDetails(null);
         setNewImages([]);
         setDeletedImages([]);

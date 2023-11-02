@@ -27,8 +27,8 @@ const AddTreeScreen = ({ navigation }) => {
         };
         await ldb.saveTreeImages(element);
       }
-      ToastAndroid.show('Tree saved locally!', ToastAndroid.SHORT);
-      navigation.navigate(Strings.screenNames.HomePage);
+      ToastAndroid.show(Strings.alertMessages.TreeSaved, ToastAndroid.SHORT);
+      navigation.navigate(Strings.screenNames.getString('HomePage',Strings.english));
     }
     const inputTreeData = {...Constants.treeFormTemplateData};
   return <TreeForm treeData={inputTreeData} updateUserId={true} updateLocation={true} onVerifiedSave={onVerifiedSave}/>;

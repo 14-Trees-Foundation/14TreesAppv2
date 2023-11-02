@@ -19,6 +19,8 @@ const LoginScreen = ({navigation}) =>{
       await GoogleSignin.hasPlayServices();
       Alert.alert('Going to request google sign in.')
       const userInfo = await GoogleSignin.signIn();
+      console.log('userInfo collected !!!!!!!');
+      console.log('userInfo: ',userInfo);
       const userDataPayload = {
         name: userInfo.user.name,
         email: userInfo.user.email,
@@ -55,10 +57,23 @@ const LoginScreen = ({navigation}) =>{
       } catch (error) {
         console.log('Error storing userId', error);
       }
-      console.log('moving to drawerscreen')
-      navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
-      // Alert.alert('Login Failed','Check phone number and secret.');
-      // Alert.alert('Login Failed','Unknown error. Consult an expert.');
+
+      console.log('response status: ',response.status)
+      // console.log(response.status);
+      // console.log(response.data);
+      // console.log(userObj._id);
+      switch (response.status) {
+        case 200:
+          console.log('Login successful');
+          navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
+          break;
+        case 400:
+          Alert.alert(Strings.alertMessages.LoginFailed, Strings.alertMessages.CheckPhoneNumber);
+          break;
+        default:
+          Alert.alert(Strings.alertMessages.LoginFailed,Strings.alertMessages.UnknownError);
+          break;
+      }
 
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {

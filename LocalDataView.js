@@ -110,7 +110,7 @@ const LocalDataView = ({ navigation }) => {
       tempfinalList = tempfinalList.filter((tree) => (tree.uploaded === wantUploaded))
     }
     if (tempfinalList.length === 0) {
-      ToastAndroid.show('No trees found with given filters', ToastAndroid.SHORT);
+      ToastAndroid.show(Strings.alertMessages.NoTreeswithFilter, ToastAndroid.SHORT);
     }
     setFinalList(tempfinalList);
     closeModal();

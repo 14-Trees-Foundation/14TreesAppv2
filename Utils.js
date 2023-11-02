@@ -4,7 +4,7 @@ import { DataService } from "./DataService";
 import { LocalDatabase } from "./tree_db";
 import { AppRegistry } from 'react-native';
 import {name as appName} from './app.json';
-import RNRestart from 'react-native-restart';
+import { Strings } from "./Strings";
 
 // Your app's root component
 import App from './App'; // Replace with the actual path to your app's root component
@@ -28,18 +28,18 @@ export class Utils{
     }
     static async confirmAction(onConfirm,title=undefined,message=undefined){
         if(!title){
-            title = 'Are you sure?';
+            title = Strings.alertMessages.ConfirmActionTitle;
         }
         if(!message){
-            message = 'Please confirm the action.'
+            message = Strings.alertMessages.ConfirmActionMsg;
         }
         Alert.alert(title,message,[
             {
-                text:'Yes',
+                text:Strings.alertMessages.Yes,
                 onPress:()=>onConfirm()
             },
             {
-                text:'No',
+                text:Strings.alertMessages.No,
                 onPress:()=>null
             }
         ])
@@ -65,7 +65,7 @@ export class Utils{
         const data = helperData.data['data'];
         const newHash = helperData.data['hash'];
         if(newHash==lastHash){
-            ToastAndroid.show('Tree types and plot already up to date.',ToastAndroid.LONG)
+            ToastAndroid.show(Strings.alertMessages.DataUptodate,ToastAndroid.LONG)
             return;
         }
         if(data){
@@ -98,7 +98,7 @@ export class Utils{
             }
         }
         if(failure){
-            ToastAndroid.show('Failed to save some tree types. See logs.');
+            ToastAndroid.show(Strings.alertMessages.FailureSavingTrees);
         }
         else{
             console.log('All tree types saved successfully.')
@@ -128,7 +128,7 @@ export class Utils{
             }
         }
         if(failure){
-            ToastAndroid.show('Failed to save some plots. See logs.');
+            ToastAndroid.show(Strings.alertMessages.FailureSavingPlots);
         }
         else{
             console.log('All plots saved successfully.')
@@ -146,10 +146,10 @@ export class Utils{
             console.log(response.data);
             if (response) {
                 await Utils.setTreeSyncStatus(final);
-                Alert.alert('Sync Successful!', 'See local tree list to check statuses.')
+                Alert.alert(Strings.alertMessages.SyncSuccess, Strings.alertMessages.CheckLocalList)
             }
             else{
-                Alert.alert('Sync Failed','Contact an expert, please.');
+                Alert.alert(Strings.alertMessages.SyncFailure,Strings.alertMessages.ContactExpert);
             }
             // await fetch();
         }
