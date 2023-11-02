@@ -39,7 +39,7 @@ const LoginScreen = ({navigation}) =>{
   
   const googleLogin = async () => {
     try {
-      // navigation.navigate('HomeScreen');
+      // navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       const userDataPayload = {
@@ -55,6 +55,7 @@ const LoginScreen = ({navigation}) =>{
       // check whether adminId field exist in the response
       // if exist, then store it in the async storage
       console.log(response.data)
+      // console.log('status: ',response.status)
       console.log(response.data.adminID)
       if (response.data.adminID) {
         await AsyncStorage.setItem(Constants.adminIdKey, response.data.adminID);
@@ -67,27 +68,30 @@ const LoginScreen = ({navigation}) =>{
 
       try {
         await AsyncStorage.setItem(Constants.userIdKey, response.data._id);
+        console.log('userId stored');
         response.data = {...response.data,image:userInfo.user.photo}
         if(!response.data.image){
           response.data.image = Constants.imagePlaceholder;
         }
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
+        console.log('userDetails stored');
         // await AsyncStorage.setItem(Constants.lastHashKey, "0");
         Utils.reloadApp()
       } catch (error) {
         console.log('Error storing userId', error);
       }
 
-      const dummy = getUserId();
-      console.log(response.status);
+      console.log('response status: ',response.status)
+      // console.log(response.status);
       // console.log(response.data);
       // console.log(userObj._id);
       switch (response.status) {
         case 200:
+          console.log('Login successful');
           navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
           break;
         case 400:
-          Alert.alert('Login Failed','Check phone number and secret.');
+          Alert.alert('Login Failed','Check phone number .');
           break;
         default:
           Alert.alert('Login Failed','Unknown error. Consult an expert.');
