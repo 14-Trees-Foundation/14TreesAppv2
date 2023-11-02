@@ -20,11 +20,10 @@ import LoadingScreen from './LoadingScreen';
 import { enableLatestRenderer } from 'react-native-maps';
 import { utils } from '@react-native-firebase/app';
 import { Strings } from './Strings';
-import { DrawerContent } from './Components';
+import { DrawerContent, DrawerNavigator } from './Components';
 enableLatestRenderer();
 
 const Stack = createStackNavigator();
-const Drawer = createDrawerNavigator();
 async function requestPermissions() {
   //https://developer.android.com/training/data-storage/shared/media#storage-permission
   const androidVersion = Number.parseInt(Platform.constants['Release']);
@@ -58,7 +57,7 @@ async function requestPermissions() {
 }
 // async function netInfo() {
 // }
-const navigationRef = createNavigationContainerRef();
+export const stackNavRef = createNavigationContainerRef();
 const App = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const rootTag = useContext(RootTagContext);
@@ -87,7 +86,7 @@ const App = () => {
       }
       else {
         // User is not signed in, navigate to LoginScreen
-        navigationRef.current?.navigate(Strings.screenNames.getString('LogIn',Strings.english));
+        stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn',Strings.english));
         return false;
       }
     } catch (error) {
@@ -115,16 +114,16 @@ const App = () => {
     await Utils.createLocalTablesIfNeeded();
     if (loggedIn) {
       Utils.fetchAndStoreHelperData();
-      navigationRef.current?.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
+      stackNavRef.current?.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
     }
     else{
-      navigationRef.current?.navigate(Strings.screenNames.getString('LogIn',Strings.english));
+      stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn',Strings.english));
     }
   }
 
   const setNavigationListener = ()=>{
-    if(navigationRef.isReady()){
-      navigationRef.addListener('state',(e)=>{
+    if(stackNavRef.isReady()){
+      stackNavRef.addListener('state',(e)=>{
         // fetchUserDetails();
       })
     }
@@ -142,57 +141,12 @@ const App = () => {
     }
   }, []);
 
-  const DrawerNavigator = ({navigation,route})=>{
-    return (
-      <Drawer.Navigator drawerContent={(props)=> <DrawerContent navigationRef={navigationRef} {...props}/>}>
-                <Drawer.Screen
-          name={Strings.screenNames.getString('HomePage',Strings.english)}
-          component={HomeScreen}
-          options={{
-            ...styleConfigs.drawerHeaderOptions,
-            title:Strings.screenNames.HomePage
-          }} />
-        <Drawer.Screen
-        name={Strings.screenNames.getString('localDataView',Strings.english)}
-        component={LocalDataView}
-        options={{
-          ...styleConfigs.drawerHeaderOptions,
-          title:Strings.screenNames.localDataView
-        }} />
-        <Drawer.Screen
-        name={Strings.screenNames.getString('AddTree',Strings.english)}
-        component={AddTreeScreen}
-        options={{
-          ...styleConfigs.drawerHeaderOptions,
-          title:Strings.screenNames.AddTree
-        }}/>
-        {isAdmin && 
-        <Drawer.Screen
-        name={Strings.screenNames.getString('EditTree',Strings.english)}
-        component={EditTreeScreen}
-        options={{
-          ...styleConfigs.drawerHeaderOptions,
-          title:Strings.screenNames.EditTree
-        }}/>
-        }
-        {isAdmin && 
-        <Drawer.Screen
-        name={Strings.screenNames.getString('VerifyUsers',Strings.english)}
-        component={VerifyusersScreen}
-        options={{
-          ...styleConfigs.drawerHeaderOptions,
-          title:Strings.screenNames.VerifyUsers
-        }}/>
-        }
-      </Drawer.Navigator>
-  );
-  }
   // check dynamically adminIdkey is stored in the async storage after login
   //TODO: navigation image load in first time login.
 
 
   return (
-    <NavigationContainer ref={navigationRef}>
+    <NavigationContainer ref={stackNavRef}>
       <Stack.Navigator>
         <Stack.Screen
           name={Strings.screenNames.getString('startScreen',Strings.english)}

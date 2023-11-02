@@ -1,13 +1,20 @@
 import { TouchableOpacity,View, Image, Text, Button, RootTagContext, BackHandler } from "react-native";
-import { Constants, Utils, commonStyles, fontAwesome5List, materialCommunityList } from "./Utils";
+import { Constants, Utils, commonStyles,styleConfigs, fontAwesome5List, materialCommunityList } from "./Utils";
 import Fa5Icon from 'react-native-vector-icons/FontAwesome5';
 import { NavigationContainer, createNavigationContainerRef, useFocusEffect, useNavigationContainerRef } from '@react-navigation/native';
-import {useState,useEffect} from 'react';
+import {useState,useEffect, useCallback} from 'react';
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
+import { DrawerContentScrollView, DrawerItemList, createDrawerNavigator } from "@react-navigation/drawer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { Strings } from "./Strings";
+import HomeScreen from "./Home";
+import LocalDataView from "./LocalDataView";
+import AddTreeScreen from "./AddTree";
+import EditTreeScreen from "./EditTree";
+import VerifyusersScreen from "./VerifyUsers";
+import { stackNavRef } from "./App";
+const Drawer = createDrawerNavigator();
 export const CustomButton = ({ text, opacityStyle,textStyle, onPress }) => {
     let finalOpacityStyle = commonStyles.defaultButtonStyle;
     if(opacityStyle){
@@ -62,13 +69,7 @@ const logout = async(navigationRef)=>{
     navigationRef.current?.navigate(Strings.screenNames.getString('LogIn',Strings.english));
 }
 export const DrawerContent = (props) => {
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [userDetails,setUserDetails] = useState(null);
-    useEffect(()=>{
-        console.log('in effect')
-        fillInUserDetails(setIsAdmin,setUserDetails);
-        return ()=>null
-    },[])
+    let {isAdmin,userDetails} = props;
     return (<DrawerContentScrollView {...props}>
       <View style={{flexDirection:'column',alignItems:'center',marginTop:50,bottom:0}}>
         <Image
@@ -96,4 +97,67 @@ export const DrawerContent = (props) => {
         <Button title='Log out' onPress={()=>Utils.confirmAction(()=>logout(props.navigationRef),undefined,'Do you want to log out?')} style={commonStyles.logOutButton} color='red' ></Button>
       </View>
     </DrawerContentScrollView>)
+}
+export const DrawerNavigator = ({route})=>{
+    const [isAdmin, setIsAdmin] = useState(false);
+    const navigationRef = stackNavRef;
+    const [userDetails,setUserDetails] = useState(null);
+    // useEffect(()=>{
+    //     console.log('in effect')
+    //     fillInUserDetails(setIsAdmin,setUserDetails);
+    //     return ()=>null
+    // },[])
+    useFocusEffect(useCallback(()=>{
+      console.log('in focus');
+      fillInUserDetails(setIsAdmin,setUserDetails);
+    },[fillInUserDetails]))
+    return (
+      <Drawer.Navigator
+      drawerContent={(props)=> <DrawerContent
+                                userDetails={userDetails}
+                                isAdmin={isAdmin}
+                                navigationRef={navigationRef}
+                                {...props}
+                                />}>
+                <Drawer.Screen
+          name={Strings.screenNames.getString('HomePage',Strings.english)}
+          component={HomeScreen}
+          options={{
+            ...styleConfigs.drawerHeaderOptions,
+            title:Strings.screenNames.HomePage
+          }} />
+        <Drawer.Screen
+        name={Strings.screenNames.getString('localDataView',Strings.english)}
+        component={LocalDataView}
+        options={{
+          ...styleConfigs.drawerHeaderOptions,
+          title:Strings.screenNames.localDataView
+        }} />
+        <Drawer.Screen
+        name={Strings.screenNames.getString('AddTree',Strings.english)}
+        component={AddTreeScreen}
+        options={{
+          ...styleConfigs.drawerHeaderOptions,
+          title:Strings.screenNames.AddTree
+        }}/>
+        {isAdmin && 
+        <Drawer.Screen
+        name={Strings.screenNames.getString('EditTree',Strings.english)}
+        component={EditTreeScreen}
+        options={{
+          ...styleConfigs.drawerHeaderOptions,
+          title:Strings.screenNames.EditTree
+        }}/>
+        }
+        {isAdmin && 
+        <Drawer.Screen
+        name={Strings.screenNames.getString('VerifyUsers',Strings.english)}
+        component={VerifyusersScreen}
+        options={{
+          ...styleConfigs.drawerHeaderOptions,
+          title:Strings.screenNames.VerifyUsers
+        }}/>
+        }
+      </Drawer.Navigator>
+  );
   }
