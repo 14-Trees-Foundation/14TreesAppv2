@@ -17,7 +17,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
     const [images, setImages] = useState([]);
     const [treeItems, setTreeItems] = useState([]);
     const [plotItems, setPlotItems] = useState([]);
-
+    const [mainScrollEnabled,setMainScrollEnabled] = useState(true);
     const [selectedTreeType, setSelectedTreeType] = useState(inTreeType);
     const [selectedPlot, setSelectedPlot] = useState(inPlot);
     const [userId, setUserId] = useState(inUserId);
@@ -199,8 +199,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                         placeholderTextColor={'#000000'}
                         onChangeText={(text) => changeimgremark(text)}
                         value={item.meta.remark}
-                        onFocus={(e)=>{}}
-                        onBlur={(e)=>{}}
                     />
                     }
                 </View>
@@ -235,7 +233,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
 
     useEffect(()=>{
         loadDataCallback();
-        console.log(selectedTreeType);
     }, []);
     const requestLocation = async () => {
         console.log('requesting location');
@@ -261,7 +258,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
     }
 
     return (
-        <ScrollView style={{ backgroundColor: '#5DB075', height: '100%' }}>
+        <ScrollView style={{ backgroundColor: '#5DB075', height: '100%' }} scrollEnabled={mainScrollEnabled}>
             <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
                 {
                     editMode === true ?
@@ -294,6 +291,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                     inLng={inLng}
                     onSetLat={setlat}
                     onSetLng={setlng}
+                    setOuterScrollEnabled={setMainScrollEnabled}
                 ></CoordinateSetter>
                 <View style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 15 }}>
                     <Button

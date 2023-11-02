@@ -36,8 +36,9 @@ export class Strings{
             Never:"Never",
             LastSyncDataOn:"Last Sync Data On : ",
             // add tree
-            Location:"Location",   
+            Location:"Tree Location",   
             CapturedAt:"Captured At",
+            userLocation:"User Location",
             // local data view
             NoTreesFound:"No Trees Found on phone",
             Filters:"Filters",  

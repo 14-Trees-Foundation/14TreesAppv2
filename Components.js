@@ -31,8 +31,7 @@ export const CustomButton = ({ text, opacityStyle,textStyle, onPress }) => {
     </TouchableOpacity>);
 }
 
-export function MyIcon({name,size,color}){
-    console.log(name,size,color)
+export function MyIcon({name,size=30,color='green'}){
     if(fontAwesome5List.includes(name)){
         return <Fa5Icon name={name} size={size} color={color}/>;
     }
@@ -42,8 +41,7 @@ export function MyIcon({name,size,color}){
     return <Text>??</Text>
 }
 
-export function MyIconButton({name,size,color,onPress,iconColor='white',text=undefined}){
-    console.log(name,size,color)
+export function MyIconButton({name,size=30,color='green',onPress,iconColor='white',text=undefined}){
     return <TouchableOpacity style={{...commonStyles.iconBtn,backgroundColor: color,}} onPress={onPress}>
             <MyIcon name={name} size={size} color={iconColor}></MyIcon>
             </TouchableOpacity>
@@ -102,11 +100,6 @@ export const DrawerNavigator = ({route})=>{
     const [isAdmin, setIsAdmin] = useState(false);
     const navigationRef = stackNavRef;
     const [userDetails,setUserDetails] = useState(null);
-    // useEffect(()=>{
-    //     console.log('in effect')
-    //     fillInUserDetails(setIsAdmin,setUserDetails);
-    //     return ()=>null
-    // },[])
     useFocusEffect(useCallback(()=>{
       console.log('in focus');
       fillInUserDetails(setIsAdmin,setUserDetails);
