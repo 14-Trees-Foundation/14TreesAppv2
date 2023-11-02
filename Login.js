@@ -12,31 +12,7 @@ import { Strings } from './Strings';
 const LoginScreen = ({navigation}) =>{
   
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [langModalVisible, setLangModalVisible] = useState(false);
-  const [signInText, setSignInText] = useState('');
-  const [something, setSomething] = useState(true); // to re-render the component(jugaad)
-  useEffect(() => {
-    console.log('I am here ')
-  }, [Strings.languages.SignIn]);
-
-  useEffect(() => {
-    // Strings.languageEvent.addListener('change',()=>{
-    //   setSomething(!something);
-    // });
-    console.log('listener added');
-    navigation.addListener('beforeRemove', async (e) => {
-      const userId = await Utils.getUserId();
-      console.log('userId fetched: ',userId);
-      if(!(userId && userId.length>0)){
-        e.preventDefault();
-      }
-    }
-  )
-  return ()=>{
-    Strings.languageEvent.removeAllListeners('change');
-  }
-  }, [])
-  
+  const [langModalVisible, setLangModalVisible] = useState(false); 
   const googleLogin = async () => {
     try {
       // navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
@@ -49,9 +25,6 @@ const LoginScreen = ({navigation}) =>{
       };
       console.log('Sending google data to server.')
       const response = await DataService.loginUser(userDataPayload);
-      console.log('got a response');
-      // console.log(response.data);
-      console.log('at login : ',response.data._id)
       // check whether adminId field exist in the response
       // if exist, then store it in the async storage
       console.log(response.data)
@@ -76,27 +49,14 @@ const LoginScreen = ({navigation}) =>{
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
         console.log('userDetails stored');
         // await AsyncStorage.setItem(Constants.lastHashKey, "0");
-        Utils.reloadApp()
+        // Utils.reloadApp()
       } catch (error) {
         console.log('Error storing userId', error);
       }
-
-      console.log('response status: ',response.status)
-      // console.log(response.status);
-      // console.log(response.data);
-      // console.log(userObj._id);
-      switch (response.status) {
-        case 200:
-          console.log('Login successful');
-          navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
-          break;
-        case 400:
-          Alert.alert('Login Failed','Check phone number .');
-          break;
-        default:
-          Alert.alert('Login Failed','Unknown error. Consult an expert.');
-          break;
-      }
+      console.log('moving to drawerscreen')
+      navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
+      // Alert.alert('Login Failed','Check phone number and secret.');
+      // Alert.alert('Login Failed','Unknown error. Consult an expert.');
 
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {

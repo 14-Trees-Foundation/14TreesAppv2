@@ -9,7 +9,7 @@ import { CustomDropdown } from "./CustomDropdown";
 import { Strings } from "./Strings";
 export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewImage, onDeleteImage }) => {
     const {inSaplingId,inLng,inLat,inImages,inTreeType,inPlot,inUserId} = treeData;
-    const [saplingid, setSaplingid] = useState(inSaplingId);
+    const [saplingid,setSaplingId] = useState(inSaplingId);
     const [lat, setlat] = useState(inLng);
     const [lng, setlng] = useState(inLat);
     const [keyboardAvoidingViewEnabled,setKeyboardAvoidingViewEnabled] = useState(false);
@@ -41,6 +41,15 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
         setImages([...images, image]);
     }
     const onSave = async () => {
+        const tree = {
+            treeid: selectedTreeType.value,
+            saplingid: saplingid,
+            lat: lat,
+            lng: lng,
+            plotid: selectedPlot.value,
+            user_id: userId,
+        };
+        console.log(tree);
         if (saplingid === null || Object.keys(selectedTreeType).length === 0 || Object.keys(selectedPlot).length === 0) {
             Alert.alert('Error', 'Please fill all the fields');
             return;
@@ -51,19 +60,11 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
         }
         else {
             try {
-                const tree = {
-                    treeid: selectedTreeType.value,
-                    saplingid: saplingid,
-                    lat: lat,
-                    lng: lng,
-                    plotid: selectedPlot.value,
-                    user_id: userId,
-                };
+
                 // call saveTreeImages for each image
 
-                
                 // await fetch();
-                setSaplingid(null);
+                setSaplingId('');
                 setSelectedTreeType({});
                 setSelectedPlot({});
                 // setSelectedUser({});
@@ -199,8 +200,8 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                         placeholderTextColor={'#000000'}
                         onChangeText={(text) => changeimgremark(text)}
                         value={item.meta.remark}
-                        onFocus={(e)=>{setKeyboardAvoidingViewEnabled(true);}}
-                        onBlur={(e)=>{setKeyboardAvoidingViewEnabled(false);}}
+                        onFocus={(e)=>{}}
+                        onBlur={(e)=>{}}
                     />
                     }
                 </View>
@@ -273,16 +274,17 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                         style={commonStyles.txtInput}
                         placeholder={Strings.labels.SaplingId}
                         placeholderTextColor={'#000000'}
-                        onChangeText={(text) => setSaplingid(text)}
-                        value={saplingid}
+                        onChangeText={(text) => {setSaplingId(text)}}
                     />
                     }
                     <CustomDropdown
+                        initItem={selectedTreeType}
                         items={treeItems}
                         label={Strings.labels.SelectTreeType}
                         onSelectItem={setSelectedTreeType}
                     />
                     <CustomDropdown
+                        initItem={selectedPlot}
                         items={plotItems}
                         label={Strings.labels.SelectPlot}
                         onSelectItem={setSelectedPlot}

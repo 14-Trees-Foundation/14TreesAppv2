@@ -97,7 +97,7 @@ const EditTreeScreen = ({navigation}) => {
         setDetails(detailsForTreeForm);
     }
     return (
-        <View style={{backgroundColor:'#5DB075', height:'100%'}}>
+        <View style={{backgroundColor:'#5DB075'}}>
             {
                 details?
                 <TreeForm

@@ -3,10 +3,15 @@ import {useState,useEffect} from 'react';
 import { commonStyles } from './Utils';
 export const CustomDropdown = ({items, onSelectItem, initItem, scrollEnabled, label})=>{
     const [filteredOptions,setFilteredOptions] = useState(items);
-    if(initItem===undefined){
-        initItem = {name:'',value:-1};
-    }
-    const [selectedItem,setSelectedItem] = useState(initItem);
+    const [selectedItem,setSelectedItem] = useState({value:-1,name:""});
+    useEffect(()=>{
+        if(initItem===undefined){
+            setSelectedItem({name:'',value:-1});
+        }
+        else{
+            setSelectedItem(initItem);
+        }
+    },[initItem])
     if(scrollEnabled===undefined){
         scrollEnabled = false;
     }
@@ -38,7 +43,7 @@ export const CustomDropdown = ({items, onSelectItem, initItem, scrollEnabled, la
     return (<View style={{flexDirection:'column'}}>
             <TextInput
             style={{...commonStyles.txtInput}}
-            defaultValue= {selectedItem.value===-1?'':selectedItem.name}
+            defaultValue= {selectedItem?(selectedItem.value===-1?'':selectedItem.name):''}
             placeholder={label}
             placeholderTextColor={'black'}
             onChangeText={updateFilteredOptions}

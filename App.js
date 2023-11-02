@@ -163,7 +163,25 @@ const App = () => {
   }, []);
 
   const DrawerContent = (props) => {
-    const userDetails = props.user;
+    // const [isAdmin, setIsAdmin] = useState(false);
+    // const [userDetails,setUserDetails] = useState(null);
+    const fillInUserDetails = async ()=>{
+      // let storedUserDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
+      // if(storedUserDetails){
+        // storedUserDetails = JSON.parse(storedUserDetails);
+        // setUserDetails(storedUserDetails);
+      //   if(storedUserDetails.adminID){
+      //     if(!isAdmin){
+      //       setIsAdmin(true);
+      //     }
+      //   }
+      // }
+    }
+    useFocusEffect(()=>{
+      console.log('in focus',isAdmin)
+      fillInUserDetails();
+      return ()=>null
+    })
     return (<DrawerContentScrollView {...props}>
       <View style={{flexDirection:'column',alignItems:'center',marginTop:50,bottom:0}}>
         <Image
@@ -194,8 +212,8 @@ const App = () => {
   }
   const DrawerNavigator = ({navigation,route})=>{
     return (
-      <Drawer.Navigator drawerContent={(props)=><DrawerContent user={route.params.userDetails} {...props}/>}>
-        <Drawer.Screen
+      <Drawer.Navigator drawerContent={DrawerContent}>
+                <Drawer.Screen
           name={Strings.screenNames.getString('HomePage',Strings.english)}
           component={HomeScreen}
           options={{

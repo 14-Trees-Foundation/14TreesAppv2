@@ -4,18 +4,27 @@ import { DataService } from "./DataService";
 import { LocalDatabase } from "./tree_db";
 import { AppRegistry } from 'react-native';
 import {name as appName} from './app.json';
+import RNRestart from 'react-native-restart';
 
 // Your app's root component
 import App from './App'; // Replace with the actual path to your app's root component
 
 export class Utils{
     static ldb = new LocalDatabase();
-
+    static async getAppRootTag(){
+        return Number.parseInt(await AsyncStorage.getItem(Constants.appRootTagKey));
+    }
 // Function to force reload the app
     static async reloadApp() {
-        const rootTag = Number.parseInt(await AsyncStorage.getItem(Constants.appRootTagKey));
-        console.log('app root tag:',(rootTag))
-        AppRegistry.runApplication(appName,{rootTag: rootTag}); 
+        // let rootTag = await Utils.getAppRootTag();
+        // console.log('app root tag:',(rootTag))
+        // // AppRegistry.unmountApplicationComponentAtRootTag(rootTag);
+        // // const response = AppRegistry.registerComponent(appName, () => App);
+        // // console.log(response,' from register')
+        // // rootTag = await Utils.getAppRootTag();
+        // console.log(rootTag, 'root tag post unmount');
+        // AppRegistry.runApplication(appName,{rootTag: rootTag}); 
+        RNRestart.restart();
     }
     static async confirmAction(onConfirm,title=undefined,message=undefined){
         if(!title){
@@ -264,7 +273,7 @@ export class Constants{
     static appRootTagKey = 'rootTag';
     static syncDateKey = 'date';
     static imagePlaceholder = 'https://i.imgur.com/vxP6SFl.png'
-    static treeFormTemplateData = {inSaplingId:null,inLat:0,inLng:0,inImages:[],inPlot:{},inTreeType:{},inUserId:''}
+    static treeFormTemplateData = {inSaplingId:null,inLat:0,inLng:0,inImages:[],inPlot:null,inTreeType:null,inUserId:''}
     static 
     selectedLangKey = 'LANG';
 }
