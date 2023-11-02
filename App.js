@@ -113,7 +113,11 @@ const App = () => {
       else {
         Strings.setLanguage(storedlang);
       }
+    Alert.alert('going to call GoogleSignin configure.')
+    console.log('going to call GoogleSignin configure.')
     GoogleSignin.configure();
+    Alert.alert('GoogleSignin configure called.')
+    console.log('GoogleSignin configure called.')
     const loggedIn = await checkSignInStatus();
     await Utils.setDBConnection();
     await Utils.createLocalTablesIfNeeded();
