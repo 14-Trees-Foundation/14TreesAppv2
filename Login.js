@@ -2,7 +2,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin, GoogleSigninButton, statusCodes, } from '@react-native-google-signin/google-signin';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View , TouchableOpacity} from 'react-native';
+import { StyleSheet, Text, View , TouchableOpacity, ToastAndroid, Alert} from 'react-native';
 import PhoneInput, { isValidNumber } from 'react-native-phone-number-input';
 import { DataService } from './DataService';
 import { Constants, Utils } from './Utils';
@@ -17,12 +17,14 @@ const LoginScreen = ({navigation}) =>{
     try {
       // navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
       await GoogleSignin.hasPlayServices();
+      Alert.alert('Going to request google sign in.')
       const userInfo = await GoogleSignin.signIn();
       const userDataPayload = {
         name: userInfo.user.name,
         email: userInfo.user.email,
         phone: phoneNumber,
       };
+      Alert.alert('Data: ',`google data rec: ${userInfo.user.name}`);
       console.log('Sending google data to server.')
       const response = await DataService.loginUser(userDataPayload);
       // check whether adminId field exist in the response
@@ -61,15 +63,19 @@ const LoginScreen = ({navigation}) =>{
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         // user cancelled the login flow
+        Alert.alert('user cancelled the login flow')
         console.log('user cancelled the login flow');
       } else if (error.code === statusCodes.IN_PROGRESS) {
         // operation (e.g. sign in) is in progress already
+        Alert.alert('operation (e.g. sign in) is in progress already')
         console.log('operation (e.g. sign in) is in progress already');
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         // play services not available or outdated
+        Alert.alert('play services not available or outdated')
         console.log('play services not available or outdated');
       } else {
         // some other error happened
+        Alert.alert('some other error happened',JSON.stringify(error))
       }
     }
   };
