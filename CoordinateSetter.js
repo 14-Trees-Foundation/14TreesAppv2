@@ -5,6 +5,10 @@ import { MyIcon, MyIconButton } from "./Components";
 import { useEffect,useState } from "react";
 import { Strings } from "./Strings";
 import { Utils, commonStyles } from "./Utils";
+//TODO:
+//1. Text in all buttons related to coordinates.
+//2. Button no.4 to view/hide other trees in the plot.
+//3. Other trees must be displayed with title and different color marker.
 const coordinateModes = {
     fixed:0,
     writeable:1,
