@@ -44,7 +44,17 @@ export function MyIcon({name,size=30,color='green'}){
 export function MyIconButton({name,size=30,color='green',onPress,iconColor='white',text=undefined}){
     return <TouchableOpacity style={{...commonStyles.iconBtn,backgroundColor: color,}} onPress={onPress}>
             <MyIcon name={name} size={size} color={iconColor}></MyIcon>
+            {
+              text && <Text style={{color:iconColor,fontSize:size*0.8}}> {text}</Text>
+            }
             </TouchableOpacity>
+}
+export const SaveButton = ({onPress,text='Save',size=30})=>{
+  return <MyIconButton name={"check"} onPress={onPress} text={text} size={size}></MyIconButton>
+}
+export const CancelButton = ({onPress,text='Cancel',size=30})=>{
+  return <MyIconButton name={"cancel"}
+  onPress={onPress} color="red" size={size} text={text}></MyIconButton>
 }
 const fillInUserDetails = async (setIsAdmin, setUserDetails) => {
     let storedUserDetails = await AsyncStorage.getItem(Constants.userDetailsKey);

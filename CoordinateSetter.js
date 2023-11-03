@@ -1,7 +1,7 @@
 import MapView,{PROVIDER_GOOGLE,Marker} from "react-native-maps";
 import Geolocation from "@react-native-community/geolocation"
 import { Text, View,Alert,ToastAndroid,TextInput } from "react-native";
-import { MyIcon, MyIconButton } from "./Components";
+import { CancelButton, MyIcon, MyIconButton, SaveButton } from "./Components";
 import { useEffect,useState } from "react";
 import { Strings } from "./Strings";
 import { Utils, commonStyles } from "./Utils";
@@ -14,6 +14,38 @@ const coordinateModes = {
     writeable:1,
     draggable:2
 }
+const safeParse = (text,defaultValue=0)=>{
+    let num = Number.parseFloat(text);
+    return isNaN(num)?defaultValue:num;
+}
+const getReadableCoordinate = (lat)=>{
+    const latval = Math.round(lat*10000)/10000
+    return `${latval}`
+}
+const getReadableLocation = (lat,lng)=>{
+    const latval = Math.round(lat*1000)/1000
+    const lngval = Math.round(lng*1000)/1000
+    return `${latval}, ${lngval}`
+}
+export const CoordinatesDisplay = ({latitude,longitude,title})=>{
+    return (
+                <View style={{flexDirection:'column',borderColor:'grey',borderWidth:3,borderRadius:5,margin:3,padding:3}}>
+                    <Text style={{...commonStyles.text3,fontWeight:'bold'}}>
+                        {title}:
+                    </Text>
+                    <Text
+                    style={{...commonStyles.text3}}
+                    >
+                    Latitude: {getReadableCoordinate(latitude)}
+                    </Text>
+                    <Text
+                    style={{...commonStyles.text3}}
+                    >
+                    Longitude: {getReadableCoordinate(longitude)}
+                    </Text>
+                </View>
+                )
+}
 export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOuterScrollEnabled})=>{
     const [lat,setLat] = useState(inLat);
     const [lng,setLng] = useState(inLng);
@@ -22,15 +54,6 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOute
     const [tmplng,setTmpLng] = useState(inLng);
     const [coordinatesMode,setCoordinatesMode] = useState(coordinateModes.fixed);
     const [accuracy,setAccuracy] = useState(0);
-    const getReadableCoordinate = (lat)=>{
-        const latval = Math.round(lat*10000)/10000
-        return `${latval}`
-    }
-    const getReadableLocation = (lat,lng)=>{
-        const latval = Math.round(lat*1000)/1000
-        const lngval = Math.round(lng*1000)/1000
-        return `${latval}, ${lngval}`
-    }
     // useEffect(()=>{
         // requestLocation();
     // })
@@ -54,108 +77,112 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOute
     };
 
 return <View style={{flexDirection:'column',padding:20}}>
-    <Text style={{ color: 'black', fontSize: 18 }}> {Strings.languages.Location}: </Text>
-        {
-            [
-            <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-                <View>
-                    <Text style={{...commonStyles.text3,textAlign:'center'}}>{getReadableLocation(lat,lng)}</Text>
-                </View>
-            <View style={{flexDirection:'row'}}>
-            <MyIconButton name={"crosshairs-gps"}
-            onPress={()=>Utils.confirmAction(()=>requestLocation(),'Refresh?','Set tree location current GPS coordinates?')}></MyIconButton>
-            <MyIconButton name={"edit"}
-            onPress={()=>{
-                setCoordinatesMode(coordinateModes.writeable);
-                setTmpLat(lat);
-                setTmpLng(lng);
-                }}></MyIconButton>
-            <MyIconButton name={"hand-rock"}
-            onPress={()=>{
-                setCoordinatesMode(coordinateModes.draggable);
-                setOuterScrollEnabled(false);
-                setTmpLat(lat);
-                setTmpLng(lng);
+        
+    {
+        [
+        <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-around'}}>
+        <View style={{flexDirection:'column'}}>
+        <CoordinatesDisplay latitude={lat} longitude={lng} title={Strings.languages.Location}/>
+        <CoordinatesDisplay {...userLocation} title={Strings.languages.userLocation}/>
+        </View>
+    
+        <View style={{flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
+            <MyIconButton name={"crosshairs-gps"} text={"GPS"}
+        onPress={()=>Utils.confirmAction(()=>requestLocation(),'Refresh?','Set tree location current GPS coordinates?')}></MyIconButton>
+        <MyIconButton name={"edit"} text={"Edit"}
+        onPress={()=>{
+            setCoordinatesMode(coordinateModes.writeable);
+            setTmpLat(lat);
+            setTmpLng(lng);
             }}></MyIconButton>
+        <MyIconButton name={"hand-rock"} text={"Drag"}
+        onPress={()=>{
+            setCoordinatesMode(coordinateModes.draggable);
+            setOuterScrollEnabled(false);
+            setTmpLat(lat);
+            setTmpLng(lng);
+        }}></MyIconButton>
+            </View>
+        </View>
+        ,
+        <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-around'}}>
+            <View style={{flexDirection:'column'}}>
+            <View style={{flexDirection:'column',borderColor:'grey',borderWidth:3,borderRadius:5,margin:3,padding:3}}>
+            <Text style={{...commonStyles.text3}}>
+                {Strings.languages.Location}
+            </Text>
+            <View style={{flexDirection:'row',alignItems:'center'}}>
+            <Text style={commonStyles.text3}>Latitude: </Text>
+            <TextInput
+            style={{...commonStyles.remark,height:30}}
+            placeholder="Lat"
+            keyboardType="numeric"
+            onChangeText={(text)=>setTmpLat(safeParse(text,lat))}
+            defaultValue={(lat).toString()}
+            />
+            </View>
+            <View style={{flexDirection:'row',alignItems:'center'}}>
+            <Text style={commonStyles.text3}>Longitude: </Text>
+            <TextInput
+            style={{...commonStyles.remark,margin:0,height:30}}
+            placeholder="Long"
+            keyboardType="numeric"
+            onChangeText={(text)=>setTmpLng(safeParse(text,lng))}
+            defaultValue={(lng).toString()}
+            />
             </View>
             </View>
-            ,
-            <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-                <View style={{flexDirection:'column'}}>
-                <TextInput
-                style={{...commonStyles.remark,height:35}}
-                placeholder="Lat"
-                keyboardType="numeric"
-                onChangeText={(text)=>setTmpLat(Number.parseFloat(text))}
-                defaultValue={(lat).toString()}
-                />
-                <TextInput
-                style={{...commonStyles.remark,height:35}}
-                placeholder="Long"
-                keyboardType="numeric"
-                onChangeText={(text)=>setTmpLng(Number.parseFloat(text))}
-                defaultValue={(lng).toString()}
-                />
-                </View>
-                <View style={{flexDirection:'row'}}>
-                    <MyIconButton name={"check"}
-                    onPress={
-                        ()=>Utils.confirmAction(()=>{
-                            onSetLat(tmplat);
-                            setLat(tmplat);
-                            onSetLng(tmplng);
-                            setLng(tmplng);
-                            setCoordinatesMode(coordinateModes.fixed);
-                        },'Update?',"Set tree location to given coordinates?")
-                    }></MyIconButton>
-                    <MyIconButton name={"cancel"}
-                    color="red"
-                    onPress={()=>{
+            <CoordinatesDisplay {...userLocation} title={Strings.languages.userLocation}/>
+
+            </View>
+            <View style={{flexDirection:'column'}}>
+                <SaveButton onPress={
+                    ()=>Utils.confirmAction(()=>{
+                        onSetLat(tmplat);
+                        setLat(tmplat);
+                        onSetLng(tmplng);
+                        setLng(tmplng);
                         setCoordinatesMode(coordinateModes.fixed);
-                        setTmpLat(lat);
-                        setTmpLng(lng);
-                        }}></MyIconButton>
-                </View>
-            </View>,
-                <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-                <View style={{flexDirection:'column'}}>
-                <Text
-                style={{...commonStyles.text3}}
-                >
-                Latitude: {getReadableCoordinate(tmplat)}
-                </Text>
-                <Text
-                style={{...commonStyles.text3}}
-                >
-                Longitude: {getReadableCoordinate(tmplng)}
-                </Text>
-                </View>
-                <View style={{flexDirection:'row'}}>
-                    <MyIconButton name={"check"}
-                    onPress={
-                        ()=>Utils.confirmAction(()=>{
-                            onSetLat(tmplat);
-                            setLat(tmplat);
-                            onSetLng(tmplng);
-                            setLng(tmplng);
-                            setCoordinatesMode(coordinateModes.fixed);
-                        },'Update?',"Set tree location to dragged coordinates?")
-                    }></MyIconButton>
-                    <MyIconButton name={"cancel"}
-                    color="red"
-                    onPress={()=>{
+                    },'Update?',"Set tree location to given coordinates?")
+                }/>
+                <CancelButton onPress={()=>{
+      setCoordinatesMode(coordinateModes.fixed);
+      setTmpLat(lat);
+      setTmpLng(lng);
+  }}/>
+            </View>
+        </View>
+        ,
+        <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-around'}}>
+            <View style={{flexDirection:'column'}}>
+                <CoordinatesDisplay latitude={tmplat} longitude={tmplng} title={Strings.languages.Location}/>
+                <CoordinatesDisplay {...userLocation} title={Strings.languages.userLocation}/>
+            </View>
+            
+            <View style={{flexDirection:'column'}}>
+                <MyIconButton name={"check"}
+                onPress={
+                    ()=>Utils.confirmAction(()=>{
+                        onSetLat(tmplat);
+                        setLat(tmplat);
+                        onSetLng(tmplng);
+                        setLng(tmplng);
                         setCoordinatesMode(coordinateModes.fixed);
                         setOuterScrollEnabled(true);
-                        setTmpLat(lat);
-                        setTmpLng(lng);
-                        }}></MyIconButton>
-                </View>
+                    },'Update?',"Set tree location to dragged coordinates?")
+                }></MyIconButton>
+                <MyIconButton name={"cancel"}
+                color="red"
+                onPress={()=>{
+                    setCoordinatesMode(coordinateModes.fixed);
+                    setOuterScrollEnabled(true);
+                    setTmpLat(lat);
+                    setTmpLng(lng);
+                }}></MyIconButton>
             </View>
-        
-            
-        ][coordinatesMode]
-        }
-        <Text style={commonStyles.text3}>{Strings.languages.userLocation}: {getReadableLocation(userLocation.latitude,userLocation.longitude)}</Text>
+        </View>
+    ][coordinatesMode]
+    }
     <MapView
     followsUserLocation={true}
     scrollEnabled={coordinatesMode!==coordinateModes.draggable}
