@@ -29,7 +29,6 @@ const getReadableLocation = (lat,lng)=>{
 }
 const requestLocation = async (onSetLat,onSetLng,setLat,setLng,setAccuracy) => {
     console.log('requesting location');
-    // TODO: handler
     Geolocation.getCurrentPosition(
         (position) => {
             onSetLat(position.coords.latitude);
@@ -85,7 +84,9 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOute
     const [coordinatesMode,setCoordinatesMode] = useState(coordinateModes.fixed);
     const [accuracy,setAccuracy] = useState(0);
     useEffect(()=>{
-        requestLocation(onSetLat,onSetLng,setLat,setLng,setAccuracy);
+        if(editMode!==true){
+            requestLocation(onSetLat,onSetLng,setLat,setLng,setAccuracy);
+        }
     },[])
 return <View style={{flexDirection:'column',padding:20}}>
         

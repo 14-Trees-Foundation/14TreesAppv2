@@ -143,7 +143,6 @@ export class Utils{
             const final = await Utils.fetchTreesFromLocalDB(0);
             console.log(final);
             let response = await DataService.uploadTrees(final);
-            console.log(response.data);
             if (response) {
                 await Utils.setTreeSyncStatus(final);
                 Alert.alert(Strings.alertMessages.SyncSuccess, Strings.alertMessages.CheckLocalList)
