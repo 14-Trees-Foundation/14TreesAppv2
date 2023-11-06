@@ -45,6 +45,8 @@ const HomeScreen = ({ navigation }) => {
     <View >
        <Text style={{ fontSize: 20, marginTop: 20, alignContent: 'center', justifyContent: 'center', alignSelf: 'center', color: 'black' }}>{Strings.languages.LastSyncDataOn}</Text>
       <Text style={{ fontSize: 20, alignContent: 'center', justifyContent: 'center', alignSelf: 'center', color: 'black' }}>{syncDate}</Text>
+      {/* TODO: show status of synced/pending trees. */}
+      {/* TODO: fix last sync date setting. */}
       {/* TODO: separate to sync component with progress bar and batch processing. */}
       <View style={{ margin: 20 }}>
         <Button
