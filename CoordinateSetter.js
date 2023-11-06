@@ -27,6 +27,33 @@ const getReadableLocation = (lat,lng)=>{
     const lngval = Math.round(lng*1000)/1000
     return `${latval}, ${lngval}`
 }
+const requestLocation = async (onSetLat,onSetLng,setLat,setLng,setAccuracy) => {
+    console.log('requesting location');
+    // TODO: handler
+    Geolocation.getCurrentPosition(
+        (position) => {
+            onSetLat(position.coords.latitude);
+            onSetLng(position.coords.longitude);
+            setLat(position.coords.latitude);
+            setLng(position.coords.longitude);
+            setAccuracy(position.coords.accuracy);
+        },
+        (error) => {
+            console.log(error)
+            if(error.code===error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE){
+                ToastAndroid.show('Error: Request timed out. GPS not available right now.',ToastAndroid.LONG);
+            }
+            // else if(error.code===error.PERMISSION_DENIED){
+            else{
+                Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.LocationError);
+            }
+
+        },
+        { enableHighAccuracy: false, timeout: 20000},
+    );
+
+};
+
 export const CoordinatesDisplay = ({latitude,longitude,title})=>{
     return (
                 <View style={{flexDirection:'column',borderColor:'grey',borderWidth:3,borderRadius:5,margin:3,padding:3}}>
@@ -46,6 +73,7 @@ export const CoordinatesDisplay = ({latitude,longitude,title})=>{
                 </View>
                 )
 }
+
 export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOuterScrollEnabled})=>{
     const [lat,setLat] = useState(inLat);
     const [lng,setLng] = useState(inLng);
@@ -56,28 +84,9 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOute
     const [tmplng,setTmpLng] = useState(inLng);
     const [coordinatesMode,setCoordinatesMode] = useState(coordinateModes.fixed);
     const [accuracy,setAccuracy] = useState(0);
-    // useEffect(()=>{
-        // requestLocation();
-    // })
-    const requestLocation = async () => {
-        console.log('requesting location');
-        // TODO: handler
-        Geolocation.getCurrentPosition(
-            (position) => {
-                onSetLat(position.coords.latitude);
-                onSetLng(position.coords.longitude);
-                setLat(position.coords.latitude);
-                setLng(position.coords.longitude);
-                setAccuracy(position.coords.accuracy);
-            },
-            (error) => {
-                Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.LocationError);
-            },
-            { enableHighAccuracy: false, timeout: 20000},
-        );
-
-    };
-
+    useEffect(()=>{
+        requestLocation(onSetLat,onSetLng,setLat,setLng,setAccuracy);
+    },[])
 return <View style={{flexDirection:'column',padding:20}}>
         
     {
@@ -89,14 +98,14 @@ return <View style={{flexDirection:'column',padding:20}}>
         </View>
     
         <View style={{flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
-            <MyIconButton name={"crosshairs-gps"} text={"GPS"}
-        onPress={()=>Utils.confirmAction(()=>requestLocation(),'Refresh?','Set tree location current GPS coordinates?')}></MyIconButton>
+        <MyIconButton name={"crosshairs-gps"} text={"GPS"}
+        onPress={()=>Utils.confirmAction(()=>requestLocation(onSetLat,onSetLng,setLat,setLng,setAccuracy),'Refresh?','Set tree location current GPS coordinates?')}/>
         <MyIconButton name={"edit"} text={"Edit"}
         onPress={()=>{
             setCoordinatesMode(coordinateModes.writeable);
             setTmpLat(lat);
             setTmpLng(lng);
-            }}></MyIconButton>
+            }}/>
         <MyIconButton name={"hand-rock"} text={"Drag"}
         onPress={()=>{
             setMarkerLocation({latitude:lat,longitude:lng});
@@ -104,8 +113,14 @@ return <View style={{flexDirection:'column',padding:20}}>
             setOuterScrollEnabled(false);
             setTmpLat(lat);
             setTmpLng(lng);
-        }}></MyIconButton>
-            </View>
+        }}/>
+        <MyIconButton
+            names={["forest","eye"]}
+            sizes={[30,20]}
+            styles={[{opacity:0.5,fontSize:10},{opacity:0.9}]}
+            text={"Show All"}
+        />
+        </View>
         </View>
         ,
         <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-around'}}>
@@ -194,6 +209,14 @@ return <View style={{flexDirection:'column',padding:20}}>
     ][coordinatesMode]
     }
     <MapView
+    region={
+        {
+            latitude:lat,
+            longitude:lng,
+            latitudeDelta:0.002,
+            longitudeDelta:0.002
+        }
+    }
     followsUserLocation={true}
     scrollEnabled={coordinatesMode!==coordinateModes.draggable}
     onMarkerDragStart={(event)=>{
@@ -230,7 +253,6 @@ return <View style={{flexDirection:'column',padding:20}}>
                     <MyIcon name={'tree'} />
                 </Marker>
                 ,
-                //TODO: new variables for marker lat and marker lng
                 <Marker coordinate={{ latitude: tmplat, longitude: tmplng }} draggable={true}>
                     <MyIcon name={'tree'} />
                 </Marker>

@@ -30,7 +30,44 @@ export const CustomButton = ({ text, opacityStyle,textStyle, onPress }) => {
         </View>
     </TouchableOpacity>);
 }
+export function MyIconStack({names,sizes,size=30,color='green',styles}){
+  if(styles && names.length!==styles.length){
+      throw "Names and styles lengths must match in MyIconStack"
+  }
+  if(sizes && names.length!==sizes.length){
+    throw "Names and sizes lengths must match in MyIconStack"
+  }
 
+    return <View style={{flexDirection:'row',alignItems:'center',justifyContent:'center',position:'relative',marginRight:10,padding:5,paddingRight:0}}>
+              {
+                styles && sizes?
+                names.map((iconName,index,[])=>{
+                  return <View key={iconName+Math.random().toString()} style={{...styles[index],position:'absolute'}}>
+                            <MyIcon name={iconName} size={sizes[index]} color={color}/>
+                          </View>
+                })
+                :
+                sizes?
+                names.map((iconName,index,[])=>{
+                  return <View key={iconName+Math.random().toString()} style={{...styles[index],position:'absolute'}}>
+                            <MyIcon name={iconName} size={sizes[index]} color={color}/>
+                          </View>
+                })
+                :
+                styles?
+                names.map((iconName,index,[])=>{
+                  return <View key={iconName+Math.random().toString()} style={{...styles[index],position:'absolute'}}>
+                            <MyIcon name={iconName} size={size} color={color}/>
+                          </View>
+                }):
+                names.map((iconName,index,[])=>{
+                  return <View key={iconName+Math.random().toString()} style={{position:'absolute'}}>
+                            <MyIcon name={iconName} size={size} color={color}/>
+                          </View>
+                })
+              }
+            </View>
+}
 export function MyIcon({name,size=30,color='green'}){
     if(fontAwesome5List.includes(name)){
         return <Fa5Icon name={name} size={size} color={color}/>;
@@ -41,13 +78,32 @@ export function MyIcon({name,size=30,color='green'}){
     return <Text>??</Text>
 }
 
-export function MyIconButton({name,size=30,color='green',onPress,iconColor='white',text=undefined}){
-    return <TouchableOpacity style={{...commonStyles.iconBtn,backgroundColor: color,}} onPress={onPress}>
-            <MyIcon name={name} size={size} color={iconColor}></MyIcon>
-            {
-              text && <Text style={{color:iconColor,fontSize:size*0.8}}> {text}</Text>
-            }
-            </TouchableOpacity>
+export function MyIconButton({name,names,sizes,styles,size=30,color='green',onPress,iconColor='white',text=undefined}){
+    if(name){
+      return <TouchableOpacity style={{...commonStyles.iconBtn,backgroundColor: color,}} onPress={onPress}>
+      <MyIcon name={name} size={size} color={iconColor}></MyIcon>
+      {
+        text && <Text style={{color:iconColor,fontSize:size*0.8}}> {text}</Text>
+      }
+      </TouchableOpacity>
+    }
+    else if(names){
+      return <TouchableOpacity style={{...commonStyles.iconBtn,backgroundColor: color,paddingLeft:15}} onPress={onPress}>
+      <MyIconStack names={names} styles={styles} sizes={sizes} size={size} color={iconColor}/>
+        {
+          text && <Text style={{color:iconColor,fontSize:size*0.8}}> {text}</Text>
+        }
+      </TouchableOpacity>
+    }
+    else{
+      return <TouchableOpacity style={{...commonStyles.iconBtn,backgroundColor: color,}} onPress={onPress}>
+      <MyIcon name={'??'} size={size} color={iconColor}></MyIcon>
+      {
+        text && <Text style={{color:iconColor,fontSize:size*0.8}}> {text}</Text>
+      }
+      </TouchableOpacity>
+    }
+
 }
 export const SaveButton = ({onPress,text='Save',size=30})=>{
   return <MyIconButton name={"check"} onPress={onPress} text={text} size={size}></MyIconButton>

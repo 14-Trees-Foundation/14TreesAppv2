@@ -105,7 +105,7 @@ export class LocalDatabase {
                         name: result.rows.item(index).name,
                         data: result.rows.item(index).data,
                         meta: {
-                            remark: result.rows.item(index).remark,
+                            remark: result.rows.item(index).remark.replace("''","'"),
                             capturetimestamp: result.rows.item(index).captureTimestamp,
                         },
                     };
@@ -155,7 +155,7 @@ export class LocalDatabase {
 
         const insertQuery =
             `INSERT OR REPLACE INTO sapling_images(saplingid, image, imageid, remark, timestamp) values` +
-            `('${treeimage.saplingid}', '${treeimage.image}', '${treeimage.imageid}', '${treeimage.remark}', '${treeimage.timestamp}')`;
+            `('${treeimage.saplingid}', '${treeimage.image}', '${treeimage.imageid}', '${treeimage.remark.replace("'","''")}', '${treeimage.timestamp}')`;
         console.log('image stored!')
         return this.db.executeSql(insertQuery);
     };

@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { Button, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Constants, Utils } from './Utils';
-import { CustomButton } from './Components';
+import { CustomButton, MyIconStack } from './Components';
 import LanguageModal from './Languagemodal';
 import { Strings } from './Strings';
 
@@ -43,7 +43,7 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View >
-      <Text style={{ fontSize: 20, marginTop: 20, alignContent: 'center', justifyContent: 'center', alignSelf: 'center', color: 'black' }}>{Strings.languages.LastSyncDataOn}</Text>
+       <Text style={{ fontSize: 20, marginTop: 20, alignContent: 'center', justifyContent: 'center', alignSelf: 'center', color: 'black' }}>{Strings.languages.LastSyncDataOn}</Text>
       <Text style={{ fontSize: 20, alignContent: 'center', justifyContent: 'center', alignSelf: 'center', color: 'black' }}>{syncDate}</Text>
       {/* TODO: separate to sync component with progress bar and batch processing. */}
       <View style={{ margin: 20 }}>
