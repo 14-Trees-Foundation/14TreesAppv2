@@ -66,7 +66,7 @@ export class LocalDatabase {
         } catch (error) {
             //TODO: remove raw throw. Convert to Alert.
             console.error(error);
-            Alert.alert(Strings.alertMessages.FailedGetTreedata);
+            Alert.alert(Strings.alertMessages.getString('FailedGetTreedata',Strings.english));
         }
     }
     getTreesByUploadStatus = async (uploaded) => {
@@ -84,7 +84,7 @@ export class LocalDatabase {
         } catch (error) {
             //TODO: remove raw throw. Convert to Alert.
             console.error(error);
-            Alert.alert(Strings.alertMessages.FailedGetTreedata);
+            Alert.alert(Strings.alertMessages.getString('FailedGetTreedata',Strings.english));
         }
     };
     deleteSyncedTrees = async()=>{
@@ -115,7 +115,7 @@ export class LocalDatabase {
             return treesimgs;
         } catch (error) {
             console.error(error);
-            Alert.alert(Strings.alertMessages.FailedGetTreeImgdata);
+            Alert.alert(Strings.alertMessages.getString('FailedGetTreeImages',Strings.english));
         }
     };
 
@@ -125,7 +125,7 @@ export class LocalDatabase {
             return res[0].rows.length;
         } catch (error) {
             console.error(error);
-            Alert.alert(Strings.alertMessages.FailedTreeCount);
+            Alert.alert(Strings.alertMessages.getString('FailedGetTreeCount',Strings.english));
         }
     };
 
@@ -135,7 +135,7 @@ export class LocalDatabase {
             return res[0].rows.length;
         } catch (error) {
             console.error(error);
-            Alert.alert(Strings.alertMessages.ErrorSetFalse);
+            Alert.alert(Strings.alertMessages.getString('FailedSetFalse',Strings.english));
         }
     };
 
@@ -213,7 +213,7 @@ export class LocalDatabase {
         }
         catch (error) {
             console.error(error);
-            Alert.alert(Strings.alertMessages.FailedTreeNames);
+            Alert.alert(Strings.alertMessages.getString('FailedGetTreeNames',Strings.english));
         }
 
     };
@@ -233,7 +233,7 @@ export class LocalDatabase {
         }
         catch (error) {
             console.error(error);
-            Alert.alert(Strings.alertMessages.FailedPlotNames);
+            Alert.alert(Strings.alertMessages.getString('FailedGetPlotNames',Strings.english));
         }
 
     }
@@ -252,7 +252,7 @@ export class LocalDatabase {
             return saplings;
         } catch (error) {
             console.error(error);
-            Alert.alert(Strings.alertMessages.FailedSaplingIds);
+            Alert.alert(Strings.alertMessages.getString('FailedGetSaplingIds',Strings.english));
         }
     };
 
@@ -304,6 +304,56 @@ export class LocalDatabase {
             console.error(error);
         }
     };
+
+    // a table of sapling ids with their corresponding plot ids and lat,long
+    
+
+
+    createSaplingPlotTbl = async () => {
+        // create table if not exists
+        const query = `CREATE TABLE IF NOT EXISTS sapling_plot(
+      saplingid TEXT NOT NULL PRIMARY KEY,
+      plotid TEXT NOT NULL,
+      lat TEXT NOT NULL,
+      lng TEXT NOT NULL
+    );`;
+
+        await this.db.executeSql(query);
+    }
+
+    storePlotSaplings = async (plot_id, sapling_id, latitude, longitude) => {
+        const insertQuery =
+            `INSERT OR REPLACE INTO sapling_plot(saplingid, plotid, lat, lng) values` +
+            `('${sapling_id}', '${plot_id}', '${latitude}', '${longitude}')`;
+        return this.db.executeSql(insertQuery);
+    }
+
+    getSaplingsforPlot = async (plot_id) => {
+        const saplings = [];
+        try {
+            let res = await this.db.executeSql(`SELECT * FROM sapling_plot WHERE plotid = '${plot_id}'`);
+            res.forEach(result => {
+                for (let index = 0; index < result.rows.length; index++) {
+                    saplings.push(result.rows.item(index));
+                }
+            });
+            return saplings;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    updateSaplingPlotTbl = async (plot_id, sapling_id, latitude, longitude) => {
+        // first delete the previous entry for sapling id
+        const deleteQuery = `DELETE FROM sapling_plot WHERE saplingid = '${sapling_id}'`;
+        await this.db.executeSql(deleteQuery);
+        // then insert the new values
+        const insertQuery =
+            `INSERT OR REPLACE INTO sapling_plot(saplingid, plotid, lat, lng) values` +
+            `('${sapling_id}', '${plot_id}', '${latitude}', '${longitude}')`;
+        return this.db.executeSql(insertQuery);
+    }
+    
 
     createUsersTbl = async () => {
         // create table if not exists

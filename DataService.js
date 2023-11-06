@@ -50,17 +50,24 @@ export class DataService{
       });
     }
 
-    // remove the hardcoded adminID later
+    static async fetchPlotSaplings(user_id,lasthash){
+      const url = `${DataService.serverBase}/fetchPlotSaplings`;
+      return await axios.post(url,{
+        userId: user_id,
+        lastHash: lasthash
+    });
+    }
+
+  
     static async fetchUsers(adminID){
       console.log('fetching users')
         const url = `${DataService.serverBase}/getUnverifiedUsers`;
         return await axios.post(url,{
-          // adminID : adminID
-          adminID: "61596d30e78e3cc6282560d0"
+          adminID : adminID
       });
     }
 
-    // remove the hardcoded adminID later
+    
     static async verifyUser(user_id,adminID){
       console.log('verifying user')
         const url = `${DataService.serverBase}/verifyUser`;

@@ -41,6 +41,11 @@ const HomeScreen = ({ navigation }) => {
     getSyncDate();
   }, []);
 
+  const fetchdata = async () => {
+    await Utils.fetchAndStoreHelperData();
+    await Utils.fetchAndStorePlotSaplings();
+  }
+
   return (
     <View >
        <Text style={{ fontSize: 20, marginTop: 20, alignContent: 'center', justifyContent: 'center', alignSelf: 'center', color: 'black' }}>{Strings.languages.LastSyncDataOn}</Text>
@@ -65,7 +70,7 @@ const HomeScreen = ({ navigation }) => {
       <View style={{ margin: 20 }}>
         <Button
           title={Strings.buttonLabels.FetchHelperData}
-          onPress={Utils.fetchAndStoreHelperData}
+          onPress={fetchdata}
           color={'#5DB075'}
         />
       </View>

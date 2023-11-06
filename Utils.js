@@ -50,6 +50,7 @@ export class Utils{
         await this.ldb.createTreetTypesTbl();
         await this.ldb.createPlotTbl();
         await this.ldb.createTreesTable();
+        await this.ldb.createSaplingPlotTbl();
     }
     static async fetchAndStoreHelperData(){
         console.log('fetching helper data');
@@ -77,6 +78,43 @@ export class Utils{
             console.log('data was null.');
         }
     }
+
+    static async fetchAndStorePlotSaplings(){
+        console.log('fetching plot saplings');
+        let lastHash = await AsyncStorage.getItem(Constants.hashForPlotSaplingsKey);
+        lastHash = String(lastHash);//take care of null values.
+        let userId = await Utils.getUserId();
+        console.log('requesting plot saps: ',userId,lastHash)
+        const plotSaplingsData = await DataService.fetchPlotSaplings(userId,lastHash);
+        // console.log(plotSaplingsData.data)
+        if(!plotSaplingsData){
+            return;//error display, logging done by DataService.
+        }
+        const newHash = plotSaplingsData.data['hash'];
+        const jsondata = plotSaplingsData.data['data'];
+        // console.log(jsondata)
+        if(newHash==lastHash){
+            ToastAndroid.show("Data up-to-date",ToastAndroid.LONG)
+            return;
+        }
+        if(jsondata){
+            jsondata.forEach((plot) => {
+                const { plot_id, saplings } = plot;
+                // console.log(plot_id);
+                saplings.forEach((sapling) => {
+                    const [sapling_id, latitude, longitude] = sapling;
+                    // console.log(plot_id, sapling_id, latitude, longitude);
+                    
+                    this.ldb.storePlotSaplings(plot_id, sapling_id, latitude, longitude);   
+                }); 
+            });
+            await AsyncStorage.setItem(Constants.hashForPlotSaplingsKey,newHash);
+        }
+        else{
+            console.log('data was null.');  
+        }
+    }
+
     static async storeTreeTypes(treeTypes){
         // console.log(treeTypes[0])
         const treeTypesInLocalDBFormat = treeTypes.map((treeType)=>{
@@ -269,6 +307,7 @@ export class Constants{
     static userDetailsKey = 'userobj';
     static adminIdKey = 'adminid';
     static lastHashKey = 'lasthash';
+    static hashForPlotSaplingsKey = 'hashForPlotSaplings';
     static appRootTagKey = 'rootTag';
     static syncDateKey = 'date';
     static imagePlaceholder = 'https://i.imgur.com/vxP6SFl.png'

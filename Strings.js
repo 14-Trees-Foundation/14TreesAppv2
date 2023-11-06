@@ -19,11 +19,13 @@ export class Strings{
         "mr":{
 
             HomePage:"मुख्य पृष्ठ",
-            AddTree:"झाड जोडा",
+            AddTree:"नवीन झाड जोडा",
             localDataView:"लोकल डेटा",
             VerifyUsers:"वापरकर्ते सत्यापित करा",
-            EditTree:"झाड संपादित करा",
-            LogIn:'Log In',//TODO, need to resolve a bug here, do NOT add translation yet.
+            EditTree:"झाड संपादन",
+            LogIn:'लॉग इन',
+            DrawerScreen:'होम स्क्रीन',
+            startScreen:'प्रारंभ स्क्रीन',
         }
     })
 
