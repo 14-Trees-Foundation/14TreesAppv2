@@ -2,9 +2,8 @@ import { Utils, commonStyles } from "./Utils";
 import { useEffect,useState,useCallback } from 'react';
 import {KeyboardAvoidingView,Alert,Text,Image,View,ToastAndroid,ScrollView,TouchableOpacity,TextInput, Button, FlatList,StyleSheet} from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
-import {launchCamera} from 'react-native-image-picker';
-import { CustomButton, MyIcon, MyIconButton } from "./Components";
-import MapView,{PROVIDER_GOOGLE,Marker} from "react-native-maps";
+import {launchCamera, } from 'react-native-image-picker';
+import { CustomButton } from "./Components";
 import { CustomDropdown } from "./CustomDropdown";
 import { Strings } from "./Strings";
 export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewImage, onDeleteImage }) => {
@@ -81,6 +80,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
             includeBase64: true,
             maxHeight: 200,
             maxWidth: 200,
+            quality : 0.25,
         };
 
         launchCamera(options, async (response) => {
@@ -89,10 +89,20 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
             } else if (response.error) {
                 console.log('ImagePicker Error: ', response.error);
             } else {
+                // const { fileSize } = response.assets[0];
+                // 
                 const timestamp = new Date().toISOString();
                 // only show time and not date
-
+                const filesz = response.assets[0].fileSize;
+                // let maxsz = 1024 * 10;
+                // const compressedQuality = maxsz / filesz;
                 const base64Data = response.assets[0].base64;
+                // if (filesz > maxsz) {
+                    
+                // }
+                console.log("file size: ", filesz);
+                // console.log('base: ',base64Data);
+
                 const imageName = `${saplingid}_${timestamp}.jpg`;
                 const newImage = {
                     saplingid: saplingid,

@@ -54,13 +54,13 @@ export class Utils {
         await this.ldb.createTreesTable();
         await this.ldb.createSaplingPlotTbl();
     }
-    static async fetchAndStoreHelperData() {
+    static async fetchAndStoreHelperData(onProgress) {
         console.log('fetching helper data');
         let lastHash = await AsyncStorage.getItem(Constants.lastHashKey);
         lastHash = String(lastHash);//take care of null values.
         let userId = await Utils.getUserId();
         console.log('requesting: ', userId, lastHash)
-        const helperData = await DataService.fetchHelperData(userId, lastHash);
+        const helperData = await DataService.fetchHelperData(userId, lastHash, onProgress);
         if (!helperData) {
             return;//error display, logging done by DataService.
 
@@ -106,14 +106,6 @@ export class Utils {
         if (jsondata) {
             console.log('Storing Json data...')
             await Promise.all(jsondata.map(async (plot) => {
-                const { plot_id, saplings } = plot;
-                // console.log(plot_id);
-                // await Promise.all(saplings.map(async(sapling) => {
-                //     const [sapling_id, latitude, longitude] = sapling;
-                //     // console.log(plot_id, sapling_id, latitude, longitude);
-                //     await this.ldb.storePlotSaplings(plot_id, sapling_id, latitude, longitude); 
-
-                // })); 
                 await this.ldb.storePlotSaplings(plot_id, saplings);
                 console.log('plot stored.')
             }));
