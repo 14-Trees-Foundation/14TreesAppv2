@@ -86,29 +86,35 @@ export class Utils{
         let userId = await Utils.getUserId();
         console.log('requesting plot saps: ',userId,lastHash)
         const plotSaplingsData = await DataService.fetchPlotSaplings(userId,lastHash);
-        // console.log(plotSaplingsData.data)
+        
         if(!plotSaplingsData){
             return;//error display, logging done by DataService.
         }
+        console.log(plotSaplingsData.data)
         const newHash = plotSaplingsData.data['hash'];
         const jsondata = plotSaplingsData.data['data'];
-        // console.log(jsondata)
-        if(newHash==lastHash){
+        console.log((jsondata?(jsondata.length+'is the data length'):'jsondata null'))
+        console.log(newHash,'is the new hash.');
+        
+        if(newHash===lastHash){
+            console.log('hashes match, returning.')
             ToastAndroid.show("Data up-to-date",ToastAndroid.LONG)
             return;
         }
         if(jsondata){
-            jsondata.forEach((plot) => {
+            console.log('Storing Json data...')
+            await Promise.all(jsondata.map(async(plot) => {
                 const { plot_id, saplings } = plot;
                 // console.log(plot_id);
-                saplings.forEach((sapling) => {
+                await Promise.all(saplings.map(async(sapling) => {
                     const [sapling_id, latitude, longitude] = sapling;
                     // console.log(plot_id, sapling_id, latitude, longitude);
                     
-                    this.ldb.storePlotSaplings(plot_id, sapling_id, latitude, longitude);   
-                }); 
-            });
+                    await this.ldb.storePlotSaplings(plot_id, sapling_id, latitude, longitude);   
+                })); 
+            }));
             await AsyncStorage.setItem(Constants.hashForPlotSaplingsKey,newHash);
+            console.log('setting hash: ',newHash);
         }
         else{
             console.log('data was null.');  

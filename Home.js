@@ -21,11 +21,6 @@ const HomeScreen = ({ navigation }) => {
   const [langModalVisible, setLangModalVisible] = useState(false);
   const [something, setSomething] = useState(true); // to re-render the component(jugaad)
   // console.log('here')
-  useEffect(() => {
-    console.log('refresh')
-  }, [Strings.languages, syncDate]);
-
-
   const getSyncDate = async () => {
     const l = await AsyncStorage.getItem(Constants.selectedLangKey);
     console.log('lang: ', l);
@@ -39,6 +34,7 @@ const HomeScreen = ({ navigation }) => {
   }
   useEffect(() => {
     getSyncDate();
+    console.log('sync date updated')
   }, []);
 
   const fetchdata = async () => {
