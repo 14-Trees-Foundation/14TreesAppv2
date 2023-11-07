@@ -312,8 +312,8 @@ export class LocalDatabase {
     createSaplingPlotTbl = async () => {
         // create table if not exists
         const query = `CREATE TABLE IF NOT EXISTS sapling_plot(
-      saplingid TEXT NOT NULL PRIMARY KEY,
       plotid TEXT NOT NULL,
+      saplingid TEXT NOT NULL PRIMARY KEY,
       lat TEXT NOT NULL,
       lng TEXT NOT NULL
     );`;
@@ -321,11 +321,18 @@ export class LocalDatabase {
         await this.db.executeSql(query);
     }
 
-    storePlotSaplings = async (plot_id, sapling_id, latitude, longitude) => {
+    storePlotSaplings = async (plot_id, saplings) => {
         const insertQuery =
-            `INSERT OR REPLACE INTO sapling_plot(saplingid, plotid, lat, lng) values` +
-            `('${sapling_id}', '${plot_id}', '${latitude}', '${longitude}')`;
-        return this.db.executeSql(insertQuery);
+            `INSERT OR REPLACE INTO sapling_plot(plotid, saplingid, lat, lng) values` +
+            `(?, ?, ?, ?)`;
+        return this.db.executeSql(insertQuery,plot_id,saplings);
+
+    }
+    
+
+    deletePlotSaplings = async () => {
+        const query = `DELETE FROM sapling_plot`;
+        return this.db.executeSql(query);
     }
 
     getSaplingsforPlot = async (plot_id) => {

@@ -7,6 +7,7 @@ import LanguageModal from './Languagemodal';
 import { Strings } from './Strings';
 
 
+
 // strings 
 // Never 
 // Last Sync Data On :
@@ -19,7 +20,7 @@ import { Strings } from './Strings';
 const HomeScreen = ({ navigation }) => {
   const [syncDate, setSyncDate] = useState('');
   const [langModalVisible, setLangModalVisible] = useState(false);
-  const [something, setSomething] = useState(true); // to re-render the component(jugaad)
+  const [something, setSomething] = useState(''); 
   // console.log('here')
   const getSyncDate = async () => {
     const l = await AsyncStorage.getItem(Constants.selectedLangKey);
@@ -37,10 +38,32 @@ const HomeScreen = ({ navigation }) => {
     console.log('sync date updated')
   }, []);
 
+  // useEffect(() => {
+  //   let saplings = Utils.getPlotSaplings();
+  //   setSomething(saplings);
+  //   console.log('plot saplings updated')
+  //   for(let i=0;i<saplings.length;i++){
+  //     console.log(saplings[i])
+  //   }
+  // }
+  //   , []);
+
+
+  // const [progress, setProgress] = useState(0);
+
   const fetchdata = async () => {
     await Utils.fetchAndStoreHelperData();
     await Utils.fetchAndStorePlotSaplings();
-  }
+  };
+
+ 
+
+  // const teststore = async () => {
+    // await Utils.deletePlotSaplings();
+    // await Utils.storeplotsaptest();
+    // await Utils.fetchAndStorePlotSaplings();
+    // 
+  // }
 
   return (
     <View >
@@ -70,6 +93,13 @@ const HomeScreen = ({ navigation }) => {
           color={'#5DB075'}
         />
       </View>
+      {/* <View style={{ margin: 20 }}>
+        <Button
+          title={"test button"}
+          onPress={teststore}
+          color={'#5DB075'}
+        />
+      </View> */}
       <TouchableOpacity style={styles.selLang} onPress={() => {
         console.log('set your language')
         setLangModalVisible(!langModalVisible)
@@ -108,4 +138,7 @@ const styles = StyleSheet.create({
     borderColor: '#A9A9A9',
   }
 });
+
+
+// Utils code
 

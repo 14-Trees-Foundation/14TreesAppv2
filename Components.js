@@ -14,6 +14,7 @@ import AddTreeScreen from "./AddTree";
 import EditTreeScreen from "./EditTree";
 import VerifyusersScreen from "./VerifyUsers";
 import { stackNavRef } from "./App";
+// import { ProgressBar } from 'react-native-progress';
 const Drawer = createDrawerNavigator();
 export const CustomButton = ({ text, opacityStyle,textStyle, onPress }) => {
     let finalOpacityStyle = commonStyles.defaultButtonStyle;
@@ -219,4 +220,14 @@ export const DrawerNavigator = ({route})=>{
         }
       </Drawer.Navigator>
   );
-  }
+}
+
+// export const ProgressBarComponent = ({ progress }) => {
+//   return (
+//     <View>
+//       <ProgressBar progress={progress / 100} width={200} />
+//       <Text>{Math.round(progress)}%</Text>
+//     </View>
+//   );
+// };
+
