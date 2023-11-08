@@ -6,6 +6,9 @@ import {launchCamera, } from 'react-native-image-picker';
 import { CustomButton } from "./Components";
 import { CustomDropdown } from "./CustomDropdown";
 import { Strings } from "./Strings";
+import { CoordinateSetter } from "./CoordinateSetter";
+import ImageResizer from "react-native-image-resizer";
+import RNFS from 'react-native-fs';
 export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewImage, onDeleteImage }) => {
     const {inSaplingId,inLng,inLat,inImages,inTreeType,inPlot,inUserId} = treeData;
     const [saplingid,setSaplingId] = useState(inSaplingId);
@@ -80,8 +83,9 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
             includeBase64: true,
             maxHeight: 200,
             maxWidth: 200,
-            quality : 0.25,
         };
+
+        
 
         launchCamera(options, async (response) => {
             if (response.didCancel) {
@@ -92,18 +96,42 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                 // const { fileSize } = response.assets[0];
                 // 
                 const timestamp = new Date().toISOString();
+                const imageName = `${saplingid}_${timestamp}.jpg`;
                 // only show time and not date
                 const filesz = response.assets[0].fileSize;
-                // let maxsz = 1024 * 10;
-                // const compressedQuality = maxsz / filesz;
-                const base64Data = response.assets[0].base64;
-                // if (filesz > maxsz) {
-                    
-                // }
-                console.log("file size: ", filesz);
-                // console.log('base: ',base64Data);
+                var base64Data = response.assets[0].base64;
 
-                const imageName = `${saplingid}_${timestamp}.jpg`;
+                console.log("file size: ", filesz);
+                let maxsz = 1024 * 10;
+                if(filesz>maxsz){
+                    const compressedQuality = (maxsz/filesz)*100;
+                    console.log("compressed quality: ", compressedQuality);
+                    const resizedImage = await ImageResizer.createResizedImage(
+                        response.assets[0].uri,
+                        200,
+                        200,
+                        'JPEG',
+                        compressedQuality,
+                    );
+                    const resizedImagePath = resizedImage.uri;
+                    
+                    RNFS.readFile(resizedImagePath, 'base64')
+                      .then((resizedbase64Data) => {
+                        // Handle the base64 data
+                        base64Data = resizedbase64Data;
+                        // console.log(base64Data);
+                      })
+                      .catch((error) => {
+                        // Handle any errors while reading the file
+                        console.error('Error reading file:', error);
+                      });
+                    
+                    console.log("resized image: ", resizedImage.size);
+                }
+                   
+                // console.log("base64Data: ", base64Data);
+
+                 
                 const newImage = {
                     saplingid: saplingid,
                     data: base64Data,
