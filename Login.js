@@ -15,7 +15,7 @@ const LoginScreen = ({navigation}) =>{
   const [langModalVisible, setLangModalVisible] = useState(false); 
   const googleLogin = async () => {
     try {
-      // navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
+      navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
       await GoogleSignin.hasPlayServices();
       Alert.alert('Going to request google sign in.')
       const userInfo = await GoogleSignin.signIn();

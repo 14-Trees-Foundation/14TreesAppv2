@@ -6,13 +6,13 @@ import { AppRegistry } from 'react-native';
 import { name as appName } from './app.json';
 import { Strings } from "./Strings";
 import RNRestart from 'react-native-restart';
-// import DummyData from "./DummyData";
+import DummyData from "./DummyData";
 
 // Your app's root component
 import App from './App'; // Replace with the actual path to your app's root component
 
 export class Utils {
-    static ldb = new LocalDatabase();
+    static localdb = new LocalDatabase();
     static async getAppRootTag() {
         return Number.parseInt(await AsyncStorage.getItem(Constants.appRootTagKey));
     }
@@ -48,43 +48,47 @@ export class Utils {
     }
     static async createLocalTablesIfNeeded() {
         // await this.setDBConnection();
+        // console.log('creating tables if needed.', this.localdb)
+        await this.localdb.createTreetTypesTbl();
+        await this.localdb.createPlotTbl();
+        await this.localdb.createTreesTable();
+        await this.localdb.createSaplingPlotTbl();
 
-        await this.ldb.createTreetTypesTbl();
-        await this.ldb.createPlotTbl();
-        await this.ldb.createTreesTable();
-        await this.ldb.createSaplingPlotTbl();
     }
     static async fetchAndStoreHelperData() {
         console.log('fetching helper data');
-        let lastHash = await AsyncStorage.getItem(Constants.lastHashKey);
-        lastHash = String(lastHash);//take care of null values.
-        let userId = await Utils.getUserId();
-        console.log('requesting: ', userId, lastHash)
-        const helperData = await DataService.fetchHelperData(userId, lastHash);
-        if (!helperData) {
-            return;//error display, logging done by DataService.
+        // console.log('ldb: ', this.localdb)
+        // let lastHash = await AsyncStorage.getItem(Constants.lastHashKey);
+        // lastHash = String(lastHash);//take care of null values.
+        // let userId = await Utils.getUserId();
+        // console.log('requesting: ', userId, lastHash)
+        // const helperData = await DataService.fetchHelperData(userId, lastHash);
+        // if (!helperData) {
+        //     return;//error display, logging done by DataService.
 
-        }
-        const data = helperData.data['data'];
-        const newHash = helperData.data['hash'];
-        if (newHash == lastHash) {
-            ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
-            return;
-        }
-        if (data) {
-            await Utils.storeTreeTypes(data['treeTypes']);
-            await Utils.storePlots(data['plots']);
-            await AsyncStorage.setItem(Constants.lastHashKey, newHash);
-        }
-        else {
-            console.log('data was null.');
-        }
+        // }
+        // const data = helperData.data['data'];
+        // const newHash = helperData.data['hash'];
+        // if (newHash == lastHash) {
+        //     ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
+        //     return;
+        // }
+        // if (data) {
+        //     await Utils.storeTreeTypes(data['treeTypes']);
+        //     await Utils.storePlots(data['plots']);
+        //     await AsyncStorage.setItem(Constants.lastHashKey, newHash);
+        // }
+        // else {
+        //     console.log('data was null.');
+        // }
     }
 
     static async fetchAndStorePlotSaplings() {
         // await AsyncStorage.setItem(Constants.hashForPlotSaplingsKey,'blah');
         // return;
         console.log('fetching plot saplings');
+        console.log('ldb: ', this.localdb)
+        console.log('ldb: ', this.localdb)
         let lastHash = await AsyncStorage.getItem(Constants.hashForPlotSaplingsKey);
         lastHash = String(lastHash);//take care of null values.
         let userId = await Utils.getUserId();
@@ -108,7 +112,7 @@ export class Utils {
         if (jsondata) {
             console.log('Storing Json data...')
             await Promise.all(jsondata.map(async (plot) => {
-                await this.ldb.storePlotSaplings(plot.plot_id, plot.saplings);
+                await this.localdb.storePlotSaplings(plot.plot_id, plot.saplings);
                 console.log(plot.plot_id,'plot stored.')
             }));
             console.log('data stored.')
@@ -118,34 +122,53 @@ export class Utils {
         else {
             console.log('data was null.');
         }
+
+        //-----------------------------------------
+
+
+        // const jsonData = DummyData;
+        // console.log("got the data")
+        // const jsondata = jsonData['data'];
+
+        // console.log((jsondata ? (jsondata.length + 'is the data length') : 'jsondata null'))
+        // await Promise.all(jsondata.map(async (plot) => {
+        //     const { plot_id, saplings } = plot;
+        //     // console.log(plot_id);
+        //     // console.log(saplings);
+        //     await this.localdb.storePlotSaplings(plot_id, saplings);
+        //     // console.log('plot stored.')
+        // }));
+        // console.log('data stored.')
     }
 
     static async deletePlotSaplings() {
-        await this.ldb.deletePlotSaplings();
+        await this.localdb.deletePlotSaplings();
     }
 
     // just for testing purposes
-    // static async storeplotsaptest() {
-    //     const jsonData = DummyData;
-    //     console.log("got the data")
-    //     const jsondata = jsonData['data'];
+    static async storeplotsaptest() {
+        console.log('storing plot saplings', this.localdb);
+        // const jsonData = DummyData;
+        // console.log("got the data")
+        // const jsondata = jsonData['data'];
 
-    //     console.log((jsondata ? (jsondata.length + 'is the data length') : 'jsondata null'))
-    //     await Promise.all(jsondata.map(async (plot) => {
-    //         const { plot_id, saplings } = plot;
-    //         console.log(plot_id);
-    //         // console.log(saplings);
-    //         await this.ldb.storePlotSaplings(plot_id, saplings);
-    //         console.log('plot stored.')
-    //     }));
-    //     console.log('data stored.')
-    // }
+        // console.log((jsondata ? (jsondata.length + 'is the data length') : 'jsondata null'))
+        // await Promise.all(jsondata.map(async (plot) => {
+        //     const { plot_id, saplings } = plot;
+        //     // console.log(plot_id);
+        //     // console.log(saplings);
+        //     await this.localdb.storePlotSaplings(plot_id, saplings);
+        //     // console.log('plot stored.')
+        // }));
+        // console.log('data stored.')
+    }
 
-    static async getPlotSaplings(plot_id) {
-        const saplings = await this.ldb.getSaplingsforPlot(plot_id);
-        console.log(`# saplings in ${plot_id}: `,saplings.length);
+    static async getPlotSaplings() {
+        console.log('getting plot saplings');
+        const saplings = await this.localdb.getSaplingsforPlot();
+        console.log(`# saplings : `,saplings.length);
         if(saplings.length>0){
-            console.log('example: ',saplings[0]);
+            console.log('example: ',saplings);
         }
         return saplings;
     }
@@ -153,7 +176,7 @@ export class Utils {
 
     static async storeTreeTypes(treeTypes) {
         // console.log(treeTypes[0])
-        const treeTypesInLocalDBFormat = treeTypes.map((treeType) => {
+        const treeTypesInLocalocaldbFormat = treeTypes.map((treeType) => {
             return {
                 name: treeType.name,
                 tree_id: treeType.tree_id
@@ -161,9 +184,9 @@ export class Utils {
         })
         // await this.setDBConnection();
         let failure = false;
-        for (let dbTreeType of treeTypesInLocalDBFormat) {
+        for (let dbTreeType of treeTypesInLocalocaldbFormat) {
             try {
-                await this.ldb.updateTreeTypeTbl(dbTreeType);
+                await this.localdb.updateTreeTypeTbl(dbTreeType);
             }
             catch (err) {
                 console.log('Failed to save treeType: ', dbTreeType);
@@ -180,7 +203,7 @@ export class Utils {
     }
     static async storePlots(plots) {
         // console.log(plots[0])
-        const plotsInLocalDBFormat = plots.map((plot) => {
+        const plotsInLocalocaldbFormat = plots.map((plot) => {
             if (plot.name) {
                 plot.name = plot.name.replace("'", "''");
             }
@@ -191,9 +214,9 @@ export class Utils {
         })
         // await this.setDBConnection();
         let failure = false;
-        for (let dbPlot of plotsInLocalDBFormat) {
+        for (let dbPlot of plotsInLocalocaldbFormat) {
             try {
-                await this.ldb.updatePlotTbl(dbPlot);
+                await this.localdb.updatePlotTbl(dbPlot);
             }
             catch (err) {
                 console.log('Failed to save plot: ', dbPlot);
@@ -209,12 +232,12 @@ export class Utils {
         }
     }
     static async deleteSyncedTrees() {
-        const newTreesList = await this.ldb.deleteSyncedTrees();
+        const newTreesList = await this.localdb.deleteSyncedTrees();
         return newTreesList;
     }
     static async upload() {
         try {
-            const final = await Utils.fetchTreesFromLocalDB(0);
+            const final = await Utils.fetchTreesFromLocalocaldb(0);
             console.log(final);
             let response = await DataService.uploadTrees(final);
             if (response) {
@@ -232,22 +255,22 @@ export class Utils {
     };
     static userId;
     static adminId;
-    static ldb;
+    static localdb;
     // static lang;
     static async setTreeSyncStatus(final) {
         for (let index = 0; index < final.length; index++) {
             const element = final[index];
-            await this.ldb.updateUpload(element.sapling_id);
+            await this.localdb.updateUpload(element.sapling_id);
         }
     }
 
-    static async fetchTreesFromLocalDB(uploaded = undefined) {
+    static async fetchTreesFromLocalocaldb(uploaded = undefined) {
         let res;
         if (uploaded) {
-            res = await this.ldb.getTreesByUploadStatus(uploaded);
+            res = await this.localdb.getTreesByUploadStatus(uploaded);
         }
         else {
-            res = await this.ldb.getAllTrees();
+            res = await this.localdb.getAllTrees();
             console.log(res)
         }
         const currentTime = new Date().toString();
@@ -264,7 +287,7 @@ export class Utils {
                 element.lng = 0;
             }
             console.log(element.lat, element.lng);
-            let images = await this.ldb.getTreeImages(element.sapling_id);
+            let images = await this.localdb.getTreeImages(element.sapling_id);
             for (let index = 0; index < images.length; index++) {
                 console.log(images[index].name);
             }
@@ -285,36 +308,36 @@ export class Utils {
         return final;
     }
     static async setDBConnection() {
-        if (!(this.ldb.db)) {
-            await this.ldb.getDBConnection();
+        if (!(this.localdb.db)) {
+            await this.localdb.getDBConnection();
         }
-        return this.ldb;
+        return this.localdb;
     }
     static async treeTypeFromID(treeTypeID) {
         //both ids are numbers of type string.
-        const treeNames = await this.ldb.getTreeTypes();
+        const treeNames = await this.localdb.getTreeTypes();
         const requiredTreeType = treeNames.find((tree) => (tree.value === treeTypeID));
         return requiredTreeType;
     }
     static async plotFromPlotID(plotID) {
         //both ids are numbers of type string.
-        const plots = await this.ldb.getPlotsList();
+        const plots = await this.localdb.getPlotsList();
         const requiredPlot = plots.find((plot) => (plot.value === plotID));
         console.log(requiredPlot)
         return requiredPlot;
     }
-    static async fetchTreeTypesFromLocalDB() {
-        let res = await this.ldb.getTreeNames();
+    static async fetchTreeTypesFromLocalocaldb() {
+        let res = await this.localdb.getTreeNames();
         return res;
     }
 
-    static async fetchPlotNamesFromLocalDB() {
-        let res = await this.ldb.getPlotNames();
+    static async fetchPlotNamesFromLocalocaldb() {
+        let res = await this.localdb.getPlotNames();
         return res;
     }
 
-    static async fetchSaplingIdsFromLocalDB() {
-        let res = await this.ldb.getSaplingIds();
+    static async fetchSaplingIdsFromLocalocaldb() {
+        let res = await this.localdb.getSaplingIds();
         return res;
     }
 

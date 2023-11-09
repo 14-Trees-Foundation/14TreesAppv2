@@ -314,18 +314,22 @@ export class LocalDatabase {
         const query = `CREATE TABLE IF NOT EXISTS sapling_plot(
       plotid TEXT NOT NULL,
       saplingid TEXT NOT NULL PRIMARY KEY,
-      lat TEXT NOT NULL,
-      lng TEXT NOT NULL
+      lat FLOAT(10,7) NOT NULL,
+      lng FLOAT(10,7) NOT NULL
     );`;
-
+            console.log('sapling plot table created')
         await this.db.executeSql(query);
     }
 
     storePlotSaplings = async (plot_id, saplings) => {
-        const insertQuery =
-            `INSERT OR REPLACE INTO sapling_plot(plotid, saplingid, lat, lng) values` +
-            `(?, ?, ?, ?)`;
-        return this.db.executeSql(insertQuery,plot_id,saplings);
+       for (let i = 0; i < saplings.length; i++) {
+           const sapling = saplings[i];
+           const insertQuery =
+               `INSERT OR REPLACE INTO sapling_plot(plotid,saplingid ,lat, lng) values` +
+               `('${plot_id}', '${sapling[0]}','${sapling[1]}', '${sapling[2]}')`;
+           await this.db.executeSql(insertQuery);
+       }
+       console.log('trees stored for plot id: ', plot_id)
 
     }
     
@@ -335,10 +339,11 @@ export class LocalDatabase {
         return this.db.executeSql(query);
     }
 
-    getSaplingsforPlot = async (plot_id) => {
+    getSaplingsforPlot = async () => {
+        // console.log('plot id: ', plot_id)
         const saplings = [];
         try {
-            let res = await this.db.executeSql(`SELECT * FROM sapling_plot WHERE plotid = '${plot_id}'`);
+            let res = await this.db.executeSql(`SELECT * FROM sapling_plot`);
             res.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {
                     saplings.push(result.rows.item(index));

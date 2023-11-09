@@ -57,12 +57,12 @@ const HomeScreen = ({ navigation }) => {
 
  
 
-  // const teststore = async () => {
-    // await Utils.deletePlotSaplings();
-    // await Utils.storeplotsaptest();
+  const test = async () => {
+    console.log('test')
     // await Utils.fetchAndStorePlotSaplings();
-    // 
-  // }
+    // await Utils.getPlotSaplings();
+    
+  }
 
   return (
     <View >
@@ -95,7 +95,7 @@ const HomeScreen = ({ navigation }) => {
       {/* <View style={{ margin: 20 }}>
         <Button
           title={"test button"}
-          onPress={teststore}
+          onPress={test}
           color={'#5DB075'}
         />
       </View> */}
