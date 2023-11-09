@@ -36,7 +36,7 @@ export class Strings{
             SignIn:"Sign In",
             // home
             Never:"Never",
-            LastSyncDataOn:"Last Sync Data On : ",
+            LastSynced:"Last Synced: ",
             // add tree
             Location:"Tree Location",   
             CapturedAt:"Captured At",
@@ -63,7 +63,7 @@ export class Strings{
             LogIn:"लॉग इन",
             // home
             Never:"कधीच नाही",
-            LastSyncDataOn:"शेवटचा सिंक केलेला डेटा : ",
+            LastSynced:"शेवटचा सिंक केलेला डेटा : ",
             // add tree
             Location:"स्थान",
             CapturedAt:"फोटो घेतले तारीख",

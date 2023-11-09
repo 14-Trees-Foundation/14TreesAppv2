@@ -6,6 +6,7 @@ import { CustomButton, MyIconStack } from './Components';
 import LanguageModal from './Languagemodal';
 import { Strings } from './Strings';
 import * as Progress from 'react-native-progress';
+import { SyncDisplay } from './SyncDisplay';
 
 // strings 
 // Never 
@@ -17,25 +18,10 @@ import * as Progress from 'react-native-progress';
 
 
 const HomeScreen = ({ navigation }) => {
-  const [syncDate, setSyncDate] = useState('');
   const [langModalVisible, setLangModalVisible] = useState(false);
   const [something, setSomething] = useState(''); 
   // console.log('here')
-  const getSyncDate = async () => {
-    const l = await AsyncStorage.getItem(Constants.selectedLangKey);
-    console.log('lang: ', l);
-    const value = await AsyncStorage.getItem(Constants.syncDateKey);
-    if (value) {
-      setSyncDate(value);
-    }
-    else {
-      setSyncDate(Strings.languages.Never);
-    }
-  }
-  useEffect(() => {
-    getSyncDate();
-    console.log('sync date updated')
-  }, []);
+  
 
   const [progress, setProgress] = useState(0);
 
@@ -66,18 +52,9 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View >
-       <Text style={{ fontSize: 20, marginTop: 20, alignContent: 'center', justifyContent: 'center', alignSelf: 'center', color: 'black' }}>{Strings.languages.LastSyncDataOn}</Text>
-      <Text style={{ fontSize: 20, alignContent: 'center', justifyContent: 'center', alignSelf: 'center', color: 'black' }}>{syncDate}</Text>
       {/* TODO: show status of synced/pending trees. */}
       {/* TODO: fix last sync date setting. */}
-      {/* TODO: separate to sync component with progress bar and batch processing. */}
-      <View style={{ margin: 20 }}>
-        <Button
-          title={Strings.buttonLabels.SyncData}
-          onPress={Utils.upload}
-          color={'#5DB075'}
-        />
-      </View>
+      <SyncDisplay/>
       <View style={{ margin: 20, marginTop: 50 }}>
         <Button
           title={Strings.buttonLabels.AddNewTree}

@@ -1,5 +1,6 @@
 import { TouchableOpacity,View, Image, Text, Button, RootTagContext, BackHandler } from "react-native";
-import { Constants, Utils, commonStyles,styleConfigs, fontAwesome5List, materialCommunityList } from "./Utils";
+import { Constants, Utils, commonStyles,styleConfigs} from "./Utils";
+import { fontAwesome5List, materialCommunityList } from './IconLists';
 import Fa5Icon from 'react-native-vector-icons/FontAwesome5';
 import { NavigationContainer, createNavigationContainerRef, useFocusEffect, useNavigationContainerRef } from '@react-navigation/native';
 import {useState,useEffect, useCallback} from 'react';

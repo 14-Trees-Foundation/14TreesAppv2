@@ -55,7 +55,7 @@ const requestLocation = async (onSetLat,onSetLng,setLat,setLng,setAccuracy) => {
 
 export const CoordinatesDisplay = ({latitude,longitude,title})=>{
     return (
-                <View style={{flexDirection:'column',borderColor:'grey',borderWidth:3,borderRadius:5,margin:3,padding:3}}>
+                <View style={{...commonStyles.borderedDisplay,flexDirection:'column'}}>
                     <Text style={{...commonStyles.text3,fontWeight:'bold'}}>
                         {title}:
                     </Text>
