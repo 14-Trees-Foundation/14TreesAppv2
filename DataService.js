@@ -42,7 +42,7 @@ export class DataService{
         const url = `${DataService.serverBase}/login`;
         return await axios.post(url, userDataPayload);
     }
-      static async fetchHelperData(user_id,lasthash, onDownloadProgress){
+      static async fetchHelperData(user_id,lasthash, onDownloadProgress=undefined){
         const url = `${DataService.serverBase}/fetchHelperData`;
         return await axios.post(url,{
           userId: user_id,

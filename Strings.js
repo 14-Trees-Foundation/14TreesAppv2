@@ -97,6 +97,7 @@ export class Strings{
             Settings:"Please go to Settings and grant permissions",
             //utils
             DataUptodate:"Tree types and plot already up to date.",
+            plotSaplingsDataUpToDate:"Plot sapling data up-to-date",
             FailureSavingTrees:"Failed to save some tree types. See logs.",
             FailureSavingPlots:"Failed to save some plots. See logs.",
             ConfirmActionTitle:"Are you sure?",
@@ -144,6 +145,7 @@ export class Strings{
             Settings:"कृपया सेटिंग्ज वर जाऊन परवानगी द्या",
             //utils
             DataUptodate:"झाडाचे प्रकार आणि प्लॉट अद्याप अपडेट आहेत.",
+            plotSaplingsDataUpToDate:"Plot sapling data up-to-date (MR)",
             FailureSavingTrees:"काही झाडाचे प्रकार सेव करण्यात असफल. लॉग पहा.",
             FailureSavingPlots:"काही प्लॉट सेव करण्यात असफल. लॉग पहा.",
             ConfirmActionTitle:"खात्री आहे का?",

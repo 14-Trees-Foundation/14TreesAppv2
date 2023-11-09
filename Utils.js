@@ -54,13 +54,13 @@ export class Utils {
         await this.ldb.createTreesTable();
         await this.ldb.createSaplingPlotTbl();
     }
-    static async fetchAndStoreHelperData(onProgress) {
+    static async fetchAndStoreHelperData() {
         console.log('fetching helper data');
         let lastHash = await AsyncStorage.getItem(Constants.lastHashKey);
         lastHash = String(lastHash);//take care of null values.
         let userId = await Utils.getUserId();
         console.log('requesting: ', userId, lastHash)
-        const helperData = await DataService.fetchHelperData(userId, lastHash, onProgress);
+        const helperData = await DataService.fetchHelperData(userId, lastHash);
         if (!helperData) {
             return;//error display, logging done by DataService.
 
@@ -100,14 +100,14 @@ export class Utils {
 
         if (newHash === lastHash) {
             console.log('hashes match, returning.')
-            ToastAndroid.show("Data up-to-date", ToastAndroid.LONG)
+            ToastAndroid.show(Strings.alertMessages.plotSaplingsDataUpToDate, ToastAndroid.LONG)
             return;
         }
         if (jsondata) {
             console.log('Storing Json data...')
             await Promise.all(jsondata.map(async (plot) => {
-                await this.ldb.storePlotSaplings(plot_id, saplings);
-                console.log('plot stored.')
+                await this.ldb.storePlotSaplings(plot.plot_id, plot.saplings);
+                console.log(plot.plot_id,'plot stored.')
             }));
             console.log('data stored.')
             await AsyncStorage.setItem(Constants.hashForPlotSaplingsKey, newHash);
@@ -139,9 +139,8 @@ export class Utils {
     //     console.log('data stored.')
     // }
 
-    static async getPlotSaplings() {
-        let plotid = '777-bomble';
-        const plots = await this.ldb.getSaplingsforPlot(plotid);
+    static async getPlotSaplings(plot_id) {
+        const plots = await this.ldb.getSaplingsforPlot(plot_id);
         console.log(plots);
     }
 

@@ -113,8 +113,8 @@ const App = () => {
     await Utils.setDBConnection();
     await Utils.createLocalTablesIfNeeded();
     if (loggedIn) {
-      // Utils.fetchAndStoreHelperData();
-      // Utils.fetchAndStorePlotSaplings();
+      Utils.fetchAndStoreHelperData();
+      Utils.fetchAndStorePlotSaplings();
       stackNavRef.current?.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
     }
     else{
