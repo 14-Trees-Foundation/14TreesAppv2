@@ -73,7 +73,7 @@ export const CoordinatesDisplay = ({latitude,longitude,title})=>{
                 )
 }
 
-export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOuterScrollEnabled})=>{
+export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOuterScrollEnabled,plotId})=>{
     const [lat,setLat] = useState(inLat);
     const [lng,setLng] = useState(inLng);
     const [markerMoving,setMarkerMoving]=useState(false);
@@ -83,9 +83,16 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOute
     const [tmplng,setTmpLng] = useState(inLng);
     const [coordinatesMode,setCoordinatesMode] = useState(coordinateModes.fixed);
     const [accuracy,setAccuracy] = useState(0);
+    const [showPlotSaplings,setShowPlotSaplings] = useState(false);
+    const [plotSaplings,setPlotSaplings] = useState([]);
     useEffect(()=>{
         if(editMode!==true){
             requestLocation(onSetLat,onSetLng,setLat,setLng,setAccuracy);
+        }
+        if(plotId){
+            Utils.getPlotSaplings(plotId).then((saplings)=>{
+                setPlotSaplings(saplings);
+            })
         }
     },[])
 return <View style={{flexDirection:'column',padding:20}}>
@@ -120,6 +127,9 @@ return <View style={{flexDirection:'column',padding:20}}>
             sizes={[30,20]}
             styles={[{opacity:0.5,fontSize:10},{opacity:0.9}]}
             text={"Show All"}
+            onPress={()=>{
+                setShowPlotSaplings(!showPlotSaplings);
+            }}
         />
         </View>
         </View>

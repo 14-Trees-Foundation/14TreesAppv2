@@ -23,6 +23,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
     const [selectedTreeType, setSelectedTreeType] = useState(inTreeType);
     const [selectedPlot, setSelectedPlot] = useState(inPlot);
     const [userId, setUserId] = useState(inUserId);
+
     let ldb;
     const handleDeleteExistingItem = async (name)=>{
         const newSetImages = exisitingImages.filter((item)=>item.name!==name);
@@ -330,6 +331,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                     onSetLat={setlat}
                     onSetLng={setlng}
                     setOuterScrollEnabled={setMainScrollEnabled}
+                    plotId={selectedPlot?selectedPlot.value:undefined}
                 ></CoordinateSetter>
                 <View style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 15 }}>
                     <Button

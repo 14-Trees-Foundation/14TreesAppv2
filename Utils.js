@@ -82,6 +82,8 @@ export class Utils {
     }
 
     static async fetchAndStorePlotSaplings() {
+        // await AsyncStorage.setItem(Constants.hashForPlotSaplingsKey,'blah');
+        // return;
         console.log('fetching plot saplings');
         let lastHash = await AsyncStorage.getItem(Constants.hashForPlotSaplingsKey);
         lastHash = String(lastHash);//take care of null values.
@@ -140,8 +142,12 @@ export class Utils {
     // }
 
     static async getPlotSaplings(plot_id) {
-        const plots = await this.ldb.getSaplingsforPlot(plot_id);
-        console.log(plots);
+        const saplings = await this.ldb.getSaplingsforPlot(plot_id);
+        console.log(`# saplings in ${plot_id}: `,saplings.length);
+        if(saplings.length>0){
+            console.log('example: ',saplings[0]);
+        }
+        return saplings;
     }
 
 
