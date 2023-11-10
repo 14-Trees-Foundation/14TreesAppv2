@@ -321,14 +321,41 @@ export class LocalDatabase {
         await this.db.executeSql(query);
     }
 
+    // let Data = [{ "id": 2, "first_name": "Shani", "last_name": "Tiwari", "is_deleted": "0" }, { "id": 3, "first_name": "John", "last_name": "Carter", "is_deleted": "0" }, { "id": 4, "first_name": "captain", "last_name": "marvel", "is_deleted": "0" }];
+    // let query = "INSERT INTO users (id, first_name, last_name, is_deleted) VALUES";
+    // for (let i = 0; i < Data.length; ++i) {
+    //   query = query + "('"
+    //     + Data[i].id //id
+    //     + "','"
+    //     + Data[i].first_name //first_name
+    //     + "','"
+    //     + Data[i].last_name //last_name
+    //     + "','"
+    //     + Data[i].is_deleted //is_deleted
+    //     + "')";
+    //   if (i != Data.length - 1) {
+    //     query = query + ",";
+    //   }
+    // }
+    // query = query + ";";
+    // console.log(query);
+
+    // let multipleInsert = await this.ExecuteQuery(query, []);
+    // console.log(multipleInsert);
+
     storePlotSaplings = async (plot_id, saplings) => {
+        let insertQuery =
+               `INSERT OR REPLACE INTO sapling_plot(plotid,saplingid ,lat, lng) VALUES` 
        for (let i = 0; i < saplings.length; i++) {
-           const sapling = saplings[i];
-           const insertQuery =
-               `INSERT OR REPLACE INTO sapling_plot(plotid,saplingid ,lat, lng) values` +
-               `('${plot_id}', '${sapling[0]}','${sapling[1]}', '${sapling[2]}')`;
-           await this.db.executeSql(insertQuery);
-       }
+            const sapling = saplings[i];
+            insertQuery = insertQuery + `('${plot_id}','${sapling[0]}','${sapling[1]}','${sapling[2]}')`;
+            if (i != saplings.length - 1) {
+                insertQuery = insertQuery + ",";
+            }   
+        }
+        insertQuery = insertQuery + ";";
+            // console.log(insertQuery)
+        await this.db.executeSql(insertQuery);
        console.log('trees stored for plot id: ', plot_id)
 
     }

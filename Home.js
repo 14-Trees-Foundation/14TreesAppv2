@@ -57,12 +57,12 @@ const HomeScreen = ({ navigation }) => {
 
  
 
-  const test = async () => {
-    console.log('test')
-    // await Utils.fetchAndStorePlotSaplings();
-    // await Utils.getPlotSaplings();
+  // const test = async () => {
+  //   console.log('test')
+  //   // await Utils.fetchAndStorePlotSaplings();
+  //   await Utils.getPlotSaplings();
     
-  }
+  // }
 
   return (
     <View >

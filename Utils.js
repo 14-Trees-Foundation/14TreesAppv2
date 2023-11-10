@@ -58,29 +58,29 @@ export class Utils {
     static async fetchAndStoreHelperData() {
         console.log('fetching helper data');
         // console.log('ldb: ', this.localdb)
-        // let lastHash = await AsyncStorage.getItem(Constants.lastHashKey);
-        // lastHash = String(lastHash);//take care of null values.
-        // let userId = await Utils.getUserId();
-        // console.log('requesting: ', userId, lastHash)
-        // const helperData = await DataService.fetchHelperData(userId, lastHash);
-        // if (!helperData) {
-        //     return;//error display, logging done by DataService.
+        let lastHash = await AsyncStorage.getItem(Constants.lastHashKey);
+        lastHash = String(lastHash);//take care of null values.
+        let userId = await Utils.getUserId();
+        console.log('requesting: ', userId, lastHash)
+        const helperData = await DataService.fetchHelperData(userId, lastHash);
+        if (!helperData) {
+            return;//error display, logging done by DataService.
 
-        // }
-        // const data = helperData.data['data'];
-        // const newHash = helperData.data['hash'];
-        // if (newHash == lastHash) {
-        //     ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
-        //     return;
-        // }
-        // if (data) {
-        //     await Utils.storeTreeTypes(data['treeTypes']);
-        //     await Utils.storePlots(data['plots']);
-        //     await AsyncStorage.setItem(Constants.lastHashKey, newHash);
-        // }
-        // else {
-        //     console.log('data was null.');
-        // }
+        }
+        const data = helperData.data['data'];
+        const newHash = helperData.data['hash'];
+        if (newHash == lastHash) {
+            ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
+            return;
+        }
+        if (data) {
+            await Utils.storeTreeTypes(data['treeTypes']);
+            await Utils.storePlots(data['plots']);
+            await AsyncStorage.setItem(Constants.lastHashKey, newHash);
+        }
+        else {
+            console.log('data was null.');
+        }
     }
 
     static async fetchAndStorePlotSaplings() {
@@ -146,8 +146,8 @@ export class Utils {
     }
 
     // just for testing purposes
-    static async storeplotsaptest() {
-        console.log('storing plot saplings', this.localdb);
+    // static async storeplotsaptest() {
+        // console.log('storing plot saplings', this.localdb);
         // const jsonData = DummyData;
         // console.log("got the data")
         // const jsondata = jsonData['data'];
@@ -161,7 +161,7 @@ export class Utils {
         //     // console.log('plot stored.')
         // }));
         // console.log('data stored.')
-    }
+    // }
 
     static async getPlotSaplings() {
         console.log('getting plot saplings');
