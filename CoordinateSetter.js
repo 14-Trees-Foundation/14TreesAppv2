@@ -9,6 +9,7 @@ import { Utils, commonStyles } from "./Utils";
 //1. Text in all buttons related to coordinates.
 //2. Button no.4 to view/hide other trees in the plot.
 //3. Other trees must be displayed with title and different color marker.
+const coordinateDelta = 0.002;
 const coordinateModes = {
     fixed:0,
     writeable:1,
@@ -85,16 +86,41 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOute
     const [accuracy,setAccuracy] = useState(0);
     const [showPlotSaplings,setShowPlotSaplings] = useState(false);
     const [plotSaplings,setPlotSaplings] = useState([]);
+    const [visibleRegion,setVisibleRegion] = useState(null);
+    const [visibleSaplings,setVisibleSaplings] = useState([]);
     useEffect(()=>{
         if(editMode!==true){
             requestLocation(onSetLat,onSetLng,setLat,setLng,setAccuracy);
         }
+    },[])
+    useEffect(()=>{
         if(plotId){
             Utils.getPlotSaplings(plotId).then((saplings)=>{
                 setPlotSaplings(saplings);
             })
         }
-    },[])
+    },[plotId])
+    useEffect(()=>{
+        setVisibleRegion({
+            latitude:lat,
+            longitude:lng,
+            latitudeDelta:coordinateDelta,
+            longitudeDelta:coordinateDelta
+        });
+    },[lat,lng])
+    useEffect(()=>{
+        if(showPlotSaplings){
+            let saplingsToShow = plotSaplings.filter((sapling)=>{
+                const withinLat = Math.abs(sapling.lat-visibleRegion.latitude) < visibleRegion.latitudeDelta;
+                const withinLng = Math.abs(sapling.lng-visibleRegion.longitude) < visibleRegion.longitudeDelta;
+                return withinLat && withinLng;
+            });
+            setVisibleSaplings(saplingsToShow);
+        }
+        else{
+            setVisibleSaplings([]);
+        }
+    },[showPlotSaplings,visibleRegion,plotSaplings]);
 return <View style={{flexDirection:'column',padding:20}}>
         
     {
@@ -220,14 +246,12 @@ return <View style={{flexDirection:'column',padding:20}}>
     ][coordinatesMode]
     }
     <MapView
-    region={
-        {
-            latitude:lat,
-            longitude:lng,
-            latitudeDelta:0.002,
-            longitudeDelta:0.002
+    region={visibleRegion}
+    onRegionChangeComplete={(event)=>{
+        if(event.latitude!==visibleRegion.latitude || event.longitude!=visibleRegion.longitude){
+            setVisibleRegion(event);
         }
-    }
+    }}
     followsUserLocation={true}
     scrollEnabled={coordinatesMode!==coordinateModes.draggable}
     onMarkerDragStart={(event)=>{
@@ -268,6 +292,13 @@ return <View style={{flexDirection:'column',padding:20}}>
                     <MyIcon name={'tree'} />
                 </Marker>
             ][coordinatesMode]
+        }
+        {
+            visibleSaplings.map((sapling,index)=>(
+                            <Marker key={index} title="" coordinate={{latitude:sapling.lat,longitude:sapling.lng}}>
+                                <MyIcon name={'tree'} color="yellow"/>
+                                <Text style={commonStyles.text6}>{sapling.saplingid}</Text>                      
+                            </Marker>))
         }
     </MapView>
 </View>

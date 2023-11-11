@@ -10,7 +10,7 @@ import DummyData from "./DummyData";
 
 // Your app's root component
 import App from './App'; // Replace with the actual path to your app's root component
-
+const MIN_BATCH_SIZE = 10
 export class Utils {
     static localdb = new LocalDatabase();
     static async getAppRootTag() {
@@ -86,9 +86,6 @@ export class Utils {
     static async fetchAndStorePlotSaplings() {
         // await AsyncStorage.setItem(Constants.hashForPlotSaplingsKey,'blah');
         // return;
-        console.log('fetching plot saplings');
-        console.log('ldb: ', this.localdb)
-        console.log('ldb: ', this.localdb)
         let lastHash = await AsyncStorage.getItem(Constants.hashForPlotSaplingsKey);
         lastHash = String(lastHash);//take care of null values.
         let userId = await Utils.getUserId();
@@ -163,12 +160,12 @@ export class Utils {
         // console.log('data stored.')
     // }
 
-    static async getPlotSaplings() {
-        console.log('getting plot saplings');
-        const saplings = await this.localdb.getSaplingsforPlot();
+    static async getPlotSaplings(plotId) {
+        console.log('getting plot saplings for ',plotId);
+        const saplings = await this.localdb.getSaplingsforPlot(plotId);
         console.log(`# saplings : `,saplings.length);
         if(saplings.length>0){
-            console.log('example: ',saplings);
+            console.log('example: ',saplings[0]);
         }
         return saplings;
     }
@@ -250,38 +247,77 @@ export class Utils {
         const uploaded = (await Utils.fetchTreesFromLocalDB(1)).length;
         return {pending,uploaded};
     }
-    static async upload() {
+    static async batchUpload(batch){
+        let failures = batch;
         try {
-            const final = await Utils.fetchTreesFromLocalocaldb(0);
-            console.log(final);
-            let response = await DataService.uploadTrees(final);
+            let response = await DataService.uploadTrees(batch);
             if (response) {
-                await Utils.setTreeSyncStatus(final);
-                Alert.alert(Strings.alertMessages.SyncSuccess, Strings.alertMessages.CheckLocalList)
+                failures = await Utils.setTreeSyncStatus(response,batch);
             }
-            else {
-                Alert.alert(Strings.alertMessages.SyncFailure, Strings.alertMessages.ContactExpert);
-            }
-            // await fetch();
         }
         catch (error) {
             console.error(error);
         }
+        return failures;
+    }
+    static async upload(onProgress=undefined) {
+        // const final = await Utils.fetchTreesFromLocalDB(0);
+        const final = [
+            {
+                "sapling_id":"2000005",
+                "type_id":"30",
+                "plot_id":"663-shindedra",
+                "user_id":"65102cc57b1e356268276ad3",
+                "images":[],
+                "coordinates":[
+                    18.9465938,
+                    73.7891527
+                ]
+            }
+        ];
+        for(let i=0;i<MIN_BATCH_SIZE*15;i++){
+            final.push(final[0]);
+        }
+        console.log('Attempting upload with total trees = ',final.length);
+        const failures = [];
+        if(final.length>MIN_BATCH_SIZE){
+            for(let i=0;i<final.length;i+=MIN_BATCH_SIZE){
+                const batchFailures = await Utils.batchUpload(final.slice(i,i+MIN_BATCH_SIZE));
+                failures.push(...batchFailures);
+                if(onProgress){
+                    onProgress(i/final.length);
+                }
+            }
+        }
+        if(failures.length===0){
+            Alert.alert(Strings.alertMessages.SyncSuccess, Strings.alertMessages.CheckLocalList);
+        }
+        else{
+            Alert.alert(Strings.alertMessages.SyncFailure, Strings.alertMessages.ContactExpert);
+        }
+        return failures;
     };
     static userId;
     static adminId;
     static localdb;
     // static lang;
-    static async setTreeSyncStatus(final) {
-        for (let index = 0; index < final.length; index++) {
-            const element = final[index];
-            await this.localdb.updateUpload(element.sapling_id);
+    static async setTreeSyncStatus(statuses,batch) {
+        const failures = [];
+        for (let index = 0; index < batch.length; index++) {
+            const element = batch[index];
+            const status = statuses[element.sapling_id];
+            if(status && status.dataUploaded){
+                await this.localdb.updateUpload(element.sapling_id);
+            }
+            else{
+                failures.push(element.sapling_id);
+            }
         }
-        const currentTime = new Date().toString();
-        await AsyncStorage.setItem(Constants.syncDateKey, currentTime);
+        return failures;
+
     }
 
-    static async fetchTreesFromLocalocaldb(uploaded = undefined) {
+    static async fetchTreesFromLocalDB(uploaded = undefined) {
         let res;
         if (uploaded) {
             res = await this.localdb.getTreesByUploadStatus(uploaded);
@@ -511,6 +547,13 @@ export const commonStyles = StyleSheet.create({
         fontSize: 17,
         color: 'black',
         textAlign: 'left',
+    },
+    text6: {
+        fontSize: 17,
+        color: 'black',
+        textAlign: 'left',
+        backgroundColor:'white',
+        borderRadius:3
     },
     txtInput: {
         height: 60,

@@ -366,11 +366,11 @@ export class LocalDatabase {
         return this.db.executeSql(query);
     }
 
-    getSaplingsforPlot = async () => {
+    getSaplingsforPlot = async (plotId) => {
         // console.log('plot id: ', plot_id)
         const saplings = [];
         try {
-            let res = await this.db.executeSql(`SELECT * FROM sapling_plot`);
+            let res = await this.db.executeSql(`SELECT * FROM sapling_plot WHERE plotid = '${plotId}'`);
             res.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {
                     saplings.push(result.rows.item(index));

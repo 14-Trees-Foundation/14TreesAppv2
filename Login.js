@@ -15,9 +15,9 @@ const LoginScreen = ({navigation}) =>{
   const [langModalVisible, setLangModalVisible] = useState(false); 
   const googleLogin = async () => {
     try {
-      navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
+      // navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
       await GoogleSignin.hasPlayServices();
-      Alert.alert('Going to request google sign in.')
+      // Alert.alert('Going to request google sign in.')
       const userInfo = await GoogleSignin.signIn();
       console.log('userInfo collected !!!!!!!');
       console.log('userInfo: ',userInfo);
@@ -26,7 +26,7 @@ const LoginScreen = ({navigation}) =>{
         email: userInfo.user.email,
         phone: phoneNumber,
       };
-      Alert.alert('Data: ',`google data rec: ${userInfo.user.name}`);
+      // Alert.alert('Data: ',`google data rec: ${userInfo.user.name}`);
       console.log('Sending google data to server.')
       const response = await DataService.loginUser(userDataPayload);
       // check whether adminId field exist in the response

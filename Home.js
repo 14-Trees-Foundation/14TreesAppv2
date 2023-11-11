@@ -76,10 +76,7 @@ const HomeScreen = ({ navigation }) => {
           color={'#5DB075'}
         />
       </View> */}
-      {/* <View>
-        <Progress.Bar progress={progress} width={200} />
-        <Text>{progress}</Text>
-      </View> */}
+
       <TouchableOpacity style={styles.selLang} onPress={() => {
         console.log('set your language')
         setLangModalVisible(!langModalVisible)
