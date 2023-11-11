@@ -24,7 +24,7 @@ const getReadableLocation = (lat,lng)=>{
     const lngval = Math.round(lng*1000)/1000
     return `${latval}, ${lngval}`
 }
-const requestLocation = async (onSetLat,onSetLng,setLat,setLng,setAccuracy) => {
+const requestLocation = async (onSetLat,onSetLng,setLat,setLng) => {
     // console.log('requesting location');
     Geolocation.getCurrentPosition(
         (position) => {
@@ -32,7 +32,6 @@ const requestLocation = async (onSetLat,onSetLng,setLat,setLng,setAccuracy) => {
             onSetLng(position.coords.longitude);
             setLat(position.coords.latitude);
             setLng(position.coords.longitude);
-            setAccuracy(position.coords.accuracy);
         },
         (error) => {
             console.log(error)
@@ -49,7 +48,12 @@ const requestLocation = async (onSetLat,onSetLng,setLat,setLng,setAccuracy) => {
     );
 
 };
-
+const useMapViewUserLocation = async(setLat,setLng,onSetLat,onSetLng,coords)=>{
+    onSetLat(coords.latitude);
+    onSetLng(coords.longitude);
+    setLat(coords.latitude);
+    setLng(coords.longitude);
+}
 export const CoordinatesDisplay = ({latitude,longitude,title})=>{
     return (
                 <View style={{...commonStyles.borderedDisplay,flexDirection:'column'}}>
@@ -84,16 +88,18 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOute
     const [tmplat,setTmpLat] = useState(inLat);
     const [tmplng,setTmpLng] = useState(inLng);
     const [coordinatesMode,setCoordinatesMode] = useState(coordinateModes.fixed);
-    const [accuracy,setAccuracy] = useState(0);
     const [showPlotSaplings,setShowPlotSaplings] = useState(false);
     const [plotSaplings,setPlotSaplings] = useState([]);
     const [visibleSaplingsRegion,setVisibleSaplingsRegion] = useState(null);
     const [visibleSaplings,setVisibleSaplings] = useState([]);
     useEffect(()=>{
         if(editMode!==true){
-            requestLocation(onSetLat,onSetLng,setLat,setLng,setAccuracy);
+            if(lat+lng==0){
+                // requestLocation(onSetLat,onSetLng,setLat,setLng);
+                useMapViewUserLocation(setLat,setLng,onSetLat,onSetLng,userLocation)
+            }
         }
-    },[])
+    },[userLocation])
     useEffect(()=>{
         if(plotId){
             Utils.getPlotSaplings(plotId).then((saplings)=>{
@@ -129,7 +135,8 @@ return <View style={{flexDirection:'column',padding:20}}>
     
         <View style={{flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
         <MyIconButton name={"crosshairs-gps"} text={"GPS"}
-        onPress={()=>Utils.confirmAction(()=>requestLocation(onSetLat,onSetLng,setLat,setLng,setAccuracy),'Refresh?','Set tree location current GPS coordinates?')}/>
+        onPress={()=>Utils.confirmAction(()=>useMapViewUserLocation(setLat,setLng,onSetLat,onSetLng,userLocation)
+            ,'Refresh?','Set tree location current GPS coordinates?')}/>
         <MyIconButton name={"edit"} text={"Edit"}
         onPress={()=>{
             setCoordinatesMode(coordinateModes.writeable);
@@ -145,10 +152,10 @@ return <View style={{flexDirection:'column',padding:20}}>
             setTmpLng(lng);
         }}/>
         <MyIconButton
-            names={["forest","eye"]}
+            names={["forest",showPlotSaplings?"eye-slash":"eye"]}
             sizes={[30,20]}
             styles={[{opacity:0.5,fontSize:10},{opacity:0.9}]}
-            text={"Show All"}
+            text={showPlotSaplings?"Hide All":"Show All"}
             onPress={()=>{
                 if(plotId===undefined){
                     Alert.alert(Strings.alertMessages.selectPlotFirst,'');
@@ -276,7 +283,6 @@ return <View style={{flexDirection:'column',padding:20}}>
     onUserLocationChange={(event)=>{
         let {latitude,longitude,accuracy} = event.nativeEvent.coordinate;
         setUserLocation({latitude,longitude})
-        setAccuracy(accuracy)
     }}
     >
         {

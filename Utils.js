@@ -260,6 +260,10 @@ export class Utils {
         }
         return failures;
     }
+    static async setSyncDateNow(){
+        const currentTime = new Date().toString();
+        await AsyncStorage.setItem(Constants.syncDateKey, currentTime);
+    }
     static async upload(onProgress=undefined) {
         // const final = await Utils.fetchTreesFromLocalDB(0);
         const final = [
@@ -289,6 +293,7 @@ export class Utils {
                 }
             }
         }
+        await Utils.setSyncDateNow();
         if(failures.length===0){
             Alert.alert(Strings.alertMessages.SyncSuccess, Strings.alertMessages.CheckLocalList);
         }
