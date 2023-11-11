@@ -1,17 +1,16 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useCallback } from 'react';
 import { Button, StyleSheet, Text, View, TouchableOpacity,FlatList } from 'react-native';
 import { Constants, Utils, commonStyles } from './Utils';
 import { CustomButton, MyIconStack } from './Components';
 import LanguageModal from './Languagemodal';
 import { Strings } from './Strings';
 import * as Progress from 'react-native-progress';
+import { useFocusEffect } from '@react-navigation/native';
 const updateSyncStatus = async (setSyncDate,setCounts) => {
-    const l = await AsyncStorage.getItem(Constants.selectedLangKey);
-    console.log('lang: ', l);
-    const value = await AsyncStorage.getItem(Constants.syncDateKey);
-    if (value) {
-      setSyncDate(await Utils.getReadableDate(value));
+    const lsdate = await Utils.getLastSyncDate();
+    if (lsdate) {
+      setSyncDate(Utils.getReadableDate(lsdate));
     }
     else {
       setSyncDate(Strings.languages.Never);
@@ -30,14 +29,21 @@ export const SyncDisplay = (props)=>{
     const [showProgress,setShowProgress] = useState(false);
     const [failedTrees,setFailedTrees] = useState([]);
     useEffect(() => {
-    updateSyncStatus(setSyncDate,setTreeCounts);
-    
-    console.log('sync date updated')
+
     }, []);
+    useFocusEffect(useCallback(()=>{
+      updateSyncStatus(setSyncDate,setTreeCounts);
+      console.log('sync date updated')
+    },[]))
     const commenceUpload = ()=>{
-      showProgress(true);
-      Utils.upload(setProgress).then((failures)=>{
+      setShowProgress(true);
+      Utils.upload(setProgress).then(async(failures)=>{
         setFailedTrees(failures);
+        setProgress(1);
+        updateSyncStatus(setSyncDate,setTreeCounts);
+        setTimeout(() => {
+          setShowProgress(false);
+        }, 2000);
       });
     }
     return (
@@ -46,15 +52,20 @@ export const SyncDisplay = (props)=>{
         {Strings.languages.LastSynced} {syncDate}
     </Text>
     {
-        treeCounts && <Text style={commonStyles.text5}>
-        {'Synced: '} {treeCounts.uploaded} {'Pending: '} {treeCounts.pending}
-        </Text>
+        treeCounts &&
+        <View style={{flexDirection:'row',justifyContent:'space-around',margin:3}}>
+          <Text style={commonStyles.text5}>
+            {'Pending: '} {treeCounts.pending}
+          </Text>
+          <Text style={commonStyles.text5}>{treeCounts.pending>0 ? '❗' :'✅'}</Text>
+          <Text style={commonStyles.text5}>
+            {'Synced: '} {treeCounts.uploaded}
+          </Text>
+        </View>
     }
     <Button
     title={Strings.buttonLabels.SyncData}
-    onPress={
-        ()=>{}
-    }
+    onPress={commenceUpload}
     color={'#5DB075'}
     />
       {

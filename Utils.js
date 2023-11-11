@@ -10,7 +10,7 @@ import DummyData from "./DummyData";
 
 // Your app's root component
 import App from './App'; // Replace with the actual path to your app's root component
-const MIN_BATCH_SIZE = 10
+const MIN_BATCH_SIZE = 5
 export class Utils {
     static localdb = new LocalDatabase();
     static async getAppRootTag() {
@@ -173,7 +173,7 @@ export class Utils {
 
     static async storeTreeTypes(treeTypes) {
         // console.log(treeTypes[0])
-        const treeTypesInLocalocaldbFormat = treeTypes.map((treeType) => {
+        const treeTypesInLocalDBFormat = treeTypes.map((treeType) => {
             return {
                 name: treeType.name,
                 tree_id: treeType.tree_id
@@ -181,7 +181,7 @@ export class Utils {
         })
         // await this.setDBConnection();
         let failure = false;
-        for (let dbTreeType of treeTypesInLocalocaldbFormat) {
+        for (let dbTreeType of treeTypesInLocalDBFormat) {
             try {
                 await this.localdb.updateTreeTypeTbl(dbTreeType);
             }
@@ -200,7 +200,7 @@ export class Utils {
     }
     static async storePlots(plots) {
         // console.log(plots[0])
-        const plotsInLocalocaldbFormat = plots.map((plot) => {
+        const plotsInLocalDBFormat = plots.map((plot) => {
             if (plot.name) {
                 plot.name = plot.name.replace("'", "''");
             }
@@ -211,7 +211,7 @@ export class Utils {
         })
         // await this.setDBConnection();
         let failure = false;
-        for (let dbPlot of plotsInLocalocaldbFormat) {
+        for (let dbPlot of plotsInLocalDBFormat) {
             try {
                 await this.localdb.updatePlotTbl(dbPlot);
             }
@@ -232,7 +232,7 @@ export class Utils {
         const newTreesList = await this.localdb.deleteSyncedTrees();
         return newTreesList;
     }
-    static async getReadableDate(date){//string arg
+    static getReadableDate(date){//string arg
         const epochMilliseconds = Date.parse(date);
         if(isNaN(epochMilliseconds)){
             return date;
@@ -260,40 +260,41 @@ export class Utils {
         }
         return failures;
     }
-    static async setSyncDateNow(){
+    static async setLastSyncDateNow(){
         const currentTime = new Date().toString();
         await AsyncStorage.setItem(Constants.syncDateKey, currentTime);
     }
+    static async getLastSyncDate(){
+        return await AsyncStorage.getItem(Constants.syncDateKey);
+    }
     static async upload(onProgress=undefined) {
-        // const final = await Utils.fetchTreesFromLocalDB(0);
-        const final = [
-            {
-                "sapling_id":"2000005",
-                "type_id":"30",
-                "plot_id":"663-shindedra",
-                "user_id":"65102cc57b1e356268276ad3",
-                "images":[],
-                "coordinates":[
-                    18.9465938,
-                    73.7891527
-                ]
-            }
-        ];
-        for(let i=0;i<MIN_BATCH_SIZE*15;i++){
-            final.push(final[0]);
-        }
+        const final = await Utils.fetchTreesFromLocalDB(0);
+        // const final = [
+        //     {
+        //         "sapling_id":"2000005",
+        //         "type_id":"30",
+        //         "plot_id":"663-shindedra",
+        //         "user_id":"65102cc57b1e356268276ad3",
+        //         "images":[],
+        //         "coordinates":[
+        //             18.9465938,
+        //             73.7891527
+        //         ]
+        //     }
+        // ];
+        // for(let i=0;i<MIN_BATCH_SIZE*15;i++){
+        //     final.push(final[0]);
+        // }
         console.log('Attempting upload with total trees = ',final.length);
         const failures = [];
-        if(final.length>MIN_BATCH_SIZE){
-            for(let i=0;i<final.length;i+=MIN_BATCH_SIZE){
-                const batchFailures = await Utils.batchUpload(final.slice(i,i+MIN_BATCH_SIZE));
-                failures.push(...batchFailures);
-                if(onProgress){
-                    onProgress(i/final.length);
-                }
+        for(let i=0;i<final.length;i+=MIN_BATCH_SIZE){
+            const batchFailures = await Utils.batchUpload(final.slice(i,i+MIN_BATCH_SIZE));
+            failures.push(...batchFailures);
+            if(onProgress){
+                onProgress(i/final.length);
             }
         }
-        await Utils.setSyncDateNow();
+        await Utils.setLastSyncDateNow();
         if(failures.length===0){
             Alert.alert(Strings.alertMessages.SyncSuccess, Strings.alertMessages.CheckLocalList);
         }
@@ -308,14 +309,13 @@ export class Utils {
     // static lang;
     static async setTreeSyncStatus(statuses,batch) {
         const failures = [];
-        for (let index = 0; index < batch.length; index++) {
-            const element = batch[index];
-            const status = statuses[element.sapling_id];
+        for (let tree of batch) {
+            const status = statuses[tree.sapling_id];
             if(status && status.dataUploaded){
-                await this.localdb.updateUpload(element.sapling_id);
+                await this.localdb.updateUpload(tree.sapling_id);
             }
             else{
-                failures.push(element.sapling_id);
+                failures.push(tree.sapling_id);
             }
         }
         return failures;
@@ -324,7 +324,7 @@ export class Utils {
 
     static async fetchTreesFromLocalDB(uploaded = undefined) {
         let res;
-        if (uploaded) {
+        if (uploaded!==undefined) {
             res = await this.localdb.getTreesByUploadStatus(uploaded);
         }
         else {
@@ -383,17 +383,17 @@ export class Utils {
         console.log(requiredPlot)
         return requiredPlot;
     }
-    static async fetchTreeTypesFromLocalocaldb() {
+    static async fetchTreeTypesFromLocalDB() {
         let res = await this.localdb.getTreeNames();
         return res;
     }
 
-    static async fetchPlotNamesFromLocalocaldb() {
+    static async fetchPlotNamesFromLocalDB() {
         let res = await this.localdb.getPlotNames();
         return res;
     }
 
-    static async fetchSaplingIdsFromLocalocaldb() {
+    static async fetchSaplingIdsFromLocalDB() {
         let res = await this.localdb.getSaplingIds();
         return res;
     }

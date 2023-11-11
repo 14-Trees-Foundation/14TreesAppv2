@@ -84,7 +84,11 @@ export class DataService{
     }
     static async uploadTrees(treeList){
         const url = `${DataService.serverBase}/uploadTrees`;
-        return await axios.post(url,treeList);
+        const response = await axios.post(url,treeList);
+        if(response){
+          return response.data;
+        }
+        return ;
     }
     static async fetchTreeDetails(saplingID, adminID){
       const url = `${DataService.serverBase}/getSapling`

@@ -225,7 +225,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
         }
         const indexString = `(${index+1} of ${exisitingImages.length+images.length})\n`
         // console.log(item.meta);
-        const captureString = 'Captured at:\n' + item.meta.capturetimestamp.split('T').join('\n');
+        const captureString = 'Captured at:\n' + Utils.getReadableDate(item.meta.capturetimestamp);
         const displayString = `${indexString} ${captureString}`
         return (
             <View style={{
