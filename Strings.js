@@ -112,6 +112,7 @@ export class Strings{
             Error:"Error",
             IncompleteFields:"Please fill all fields.",
             NoImage:"Please add atleast one image.",
+            selectPlotFirst:"Select plot to view other trees.",
             //verify users
             UserVerified:"User Verified",
             //localdataview
@@ -160,6 +161,7 @@ export class Strings{
             Error:"त्रुटी",
             IncompleteFields:"कृपया सर्व रिक्त जागा भरा.",
             NoImage:"कृपया किमान एक फोटो घ्या.",
+            selectPlotFirst:"Select plot to view other trees.",
             //verify users
             UserVerified:"वापरकर्ता सत्यापित केला गेला",
             

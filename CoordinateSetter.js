@@ -5,10 +5,6 @@ import { CancelButton, MyIcon, MyIconButton, SaveButton } from "./Components";
 import { useEffect,useState } from "react";
 import { Strings } from "./Strings";
 import { Utils, commonStyles } from "./Utils";
-//TODO:
-//1. Text in all buttons related to coordinates.
-//2. Button no.4 to view/hide other trees in the plot.
-//3. Other trees must be displayed with title and different color marker.
 const coordinateDelta = 0.002;
 const coordinateModes = {
     fixed:0,
@@ -29,7 +25,7 @@ const getReadableLocation = (lat,lng)=>{
     return `${latval}, ${lngval}`
 }
 const requestLocation = async (onSetLat,onSetLng,setLat,setLng,setAccuracy) => {
-    console.log('requesting location');
+    // console.log('requesting location');
     Geolocation.getCurrentPosition(
         (position) => {
             onSetLat(position.coords.latitude);
@@ -73,7 +69,12 @@ export const CoordinatesDisplay = ({latitude,longitude,title})=>{
                 </View>
                 )
 }
-
+export const pointToRegion = (lat,lng)=>({
+    latitude:lat,
+    longitude:lng,
+    latitudeDelta:coordinateDelta,
+    longitudeDelta:coordinateDelta
+});
 export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOuterScrollEnabled,plotId})=>{
     const [lat,setLat] = useState(inLat);
     const [lng,setLng] = useState(inLng);
@@ -86,7 +87,7 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOute
     const [accuracy,setAccuracy] = useState(0);
     const [showPlotSaplings,setShowPlotSaplings] = useState(false);
     const [plotSaplings,setPlotSaplings] = useState([]);
-    const [visibleRegion,setVisibleRegion] = useState(null);
+    const [visibleSaplingsRegion,setVisibleSaplingsRegion] = useState(null);
     const [visibleSaplings,setVisibleSaplings] = useState([]);
     useEffect(()=>{
         if(editMode!==true){
@@ -101,18 +102,13 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOute
         }
     },[plotId])
     useEffect(()=>{
-        setVisibleRegion({
-            latitude:lat,
-            longitude:lng,
-            latitudeDelta:coordinateDelta,
-            longitudeDelta:coordinateDelta
-        });
+        setVisibleSaplingsRegion(pointToRegion(lat,lng));
     },[lat,lng])
     useEffect(()=>{
         if(showPlotSaplings){
             let saplingsToShow = plotSaplings.filter((sapling)=>{
-                const withinLat = Math.abs(sapling.lat-visibleRegion.latitude) < visibleRegion.latitudeDelta;
-                const withinLng = Math.abs(sapling.lng-visibleRegion.longitude) < visibleRegion.longitudeDelta;
+                const withinLat = Math.abs(sapling.lat-visibleSaplingsRegion.latitude) < visibleSaplingsRegion.latitudeDelta;
+                const withinLng = Math.abs(sapling.lng-visibleSaplingsRegion.longitude) < visibleSaplingsRegion.longitudeDelta;
                 return withinLat && withinLng;
             });
             setVisibleSaplings(saplingsToShow);
@@ -120,7 +116,7 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOute
         else{
             setVisibleSaplings([]);
         }
-    },[showPlotSaplings,visibleRegion,plotSaplings]);
+    },[showPlotSaplings,visibleSaplingsRegion,plotSaplings]);
 return <View style={{flexDirection:'column',padding:20}}>
         
     {
@@ -154,7 +150,13 @@ return <View style={{flexDirection:'column',padding:20}}>
             styles={[{opacity:0.5,fontSize:10},{opacity:0.9}]}
             text={"Show All"}
             onPress={()=>{
-                setShowPlotSaplings(!showPlotSaplings);
+                if(plotId===undefined){
+                    Alert.alert(Strings.alertMessages.selectPlotFirst,'');
+                }
+                else{
+                    setShowPlotSaplings(!showPlotSaplings);
+                }
+
             }}
         />
         </View>
@@ -246,11 +248,10 @@ return <View style={{flexDirection:'column',padding:20}}>
     ][coordinatesMode]
     }
     <MapView
-    region={visibleRegion}
+    
+    region={pointToRegion(lat,lng)}
     onRegionChangeComplete={(event)=>{
-        if(event.latitude!==visibleRegion.latitude || event.longitude!=visibleRegion.longitude){
-            setVisibleRegion(event);
-        }
+        setVisibleSaplingsRegion(event);
     }}
     followsUserLocation={true}
     scrollEnabled={coordinatesMode!==coordinateModes.draggable}
