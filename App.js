@@ -121,13 +121,9 @@ const App = () => {
       stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn',Strings.english));
     }
   }
-
+//Code cleanup.
   const setNavigationListener = ()=>{
-    if(stackNavRef.isReady()){
-      stackNavRef.addListener('state',(e)=>{
-        // fetchUserDetails();
-      })
-    }
+    
   }
   const backHandler = ()=>{
     return true;

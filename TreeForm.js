@@ -163,7 +163,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                     name: imageName,
                     meta: {
                         capturetimestamp: timestamp,
-                        remark: 'default remark',
+                        remark: Strings.messages.defaultRemark,
                     }
                 };
                 await handleAddImage(newImage);
@@ -173,7 +173,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
     const renderExistingImage = ({item,index})=>{
         const indexString = `(${index+1} of ${exisitingImages.length+images.length})\n`
         console.log(item.meta);
-        const captureString = Strings.languages.CapturedAt + ' :\n' + item.meta.capturetimestamp.split('T').join('\n');
+        const captureString = Strings.messages.CapturedAt + ' :\n' + item.meta.capturetimestamp.split('T').join('\n');
         const displayString = `${indexString} ${captureString}`
         return (
             <View style={{
@@ -190,7 +190,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                         style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
                     />
                     <Text style={{ ...commonStyles.text3, textAlign: 'center' }}>{displayString}</Text>
-                    <TouchableOpacity onPress={() => Utils.confirmAction(()=>handleDeleteExistingItem(item.name),'Delete image?')}>
+                    <TouchableOpacity onPress={() => Utils.confirmAction(()=>handleDeleteExistingItem(item.name),Strings.alertMessages.confirmDeleteImage)}>
                         <Image
                             source={require('./assets/icondelete.png')} // Replace with your delete icon image
                             style={{ width: 20, height: 20, marginLeft: 10 }} // Adjust the icon dimensions and margin
@@ -242,7 +242,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                         style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
                     />
                     <Text style={{ ...commonStyles.text3, textAlign: 'center' }}>{displayString}</Text>
-                    <TouchableOpacity onPress={() => Utils.confirmAction(()=>handleDeleteItem(item.name),'Delete image?')}>
+                    <TouchableOpacity onPress={() => Utils.confirmAction(()=>handleDeleteItem(item.name),Strings.alertMessages.confirmDeleteImage)}>
                         <Image
                             source={require('./assets/icondelete.png')} // Replace with your delete icon image
                             style={{ width: 20, height: 20, marginLeft: 10 }} // Adjust the icon dimensions and margin
@@ -258,7 +258,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                         </Text>
                         :<TextInput
                         style={commonStyles.remark}
-                        placeholder="Enter Remark"
+                        placeholder={Strings.messages.enterRemark}
                         placeholderTextColor={'#000000'}
                         onChangeText={(text) => changeimgremark(text)}
                         value={item.meta.remark}
@@ -375,7 +375,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                     {
                         (onCancel !== undefined)
                         &&
-                        <CustomButton text='Cancel' onPress={onCancel} opacityStyle={{ backgroundColor: 'red' }} />
+                        <CustomButton text={Strings.buttonLabels.cancel} onPress={onCancel} opacityStyle={{ backgroundColor: 'red' }} />
                     }
                     <CustomButton
                         text={Strings.buttonLabels.Submit}

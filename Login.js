@@ -78,19 +78,19 @@ const LoginScreen = ({navigation}) =>{
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         // user cancelled the login flow
-        Alert.alert('user cancelled the login flow')
+        Alert.alert(Strings.alertMessages.userCancelled)
         console.log('user cancelled the login flow');
       } else if (error.code === statusCodes.IN_PROGRESS) {
         // operation (e.g. sign in) is in progress already
-        Alert.alert('operation (e.g. sign in) is in progress already')
+        Alert.alert(Strings.alertMessages.signIninProgress)
         console.log('operation (e.g. sign in) is in progress already');
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         // play services not available or outdated
-        Alert.alert('play services not available or outdated')
+        Alert.alert(Strings.alertMessages.playServicesOutdated)
         console.log('play services not available or outdated');
       } else {
         // some other error happened
-        Alert.alert('some other error happened',JSON.stringify(error))
+        Alert.alert(Strings.alertMessages.someError,JSON.stringify(error))
       }
     }
   };
@@ -127,7 +127,6 @@ const LoginScreen = ({navigation}) =>{
             }}
           />
         </View>
-        {/* <Text style={{ fontSize: 20, color: 'white',marginLeft: 35, marginTop: 30 }}> {Strings.languages.SignIn}</Text> */}
         <View style={{marginVertical:30}}>
           <GoogleSigninButton
             style={{ width: '50%', height: 70, borderRadius: 40, alignItems: 'center', justifyContent: 'center', alignSelf: 'center'}}

@@ -107,10 +107,10 @@ export function MyIconButton({name,names,sizes,styles,size=30,color='green',onPr
     }
 
 }
-export const SaveButton = ({onPress,text='Save',size=30})=>{
+export const SaveButton = ({onPress,text=Strings.buttonLabels.save,size=30})=>{
   return <MyIconButton name={"check"} onPress={onPress} text={text} size={size}></MyIconButton>
 }
-export const CancelButton = ({onPress,text='Cancel',size=30})=>{
+export const CancelButton = ({onPress,text=Strings.buttonLabels.cancel,size=30})=>{
   return <MyIconButton name={"cancel"}
   onPress={onPress} color="red" size={size} text={text}></MyIconButton>
 }
@@ -151,7 +151,7 @@ export const DrawerContent = (props) => {
           </Image>
           <View style={{flexDirection:'column',marginLeft:5}}>
             <Text style={{fontSize:15,color:'black'}}>{userDetails.name}</Text>
-            <Text>{isAdmin?'Admin':'Logger'}</Text>
+            <Text>{isAdmin?Strings.labels.admin:Strings.labels.logger}</Text>
           </View>
         </View>
         :
@@ -160,7 +160,7 @@ export const DrawerContent = (props) => {
       </View>
       <DrawerItemList {...props} />
       <View style={{flexDirection:'column',position:'relative',marginTop:100,alignSelf:'center'}}>
-        <Button title='Log out' onPress={()=>Utils.confirmAction(()=>logout(props.navigationRef),undefined,'Do you want to log out?')} style={commonStyles.logOutButton} color='red' ></Button>
+        <Button title={Strings.buttonLabels.logOut} onPress={()=>Utils.confirmAction(()=>logout(props.navigationRef),undefined,Strings.messages.logoutConfirm)} style={commonStyles.logOutButton} color='red' ></Button>
       </View>
     </DrawerContentScrollView>)
 }
@@ -222,13 +222,3 @@ export const DrawerNavigator = ({route})=>{
       </Drawer.Navigator>
   );
 }
-
-// export const ProgressBarComponent = ({ progress }) => {
-//   return (
-//     <View>
-//       <ProgressBar progress={progress / 100} width={200} />
-//       <Text>{Math.round(progress)}%</Text>
-//     </View>
-//   );
-// };
-

@@ -13,7 +13,7 @@ const updateSyncStatus = async (setSyncDate,setCounts) => {
       setSyncDate(Utils.getReadableDate(lsdate));
     }
     else {
-      setSyncDate(Strings.languages.Never);
+      setSyncDate(Strings.messages.Never);
     }
     const counts = await Utils.getSyncCounts();
     console.log('setting counts: ', counts);
@@ -49,17 +49,17 @@ export const SyncDisplay = (props)=>{
     return (
     <View style={{ ...commonStyles.borderedDisplay,margin:20 }}>
     <Text style={commonStyles.text5}>
-        {Strings.languages.LastSynced} {syncDate}
+        {Strings.messages.LastSynced} {syncDate}
     </Text>
     {
         treeCounts &&
         <View style={{flexDirection:'row',justifyContent:'space-around',margin:3}}>
           <Text style={commonStyles.text5}>
-            {'Pending: '} {treeCounts.pending}
+            {Strings.messages.pending} {treeCounts.pending}
           </Text>
           <Text style={commonStyles.text5}>{treeCounts.pending>0 ? '❗' :'✅'}</Text>
           <Text style={commonStyles.text5}>
-            {'Synced: '} {treeCounts.uploaded}
+            {Strings.messages.synced} {treeCounts.uploaded}
           </Text>
         </View>
     }

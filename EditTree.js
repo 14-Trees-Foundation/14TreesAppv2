@@ -1,10 +1,9 @@
-import React, {useEffect,useState} from 'react';
-import { View, Text,TextInput, Button,  Alert, StyleSheet, TouchableOpacity, ToastAndroid} from 'react-native';
-import { Dropdown } from './DropDown';
+import React, { useState } from 'react';
+import { Button, StyleSheet, Text, TextInput, ToastAndroid, View } from 'react-native';
 import { DataService } from './DataService';
-import { Constants, Utils } from './Utils';
-import { TreeForm } from './TreeForm';
 import { Strings } from './Strings';
+import { TreeForm } from './TreeForm';
+import { Constants, Utils } from './Utils';
 
 const EditTreeScreen = ({navigation}) => {
     const [saplingid, setSaplingid] = useState('');
@@ -113,7 +112,7 @@ const EditTreeScreen = ({navigation}) => {
         return (
             <View style={{backgroundColor:'#5DB075',height:'100%'}}>
                 <View style={{backgroundColor:'white', margin: 10,borderRadius:10}}>
-                    <Text style={{color:'black', marginLeft:20, margin:10, fontSize:18}}>{Strings.languages.EnterSaplingId}</Text>
+                    <Text style={{color:'black', marginLeft:20, margin:10, fontSize:18}}>{Strings.messages.EnterSaplingId}</Text>
                     <TextInput
                         style={styles.txtInput}
                         placeholder={Strings.labels.SaplingId}

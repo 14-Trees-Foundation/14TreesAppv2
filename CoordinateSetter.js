@@ -129,21 +129,21 @@ return <View style={{flexDirection:'column',padding:20}}>
         [
         <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-around'}}>
         <View style={{flexDirection:'column'}}>
-        <CoordinatesDisplay latitude={lat} longitude={lng} title={Strings.languages.Location}/>
-        <CoordinatesDisplay {...userLocation} title={Strings.languages.userLocation}/>
+        <CoordinatesDisplay latitude={lat} longitude={lng} title={Strings.messages.Location}/>
+        <CoordinatesDisplay {...userLocation} title={Strings.messages.userLocation}/>
         </View>
     
         <View style={{flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
-        <MyIconButton name={"crosshairs-gps"} text={"GPS"}
+        <MyIconButton name={"crosshairs-gps"} text={Strings.buttonLabels.gps}
         onPress={()=>Utils.confirmAction(()=>useMapViewUserLocation(setLat,setLng,onSetLat,onSetLng,userLocation)
-            ,'Refresh?','Set tree location current GPS coordinates?')}/>
-        <MyIconButton name={"edit"} text={"Edit"}
+            ,undefined,Strings.messages.confirmSetGPS)}/>
+        <MyIconButton name={"edit"} text={Strings.buttonLabels.edit}
         onPress={()=>{
             setCoordinatesMode(coordinateModes.writeable);
             setTmpLat(lat);
             setTmpLng(lng);
             }}/>
-        <MyIconButton name={"hand-rock"} text={"Drag"}
+        <MyIconButton name={"hand-rock"} text={Strings.buttonLabels.drag}
         onPress={()=>{
             setMarkerLocation({latitude:lat,longitude:lng});
             setCoordinatesMode(coordinateModes.draggable);
@@ -155,7 +155,7 @@ return <View style={{flexDirection:'column',padding:20}}>
             names={["forest",showPlotSaplings?"eye-slash":"eye"]}
             sizes={[30,20]}
             styles={[{opacity:0.5,fontSize:10},{opacity:0.9}]}
-            text={showPlotSaplings?"Hide All":"Show All"}
+            text={showPlotSaplings?Strings.buttonLabels.hideAll:Strings.buttonLabels.showAll}
             onPress={()=>{
                 if(plotId===undefined){
                     Alert.alert(Strings.alertMessages.selectPlotFirst,'');
@@ -173,7 +173,7 @@ return <View style={{flexDirection:'column',padding:20}}>
             <View style={{flexDirection:'column'}}>
             <View style={{flexDirection:'column',borderColor:'grey',borderWidth:3,borderRadius:5,margin:3,padding:3}}>
             <Text style={{...commonStyles.text3}}>
-                {Strings.languages.Location}
+                {Strings.messages.Location}
             </Text>
             <View style={{flexDirection:'row',alignItems:'center'}}>
             <Text style={commonStyles.text3}>Latitude: </Text>
@@ -196,7 +196,7 @@ return <View style={{flexDirection:'column',padding:20}}>
             />
             </View>
             </View>
-            <CoordinatesDisplay {...userLocation} title={Strings.languages.userLocation}/>
+            <CoordinatesDisplay {...userLocation} title={Strings.messages.userLocation}/>
 
             </View>
             <View style={{flexDirection:'column'}}>
@@ -207,7 +207,7 @@ return <View style={{flexDirection:'column',padding:20}}>
                         onSetLng(tmplng);
                         setLng(tmplng);
                         setCoordinatesMode(coordinateModes.fixed);
-                    },'Update?',"Set tree location to given coordinates?")
+                    },undefined,Strings.messages.confirmCoordinateEdit)
                 }/>
                 <CancelButton onPress={()=>{
                     setCoordinatesMode(coordinateModes.fixed);
@@ -222,11 +222,11 @@ return <View style={{flexDirection:'column',padding:20}}>
                 {
                     markerMoving
                     ?
-                    <CoordinatesDisplay {...markerLocation} title={Strings.languages.Location}/>
+                    <CoordinatesDisplay {...markerLocation} title={Strings.messages.Location}/>
                     :
-                    <CoordinatesDisplay latitude={tmplat} longitude={tmplng} title={Strings.languages.Location}/>
+                    <CoordinatesDisplay latitude={tmplat} longitude={tmplng} title={Strings.messages.Location}/>
                 }
-                <CoordinatesDisplay {...userLocation} title={Strings.languages.userLocation}/>
+                <CoordinatesDisplay {...userLocation} title={Strings.messages.userLocation}/>
             </View>
             
             <View style={{flexDirection:'column'}}>
@@ -238,7 +238,7 @@ return <View style={{flexDirection:'column',padding:20}}>
                     setLng(tmplng);
                     setCoordinatesMode(coordinateModes.fixed);
                     setOuterScrollEnabled(true);
-                },'Update?',"Set tree location to dragged coordinates?")}
+                },undefined,Strings.messages.confirmDrag)}
                 />
                 <CancelButton
                 onPress={

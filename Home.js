@@ -1,12 +1,9 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useState } from 'react';
-import { Button, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { Constants, Utils } from './Utils';
-import { CustomButton, MyIconStack } from './Components';
+import React, { useState } from 'react';
+import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import LanguageModal from './Languagemodal';
 import { Strings } from './Strings';
-import * as Progress from 'react-native-progress';
 import { SyncDisplay } from './SyncDisplay';
+import { Utils } from './Utils';
 
 // strings 
 // Never 
@@ -19,41 +16,9 @@ import { SyncDisplay } from './SyncDisplay';
 
 const HomeScreen = ({ navigation }) => {
   const [langModalVisible, setLangModalVisible] = useState(false);
-  const [something, setSomething] = useState(''); 
-  // console.log('here')
-  
-
-  const [progress, setProgress] = useState(0);
-
-  const fetchdata = async () => {
-    
-    try{
-      await Utils.fetchAndStoreHelperData((onProgressEvent) => {
-        const progress = onProgressEvent.loaded / onProgressEvent.total;
-        setProgress(progress);
-      }
-      );
-
-    }
-    catch(err){
-      console.log(err);
-    }
-    // await Utils.fetchAndStorePlotSaplings();
-  };
-
- 
-
-  // const test = async () => {
-  //   console.log('test')
-  //   // await Utils.fetchAndStorePlotSaplings();
-  //   await Utils.getPlotSaplings();
-    
-  // }
 
   return (
     <View >
-      {/* TODO: show status of synced/pending trees. */}
-      {/* TODO: fix last sync date setting. */}
       <SyncDisplay/>
       <View style={{ margin: 20, marginTop: 50 }}>
         <Button
@@ -62,20 +27,21 @@ const HomeScreen = ({ navigation }) => {
           color={'#5DB075'}
         />
       </View>
-      {/* <View style={{ margin: 20 }}>
+      <View style={{ margin: 20 }}>
         <Button
           title={Strings.buttonLabels.FetchHelperData}
-          onPress={fetchdata}
+          onPress={Utils.fetchAndStoreHelperData}
           color={'#5DB075'}
         />
-      </View> */}
-      {/* <View style={{ margin: 20 }}>
+      </View>
+      <View style={{ margin: 20 }}>
         <Button
-          title={"test button"}
-          onPress={test}
+          title={Strings.buttonLabels.fetchPlotSaplingData}
+          onPress={Utils.fetchAndStorePlotSaplings}
           color={'#5DB075'}
         />
-      </View> */}
+      </View>
+
 
       <TouchableOpacity style={styles.selLang} onPress={() => {
         console.log('set your language')

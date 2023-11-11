@@ -30,17 +30,24 @@ export class Strings{
     })
 
     // text strings
-    static languages = new LocalizedStrings({
+    static messages = new LocalizedStrings({
         "en": {
             LogIn:"Login",
             SignIn:"Sign In",
             // home
             Never:"Never",
             LastSynced:"Last Synced: ",
+            pending:"Pending: ",
+            synced:"Synced: ",
             // add tree
             Location:"Tree Location",   
             CapturedAt:"Captured At",
             userLocation:"User Location",
+            confirmSetGPS:"Set tree location current GPS coordinates?",
+            confirmCoordinateEdit:"Set tree location to given coordinates?",
+            confirmDrag:"Set tree location to dragged coordinates?",
+            enterRemark:"Enter Remark",
+            defaultRemark:"Default Remark",
             // local data view
             NoTreesFound:"No Trees Found on phone",
             Filters:"Filters",  
@@ -57,6 +64,8 @@ export class Strings{
             Email:"Email: ",
             //Edit tree
             EnterSaplingId:" Enter the Sapling ID",
+            //general:
+            logoutConfirm:"Do you want to log out?"
         },
         "mr": {
             SignIn:"साइन इन करा",
@@ -64,9 +73,17 @@ export class Strings{
             // home
             Never:"कधीच नाही",
             LastSynced:"शेवटचा सिंक केलेला डेटा : ",
+            pending:"Pending: ",
+            synced:"Synced: ",
             // add tree
             Location:"स्थान",
             CapturedAt:"फोटो घेतले तारीख",
+            userLocation:"User Location",
+            confirmSetGPS:"Set tree location current GPS coordinates?",
+            confirmCoordinateEdit:"Set tree location to given coordinates?",
+            confirmDrag:"Set tree location to dragged coordinates?",
+            enterRemark:"Enter Remark",
+            defaultRemark:"Default Remark",
             // local data view
             NoTreesFound:"फोनवर झाडे आढळली नाहीत",
             Filters:"फिल्टर",
@@ -83,7 +100,7 @@ export class Strings{
             Email:"ईमेल : ",
             //Edit tree
             EnterSaplingId:"रोपाची संख्या लिहा",
-            
+            logoutConfirm:"Do you want to log out? MR"
         },
     });
     static alertMessages = new LocalizedStrings({
@@ -92,6 +109,10 @@ export class Strings{
             LoginFailed:"Login Failed",
             CheckPhoneNumber:"Check phone number.",
             UnknownError:"Unknown error. Consult an expert.",
+            userCancelled:"User cancelled the login flow",
+            signIninProgress:"Operation (e.g. sign in) is in progress already",
+            playServicesOutdated:"Play services not available or outdated",
+            someError:"Some unidentified error happened",
             //app
             PermissionsRequired:"Permissions Required!",
             Settings:"Please go to Settings and grant permissions",
@@ -113,6 +134,7 @@ export class Strings{
             IncompleteFields:"Please fill all fields.",
             NoImage:"Please add atleast one image.",
             selectPlotFirst:"Select plot to view other trees.",
+            confirmDeleteImage:"Delete image?",
             //verify users
             UserVerified:"User Verified",
             //localdataview
@@ -141,6 +163,10 @@ export class Strings{
             LoginFailed:"लॉग इन अयशस्वी",
             CheckPhoneNumber:"फोन नंबर तपासा.",
             UnknownError:"अज्ञात त्रुटी. एक तज्ञाशी संपर्क साधा.",
+            userCancelled:"User cancelled the login flow",
+            signIninProgress:"Operation (e.g. sign in) is in progress already",
+            playServicesOutdated:"Play services not available or outdated",
+            someError:"Some unidentified error happened",
             //app
             PermissionsRequired:"परवानगी आवश्यक!",
             Settings:"कृपया सेटिंग्ज वर जाऊन परवानगी द्या",
@@ -193,10 +219,16 @@ export class Strings{
             SyncData:"Sync Data",
             AddNewTree:"Add New Tree",
             FetchHelperData:"Fetch Helper Data",
+            fetchPlotSaplingData:"Fetch Plot-Sapling Data",
             SelectLanguage:"Select Language",
             // add tree
             ClickPhoto:"Click Photo",
             Submit:"Submit",
+            gps:"GPS",
+            edit:"Edit",
+            drag:"Drag",
+            hideAll:"Hide All",
+            showAll:"Show All",
             // local data view
             DeleteSyncedTrees:"Delete Synced Trees",
             Filters:"Filters",
@@ -207,16 +239,26 @@ export class Strings{
             Verify:"Verify",
             //edit tree
             Search:"Search",
+            //general:
+            save:"Save",
+            cancel:"Cancel",
+            logOut:'Log out',
         },
         "mr":{
             // home
             SyncData:"डेटा सिंक करा",
             AddNewTree:"नवीन झाड जोडा",
             FetchHelperData:"मदतकारी डेटा तयार करा",
+            fetchPlotSaplingData:"Fetch Plot-Sapling Data",
             SelectLanguage:"भाषा निवडा",
             // add tree
             ClickPhoto:"फोटो घ्या",
             Submit:"सबमिट करा",
+            gps:"GPS",
+            edit:"Edit",
+            drag:"Drag",
+            hideAll:"Hide All",
+            showAll:"Show All",
             // local data view
             DeleteSyncedTrees:"सिंक केलेले झाडे हटवा",
             Filters:"फिल्टर",
@@ -227,6 +269,11 @@ export class Strings{
             Verify:"सत्यापित करा",
             //edit tree
             Search:"शोधा",
+            //general:
+            save:"Save",
+            cancel:"Cancel",
+            logOut:'Log out',
+
         }
     })
     static labels = new LocalizedStrings({
@@ -239,6 +286,9 @@ export class Strings{
             UploadStatus:"Upload Status",
             TreeType: "Tree Type",
             Plot: "Plot",
+            //general
+            admin:'Admin',
+            logger:'Logger'
         },
         "mr":{
             //add tree
@@ -249,6 +299,8 @@ export class Strings{
             UploadStatus:"अपलोड स्थिती",
             TreeType: "झाडाचा प्रकार",
             Plot: "प्लॉट",
+            admin:'Admin',
+            logger:'Logger'
         }
     })
     static english  = 'en';
@@ -256,7 +308,7 @@ export class Strings{
     static setLanguage = async (langidx) => {
         var lang = langidx;
         await AsyncStorage.setItem(Constants.selectedLangKey, lang);
-        this.languages.setLanguage(lang);
+        this.messages.setLanguage(lang);
         this.alertMessages.setLanguage(lang);
         this.screenNames.setLanguage(lang);
         this.buttonLabels.setLanguage(lang);

@@ -4,20 +4,7 @@ import {RESULTS, request,requestMultiple} from 'react-native-permissions';
 // It checks for permissions and then requests for it.
 export async function checkMultiplePermissions(permissions) {
   let isPermissionGranted = false;
-  // const statuses = await requestMultiple(permissions);
-  // for (var index in permissions) {
-  //   console.log(permissions[index] + ' : ' + statuses[permissions[index]]);
-  //   if (statuses[permissions[index]] === RESULTS.GRANTED) {
-      
-  //     isPermissionGranted = true;
-  //   } else {
-  //     // request(permissions[index]);
-  //     // isPermissionGranted = false;
-  //     // break;
-  //   }
-  // }
-
-
+  
   for (var index in permissions) {
     const statuses = await request(permissions[index]);
     console.log(permissions[index] + ' : ' + statuses);

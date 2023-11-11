@@ -1,11 +1,10 @@
-import React, {useEffect,useState} from 'react';
-import { View, Text,TextInput, Button,  Alert, StyleSheet, TouchableOpacity, ToastAndroid} from 'react-native';
-import { Dropdown } from './DropDown';
-import { DataService } from './DataService';
+import React, { useEffect, useState } from 'react';
+import { Button, StyleSheet, Text, ToastAndroid, View } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
-import { Utils } from './Utils';
 import { CustomButton } from './Components';
+import { DataService } from './DataService';
 import { Strings } from './Strings';
+import { Utils } from './Utils';
 
 const VerifyusersScreen = ({navigation}) => {
   
@@ -47,8 +46,8 @@ const VerifyusersScreen = ({navigation}) => {
                    
                 
                 <View >
-                    <Text style={styles.text3}>{Strings.languages.Name} {item.name} </Text>
-                    <Text style={styles.text3}>{Strings.languages.Email} {item.email} </Text>
+                    <Text style={styles.text3}>{Strings.messages.Name} {item.name} </Text>
+                    <Text style={styles.text3}>{Strings.messages.Email} {item.email} </Text>
                 </View>
                 
                 
@@ -67,7 +66,7 @@ const VerifyusersScreen = ({navigation}) => {
     return (
         <View style={{backgroundColor:'white', height:'100%'}}>
             <View style={{marginTop:5,flexDirection:'row',justifyContent:'space-around'}}>
-            <Text style={styles.text2}> {Strings.languages.ListUnverifiedUsers} </Text>
+            <Text style={styles.text2}> {Strings.messages.ListUnverifiedUsers} </Text>
             <CustomButton text={Strings.buttonLabels.Refresh} onPress={()=>fetchUsers(adminID)}></CustomButton>
             </View>
             <View style={{height:500,margin:5,borderWidth:2,borderColor: '#5DB075',borderRadius: 5,flexDirection:'column',}}>
