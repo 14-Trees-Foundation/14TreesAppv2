@@ -102,10 +102,33 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                 const filesz = response.assets[0].fileSize;
                 var base64Data = response.assets[0].base64;
 
-                console.log("file size: ", filesz);
+                console.log("original file size: ", filesz);
                 let maxsz = 1024 * 10;
                 if(filesz>maxsz){
-                    const compressedQuality = (maxsz/filesz)*100;
+                    // let compressedQuality = -5.536/10000000*filesz*filesz + 0.0128*filesz + 100;
+                    let compressedQuality = -0.00166*filesz + 129.74;
+                    // let compressedQuality = 93;
+                    if(filesz<17000)
+                    {
+                        if(filesz<14000)
+                        {
+                            compressedQuality = 98;
+                        }
+                        else if(filesz<15500){
+                            compressedQuality = 97;
+                        }
+                        else if(filesz<17000){
+                            compressedQuality = 96;
+                        }
+
+                    }
+                    
+                    if(compressedQuality<(maxsz/filesz)*100){
+                        compressedQuality = (maxsz/filesz)*100;
+
+                    }
+                    
+                    // const compressedQuality = 75;
                     console.log("compressed quality: ", compressedQuality);
                     const resizedImage = await ImageResizer.createResizedImage(
                         response.assets[0].uri,
@@ -128,6 +151,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                       });
                     
                     console.log("resized image: ", resizedImage.size);
+                    console.log('off factor', maxsz/resizedImage.size);
                 }
                    
                 // console.log("base64Data: ", base64Data);
@@ -200,7 +224,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
             setImages(newImages);
         }
         const indexString = `(${index+1} of ${exisitingImages.length+images.length})\n`
-        console.log(item.meta);
+        // console.log(item.meta);
         const captureString = 'Captured at:\n' + item.meta.capturetimestamp.split('T').join('\n');
         const displayString = `${indexString} ${captureString}`
         return (
