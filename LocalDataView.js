@@ -33,6 +33,8 @@ const LocalDataView = ({ navigation }) => {
   const [selectedTreeType, setSelectedTreeType] = useState({});
   const [selectedPlot, setSelectedPlot] = useState({});
   const [selectedSaplingId, setSelectedSaplingId] = useState({});
+  const [allPlots,setAllPlots] = useState([]);
+  const [allTreeTypes,setAllTreeTypes] = useState([]);
   const uploadStatuses = [
     { name: Strings.messages.LocalOrSynced, value: 0 },
     { name: Strings.messages.Local, value: 1 },
@@ -47,6 +49,7 @@ const LocalDataView = ({ navigation }) => {
       trees = [...localTrees,...syncedTrees]
       setTreeList(trees)
       setFinalList(trees)
+      console.log('setting both lists to: ',trees);
     })
   }
   useEffect(() => {
@@ -55,23 +58,33 @@ const LocalDataView = ({ navigation }) => {
       setUserId(id);
     })
     // // loadDataCallback();
+    Utils.getLocalTreeTypesAndPlots().then((response)=>{
+      setAllTreeTypes(response.treeTypes);
+      setAllPlots(response.plots);
+    })
     Utils.fetchTreeTypesFromLocalDB().then((types) => {
-      console.log(types)
+      console.log('tree types',types)
       setTreeTypeList(types)
     })
     Utils.fetchPlotNamesFromLocalDB().then((plots) => {
-      console.log(plots)
       setPlotList(plots)
     })
     Utils.fetchSaplingIdsFromLocalDB().then((ids) => {
       console.log(ids)
       setsaplingIdList(ids)
     })
-    // console.log('local data view')
+    console.log('local data view')
   }, [])
   useFocusEffect(React.useCallback(() => {
     fetchTreesFromLocalDB();
+    console.log('focus');
   }, []))
+  const typeNameFromId = (id)=>{
+    return allTreeTypes.find((type)=>(type.value===id)).name;
+  }
+  const plotNameFromId = (id)=>{
+    return allPlots.find((type)=>(type.value===id)).name;
+  }
   const [modalVisible, setModalVisible] = useState(false);
 
   const openModal = () => {
@@ -119,11 +132,6 @@ const LocalDataView = ({ navigation }) => {
     closeModal();
   }
 
-  //fetch userId from Async Storage.
-  // AsyncStorage.getItem(Constants.userIdKey).then((userid)=>{
-  //   userId = userid;
-  // })
-  // image handle---------------------  
   const renderImg = (item) => {
     // console.log(item.data.slice(0,30));
     return (
@@ -138,21 +146,21 @@ const LocalDataView = ({ navigation }) => {
   const renderTree = (tree) => {
     return (
       <View style={{...commonStyles.borderedDisplay,flexDirection:'row',justifyContent:'space-around'}}>
-        <View>
-          <Text style={styles.text3}>{Strings.messages.SaplingNo} {tree.sapling_id}</Text>
-          <Text style={styles.text3}>{Strings.messages.PlotId}{tree.plot_id}</Text>
-          <Text style={styles.text3}> {Strings.messages.TypeId} {tree.type_id}</Text>
+        <View style={{justifyContent:'space-around',flexGrow:1}}>
+          <Text style={{...commonStyles.text}}>{Strings.messages.SaplingNo}: {tree.sapling_id}</Text>
+          <Text style={{...commonStyles.text}}>{Strings.messages.Plot}: {plotNameFromId(tree.plot_id)}</Text>
+          <Text style={{...commonStyles.text}}>{Strings.messages.Type}: {typeNameFromId(tree.type_id)}</Text>
 
           {(tree.uploaded) ?
-            <Text style={{ ...styles.success, ...styles.label }}>{Strings.messages.Synced}</Text>
+            <Text style={{ ...commonStyles.success, ...commonStyles.label }}>{Strings.messages.Synced}</Text>
             :
             <View style={{flexDirection:'row',justifyContent:'space-around'}}>
-                <Text style={{ ...styles.danger, ...styles.label }}>{Strings.messages.Local}</Text>
+                <Text style={{ ...commonStyles.danger, ...commonStyles.label }}>{Strings.messages.Local}</Text>
                 <MyIconButton
                   name={"edit"}
                   text={Strings.buttonLabels.edit}
                   onPress={()=>{
-                      // navigation.navigate(Strings.screenNames.EditLocalTree)
+                      navigation.navigate(Strings.screenNames.getString("EditLocalTree",Strings.english),{sapling_id:tree.sapling_id})
                     }}
                   />
             </View>
@@ -239,16 +247,19 @@ const LocalDataView = ({ navigation }) => {
 
 
       {
-        finalList === null ? <Text style={styles.text2}>{Strings.messages.LoadingTrees}</Text>
+        finalList === null ? <Text style={commonStyles.text2}>{Strings.messages.LoadingTrees}</Text>
           :
           <FlatList
           style={{backgroundColor:'white'}}
-            ListEmptyComponent={
-              <Text style={commonStyles.text2}>{Strings.messages.NoTreesFound}</Text>
+            ListEmptyComponent={()=><View style={{...commonStyles.borderedDisplay}}>
+                                    <Text style={{...commonStyles.text5}}>
+                                      {Strings.messages.NoTreesFound}
+                                    </Text>
+                                    </View>
             }
             ListHeaderComponent={
-              (treeList&&treeList.length>0)&&<View>
-                  <SyncDisplay/>
+              treeList && treeList.length>0 && <View>
+                  <SyncDisplay onSyncComplete={()=>fetchTreesFromLocalDB()}/>
                   <View style={{flexDirection:'row',justifyContent:'space-around'}}>
                     <MyIconButton
                       name={"filter"}
@@ -270,108 +281,10 @@ const LocalDataView = ({ navigation }) => {
                 </View>
             }
             data={finalList} renderItem={({ item }) => renderTree(item)}></FlatList>
-
-
-
       }
-
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  label: {
-    borderWidth: 2,
-    borderColor: 'black',
-    borderRadius: 5,
-    fontSize: 15,
-    alignContent: 'center',
-    color: 'white',
-    textAlign: 'center',
-    textAlignVertical:'center',
-    padding: 5,
-    margin: 5
-  },
-  success: {
-    backgroundColor: 'green',
-  },
-  danger: {
-    backgroundColor: 'red',
-  },
-  btnview: {
-    justifyContent: 'center',
-    elevation: 3,
-    marginHorizontal: 20,
-    marginVertical: 10,
-  },
-  btn: {
-    paddingHorizontal: 20,
-    borderRadius: 9,
-    backgroundColor: '#1f3625',
-    alignItems: 'center',
-    paddingVertical: 12,
-    height: 50,
-  },
-  btndisabled: {
-    paddingHorizontal: 20,
-    borderRadius: 9,
-    backgroundColor: '#686868',
-    alignItems: 'center',
-    paddingVertical: 12,
-    height: 50,
-  },
-  text: {
-    fontSize: 14,
-    color: '#1f3625',
-    textAlign: 'center',
-  },
-  text3: {
-    fontSize: 14,
-    color: 'black',
-    fontSize: 20,
-    textAlign: 'left',
-  },
-  text2: {
-    fontSize: 25,
-    color: 'white',
-    textAlign: 'center',
-    marginVertical: 5,
-    marginBottom: 40,
-  },
-  recordTxt: {
-    fontSize: 18,
-    color: '#1f3625',
-    marginTop: 5,
-    marginBottom: 5,
-    textAlign: 'center',
-  },
-  btntxt: {
-    fontSize: 18,
-    color: '#ffffff',
-    textAlign: 'center',
-  },
-  txtInput: {
-    height: 60,
-    width: 310,
-    borderWidth: 0.5,
-    borderColor: 'grey',
-    borderRadius: 10,
-    backgroundColor: '#f5f5f5',
-    marginTop: 30,
-    marginBottom: 10,
-    padding: 10,
-    color: 'black', // Change font color here
-    fontSize: 16,
-    fontWeight: 'bold',
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'center',
-  },
-  headerText: {
-    fontSize: 30, color: 'white', textAlign: 'center', marginTop: 30, marginBottom: 30, fontFamily: 'cochin', fontWeight: 'bold', textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
-  }
-});
 
 export default LocalDataView;

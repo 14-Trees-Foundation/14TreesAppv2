@@ -14,15 +14,27 @@ const MIN_BATCH_SIZE = 5
 export class Utils {
     static localdb = new LocalDatabase();
     static async getLocalTreeTypesAndPlots(){
-        let treeTypes = await this.localdb.getTreesList();
-        let plots = await this.localdb.getPlotsList();
+        let treeTypes = await this.localdb.getAllTreeTypes();
+        let plots = await this.localdb.getAllPlots();
         return {treeTypes,plots};
     }
+    static async deleteTreeAndImages(saplingId){
+        await this.localdb.deleteTreeImages(saplingId);
+        await this.localdb.deleteTree(saplingId);
+        return;
+    }
+    static async fetchLocalTree(saplingId){
+        const results = await this.localdb.getTreeBySaplingID(saplingId);
+        if(results.length>0){
+            return await this.formatLocalTreeToJSON(results[0]);
+        }
+        return null;
+    }
     static async saveTreeAndImagesToLocalDB(tree,images){
-        await this.localdb.saveTrees(tree, 0);
+        await this.localdb.saveTree(tree, 0);
         for (let index = 0; index < images.length; index++) {
             const element = {
-            saplingid: images[index].saplingid,
+            saplingid: tree.saplingid,
             image: images[index].data,
             imageid: images[index].name,
             remark: images[index].meta.remark,
@@ -138,7 +150,7 @@ export class Utils {
         }
 
         //-----------------------------------------
-
+//Possibly, LDB set to null on app reload
 
         // const jsonData = DummyData;
         // console.log("got the data")
@@ -244,7 +256,10 @@ export class Utils {
         }
     }
     static async deleteSyncedTrees() {
-        const newTreesList = await this.localdb.deleteSyncedTrees();
+        let newTreesList = await this.localdb.deleteSyncedTrees();
+        newTreesList = await Promise.all(newTreesList.map(async(tree)=>{
+            return await Utils.formatLocalTreeToJSON(tree);
+        }))
         return newTreesList;
     }
     static getReadableDate(date){//string arg
@@ -268,6 +283,7 @@ export class Utils {
             let response = await DataService.uploadTrees(batch);
             if (response) {
                 failures = await Utils.setTreeSyncStatus(response,batch);
+                console.log('batch failures: ',failures);
             }
         }
         catch (error) {
@@ -334,36 +350,40 @@ export class Utils {
         // console.log(res);
         var final = [];
         for (let index = 0; index < res.length; index++) {
-            var element = res[index];
-            // if lat or lng is null, change it to 0
-            if (element.lat === 'undefined') {
-                element.lat = 0;
-            }
-            if (element.lng === 'undefined') {
-                element.lng = 0;
-            }
-            console.log(element.lat, element.lng);
-            let images = await this.localdb.getTreeImages(element.sapling_id);
-            for (let index = 0; index < images.length; index++) {
-                console.log(images[index].name);
-            }
-            // console.log(element);
-            const tree = {
-                sapling_id: element.sapling_id,
-                type_id: element.type_id,
-                plot_id: element.plot_id,
-                coordinates: [element.lat, element.lng],
-                images: images,
-                uploaded:(element.uploaded===1)
-            };
-            if (element.uploaded !== undefined) {
-                tree.uploaded = (element.uploaded === 1)
-            }
-            tree.user_id = await this.getUserId();
+            let tree = await Utils.formatLocalTreeToJSON(res[index]);
             final.push(tree);
         }
         return final;
     }
+    static async formatLocalTreeToJSON(element) {
+        // if lat or lng is null, change it to 0
+        if (element.lat === 'undefined') {
+            element.lat = 0;
+        }
+        if (element.lng === 'undefined') {
+            element.lng = 0;
+        }
+        console.log(element.lat, element.lng);
+        let images = await this.localdb.getTreeImages(element.sapling_id);
+        for (let index = 0; index < images.length; index++) {
+            console.log(images[index].name);
+        }
+        // console.log(element);
+        const tree = {
+            sapling_id: element.sapling_id,
+            type_id: element.type_id,
+            plot_id: element.plot_id,
+            coordinates: [element.lat, element.lng],
+            images: images,
+            uploaded: (element.uploaded === 1)
+        };
+        if (element.uploaded !== undefined) {
+            tree.uploaded = (element.uploaded === 1);
+        }
+        tree.user_id = await this.getUserId();
+        return tree;
+    }
+
     static async setDBConnection() {
         if (!(this.localdb.db)) {
             await this.localdb.getDBConnection();
@@ -378,18 +398,18 @@ export class Utils {
     }
     static async plotFromPlotID(plotID) {
         //both ids are numbers of type string.
-        const plots = await this.localdb.getPlotsList();
+        const plots = await this.localdb.getAllPlots();
         const requiredPlot = plots.find((plot) => (plot.value === plotID));
         console.log(requiredPlot)
         return requiredPlot;
     }
     static async fetchTreeTypesFromLocalDB() {
-        let res = await this.localdb.getTreeNames();
+        let res = await this.localdb.getTreeTypesUsedByLocalTrees();
         return res;
     }
 
     static async fetchPlotNamesFromLocalDB() {
-        let res = await this.localdb.getPlotNames();
+        let res = await this.localdb.getPlotNamesUsedByLocalTrees();
         return res;
     }
 
@@ -434,8 +454,26 @@ export class Constants {
 
 
 export const commonStyles = StyleSheet.create({
-    iconBtn: {
+    label: {
+        borderWidth: 2,
+        borderColor: 'black',
+        borderRadius: 5,
+        fontSize: 15,
+        alignContent: 'center',
+        color: 'white',
+        textAlign: 'center',
+        textAlignVertical:'center',
         padding: 5,
+        margin: 5
+      },
+      success: {
+        backgroundColor: 'green',
+      },
+      danger: {
+        backgroundColor: 'red',
+      },
+    iconBtn: {
+        padding: 8,
         margin: 5,
         borderRadius: 5,
         flexDirection: 'row',
@@ -514,8 +552,8 @@ export const commonStyles = StyleSheet.create({
     },
     text: {
         fontSize: 14,
-        color: '#1f3625',
-        textAlign: 'center',
+        color: 'black',
+        textAlign: 'left',
     },
     text2: {
         fontSize: 25,

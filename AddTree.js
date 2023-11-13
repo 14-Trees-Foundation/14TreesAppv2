@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 // import * as ImagePicker from 'react-native-image-picker';
-import { TreeForm } from './TreeForm';
+import { TreeForm, treeFormModes } from './TreeForm';
 import { Constants, Utils } from './Utils';
 import {ToastAndroid} from 'react-native';
 import { Strings } from './Strings';
@@ -15,7 +15,7 @@ const AddTreeScreen = ({ navigation }) => {
       navigation.navigate(Strings.screenNames.getString('HomePage',Strings.english));
     }
     const inputTreeData = {...Constants.treeFormTemplateData};
-  return <TreeForm treeData={inputTreeData} updateUserId={true} updateLocation={true} onVerifiedSave={onVerifiedSave}/>;
+  return <TreeForm treeData={inputTreeData} updateUserId={true} updateLocation={true} onVerifiedSave={onVerifiedSave} mode={treeFormModes.addTree}/>;
 }
 
 export default AddTreeScreen;

@@ -69,6 +69,19 @@ export class LocalDatabase {
             Alert.alert(Strings.alertMessages.getString('FailedGetTreedata',Strings.english));
         }
     }
+    getTreeBySaplingID = async(saplingId)=>{
+        const trees = [];
+        const queryString = `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng, uploaded FROM ${treeTableName} WHERE sapling_id = ?`
+        const results = await this.db.executeSql(
+            queryString,[saplingId]
+        );
+        results.forEach(result => {
+            for (let index = 0; index < result.rows.length; index++) {
+                trees.push(result.rows.item(index));
+            }
+        });
+        return trees;
+    }
     getTreesByUploadStatus = async (uploaded) => {
         try {
             const trees = [];
@@ -139,7 +152,7 @@ export class LocalDatabase {
         }
     };
 
-    saveTrees = async (tree, uploaded) => {
+    saveTree = async (tree, uploaded) => {
 
         const insertQuery =
             `INSERT OR REPLACE INTO ${treeTableName}(treeid, saplingid, lat, lng, plotid, uploaded, user_id) values` +
@@ -150,6 +163,11 @@ export class LocalDatabase {
     };
 
     // save tree images
+    deleteTree = async(saplingId)=>{
+        const deleteQuery = `DELETE FROM ${treeTableName} where saplingid = ?`;
+        await this.db.executeSql(deleteQuery,[saplingId]);
+        return;
+    }
     deleteTreeImages = async (saplingId)=>{
         const deleteQuery = `DELETE FROM sapling_images where saplingid = ?`;
         await this.db.executeSql(deleteQuery,[saplingId]);
@@ -202,7 +220,7 @@ export class LocalDatabase {
             console.log(err)
         }
     }
-    getTreeNames = async () => {
+    getTreeTypesUsedByLocalTrees = async () => {
         const selectQuery = `SELECT * FROM ${treetypeName} WHERE value IN (SELECT treeid FROM ${treeTableName})`;
         const treeNames = [];
 
@@ -222,7 +240,7 @@ export class LocalDatabase {
 
     };
 
-    getPlotNames = async () => {
+    getPlotNamesUsedByLocalTrees = async () => {
         const selectQuery = `SELECT * FROM ${plotName} WHERE value IN (SELECT plotid FROM ${treeTableName})`;
         const plotNames = [];
 
@@ -262,7 +280,7 @@ export class LocalDatabase {
 
 
 
-    getTreesList = async () => {
+    getAllTreeTypes = async () => {
         const trees = [];
         try {
             let res = await this.db.executeSql(`SELECT * FROM ${treetypeName}`);
@@ -294,7 +312,7 @@ export class LocalDatabase {
         return this.db.executeSql(insertQuery);
     };
 
-    getPlotsList = async () => {
+    getAllPlots = async () => {
         const plots = [];
         try {
             let res = await this.db.executeSql(`SELECT * FROM ${plotName}`);

@@ -9,7 +9,12 @@ import { Strings } from "./Strings";
 import { CoordinateSetter } from "./CoordinateSetter";
 import ImageResizer from "react-native-image-resizer";
 import RNFS from 'react-native-fs';
-export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewImage, onDeleteImage }) => {
+export const treeFormModes = {
+    addTree:0,
+    localEdit:1,
+    remoteEdit:2
+}
+export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage, onDeleteImage }) => {
     const {inSaplingId,inLng,inLat,inImages,inTreeType,inPlot,inUserId} = treeData;
     const [saplingid,setSaplingId] = useState(inSaplingId);
     const [lat, setlat] = useState(inLat);
@@ -23,7 +28,13 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
     const [selectedTreeType, setSelectedTreeType] = useState(inTreeType);
     const [selectedPlot, setSelectedPlot] = useState(inPlot);
     const [userId, setUserId] = useState(inUserId);
-
+    useEffect(()=>{
+        console.log(treeData.inSaplingId)
+        if(mode===treeFormModes.localEdit){
+            setExistingImages([]);
+            setImages(treeData.inImages);
+        }
+    },[treeData])
     const handleDeleteExistingItem = async (name)=>{
         const newSetImages = exisitingImages.filter((item)=>item.name!==name);
         if(onDeleteImage){
@@ -276,14 +287,13 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
 
     const loadDataCallback = useCallback(async () => {
         try {
-            if(editMode!==true){
+            if(mode===treeFormModes.addTree){
                 let userId = await Utils.getUserId();
                 setUserId(userId);
             }
             let {treeTypes,plots} = await Utils.getLocalTreeTypesAndPlots();
             setTreeItems(treeTypes);
             setPlotItems(plots);
-            console.log(editMode, 'editmode');
             console.log('options loaded: ',treeTypes.length,plots.length)
             // setUserItems(users);
         } catch (error) {
@@ -321,16 +331,26 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
         <ScrollView style={{ backgroundColor: '#5DB075', height: '100%' }} scrollEnabled={mainScrollEnabled}>
             <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
                 {
-                    editMode === true ?
-                        <Text style={{ ...commonStyles.text4, textAlign: 'center' }}>
-                            Sapling ID: {saplingid}
-                        </Text>
-                        : <TextInput
+                    [
+                            <TextInput
+                            defaultValue={inSaplingId}
                             style={commonStyles.txtInput}
                             placeholder={Strings.labels.SaplingId}
                             placeholderTextColor={'#000000'}
                             onChangeText={(text) => { setSaplingId(text) }}
                         />
+                            ,
+                        <TextInput
+                            defaultValue={inSaplingId}
+                            style={commonStyles.txtInput}
+                            placeholder={Strings.labels.SaplingId}
+                            placeholderTextColor={'#000000'}
+                            onChangeText={(text) => { setSaplingId(text) }}
+                        />,
+                        <Text style={{ ...commonStyles.text4, textAlign: 'center' }}>
+                            Sapling ID: {saplingid}
+                        </Text>
+                    ][mode]
                 }
                 <CustomDropdown
                     initItem={selectedTreeType}
@@ -346,7 +366,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                 />
                 {/* <Text style={styles.text2}> Add photos</Text> */}
                 <CoordinateSetter
-                    editMode={editMode}
+                    setInitLocation={mode===treeFormModes.addTree}
                     inLat={inLat}
                     inLng={inLng}
                     onSetLat={setlat}

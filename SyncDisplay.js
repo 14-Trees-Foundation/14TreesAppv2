@@ -22,7 +22,7 @@ const updateSyncStatus = async (setSyncDate,setCounts) => {
 export const getReadableProgress = (progress)=>{
   return Math.round(progress*100).toString()+'%';
 }
-export const SyncDisplay = (props)=>{
+export const SyncDisplay = ({onSyncComplete})=>{
     const [syncDate, setSyncDate] = useState('');
     const [treeCounts,setTreeCounts] = useState(null);
     const [progress,setProgress] = useState(0);
@@ -44,6 +44,9 @@ export const SyncDisplay = (props)=>{
         setTimeout(() => {
           setShowProgress(false);
         }, 2000);
+        if(onSyncComplete){
+          onSyncComplete();
+        }
       });
     }
     return (
@@ -79,10 +82,10 @@ export const SyncDisplay = (props)=>{
     {
       (failedTrees.length>0) && 
       <FlatList
-        ListHeaderComponent={()=><Text style={commonStyles.text5}>Failed to upload {failedTrees.length} trees: </Text>}
+        ListHeaderComponent={()=><Text style={commonStyles.text5}>{Strings.messages.failedToUpload} {failedTrees.length} {Strings.messages.trees}: </Text>}
         data={failedTrees}
-        renderItem={(item,index)=>{
-          return <Text style={commonStyles.text5}>{index+1}. {item.sapling_id}</Text>
+        renderItem={({item,index})=>{
+          return <Text style={commonStyles.text5}>{index+1}. {Strings.messages.SaplingNo} {item.sapling_id}</Text>
         }}
       />
     }

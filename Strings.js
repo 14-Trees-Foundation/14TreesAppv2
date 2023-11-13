@@ -44,6 +44,8 @@ export class Strings{
             pending:"Pending",
             synced:"Synced",
             LocalOrSynced:"Local Or Synced",
+            failedToUpload:"Failed to upload",
+            trees:"trees",
             // add tree
             Location:"Tree Location",   
             CapturedAt:"Captured At",
@@ -57,9 +59,9 @@ export class Strings{
             NoTreesFound:"No Trees Found on phone",
             Filters:"Filters",  
             LoadingTrees:"Loading Trees...",
-            SaplingNo:"Sapling ID: ",
-            TypeId : "Type ID: ",
-            PlotId : "Plot ID: ",
+            SaplingNo:"Sapling ID",
+            Type : "Type",
+            Plot : "Plot ID: ",
             Synced:"Synced",
             Local:"Local",
             NoImageFound:"No Image Found",
@@ -81,6 +83,8 @@ export class Strings{
             pending:"Pending",
             synced:"Synced",
             LocalOrSynced:"Local Or Synced",
+            failedToUpload:"Failed to upload",
+            trees:"trees",
             // add tree
             Location:"स्थान",
             CapturedAt:"फोटो घेतले तारीख",
@@ -94,9 +98,9 @@ export class Strings{
             NoTreesFound:"फोनवर झाडे आढळली नाहीत",
             Filters:"फिल्टर",
             LoadingTrees:"झाडे लोड होत आहेत...",
-            SaplingNo:"रोप क्र: ",
-            TypeId : "प्रकार क्र: ",
-            PlotId : "प्लॉट क्र: ",
+            SaplingNo:"रोप क्र",
+            Type : "प्रकार",
+            Plot : "प्लॉट",
             Synced:"सिंक केले गेले",
             Local:"लोकल",
             NoImageFound:"फोटो नाही",
@@ -194,6 +198,7 @@ export class Strings{
             IncompleteFields:"कृपया सर्व रिक्त जागा भरा.",
             NoImage:"कृपया किमान एक फोटो घ्या.",
             selectPlotFirst:"Select plot to view other trees.",
+            confirmDeleteImage:"Delete image?",
             //verify users
             UserVerified:"वापरकर्ता सत्यापित केला गेला",
             
@@ -226,7 +231,8 @@ export class Strings{
             AddNewTree:"Add New Tree",
             FetchHelperData:"Fetch Helper Data",
             fetchPlotSaplingData:"Fetch Plot-Sapling Data",
-            SelectLanguage:"Select Language",
+            SelectLanguage:"Language/भाषा",
+
             // add tree
             ClickPhoto:"Click Photo",
             Submit:"Submit",
@@ -256,7 +262,7 @@ export class Strings{
             AddNewTree:"नवीन झाड जोडा",
             FetchHelperData:"मदतकारी डेटा तयार करा",
             fetchPlotSaplingData:"Fetch Plot-Sapling Data",
-            SelectLanguage:"भाषा निवडा",
+            SelectLanguage:"भाषा/Language",
             // add tree
             ClickPhoto:"फोटो घ्या",
             Submit:"सबमिट करा",
@@ -284,6 +290,7 @@ export class Strings{
     })
     static labels = new LocalizedStrings({
         "en":{
+
             //add tree
             SaplingId:"Sapling Id",
             SelectTreeType:"Select Tree Type",

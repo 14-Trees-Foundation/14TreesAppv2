@@ -79,7 +79,7 @@ export const pointToRegion = (lat,lng)=>({
     latitudeDelta:coordinateDelta,
     longitudeDelta:coordinateDelta
 });
-export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOuterScrollEnabled,plotId})=>{
+export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,setInitLocation,setOuterScrollEnabled,plotId})=>{
     const [lat,setLat] = useState(inLat);
     const [lng,setLng] = useState(inLng);
     const [markerMoving,setMarkerMoving]=useState(false);
@@ -93,7 +93,7 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,editMode,setOute
     const [visibleSaplingsRegion,setVisibleSaplingsRegion] = useState(null);
     const [visibleSaplings,setVisibleSaplings] = useState([]);
     useEffect(()=>{
-        if(editMode!==true){
+        if(setInitLocation){
             if(lat+lng==0){
                 // requestLocation(onSetLat,onSetLng,setLat,setLng);
                 useMapViewUserLocation(setLat,setLng,onSetLat,onSetLng,userLocation)
@@ -255,7 +255,7 @@ return <View style={{flexDirection:'column',padding:20}}>
     ][coordinatesMode]
     }
     <MapView
-    
+    // cacheEnabled={true}
     region={pointToRegion(lat,lng)}
     onRegionChangeComplete={(event)=>{
         setVisibleSaplingsRegion(event);

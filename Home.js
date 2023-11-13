@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { MyIconButton } from './Components';
 import LanguageModal from './Languagemodal';
 import { Strings } from './Strings';
 import { SyncDisplay } from './SyncDisplay';
@@ -20,35 +21,31 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View >
       <SyncDisplay/>
-      <View style={{ margin: 20, marginTop: 50 }}>
-        <Button
-          title={Strings.buttonLabels.AddNewTree}
+      <View style={{margin:10 }}>
+        <MyIconButton
+          names={["plus","tree"]}
+          styles={[{opacity:0.9},{opacity:0.5}]}
+          text={Strings.buttonLabels.AddNewTree}
           onPress={() => navigation.navigate(Strings.screenNames.getString('AddTree',Strings.english))}
-          color={'#5DB075'}
         />
-      </View>
-      <View style={{ margin: 20 }}>
-        <Button
-          title={Strings.buttonLabels.FetchHelperData}
+        <MyIconButton
+          name={"cloud-download-alt"}
+          text={Strings.buttonLabels.FetchHelperData}
           onPress={Utils.fetchAndStoreHelperData}
-          color={'#5DB075'}
         />
-      </View>
-      <View style={{ margin: 20 }}>
-        <Button
-          title={Strings.buttonLabels.fetchPlotSaplingData}
+        <MyIconButton
+          name={"map-marked-alt"}
+          text={Strings.buttonLabels.fetchPlotSaplingData}
           onPress={Utils.fetchAndStorePlotSaplings}
-          color={'#5DB075'}
         />
-      </View>
-
-
-      <TouchableOpacity style={styles.selLang} onPress={() => {
+      <MyIconButton
+      name={"language"}
+      text={Strings.buttonLabels.SelectLanguage}
+      onPress={() => {
         console.log('set your language')
         setLangModalVisible(!langModalVisible)
-      }}>
-        <Text style={{ color: '#36454F', fontWeight: 'bold' }}>{Strings.buttonLabels.SelectLanguage}</Text>
-      </TouchableOpacity>
+      }}/>
+      </View>
       <LanguageModal
         navigation={navigation}
         langModalVisible={langModalVisible}

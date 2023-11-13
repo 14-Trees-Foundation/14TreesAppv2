@@ -2,6 +2,7 @@ import { View, Text, Modal, StyleSheet, ActivityIndicator, FlatList, TouchableOp
 import React, { useState, useEffect, useContext } from 'react';
 import { Utils } from './Utils';
 import { Strings } from './Strings';
+import { CancelButton, MyIconButton, SaveButton } from './Components';
 const { height, width } = Dimensions.get('window');
 const LanguageModal = ({ navigation, langModalVisible, setLangModalVisible, onSelectLang, }) => {
   const [selectedLang, setSelectedLang] = useState(Strings.english);
@@ -80,15 +81,12 @@ const LanguageModal = ({ navigation, langModalVisible, setLangModalVisible, onSe
             />
           </View>
           <View style={styles.btns}>
-            <TouchableOpacity
-              style={styles.btn2}
+            <CancelButton
               onPress={() => {
                 setLangModalVisible(false);
-              }}>
-              <Text style={{ color: '#fff' }}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.btn2}
+              }}
+            />
+            <SaveButton
               onPress={async () => {
                 setLangModalVisible(false);
                 await Strings.setLanguage(selectedLang);
@@ -100,9 +98,8 @@ const LanguageModal = ({ navigation, langModalVisible, setLangModalVisible, onSe
                 else {
                   console.log('reloading app')
                 }
-              }}>
-              <Text style={{ color: '#fff' }}>Apply</Text>
-            </TouchableOpacity>
+              }}
+              />
           </View>
         </View>
       </View>

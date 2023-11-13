@@ -13,12 +13,11 @@ axios.interceptors.response.use(function (response) {
   }
   if(error.response){
     if(error.response.data){
-      errorMsg =  Strings.alertMessages.FailedAtServer + error.response.data
+      errorMsg =  Strings.alertMessages.FailedAtServer + (error.response.data)
     }
     else{
       errorMsg = error.message;
     }
-
   }
   else if(error.request){
     errorMsg = `Request to be sent: ${error.request}`
@@ -31,7 +30,7 @@ axios.interceptors.response.use(function (response) {
     requestDescriptor = ` (${requestDescriptor})`;
     ToastAndroid.show(requestDescriptor,ToastAndroid.LONG);
   }
-  console.log(errorMsg);
+  console.log(error);
   return null;
 });
 export class DataService{

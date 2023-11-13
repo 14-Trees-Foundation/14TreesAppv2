@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, StyleSheet, Text, TextInput, ToastAndroid, View } from 'react-native';
 import { DataService } from './DataService';
 import { Strings } from './Strings';
-import { TreeForm } from './TreeForm';
+import { TreeForm, treeFormModes } from './TreeForm';
 import { Constants, Utils, commonStyles } from './Utils';
 
 const EditTreeScreen = ({navigation}) => {
@@ -98,7 +98,7 @@ const EditTreeScreen = ({navigation}) => {
     }
     if(details){
         return <TreeForm
-                 editMode={true}
+                 mode={treeFormModes.remoteEdit}
                  treeData={details}
                  onCancel={()=>setDetails(null)}
                  updateUserId={false}
