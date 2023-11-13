@@ -24,7 +24,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
     const [selectedPlot, setSelectedPlot] = useState(inPlot);
     const [userId, setUserId] = useState(inUserId);
 
-    let ldb;
     const handleDeleteExistingItem = async (name)=>{
         const newSetImages = exisitingImages.filter((item)=>item.name!==name);
         if(onDeleteImage){
@@ -277,17 +276,15 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
 
     const loadDataCallback = useCallback(async () => {
         try {
-            ldb = await Utils.setDBConnection();
             if(editMode!==true){
                 let userId = await Utils.getUserId();
                 setUserId(userId);
             }
-            let trees = await ldb.getTreesList();
-            let plots = await ldb.getPlotsList();
-            setTreeItems(trees);
+            let {treeTypes,plots} = await Utils.getLocalTreeTypesAndPlots();
+            setTreeItems(treeTypes);
             setPlotItems(plots);
             console.log(editMode, 'editmode');
-            console.log('options loaded: ',trees.length,plots.length)
+            console.log('options loaded: ',treeTypes.length,plots.length)
             // setUserItems(users);
         } catch (error) {
             console.error(error);

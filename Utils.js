@@ -13,6 +13,24 @@ import App from './App'; // Replace with the actual path to your app's root comp
 const MIN_BATCH_SIZE = 5
 export class Utils {
     static localdb = new LocalDatabase();
+    static async getLocalTreeTypesAndPlots(){
+        let treeTypes = await this.localdb.getTreesList();
+        let plots = await this.localdb.getPlotsList();
+        return {treeTypes,plots};
+    }
+    static async saveTreeAndImagesToLocalDB(tree,images){
+        await this.localdb.saveTrees(tree, 0);
+        for (let index = 0; index < images.length; index++) {
+            const element = {
+            saplingid: images[index].saplingid,
+            image: images[index].data,
+            imageid: images[index].name,
+            remark: images[index].meta.remark,
+            timestamp: images[index].meta.capturetimestamp,
+            };
+            await this.localdb.saveTreeImages(element);
+        }
+    }
     static async getAppRootTag() {
         return Number.parseInt(await AsyncStorage.getItem(Constants.appRootTagKey));
     }
@@ -47,7 +65,6 @@ export class Utils {
         ])
     }
     static async createLocalTablesIfNeeded() {
-        // await this.setDBConnection();
         // console.log('creating tables if needed.', this.localdb)
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
@@ -179,7 +196,6 @@ export class Utils {
                 tree_id: treeType.tree_id
             }
         })
-        // await this.setDBConnection();
         let failure = false;
         for (let dbTreeType of treeTypesInLocalDBFormat) {
             try {
@@ -209,7 +225,6 @@ export class Utils {
                 plot_id: plot.plot_id
             }
         })
-        // await this.setDBConnection();
         let failure = false;
         for (let dbPlot of plotsInLocalDBFormat) {
             try {
@@ -268,23 +283,7 @@ export class Utils {
         return await AsyncStorage.getItem(Constants.syncDateKey);
     }
     static async upload(onProgress=undefined) {
-        const final = await Utils.fetchTreesFromLocalDB(0);
-        // const final = [
-        //     {
-        //         "sapling_id":"2000005",
-        //         "type_id":"30",
-        //         "plot_id":"663-shindedra",
-        //         "user_id":"65102cc57b1e356268276ad3",
-        //         "images":[],
-        //         "coordinates":[
-        //             18.9465938,
-        //             73.7891527
-        //         ]
-        //     }
-        // ];
-        // for(let i=0;i<MIN_BATCH_SIZE*15;i++){
-        //     final.push(final[0]);
-        // }
+        const final = await Utils.fetchTreesFromLocalDB(0);//not uploaded.
         console.log('Attempting upload with total trees = ',final.length);
         const failures = [];
         for(let i=0;i<final.length;i+=MIN_BATCH_SIZE){
@@ -355,6 +354,7 @@ export class Utils {
                 plot_id: element.plot_id,
                 coordinates: [element.lat, element.lng],
                 images: images,
+                uploaded:(element.uploaded===1)
             };
             if (element.uploaded !== undefined) {
                 tree.uploaded = (element.uploaded === 1)
@@ -567,7 +567,7 @@ export const commonStyles = StyleSheet.create({
         borderColor: 'grey',
         borderRadius: 10,
         backgroundColor: '#f5f5f5',
-        marginTop: 30,
+        marginTop: 10,
         marginBottom: 10,
         padding: 10,
         color: 'black', // Change font color here

@@ -15,6 +15,7 @@ import AddTreeScreen from "./AddTree";
 import EditTreeScreen from "./EditTree";
 import VerifyusersScreen from "./VerifyUsers";
 import { stackNavRef } from "./App";
+import { LocalDataNavigator } from "./LocalDataNavigator";
 // import { ProgressBar } from 'react-native-progress';
 const Drawer = createDrawerNavigator();
 export const CustomButton = ({ text, opacityStyle,textStyle, onPress }) => {
@@ -180,7 +181,7 @@ export const DrawerNavigator = ({route})=>{
                                 navigationRef={navigationRef}
                                 {...props}
                                 />}>
-                <Drawer.Screen
+        <Drawer.Screen
           name={Strings.screenNames.getString('HomePage',Strings.english)}
           component={HomeScreen}
           options={{
@@ -188,11 +189,11 @@ export const DrawerNavigator = ({route})=>{
             title:Strings.screenNames.HomePage
           }} />
         <Drawer.Screen
-        name={Strings.screenNames.getString('localDataView',Strings.english)}
-        component={LocalDataView}
+        name={Strings.screenNames.getString('LocalDataNavigator',Strings.english)}
+        component={LocalDataNavigator}
         options={{
           ...styleConfigs.drawerHeaderOptions,
-          title:Strings.screenNames.localDataView
+          title:Strings.screenNames.LocalDataView,
         }} />
         <Drawer.Screen
         name={Strings.screenNames.getString('AddTree',Strings.english)}

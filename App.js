@@ -1,26 +1,18 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { createDrawerNavigator, DrawerItemList, DrawerContentScrollView, useDrawerProgress } from '@react-navigation/drawer';
-import { NavigationContainer, createNavigationContainerRef, useFocusEffect, useNavigationContainerRef } from '@react-navigation/native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useContext, useEffect, useState } from 'react';
-import { Alert, Platform, View, Image, Text, Button, RootTagContext, BackHandler } from 'react-native';
-import { PERMISSIONS } from 'react-native-permissions';
-import AddTreeScreen from './AddTree';
-import EditTreeScreen from './EditTree';
-import HomeScreen from './Home';
-import LocalDataView from './LocalDataView';
-import LoginScreen from './Login';
-import { Constants, Utils, styleConfigs,commonStyles } from './Utils';
-import VerifyusersScreen from './VerifyUsers';
-import { checkMultiplePermissions } from './check_permissions';
-import { LocalDatabase } from './tree_db';
-import LoadingScreen from './LoadingScreen';
+import { Alert, BackHandler, Platform, RootTagContext } from 'react-native';
 import { enableLatestRenderer } from 'react-native-maps';
-import { utils } from '@react-native-firebase/app';
+import { PERMISSIONS } from 'react-native-permissions';
+import { DrawerNavigator } from './Components';
+import LoadingScreen from './LoadingScreen';
+import LoginScreen from './Login';
 import { Strings } from './Strings';
-import { DrawerContent, DrawerNavigator } from './Components';
+import { Constants, Utils, styleConfigs } from './Utils';
+import { checkMultiplePermissions } from './check_permissions';
 enableLatestRenderer();
 
 const Stack = createStackNavigator();
@@ -55,11 +47,8 @@ async function requestPermissions() {
     );
   }
 }
-// async function netInfo() {
-// }
 export const stackNavRef = createNavigationContainerRef();
 const App = () => {
-  const [isAdmin, setIsAdmin] = useState(false);
   const rootTag = useContext(RootTagContext);
   console.log('app roottag: ',rootTag)
   
@@ -75,9 +64,6 @@ const App = () => {
           if(storedUserDetails){
             storedUserDetails = JSON.parse(storedUserDetails);
           }
-        if (adminId) {
-          setIsAdmin(true);
-        }
         if (userId === null) {
             GoogleSignin.signOut();
             return false;
@@ -110,7 +96,7 @@ const App = () => {
     // Alert.alert('GoogleSignin configure called.')
     console.log('GoogleSignin configure called.')
     const loggedIn = await checkSignInStatus();
-    await Utils.setDBConnection();
+    await Utils.setDBConnection();//ensures ldb setup in Utils
     await Utils.createLocalTablesIfNeeded();
     if (loggedIn) {
       Utils.fetchAndStoreHelperData();
@@ -122,9 +108,7 @@ const App = () => {
     }
   }
 //Code cleanup.
-  const setNavigationListener = ()=>{
-    
-  }
+
   const backHandler = ()=>{
     return true;
   }
@@ -132,7 +116,6 @@ const App = () => {
     initTasks();
     BackHandler.addEventListener('hardwareBackPress',backHandler)//disables back button presses.
     requestPermissions();
-    setNavigationListener();
     return ()=>{
       BackHandler.removeEventListener('hardwareBackPress',backHandler);
     }

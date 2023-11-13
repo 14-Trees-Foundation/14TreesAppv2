@@ -9,24 +9,8 @@ import { Strings } from './Strings';
 
 
 const AddTreeScreen = ({ navigation }) => {
-    let ldb;
-    useEffect(React.useCallback(()=>{
-      Utils.setDBConnection().then((dbobj)=>{
-        ldb = dbobj;
-      })
-    }));
     async function onVerifiedSave(tree,images) {
-      await ldb.saveTrees(tree, 0);
-      for (let index = 0; index < images.length; index++) {
-        const element = {
-          saplingid: images[index].saplingid,
-          image: images[index].data,
-          imageid: images[index].name,
-          remark: images[index].meta.remark,
-          timestamp: images[index].meta.capturetimestamp,
-        };
-        await ldb.saveTreeImages(element);
-      }
+      await Utils.saveTreeAndImagesToLocalDB(tree,images);
       ToastAndroid.show(Strings.alertMessages.TreeSaved, ToastAndroid.SHORT);
       navigation.navigate(Strings.screenNames.getString('HomePage',Strings.english));
     }

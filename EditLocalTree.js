@@ -3,13 +3,13 @@ import { Button, StyleSheet, Text, TextInput, ToastAndroid, View } from 'react-n
 import { DataService } from './DataService';
 import { Strings } from './Strings';
 import { TreeForm } from './TreeForm';
-import { Constants, Utils, commonStyles } from './Utils';
+import { Constants, Utils } from './Utils';
 
-const EditTreeScreen = ({navigation}) => {
+
+export const EditLocalTree = ({navigation,route})=>{
     const [saplingid, setSaplingid] = useState('');
     const [details,setDetails] = useState(null);
     const [newImages,setNewImages] = useState([]);
-    const [deletedImages,setDeletedImages] = useState([]);
     const updateDetails = async(tree, images)=>{
         const saplingData = {
             location:{
@@ -35,21 +35,20 @@ const EditTreeScreen = ({navigation}) => {
                 setNewImages(newImages);
             }
         }
-        const requestData = {
-            data:saplingData,
-            newImages:newImages,
-            deletedImages:deletedImages,
-        }
-        const response = await DataService.updateSapling(adminID,requestData);
-        if(!response){
-            return;
-        }
-        console.log(requestData);
-        let toastmsg = Strings.alertMessages.TreeUpdatedfirsthalf + response.data.sapling_id + Strings.alertMessages.TreeUpdatedsecondhalf;
-        ToastAndroid.show(toastmsg,ToastAndroid.LONG);
-        setDetails(null);
-        setNewImages([]);
-        setDeletedImages([]);
+        // const requestData = {
+        //     data:saplingData,
+        //     newImages:newImages,
+        // }
+        // const response = await DataService.updateSapling(adminID,requestData);
+        // if(!response){
+        //     return;
+        // }
+        // console.log(requestData);
+        // let toastmsg = Strings.alertMessages.TreeUpdatedfirsthalf + response.data.sapling_id + Strings.alertMessages.TreeUpdatedsecondhalf;
+        // ToastAndroid.show(toastmsg,ToastAndroid.LONG);
+        // setDetails(null);
+        // setNewImages([]);
+        // setDeletedImages([]);
         //Format saplingData using tree,newIamges, deletedImages.
         // Dataservice.updateSapling call...
         // check reply.
@@ -60,7 +59,6 @@ const EditTreeScreen = ({navigation}) => {
         console.log(adminID)
         setDetails(null);
         setNewImages([]);
-        setDeletedImages([]);
         
         const treeDetails = await DataService.fetchTreeDetails(saplingid,adminID);
         if(!treeDetails){return;}
@@ -132,5 +130,3 @@ const EditTreeScreen = ({navigation}) => {
         )
     }
 }
-
-export default EditTreeScreen;

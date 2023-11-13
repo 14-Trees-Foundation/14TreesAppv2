@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState,useCallback } from 'react';
 import { Button, StyleSheet, Text, View, TouchableOpacity,FlatList } from 'react-native';
 import { Constants, Utils, commonStyles } from './Utils';
-import { CustomButton, MyIconStack } from './Components';
+import { CustomButton, MyIconButton, MyIconStack } from './Components';
 import LanguageModal from './Languagemodal';
 import { Strings } from './Strings';
 import * as Progress from 'react-native-progress';
@@ -55,18 +55,18 @@ export const SyncDisplay = (props)=>{
         treeCounts &&
         <View style={{flexDirection:'row',justifyContent:'space-around',margin:3}}>
           <Text style={commonStyles.text5}>
-            {Strings.messages.pending} {treeCounts.pending}
+            {Strings.messages.pending}: {treeCounts.pending}
           </Text>
           <Text style={commonStyles.text5}>{treeCounts.pending>0 ? '❗' :'✅'}</Text>
           <Text style={commonStyles.text5}>
-            {Strings.messages.synced} {treeCounts.uploaded}
+            {Strings.messages.synced}: {treeCounts.uploaded}
           </Text>
         </View>
     }
-    <Button
-    title={Strings.buttonLabels.SyncData}
+    <MyIconButton
+    name={"wifi-sync"}
+    text={Strings.buttonLabels.SyncData}
     onPress={commenceUpload}
-    color={'#5DB075'}
     />
       {
         showProgress &&

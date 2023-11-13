@@ -150,7 +150,11 @@ export class LocalDatabase {
     };
 
     // save tree images
-
+    deleteTreeImages = async (saplingId)=>{
+        const deleteQuery = `DELETE FROM sapling_images where saplingid = ?`;
+        await this.db.executeSql(deleteQuery,[saplingId]);
+        return;
+    }
     saveTreeImages = async (treeimage) => {
 
         const insertQuery =

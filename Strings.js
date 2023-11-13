@@ -9,9 +9,11 @@ export class Strings{
         "en":{
             HomePage:"Home",
             AddTree:"Add Tree",
-            localDataView:"Local Data",
+            LocalDataView:"Local Data",
+            LocalDataNavigator:"LocalDataNavigator",
             VerifyUsers:"Verify Users",
             EditTree:"Edit Tree",
+            EditLocalTree:"Edit Local Tree",
             LogIn:'Log In',
             DrawerScreen:'Homescreen',
             startScreen:'start',
@@ -20,9 +22,11 @@ export class Strings{
 
             HomePage:"मुख्य पृष्ठ",
             AddTree:"नवीन झाड जोडा",
-            localDataView:"लोकल डेटा",
+            LocalDataView:"लोकल डेटा",
+            LocalDataNavigator:"LocalDataNavigator",
             VerifyUsers:"वापरकर्ते सत्यापित करा",
             EditTree:"झाड संपादन",
+            EditLocalTree:"Edit Local Tree",
             LogIn:'लॉग इन',
             DrawerScreen:'होम स्क्रीन',
             startScreen:'प्रारंभ स्क्रीन',
@@ -37,8 +41,9 @@ export class Strings{
             // home
             Never:"Never",
             LastSynced:"Last Synced: ",
-            pending:"Pending: ",
-            synced:"Synced: ",
+            pending:"Pending",
+            synced:"Synced",
+            LocalOrSynced:"Local Or Synced",
             // add tree
             Location:"Tree Location",   
             CapturedAt:"Captured At",
@@ -73,8 +78,9 @@ export class Strings{
             // home
             Never:"कधीच नाही",
             LastSynced:"शेवटचा सिंक केलेला डेटा : ",
-            pending:"Pending: ",
-            synced:"Synced: ",
+            pending:"Pending",
+            synced:"Synced",
+            LocalOrSynced:"Local Or Synced",
             // add tree
             Location:"स्थान",
             CapturedAt:"फोटो घेतले तारीख",

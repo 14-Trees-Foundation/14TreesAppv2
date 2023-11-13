@@ -5,6 +5,7 @@ import {
   FlatList,
   Image,
   Modal,
+  ScrollView,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -12,10 +13,11 @@ import {
 } from 'react-native';
 // import * as ImagePicker from 'react-native-image-picker';
 import { useFocusEffect } from '@react-navigation/native';
-import { CustomButton } from './Components';
+import { CustomButton, MyIconButton } from './Components';
 import { CustomDropdown } from './CustomDropdown';
 import { Strings } from './Strings';
 import { Utils, commonStyles } from './Utils';
+import { SyncDisplay } from './SyncDisplay';
 
 
 
@@ -32,14 +34,17 @@ const LocalDataView = ({ navigation }) => {
   const [selectedPlot, setSelectedPlot] = useState({});
   const [selectedSaplingId, setSelectedSaplingId] = useState({});
   const uploadStatuses = [
-    { name: 'Any', value: 0 },
-    { name: 'Local', value: 1 },
-    { name: 'Synced', value: 2 }
+    { name: Strings.messages.LocalOrSynced, value: 0 },
+    { name: Strings.messages.Local, value: 1 },
+    { name: Strings.messages.synced, value: 2 }
   ]
   const [selectedUploadStatus, setSelectedUploadStatus] = useState(uploadStatuses[0]);
   const fetchTreesFromLocalDB = () => {
     Utils.fetchTreesFromLocalDB().then((trees) => {
       // console.log(trees)
+      const syncedTrees = trees.filter((tree)=>(tree.uploaded===true));
+      const localTrees = trees.filter((tree)=>(tree.uploaded!==true));
+      trees = [...localTrees,...syncedTrees]
       setTreeList(trees)
       setFinalList(trees)
     })
@@ -100,7 +105,7 @@ const LocalDataView = ({ navigation }) => {
       console.log('both plot and tree type selected')
       tempfinalList = tempfinalList.filter((tree) => tree.plot_id === selectedPlot.value && tree.type_id === selectedTreeType.value)
     }
-    if (selectedUploadStatus !== uploadStatuses[0]) {
+    if (selectedUploadStatus.value !== uploadStatuses[0].value) {//Not 'local or synced'
       const wantUploaded = selectedUploadStatus.value === uploadStatuses[2].value;//'Synced'
       console.log(selectedUploadStatus, uploadStatuses[2]);
       console.log(wantUploaded);
@@ -132,17 +137,8 @@ const LocalDataView = ({ navigation }) => {
   }
   const renderTree = (tree) => {
     return (
-      <View style={{
-        margin: 10,
-        borderWidth: 2,
-        borderColor: 'white',
-        borderRadius: 10,
-        flexDirection: 'row',
-        alignItems: 'center'
-      }}>
-
-
-        <View style={{ padding: 20, }}>
+      <View style={{...commonStyles.borderedDisplay,flexDirection:'row',justifyContent:'space-around'}}>
+        <View>
           <Text style={styles.text3}>{Strings.messages.SaplingNo} {tree.sapling_id}</Text>
           <Text style={styles.text3}>{Strings.messages.PlotId}{tree.plot_id}</Text>
           <Text style={styles.text3}> {Strings.messages.TypeId} {tree.type_id}</Text>
@@ -150,7 +146,17 @@ const LocalDataView = ({ navigation }) => {
           {(tree.uploaded) ?
             <Text style={{ ...styles.success, ...styles.label }}>{Strings.messages.Synced}</Text>
             :
-            <Text style={{ ...styles.danger, ...styles.label }}>{Strings.messages.Local}</Text>}
+            <View style={{flexDirection:'row',justifyContent:'space-around'}}>
+                <Text style={{ ...styles.danger, ...styles.label }}>{Strings.messages.Local}</Text>
+                <MyIconButton
+                  name={"edit"}
+                  text={Strings.buttonLabels.edit}
+                  onPress={()=>{
+                      // navigation.navigate(Strings.screenNames.EditLocalTree)
+                    }}
+                  />
+            </View>
+          }
         </View>
         {
           tree.images.length ?
@@ -185,9 +191,11 @@ const LocalDataView = ({ navigation }) => {
         onRequestClose={closeModal}
         presentationStyle='formSheet'
       >
-        <View style={{ margin: 20 }}>
-          <Text style={{ ...styles.text3, fontSize: 20 }}>{Strings.messages.Filters}</Text>
-          <View style={{ margin: 5 }}>
+        <ScrollView style={{ margin: 10 }}>
+          <Text style={{ ...commonStyles.text5 }}>{Strings.messages.Filters}</Text>
+          <View>
+          <View style={{...commonStyles.borderedDisplay}}>
+              <Text style={{...commonStyles.text3}}>{Strings.labels.UploadStatus}: </Text>
             <CustomDropdown
               items={uploadStatusList}
               label={Strings.labels.UploadStatus}
@@ -195,8 +203,8 @@ const LocalDataView = ({ navigation }) => {
               initItem={selectedUploadStatus}
             />
           </View>
-
-          <View style={{ margin: 5 }}>
+          <View style={{...commonStyles.borderedDisplay}}>
+            <Text style={{...commonStyles.text3}}>{Strings.labels.SaplingId}: </Text>
             <CustomDropdown
               items={saplingIdList}
               label={Strings.labels.SaplingId}
@@ -204,7 +212,8 @@ const LocalDataView = ({ navigation }) => {
               initItem={selectedSaplingId}
             />
           </View>
-          <View style={{ margin: 5 }}>
+          <View style={{...commonStyles.borderedDisplay}}>
+              <Text style={{...commonStyles.text3}}>{Strings.labels.TreeType}: </Text>
             <CustomDropdown
               items={treeTypeList}
               label={Strings.labels.TreeType}
@@ -212,7 +221,8 @@ const LocalDataView = ({ navigation }) => {
               initItem={selectedTreeType}
             />
           </View>
-          <View style={{ margin: 5 }}>
+          <View style={{...commonStyles.borderedDisplay}}>
+              <Text style={{...commonStyles.text3}}>{Strings.labels.Plot}: </Text>
             <CustomDropdown
               items={plotList}
               label={Strings.labels.Plot}
@@ -220,11 +230,11 @@ const LocalDataView = ({ navigation }) => {
               initItem={selectedPlot}
             />
           </View>
+          </View>
           <View style={{ margin: 20 }}>
             <Button title={Strings.buttonLabels.Apply} onPress={applychanges} color={'#5DB075'} />
           </View>
-        </View>
-        {/* </View> */}
+        </ScrollView>
       </Modal>
 
 
@@ -232,16 +242,26 @@ const LocalDataView = ({ navigation }) => {
         finalList === null ? <Text style={styles.text2}>{Strings.messages.LoadingTrees}</Text>
           :
           <FlatList
+          style={{backgroundColor:'white'}}
             ListEmptyComponent={
               <Text style={commonStyles.text2}>{Strings.messages.NoTreesFound}</Text>
             }
             ListHeaderComponent={
               (treeList&&treeList.length>0)&&<View>
-                  <View>
-                    <CustomButton text={Strings.buttonLabels.DeleteSyncedTrees}opacityStyle={{ backgroundColor: 'red', margin: 20, marginBottom: 0 }} onPress={() => Utils.confirmAction(deleteSyncedTrees)}></CustomButton>
-                  </View>
-                  <View style={{ margin: 20, marginBottom: 5 }}>
-                    <CustomButton text={Strings.buttonLabels.Filters} onPress={openModal} color={'black'} />
+                  <SyncDisplay/>
+                  <View style={{flexDirection:'row',justifyContent:'space-around'}}>
+                    <MyIconButton
+                      name={"filter"}
+                      size={25}
+                      text={Strings.buttonLabels.Filters}
+                      onPress={openModal}
+                      />
+                    <MyIconButton
+                      name={"delete"}
+                      size={25}
+                      text={Strings.buttonLabels.DeleteSyncedTrees}
+                      onPress={() => Utils.confirmAction(deleteSyncedTrees)}
+                      color="red"/>
                   </View>
                   {(finalList !== treeList) && <View style={{ margin: 20, marginBottom: 5 }}>
                     <Button title={Strings.buttonLabels.ClearFilters} onPress={clearFilters} color={'black'} />
@@ -263,12 +283,12 @@ const styles = StyleSheet.create({
   label: {
     borderWidth: 2,
     borderColor: 'black',
-    borderRadius: 10,
+    borderRadius: 5,
     fontSize: 15,
     alignContent: 'center',
     color: 'white',
     textAlign: 'center',
-    width: 'auto',
+    textAlignVertical:'center',
     padding: 5,
     margin: 5
   },
