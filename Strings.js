@@ -26,7 +26,7 @@ export class Strings{
             LocalDataNavigator:"LocalDataNavigator",
             VerifyUsers:"वापरकर्ते सत्यापित करा",
             EditTree:"झाड संपादन",
-            EditLocalTree:"Edit Local Tree",
+            EditLocalTree:"एक स्थानिक झाड संपादित करा",
             LogIn:'लॉग इन',
             DrawerScreen:'होम स्क्रीन',
             startScreen:'प्रारंभ स्क्रीन',
@@ -80,20 +80,20 @@ export class Strings{
             // home
             Never:"कधीच नाही",
             LastSynced:"शेवटचा सिंक केलेला डेटा : ",
-            pending:"Pending",
-            synced:"Synced",
-            LocalOrSynced:"Local Or Synced",
-            failedToUpload:"Failed to upload",
-            trees:"trees",
+            pending:"प्रलंबित",
+            synced:"समक्रमित",
+            LocalOrSynced:"स्थानिक किंवा समक्रमित",
+            failedToUpload:"अपलोड करण्यात अयशस्वी",
+            trees:"झाडे",
             // add tree
             Location:"स्थान",
             CapturedAt:"फोटो घेतले तारीख",
-            userLocation:"User Location",
-            confirmSetGPS:"Set tree location current GPS coordinates?",
-            confirmCoordinateEdit:"Set tree location to given coordinates?",
-            confirmDrag:"Set tree location to dragged coordinates?",
-            enterRemark:"Enter Remark",
-            defaultRemark:"Default Remark",
+            userLocation:"वापरकर्ता स्थान",
+            confirmSetGPS:"वृक्ष स्थान वर्तमान GPS निर्देशांक सेट करायचे?",
+            confirmCoordinateEdit:"दिलेल्या निर्देशांकांवर झाडाचे स्थान सेट करायचे?",
+            confirmDrag:"ड्रॅग केलेल्या निर्देशांकांवर झाडाचे स्थान सेट करायचे?",
+            enterRemark:"टिप्पणी प्रविष्ट करा",
+            defaultRemark:"डीफॉल्ट टिप्पणी",
             // local data view
             NoTreesFound:"फोनवर झाडे आढळली नाहीत",
             Filters:"फिल्टर",
@@ -110,7 +110,7 @@ export class Strings{
             Email:"ईमेल : ",
             //Edit tree
             EnterSaplingId:"रोपाची संख्या लिहा",
-            logoutConfirm:"Do you want to log out? MR"
+            logoutConfirm:"तुम्हाला लॉग आउट करायचे आहे का?"
         },
     });
     static alertMessages = new LocalizedStrings({
@@ -173,16 +173,16 @@ export class Strings{
             LoginFailed:"लॉग इन अयशस्वी",
             CheckPhoneNumber:"फोन नंबर तपासा.",
             UnknownError:"अज्ञात त्रुटी. एक तज्ञाशी संपर्क साधा.",
-            userCancelled:"User cancelled the login flow",
-            signIninProgress:"Operation (e.g. sign in) is in progress already",
-            playServicesOutdated:"Play services not available or outdated",
-            someError:"Some unidentified error happened",
+            userCancelled:"वापरकर्त्याने लॉगिन प्रवाह रद्द केला.",
+            signIninProgress:"ऑपरेशन (उदा. साइन इन) आधीच प्रगतीपथावर आहे.",
+            playServicesOutdated:"प्ले सेवा उपलब्ध नाहीत किंवा कालबाह्य आहेत",
+            someError:"काही अज्ञात त्रुटी घडली",
             //app
             PermissionsRequired:"परवानगी आवश्यक!",
             Settings:"कृपया सेटिंग्ज वर जाऊन परवानगी द्या",
             //utils
             DataUptodate:"झाडाचे प्रकार आणि प्लॉट अद्याप अपडेट आहेत.",
-            plotSaplingsDataUpToDate:"Plot sapling data up-to-date (MR)",
+            plotSaplingsDataUpToDate:"प्लॉट रोपटी डेटा अद्ययावत.",
             FailureSavingTrees:"काही झाडाचे प्रकार सेव करण्यात असफल. लॉग पहा.",
             FailureSavingPlots:"काही प्लॉट सेव करण्यात असफल. लॉग पहा.",
             ConfirmActionTitle:"खात्री आहे का?",
@@ -197,8 +197,8 @@ export class Strings{
             Error:"त्रुटी",
             IncompleteFields:"कृपया सर्व रिक्त जागा भरा.",
             NoImage:"कृपया किमान एक फोटो घ्या.",
-            selectPlotFirst:"Select plot to view other trees.",
-            confirmDeleteImage:"Delete image?",
+            selectPlotFirst:"इतर झाडे पाहण्यासाठी प्लॉट निवडा.",
+            confirmDeleteImage:"इमेज हटवायची??",
             //verify users
             UserVerified:"वापरकर्ता सत्यापित केला गेला",
             
@@ -261,16 +261,16 @@ export class Strings{
             SyncData:"डेटा सिंक करा",
             AddNewTree:"नवीन झाड जोडा",
             FetchHelperData:"मदतकारी डेटा तयार करा",
-            fetchPlotSaplingData:"Fetch Plot-Sapling Data",
+            fetchPlotSaplingData:"प्लॉट-सॅपलिंग डेटा मिळवा",
             SelectLanguage:"भाषा/Language",
             // add tree
             ClickPhoto:"फोटो घ्या",
             Submit:"सबमिट करा",
-            gps:"GPS",
-            edit:"Edit",
-            drag:"Drag",
-            hideAll:"Hide All",
-            showAll:"Show All",
+            gps:"जीपीएस",
+            edit:"सुधारणे",
+            drag:"ड्रॅग करा",
+            hideAll:"सर्व लपवा",
+            showAll:"सगळं दाखवा",
             // local data view
             DeleteSyncedTrees:"सिंक केलेले झाडे हटवा",
             Filters:"फिल्टर",
@@ -282,9 +282,9 @@ export class Strings{
             //edit tree
             Search:"शोधा",
             //general:
-            save:"Save",
-            cancel:"Cancel",
-            logOut:'Log out',
+            save:"जतन करा",
+            cancel:"रद्द करा",
+            logOut:'बाहेर पडणे',
 
         }
     })
@@ -312,8 +312,8 @@ export class Strings{
             UploadStatus:"अपलोड स्थिती",
             TreeType: "झाडाचा प्रकार",
             Plot: "प्लॉट",
-            admin:'Admin',
-            logger:'Logger'
+            admin:'प्रशासक',
+            logger:'माली'
         }
     })
     static english  = 'en';

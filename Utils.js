@@ -437,7 +437,6 @@ export class Utils {
 
 
 }
-
 export class Constants {
     static userIdKey = 'userid';
     static userDetailsKey = 'userobj';
@@ -446,12 +445,25 @@ export class Constants {
     static hashForPlotSaplingsKey = 'hashForPlotSaplings';
     static appRootTagKey = 'rootTag';
     static syncDateKey = 'date';
-    static imagePlaceholder = 'https://i.imgur.com/vxP6SFl.png'
     static treeFormTemplateData = { inSaplingId: null, inLat: 0, inLng: 0, inImages: [], inPlot: null, inTreeType: null, inUserId: '' }
-    static
-        selectedLangKey = 'LANG';
+    static selectedLangKey = 'LANG';
+    static logoImage(){
+        return require('./assets/logo.png');
+    }
+    static placeholderImage(){
+        return require('./assets/placeholder.png');
+    }
 }
-
+export const getImageSourceObject = (src)=>{
+    if(src.length===0){
+        return Constants.placeholderImage();
+    }
+    else if(src.startsWith('http')){
+        return {uri:src}
+    }
+    console.log('image src was unexpected.')
+    return Constants.placeholderImage()
+}
 
 export const commonStyles = StyleSheet.create({
     label: {

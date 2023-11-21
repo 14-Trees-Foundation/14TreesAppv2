@@ -1,13 +1,13 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin, GoogleSigninButton, statusCodes, } from '@react-native-google-signin/google-signin';
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View , TouchableOpacity, ToastAndroid, Alert} from 'react-native';
-import PhoneInput, { isValidNumber } from 'react-native-phone-number-input';
+import React, { useState } from 'react';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import PhoneInput from 'react-native-phone-number-input';
 import { DataService } from './DataService';
-import { Constants, Utils } from './Utils';
 import LanguageModal from './Languagemodal';
 import { Strings } from './Strings';
+import { Constants } from './Utils';
 
 const LoginScreen = ({navigation}) =>{
   
@@ -48,7 +48,7 @@ const LoginScreen = ({navigation}) =>{
         console.log('userId stored');
         response.data = {...response.data,image:userInfo.user.photo}
         if(!response.data.image){
-          response.data.image = Constants.imagePlaceholder;
+          response.data.image = '';
         }
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
         console.log('userDetails stored');

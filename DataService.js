@@ -36,7 +36,7 @@ axios.interceptors.response.use(function (response) {
 export class DataService{
     static hostName = 'https://vk061k4q-7000.inc1.devtunnels.ms'
     // static hostName = 'http://localhost:7000'
-    static serverBase = `${this.hostName}/api/v2`
+    static serverBase = `${this.hostName}/api/appv2`
     static async loginUser(userDataPayload){
         const url = `${DataService.serverBase}/login`;
         return await axios.post(url, userDataPayload);

@@ -1,5 +1,5 @@
 import { TouchableOpacity,View, Image, Text, Button, RootTagContext, BackHandler } from "react-native";
-import { Constants, Utils, commonStyles,styleConfigs} from "./Utils";
+import { Constants, Utils, commonStyles,getImageSourceObject,logoSrc,styleConfigs} from "./Utils";
 import { fontAwesome5List, materialCommunityList } from './IconLists';
 import Fa5Icon from 'react-native-vector-icons/FontAwesome5';
 import { NavigationContainer, createNavigationContainerRef, useFocusEffect, useNavigationContainerRef } from '@react-navigation/native';
@@ -140,7 +140,7 @@ export const DrawerContent = (props) => {
     return (<DrawerContentScrollView {...props}>
       <View style={{flexDirection:'column',alignItems:'center',marginTop:50,bottom:0}}>
         <Image
-          source={require('./assets/logo.png')} // Replace with your delete icon image
+          source={Constants.logoImage()} // Replace with your delete icon image
           style={{ width: 100, height: 100, marginLeft: 10 }} // Adjust the icon dimensions and margin
         />
         <Text style={{fontSize:20,fontWeight:'bold',color:'black'}}>14 Trees</Text>
@@ -148,7 +148,7 @@ export const DrawerContent = (props) => {
         userDetails
         ?
         <View style={{flexDirection:'row',alignItems:'center',alignSelf:'flex-start',margin:10,justifyContent:'space-around'}}>
-          <Image source={{uri:userDetails.image}} style={{width:75,height:75,borderRadius:37.5}}>
+          <Image source={getImageSourceObject(userDetails.image)} style={{width:75,height:75,borderRadius:37.5}}>
           </Image>
           <View style={{flexDirection:'column',marginLeft:5}}>
             <Text style={{fontSize:15,color:'black'}}>{userDetails.name}</Text>
