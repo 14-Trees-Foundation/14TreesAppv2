@@ -9,7 +9,16 @@ axios.interceptors.response.use(function (response) {
   let requestDescriptor=null;
   if(error.request){
     const request = error.request;
-    requestDescriptor = `${request._method} ${request.responseURL}.`
+    console.log(request)
+    if(request.responseURL){
+      requestDescriptor = `${request._method} ${request.responseURL}.`
+    }
+    else if(request._response){
+      requestDescriptor = `${request._response}.`
+    }
+    else{
+      requestDescriptor = `${request._method} ${request._url}.`
+    }
   }
   if(error.response){
     if(error.response.data){
@@ -34,9 +43,10 @@ axios.interceptors.response.use(function (response) {
   return null;
 });
 export class DataService{
-    static hostName = 'https://vk061k4q-7000.inc1.devtunnels.ms'
+    static productionHostName = 'https://api.14trees.org';
+    static hostName = 'https://vk061k4q-7000.inc1.devtunnels.ms';
     // static hostName = 'http://localhost:7000'
-    static serverBase = `${this.hostName}/api/appv2`
+    static serverBase = `${this.productionHostName}/api/appv2`
     static async loginUser(userDataPayload){
         const url = `${DataService.serverBase}/login`;
         return await axios.post(url, userDataPayload);

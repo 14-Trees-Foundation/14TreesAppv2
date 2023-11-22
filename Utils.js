@@ -106,6 +106,8 @@ export class Utils {
             await Utils.storeTreeTypes(data['treeTypes']);
             await Utils.storePlots(data['plots']);
             await AsyncStorage.setItem(Constants.lastHashKey, newHash);
+            ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
+            
         }
         else {
             console.log('data was null.');
@@ -144,6 +146,7 @@ export class Utils {
             console.log('data stored.')
             await AsyncStorage.setItem(Constants.hashForPlotSaplingsKey, newHash);
             console.log('setting hash: ', newHash);
+            ToastAndroid.show(Strings.alertMessages.plotSaplingsDataUpToDate, ToastAndroid.LONG)
         }
         else {
             console.log('data was null.');

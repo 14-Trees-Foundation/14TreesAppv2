@@ -117,6 +117,8 @@ export class Strings{
         "en":{
             //login
             LoginFailed:"Login Failed",
+            GPSUnavailable:"GPS Unavailable",
+            gpsActionMessage:"Turn on location services and/or mobile data, and restart the app.",
             CheckPhoneNumber:"Check phone number.",
             UnknownError:"Unknown error. Consult an expert.",
             userCancelled:"User cancelled the login flow",
@@ -127,7 +129,7 @@ export class Strings{
             PermissionsRequired:"Permissions Required!",
             Settings:"Please go to Settings and grant permissions",
             //utils
-            DataUptodate:"Tree types and plot already up to date.",
+            DataUptodate:"Tree types and plot up to date.",
             plotSaplingsDataUpToDate:"Plot sapling data up-to-date",
             FailureSavingTrees:"Failed to save some tree types. See logs.",
             FailureSavingPlots:"Failed to save some plots. See logs.",
@@ -169,6 +171,8 @@ export class Strings{
             FailedSaplingIds:"Failed to get sapling ids !",
         },
         "mr":{
+            GPSUnavailable:"GPS Unavailable",
+            gpsActionMessage:"Turn on location services and/or mobile data, and restart the app.",
             //login
             LoginFailed:"लॉग इन अयशस्वी",
             CheckPhoneNumber:"फोन नंबर तपासा.",

@@ -95,7 +95,7 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,setInitLocation,
     useEffect(()=>{
         if(setInitLocation){
             if(lat+lng==0){
-                // requestLocation(onSetLat,onSetLng,setLat,setLng);
+
                 useMapViewUserLocation(setLat,setLng,onSetLat,onSetLng,userLocation)
             }
         }
@@ -135,7 +135,15 @@ return <View style={{flexDirection:'column',padding:20}}>
     
         <View style={{flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
         <MyIconButton name={"crosshairs-gps"} text={Strings.buttonLabels.gps}
-        onPress={()=>Utils.confirmAction(()=>useMapViewUserLocation(setLat,setLng,onSetLat,onSetLng,userLocation)
+        onPress={()=>Utils.confirmAction(()=>{
+            if(userLocation.latitude+userLocation.longitude>0){
+                useMapViewUserLocation(setLat,setLng,onSetLat,onSetLng,userLocation)
+            }
+            else{
+                requestLocation(onSetLat,onSetLng,setLat,setLng);
+                // Alert.alert(Strings.alertMessages.GPSUnavailable,Strings.alertMessages.gpsActionMessage)
+            }
+        }
             ,undefined,Strings.messages.confirmSetGPS)}/>
         <MyIconButton name={"edit"} text={Strings.buttonLabels.edit}
         onPress={()=>{
