@@ -140,6 +140,7 @@ export class Utils {
         if (jsondata) {
             console.log('Storing Json data...')
             await Promise.all(jsondata.map(async (plot) => {
+                console.log(this)
                 await this.localdb.storePlotSaplings(plot.plot_id, plot.saplings);
                 console.log(plot.plot_id,'plot stored.')
             }));
