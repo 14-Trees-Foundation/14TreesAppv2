@@ -8,6 +8,7 @@ import { DataService } from './DataService';
 import LanguageModal from './Languagemodal';
 import { Strings } from './Strings';
 import { Constants } from './Utils';
+import { TextInput } from 'react-native-gesture-handler';
 
 const LoginScreen = ({navigation}) =>{
   
@@ -103,29 +104,15 @@ const LoginScreen = ({navigation}) =>{
 
         <View >  
           {/* <Text style={{ fontSize: 20, color: 'black',marginLeft: 35, marginTop: 70 }}>Enter your phone number</Text> */}
-          <PhoneInput
-            defaultValue={phoneNumber}
-            defaultCode="IN"
-            layout="first"
-            // placeholder='Enter phone number'
-          
-            filterProps={{autoFocus: true}}
-            containerStyle={{ // centre the phone number input
-              alignItems: 'center',
-              justifyContent: 'center',
-              alignSelf: 'center',
-              marginTop: 30,
-            }}
-            flagButtonStyle={{backgroundColor: '#F5F5F5', borderWidth: 1, borderColor: 'white', borderRadius: 10, padding: 10, color: 'black', fontSize: 16, fontWeight: 'bold',}}
-            textContainerStyle={{backgroundColor: '#F5F5F5', borderWidth: 1, borderColor: 'white', borderRadius: 10, padding: 10, color: 'black', fontSize: 16, fontWeight: 'bold',}}
-            onChangeText={(text) => {
-              setPhoneNumber(text);
-            }}
-            onChangeFormattedText={(text) => {
-              setPhoneNumber(text);
-              
-            }}
-          />
+         <TextInput
+          style={styles.textInput}
+          placeholder="Enter your phone number"
+          placeholderTextColor="grey"
+          onChangeText={(text) => setPhoneNumber(text)}
+          value={phoneNumber}
+          keyboardType="number-pad"
+          maxLength={10}
+        />
         </View>
         <View style={{marginVertical:30}}>
           <GoogleSigninButton
@@ -159,14 +146,13 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: 'white',
     backgroundColor: '#f5f5f5',
-   
-    padding: 10,
+    marginTop: 20,
     color: 'black', // Change font color here
     fontSize: 16,
     fontWeight: 'bold',  
-    alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
+    textAlign: 'center',
   },
   pop: {
     backgroundColor: '#5DB075',

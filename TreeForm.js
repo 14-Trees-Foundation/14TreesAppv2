@@ -17,6 +17,7 @@ export const treeFormModes = {
 export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage, onDeleteImage }) => {
     const {inSaplingId,inLng,inLat,inImages,inTreeType,inPlot,inUserId} = treeData;
     const [saplingid,setSaplingId] = useState(inSaplingId);
+    // console.log('saplingid: ',inSaplingId);
     const [lat, setlat] = useState(inLat);
     const [lng, setlng] = useState(inLng);
     // array of images
@@ -76,11 +77,14 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                 // call saveTreeImages for each image
 
                 // await fetch();
-                setSaplingId('');
+                
+                setSaplingId(null);
                 setSelectedTreeType({});
                 setSelectedPlot({});
                 // setSelectedUser({});
                 setImages([]);
+                // console.log('saplingid: ',saplingid);
+                // console.log('insaplingid: ',inSaplingId);
                 await onVerifiedSave(tree, images);
                 // await Utils.upload();
             } catch (error) {
@@ -333,11 +337,12 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                 {
                     [
                             <TextInput
-                            defaultValue={inSaplingId}
+                            defaultValue={saplingid}
                             style={commonStyles.txtInput}
                             placeholder={Strings.labels.SaplingId}
                             placeholderTextColor={'#000000'}
                             onChangeText={(text) => { setSaplingId(text) }}
+                            // value={saplingid}
                         />
                             ,
                         <TextInput
@@ -346,6 +351,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                             placeholder={Strings.labels.SaplingId}
                             placeholderTextColor={'#000000'}
                             onChangeText={(text) => { setSaplingId(text) }}
+                            // value={saplingid}
                         />,
                         <Text style={{ ...commonStyles.text4, textAlign: 'center' }}>
                             Sapling ID: {saplingid}

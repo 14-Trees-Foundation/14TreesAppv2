@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { MyIconButton } from './Components';
 import LanguageModal from './Languagemodal';
@@ -6,17 +6,16 @@ import { Strings } from './Strings';
 import { SyncDisplay } from './SyncDisplay';
 import { Utils } from './Utils';
 
-// strings 
-// Never 
-// Last Sync Data On :
-// Sync Data
-// Add New Tree
-// Fetch Helper Data
-
-
-
 const HomeScreen = ({ navigation }) => {
   const [langModalVisible, setLangModalVisible] = useState(false);
+
+  // call utils.fetchAndStoreHelperData() on first load
+
+  useEffect(() => {
+    Utils.fetchAndStoreHelperData();
+  }
+  ,[]);
+  
 
   return (
     <View >
