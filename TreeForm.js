@@ -22,6 +22,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     const [lng, setlng] = useState(inLng);
     // array of images
     const [exisitingImages,setExistingImages] = useState(inImages)
+    const [localSaplingIds,setLocalSaplingIds] = useState([])
     const [images, setImages] = useState([]);
     const [treeItems, setTreeItems] = useState([]);
     const [plotItems, setPlotItems] = useState([]);
@@ -54,16 +55,11 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         setImages([...images, image]);
     }
     const onSave = async () => {
-        const tree = {
-            treeid: selectedTreeType.value,
-            saplingid: saplingid,
-            lat: lat,
-            lng: lng,
-            plotid: selectedPlot.value,
-            user_id: userId,
-        };
-        console.log(tree);
-        if (saplingid === null || Object.keys(selectedTreeType).length === 0 || Object.keys(selectedPlot).length === 0) {
+        if(localSaplingIds.includes(saplingid)){
+            Alert.alert(Strings.alertMessages.invalidSaplingId,Strings.labels.SaplingId+' '+saplingid+' '+Strings.alertMessages.alreadyExists);
+            return;
+        }
+        else if (saplingid === null || Object.keys(selectedTreeType).length === 0 || Object.keys(selectedPlot).length === 0) {
             Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
             return;
         }
@@ -73,20 +69,20 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         }
         else {
             try {
-
-                // call saveTreeImages for each image
-
-                // await fetch();
-                
+                const tree = {
+                    treeid: selectedTreeType.value,
+                    saplingid: saplingid,
+                    lat: lat,
+                    lng: lng,
+                    plotid: selectedPlot.value,
+                    user_id: userId,
+                };
+                console.log(tree);
                 setSaplingId(null);
                 setSelectedTreeType({});
                 setSelectedPlot({});
-                // setSelectedUser({});
                 setImages([]);
-                // console.log('saplingid: ',saplingid);
-                // console.log('insaplingid: ',inSaplingId);
                 await onVerifiedSave(tree, images);
-                // await Utils.upload();
             } catch (error) {
                 console.error(error);
             }
@@ -298,8 +294,10 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             let {treeTypes,plots} = await Utils.getLocalTreeTypesAndPlots();
             setTreeItems(treeTypes);
             setPlotItems(plots);
-            console.log('options loaded: ',treeTypes.length,plots.length)
-            // setUserItems(users);
+            let saplingIds = await Utils.fetchSaplingIdsFromLocalDB();
+            saplingIds = saplingIds.map((saplingid)=>saplingid.name)
+            saplingIds = saplingIds.filter((id)=>(id!==inSaplingId));
+            setLocalSaplingIds(saplingIds);
         } catch (error) {
             console.error(error);
         }
@@ -336,23 +334,37 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
                 {
                     [
-                            <TextInput
-                            defaultValue={saplingid}
-                            style={commonStyles.txtInput}
-                            placeholder={Strings.labels.SaplingId}
-                            placeholderTextColor={'#000000'}
-                            onChangeText={(text) => { setSaplingId(text) }}
-                            // value={saplingid}
-                        />
+                            <View>
+                                <TextInput
+                                defaultValue={saplingid}
+                                style={commonStyles.txtInput}
+                                placeholder={Strings.labels.SaplingId}
+                                placeholderTextColor={'#000000'}
+                                onChangeText={(text) => { setSaplingId(text) }}
+                                // value={saplingid}
+                                />
+                                {
+                                    localSaplingIds.includes(saplingid)
+                                    &&
+                                    <Text style={{...commonStyles.text5,color:'red',fontWeight:'bold',padding:5}}>Sapling ID {saplingid} already exists locally.</Text>
+                                }
+                            </View>
                             ,
-                        <TextInput
+                        <View>
+                            <TextInput
                             defaultValue={inSaplingId}
                             style={commonStyles.txtInput}
                             placeholder={Strings.labels.SaplingId}
                             placeholderTextColor={'#000000'}
                             onChangeText={(text) => { setSaplingId(text) }}
                             // value={saplingid}
-                        />,
+                            />
+                            {
+                                localSaplingIds.includes(saplingid)
+                                &&
+                                <Text style={{...commonStyles.text5,color:'red',fontWeight:'bold',padding:5}}>Sapling ID {saplingid} already exists locally.</Text>
+                            }
+                        </View>,
                         <Text style={{ ...commonStyles.text4, textAlign: 'center' }}>
                             Sapling ID: {saplingid}
                         </Text>

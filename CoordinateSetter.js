@@ -2,9 +2,10 @@ import MapView,{PROVIDER_GOOGLE,Marker} from "react-native-maps";
 import Geolocation from "@react-native-community/geolocation"
 import { Text, View,Alert,ToastAndroid,TextInput } from "react-native";
 import { CancelButton, MyIcon, MyIconButton, SaveButton } from "./Components";
-import { useEffect,useState } from "react";
+import { useCallback, useEffect,useState } from "react";
 import { Strings } from "./Strings";
 import { Utils, commonStyles } from "./Utils";
+import { useFocusEffect } from "@react-navigation/native";
 const coordinateDelta = 0.002;
 const coordinateModes = {
     fixed:0,
@@ -24,6 +25,27 @@ const getReadableLocation = (lat,lng)=>{
     const lngval = Math.round(lng*1000)/1000
     return `${latval}, ${lngval}`
 }
+const isLocationAllowed = async()=>{
+    return new Promise((resolve,reject)=>{
+        Geolocation.getCurrentPosition(
+            (_) => {
+                //location available, maps will use it to set tree location.
+                resolve(true);
+            },
+            (error) => {
+                console.log(error)
+                if(error.code===error.TIMEOUT){
+                    ToastAndroid.show(Strings.alertMessages.GPSUnavailable,ToastAndroid.LONG);
+                }
+                else if(error.code === error.POSITION_UNAVAILABLE){
+                    resolve(false);
+                }
+                resolve(true);//location turned on, but error anyways.
+            },
+            { enableHighAccuracy: false, timeout: 20000},
+        );
+    })
+}
 const requestLocation = async (onSetLat,onSetLng,setLat,setLng) => {
     // console.log('requesting location');
     Geolocation.getCurrentPosition(
@@ -35,10 +57,9 @@ const requestLocation = async (onSetLat,onSetLng,setLat,setLng) => {
         },
         (error) => {
             console.log(error)
-            if(error.code===error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE){
-                ToastAndroid.show('Error: Request timed out. GPS not available right now.',ToastAndroid.LONG);
+            if(error.code===error.TIMEOUT){
+                ToastAndroid.show(Strings.alertMessages.GPSUnavailable,ToastAndroid.LONG);
             }
-            // else if(error.code===error.PERMISSION_DENIED){
             else{
                 Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.LocationError);
             }
@@ -92,10 +113,16 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,setInitLocation,
     const [plotSaplings,setPlotSaplings] = useState([]);
     const [visibleSaplingsRegion,setVisibleSaplingsRegion] = useState(null);
     const [visibleSaplings,setVisibleSaplings] = useState([]);
+    useFocusEffect(useCallback(()=>{
+        isLocationAllowed().then((locationOn)=>{
+            if(!locationOn){
+                Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.LocationError);
+            }
+        });
+    },[isLocationAllowed]))
     useEffect(()=>{
         if(setInitLocation){
             if(lat+lng==0){
-
                 useMapViewUserLocation(setLat,setLng,onSetLat,onSetLng,userLocation)
             }
         }
@@ -141,7 +168,6 @@ return <View style={{flexDirection:'column',padding:20}}>
             }
             else{
                 requestLocation(onSetLat,onSetLng,setLat,setLng);
-                // Alert.alert(Strings.alertMessages.GPSUnavailable,Strings.alertMessages.gpsActionMessage)
             }
         }
             ,undefined,Strings.messages.confirmSetGPS)}/>

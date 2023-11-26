@@ -275,6 +275,7 @@ export class LocalDatabase {
         } catch (error) {
             console.error(error);
             Alert.alert(Strings.alertMessages.getString('FailedGetSaplingIds',Strings.english));
+            return [];
         }
     };
 

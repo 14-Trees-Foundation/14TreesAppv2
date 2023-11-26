@@ -117,7 +117,7 @@ export class Strings{
         "en":{
             //login
             LoginFailed:"Login Failed",
-            GPSUnavailable:"GPS Unavailable",
+            GPSUnavailable:"Error: Request timed out. GPS not available right now.",
             gpsActionMessage:"Turn on location services and/or mobile data, and restart the app.",
             CheckPhoneNumber:"Check phone number.",
             UnknownError:"Unknown error. Consult an expert.",
@@ -142,6 +142,8 @@ export class Strings{
             CheckLocalList:"See local tree list to check statuses.",
             ContactExpert:"Contact an expert, please.",
             //tree form
+            invalidSaplingId:"Invalid Sapling Id",
+            alreadyExists:"already exists.",
             Error:"Error",
             IncompleteFields:"Please fill all fields.",
             NoImage:"Please add atleast one image.",
@@ -171,8 +173,8 @@ export class Strings{
             FailedSaplingIds:"Failed to get sapling ids !",
         },
         "mr":{
-            GPSUnavailable:"GPS Unavailable",
-            gpsActionMessage:"Turn on location services and/or mobile data, and restart the app.",
+            GPSUnavailable:"त्रुटी: विनंतीची वेळ संपली. GPS सध्या उपलब्ध नाही.",
+            gpsActionMessage:"स्थान सेवा आणि/किंवा मोबाइल डेटा चालू करा आणि अॅप रीस्टार्ट करा.",
             //login
             LoginFailed:"लॉग इन अयशस्वी",
             CheckPhoneNumber:"फोन नंबर तपासा.",
@@ -198,6 +200,8 @@ export class Strings{
             CheckLocalList:" लोकल झाडांची यादी पहा स्थिती तपासण्यासाठी.",
             ContactExpert:"कृपया एक तज्ञाशी संपर्क साधा.",
             //tree form
+            invalidSaplingId:"अवैध रोपटी आयडी",
+            alreadyExists:"आधिपासूनच अस्तित्वात आहे",
             Error:"त्रुटी",
             IncompleteFields:"कृपया सर्व रिक्त जागा भरा.",
             NoImage:"कृपया किमान एक फोटो घ्या.",
