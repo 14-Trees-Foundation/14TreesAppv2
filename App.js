@@ -7,12 +7,12 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Alert, BackHandler, Platform, RootTagContext } from 'react-native';
 import { enableLatestRenderer } from 'react-native-maps';
 import { PERMISSIONS } from 'react-native-permissions';
-import { DrawerNavigator } from './Components';
-import LoadingScreen from './LoadingScreen';
-import LoginScreen from './Login';
-import { Strings } from './Strings';
-import { Constants, Utils, styleConfigs } from './Utils';
-import { checkMultiplePermissions } from './check_permissions';
+import { DrawerNavigator } from './components/Components';
+import LoadingScreen from './screens/LoadingScreen';
+import LoginScreen from './screens/Login';
+import { Strings } from './services/Strings';
+import { Constants, Utils, styleConfigs } from './services/Utils';
+import { checkMultiplePermissions } from './services/check_permissions';
 enableLatestRenderer();
 
 const Stack = createStackNavigator();
