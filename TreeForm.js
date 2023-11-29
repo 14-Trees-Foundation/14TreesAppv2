@@ -30,6 +30,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     const [selectedTreeType, setSelectedTreeType] = useState(inTreeType);
     const [selectedPlot, setSelectedPlot] = useState(inPlot);
     const [userId, setUserId] = useState(inUserId);
+    console.log('rendered treeform')
     useEffect(()=>{
         console.log(treeData.inSaplingId)
         if(mode===treeFormModes.localEdit){
@@ -99,6 +100,8 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         
 
         launchCamera(options, async (response) => {
+            console.log('from launch camera: ',response)
+
             if (response.didCancel) {
                 console.log('User cancelled image picker');
             } else if (response.error) {
@@ -286,6 +289,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     }
 
     const loadDataCallback = useCallback(async () => {
+        console.log('fetching data')
         try {
             if(mode===treeFormModes.addTree){
                 let userId = await Utils.getUserId();

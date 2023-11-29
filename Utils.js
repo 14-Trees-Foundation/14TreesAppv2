@@ -91,15 +91,18 @@ export class Utils {
         lastHash = String(lastHash);//take care of null values.
         let userId = await Utils.getUserId();
         console.log('requesting: ', userId, lastHash)
+        //setStatus(requesting)
         const helperData = await DataService.fetchHelperData(userId, lastHash);
         if (!helperData) {
+            //setStatus(request failed)
             return;//error display, logging done by DataService.
-
         }
+        // setStatus(storing)
         const data = helperData.data['data'];
         const newHash = helperData.data['hash'];
         if (newHash == lastHash) {
             ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
+            // setStatus(Data updated)
             return;
         }
         if (data) {
@@ -107,11 +110,10 @@ export class Utils {
             await Utils.storePlots(data['plots']);
             await AsyncStorage.setItem(Constants.lastHashKey, newHash);
             ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
-            
+            // setstatus(data updated)
+            return;
         }
-        else {
-            console.log('data was null.');
-        }
+        // setstatus(failed)
     }
 
     static async fetchAndStorePlotSaplings() {

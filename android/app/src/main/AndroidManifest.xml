@@ -16,6 +16,7 @@
       android:icon="@mipmap/ic_launcher"
       android:roundIcon="@mipmap/ic_launcher_round"
       android:allowBackup="false"
+      android:requestLegacyExternalStorage="true"
       android:theme="@style/AppTheme">
       <!-- API KEY from Chaitanya -->
       <meta-data android:name="com.google.android.geo.API_KEY" android:value="${GOOGLE_MAPS_API_KEY}" />
