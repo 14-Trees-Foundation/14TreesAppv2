@@ -1,10 +1,11 @@
 import { Utils, commonStyles } from "./Utils";
 import { useEffect,useState,useCallback } from 'react';
-import {KeyboardAvoidingView,Alert,Text,Image,View,ToastAndroid,TouchableOpacity,TextInput, Button, FlatList} from 'react-native';
+import {KeyboardAvoidingView,Alert,Text,Image,View,ToastAndroid,ScrollView,TouchableOpacity,TextInput, Button, FlatList,StyleSheet} from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
-import { Dropdown } from "./DropDown";
 import {launchCamera} from 'react-native-image-picker';
 import { CustomButton } from "./Components";
+import MapView,{PROVIDER_GOOGLE,Marker} from "react-native-maps";
+import { CustomDropdown } from "./CustomDropdown";
 export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewImage, onDeleteImage }) => {
     const {inSaplingId,inLng,inLat,inImages,inTreeType,inPlot,inUserId} = treeData;
     const [saplingid, setSaplingid] = useState(inSaplingId);
@@ -224,9 +225,11 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
             let plots = await ldb.getPlotsList();
             setTreeItems(trees);
             setPlotItems(plots);
+            console.log(editMode, 'editmode');
             if(editMode!==true){
                 requestLocation();
             }
+            console.log('options loaded: ',trees.length,plots.length)
             // setUserItems(users);
         } catch (error) {
             console.error(error);
@@ -237,9 +240,9 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
         loadDataCallback();
         console.log(selectedTreeType);
     }, []);
-
     const requestLocation = async () => {
         console.log('requesting location');
+        // TODO: handler
         Geolocation.getCurrentPosition(
             (position) => {
                 setlat(position.coords.latitude);
@@ -248,9 +251,9 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                 console.log(lng);
             },
             (error) => {
-                error => Alert.alert('Error', JSON.stringify(error));
+                Alert.alert('Error', 'Have you turned on the location (GPS) on your phone?');
             },
-            { enableHighAccuracy: false, timeout: 20000, maximumAge: 1000 },
+            { enableHighAccuracy: false, timeout: 2000 },
         );
 
     };
@@ -258,7 +261,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
 
     return (
         <KeyboardAvoidingView behavior='height' style={{ backgroundColor: '#5DB075' }} keyboardVerticalOffset={100}>
-            <View style={{ backgroundColor: '#5DB075', height: '100%' }}>
+            <ScrollView  style={{ backgroundColor: '#5DB075', height: '100%' }}>
                 <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
                     {
                         editMode===true?
@@ -273,20 +276,41 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                         value={saplingid}
                     />
                     }
-                    <Dropdown
+                    <CustomDropdown
                         items={treeItems}
                         label="Select Tree Type"
-                        setSelectedItems={setSelectedTreeType}
-                        selectedItem={selectedTreeType}
+                        onSelectItem={setSelectedTreeType}
                     />
-                    <Dropdown
+                    <CustomDropdown
                         items={plotItems}
                         label="Select Plot"
-                        setSelectedItems={setSelectedPlot}
-                        selectedItem={selectedPlot}
+                        onSelectItem={setSelectedPlot}
                     />
                     {/* <Text style={styles.text2}> Add photos</Text> */}
-                    <Text style={{ color: 'black', marginLeft: 20, margin: 10, fontSize: 18 }}> Coordinates : {lat},{lng}</Text>
+                    <View style={{flexDirection:'column'}}>
+                        <View style={{flexDirection:'row'}}>
+                        <Text style={{ color: 'black', marginLeft: 20, margin: 10, fontSize: 18 }}> Location : {Math.round(lat,4)},{Math.round(lng,4)}</Text>
+                        <TouchableOpacity>
+                            <Text>R</Text>
+                        </TouchableOpacity>
+                        </View>
+                        {((lat+lng)>0 )&&<MapView
+                        showsCompass={true}
+                        rotateEnabled={false}
+                        provider={PROVIDER_GOOGLE}
+                        style={{height:200,margin:10}}
+                        showsUserLocation={true}
+                        region={{
+                            latitude: lat,
+                            longitude: lng,
+                            latitudeDelta: 0.001,
+                            longitudeDelta: 0.001,
+                          }}
+                        >
+                            <Marker coordinate={{latitude:lat,longitude:lng}}>
+                            </Marker>
+                        </MapView>}
+                    </View>
                     <View style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 15 }}>
                         <Button
                             title="Add Photo"
@@ -296,8 +320,9 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
                     </View>
 
                     <KeyboardAvoidingView behavior="position" style={{}} keyboardVerticalOffset={150} enabled={keyboardAvoidingViewEnabled}>
-                    <View style={{ height: 200, margin: 2, borderColor: '#5DB075', borderRadius: 5, flexDirection: 'column', backgroundColor:'white'}}>
+                    <View style={{ margin: 2, borderColor: '#5DB075', borderRadius: 5, flexDirection: 'column', backgroundColor:'white'}}>
                         <FlatList
+                            scrollEnabled={false}
                             data={[...exisitingImages,...images]}
                             renderItem={commonRenderFunction}
                         />
@@ -318,7 +343,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, editMode, onCancel, onNewIm
 
 
                 </View>
-            </View>
+            </ScrollView>
         </KeyboardAvoidingView>
     )
 

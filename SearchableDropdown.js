@@ -30,6 +30,7 @@ export default class SearchableDropDown extends Component {
     if (this.state.focus) {
       const flatListPorps = { ...this.props.listProps };
       const oldSupport = [
+        { key: 'scrollEnabled', val:false },
         { key: 'keyboardShouldPersistTaps', val: 'always' }, 
         { key: 'nestedScrollEnabled', val : false },
         { key: 'style', val : { ...this.props.itemsContainerStyle } },
@@ -94,10 +95,12 @@ export default class SearchableDropDown extends Component {
   };
 
   renderItems = (item, index) => {
+      console.log('rendering items')
       return (
         <TouchableOpacity
           style={{ ...this.props.itemStyle }}
-          onPress={() => {
+          onPress={(e) => {
+            console.log('selecting items')
             this.setState({ item: item, focus: false });
             Keyboard.dismiss();
             setTimeout(() => {

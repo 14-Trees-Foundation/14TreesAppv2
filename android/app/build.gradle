@@ -68,7 +68,9 @@ def enableProguardInReleaseBuilds = false
  * this variant is about 6MiB larger per architecture than default.
  */
 def jscFlavor = 'org.webkit:android-jsc:+'
-
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream()) 
+def googleMapsAPIKey = properties.getProperty('secrets.googleMapsAPIKey')
 android {
     ndkVersion rootProject.ext.ndkVersion
 
@@ -81,6 +83,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        manifestPlaceholders = [googleMapsAPIKey: googleMapsAPIKey]
     }
     signingConfigs {
         debug {

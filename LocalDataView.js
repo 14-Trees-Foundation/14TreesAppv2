@@ -16,6 +16,7 @@ import { Dropdown } from './DropDown';
 import { Utils, commonStyles } from './Utils';
 import { useFocusEffect } from '@react-navigation/native';
 import { CustomButton } from './Components';
+import { CustomDropdown } from './CustomDropdown';
 
 
 
@@ -188,36 +189,36 @@ const LocalDataView = ({ navigation }) => {
         <View style={{ margin: 20 }}>
           <Text style={{ ...styles.text3, fontSize: 20 }}>Filters</Text>
           <View style={{ margin: 5 }}>
-            <Dropdown
+            <CustomDropdown
               items={uploadStatusList}
               label="Upload Status"
-              setSelectedItems={setSelectedUploadStatus}
-              selectedItem={selectedUploadStatus}
+              onSelectItem={setSelectedUploadStatus}
+              initItem={selectedUploadStatus}
             />
           </View>
 
           <View style={{ margin: 5 }}>
-            <Dropdown
+            <CustomDropdown
               items={saplingIdList}
               label="Sapling ID"
-              setSelectedItems={setSelectedSaplingId}
-              selectedItem={selectedSaplingId}
+              onSelectItem={setSelectedSaplingId}
+              initItem={selectedSaplingId}
             />
           </View>
           <View style={{ margin: 5 }}>
-            <Dropdown
+            <CustomDropdown
               items={treeTypeList}
               label={'Tree Type '}
-              setSelectedItems={setSelectedTreeType}
-              selectedItem={selectedTreeType}
+              onSelectItem={setSelectedTreeType}
+              initItem={selectedTreeType}
             />
           </View>
           <View style={{ margin: 5 }}>
-            <Dropdown
+            <CustomDropdown
               items={plotList}
               label={'Plot '}
-              setSelectedItems={setSelectedPlot}
-              selectedItem={selectedPlot}
+              onSelectItem={setSelectedPlot}
+              initItem={selectedPlot}
             />
           </View>
           <View style={{ margin: 20 }}>

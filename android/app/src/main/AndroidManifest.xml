@@ -17,8 +17,8 @@
       android:roundIcon="@mipmap/ic_launcher_round"
       android:allowBackup="false"
       android:theme="@style/AppTheme">
-      <!-- Hardik's Personal Maps API_KEY. TODO: replace by one issued for 14 trees -->
-      <!-- <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyCJ1SdrqY65jab89Trv64XoVsHiUOOF3LY" /> -->
+      <!-- API KEY from Chaitanya -->
+      <meta-data android:name="com.google.android.geo.API_KEY" android:value="${googleMapsAPIKey}" />
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"

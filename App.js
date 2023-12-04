@@ -17,8 +17,8 @@ import VerifyusersScreen from './VerifyUsers';
 import { checkMultiplePermissions } from './check_permissions';
 import { LocalDatabase } from './tree_db';
 import LoadingScreen from './LoadingScreen';
-
-
+import { enableLatestRenderer } from 'react-native-maps';
+enableLatestRenderer();
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
