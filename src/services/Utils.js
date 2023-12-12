@@ -239,6 +239,12 @@ export class Utils {
         }))
         return newTreesList;
     }
+    static getDisplayString = (index, capturetimestamp,length) => {
+        const indexString = `(${index + 1} of ${length})\n`;
+        const captureString = Strings.messages.CapturedAt + ' :\n' + Utils.getReadableDate(capturetimestamp);
+        const displayString = `${indexString} ${captureString}`;
+        return displayString;
+    }
     static getReadableDate(date) {//string arg
         const epochMilliseconds = Date.parse(date);
         if (isNaN(epochMilliseconds)) {

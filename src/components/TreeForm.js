@@ -1,44 +1,43 @@
-import { Utils, commonStyles } from "../services/Utils";
-import { useEffect,useState,useCallback } from 'react';
-import {KeyboardAvoidingView,Alert,Text,Image,View,ToastAndroid,ScrollView,TouchableOpacity,TextInput, Button, FlatList,StyleSheet} from 'react-native';
-import Geolocation from '@react-native-community/geolocation';
-import { CustomButton } from "./Components";
-import { CustomDropdown } from "./CustomDropdown";
+import { useCallback, useEffect, useState } from 'react';
+import { Alert, Button, FlatList, ScrollView, Text, TextInput, View } from 'react-native';
 import { Strings } from "../services/Strings";
+import { Utils, commonStyles } from "../services/Utils";
+import { CustomButton, ImageWithEditableRemark, ImageWithUneditableRemark } from "./Components";
 import { CoordinateSetter } from "./CoordinateSetter";
+import { CustomDropdown } from "./CustomDropdown";
 
 export const treeFormModes = {
-    addTree:0,
-    localEdit:1,
-    remoteEdit:2
+    addTree: 0,
+    localEdit: 1,
+    remoteEdit: 2
 }
 export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage, onDeleteImage }) => {
-    const {inSaplingId,inLng,inLat,inImages,inTreeType,inPlot,inUserId} = treeData;
-    const [saplingid,setSaplingId] = useState(inSaplingId);
+    const { inSaplingId, inLng, inLat, inImages, inTreeType, inPlot, inUserId } = treeData;
+    const [saplingid, setSaplingId] = useState(inSaplingId);
     // console.log('saplingid: ',inSaplingId);
     const [lat, setlat] = useState(inLat);
     const [lng, setlng] = useState(inLng);
     // array of images
-    const [exisitingImages,setExistingImages] = useState(inImages)
-    const [localSaplingIds,setLocalSaplingIds] = useState([])
+    const [exisitingImages, setExistingImages] = useState(inImages)
+    const [localSaplingIds, setLocalSaplingIds] = useState([])
     const [images, setImages] = useState([]);
     const [treeItems, setTreeItems] = useState([]);
     const [plotItems, setPlotItems] = useState([]);
-    const [mainScrollEnabled,setMainScrollEnabled] = useState(true);
+    const [mainScrollEnabled, setMainScrollEnabled] = useState(true);
     const [selectedTreeType, setSelectedTreeType] = useState(inTreeType);
     const [selectedPlot, setSelectedPlot] = useState(inPlot);
     const [userId, setUserId] = useState(inUserId);
     console.log('rendered treeform')
-    useEffect(()=>{
+    useEffect(() => {
         console.log(treeData.inSaplingId)
-        if(mode===treeFormModes.localEdit){
+        if (mode === treeFormModes.localEdit) {
             setExistingImages([]);
             setImages(treeData.inImages);
         }
-    },[treeData])
-    const handleDeleteExistingItem = async (name)=>{
-        const newSetImages = exisitingImages.filter((item)=>item.name!==name);
-        if(onDeleteImage){
+    }, [treeData])
+    const handleDeleteExistingItem = async (name) => {
+        const newSetImages = exisitingImages.filter((item) => item.name !== name);
+        if (onDeleteImage) {
             await onDeleteImage(name);
         }
         setExistingImages(newSetImages);
@@ -47,22 +46,22 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         const newImages = images.filter((item) => item.name !== name);
         setImages(newImages);
     };
-    const handleAddImage = async (image)=>{
-        if(onNewImage){
+    const handleAddImage = async (image) => {
+        if (onNewImage) {
             await onNewImage(image);
         }
         setImages([...images, image]);
     }
     const onSave = async () => {
-        if(localSaplingIds.includes(saplingid)){
-            Alert.alert(Strings.alertMessages.invalidSaplingId,Strings.labels.SaplingId+' '+saplingid+' '+Strings.alertMessages.alreadyExists);
+        if (localSaplingIds.includes(saplingid)) {
+            Alert.alert(Strings.alertMessages.invalidSaplingId, Strings.labels.SaplingId + ' ' + saplingid + ' ' + Strings.alertMessages.alreadyExists);
             return;
         }
         else if (saplingid === null || Object.keys(selectedTreeType).length === 0 || Object.keys(selectedPlot).length === 0) {
             Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
             return;
         }
-        else if (images.length+exisitingImages.length === 0) {
+        else if (images.length + exisitingImages.length === 0) {
             Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.NoImage);
             return;
         }
@@ -87,195 +86,109 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             }
         };
     }
-    const pickImage = async() => {
+    const pickImage = async () => {
         let newImage = await Utils.getImageFromCamera(true);
-        newImage = await Utils.formatImageForSapling(newImage,saplingid);
+        newImage = await Utils.formatImageForSapling(newImage, saplingid);
         await handleAddImage(newImage);
     };
-    const renderExistingImage = ({item,index})=>{
-        const indexString = `(${index+1} of ${exisitingImages.length+images.length})\n`
-        console.log(item.meta);
-        const captureString = Strings.messages.CapturedAt + ' :\n' + item.meta.capturetimestamp.split('T').join('\n');
-        const displayString = `${indexString} ${captureString}`
-        return (
-            <View style={{
-                marginHorizontal: 10,
-                marginVertical: 4,
-                borderWidth: 2,
-                borderColor: '#5DB075',
-                borderRadius: 10,
-                flexDirection: 'column',
-            }}>
-                <View style={{ margin: 5, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-                    <Image
-                        source={{ uri: `data:image/jpeg;base64,${item.data}` }}
-                        style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
-                    />
-                    <Text style={{ ...commonStyles.text3, textAlign: 'center' }}>{displayString}</Text>
-                    <TouchableOpacity onPress={() => Utils.confirmAction(()=>handleDeleteExistingItem(item.name),Strings.alertMessages.confirmDeleteImage)}>
-                        <Image
-                            source={require('../../assets/icondelete.png')} // Replace with your delete icon image
-                            style={{ width: 20, height: 20, marginLeft: 10 }} // Adjust the icon dimensions and margin
-                        />
-                    </TouchableOpacity>
-                </View>
-
-                <View style={{}}>
-                    <Text style={commonStyles.text4}>
-                        Remark: {item.meta.remark}
-                    </Text>
-                </View>
-            </View>
-        );
+    const changeImageRemarkTo = (text, name) => {
+        const newImages = images.map((image) => {
+            if (image.name === name) {
+                return {
+                    ...image,
+                    meta: {
+                        ...image.meta,
+                        remark: text,
+                    },
+                };
+            }
+            return image;
+        });
+        setImages(newImages);
     }
+    const renderImage = ({ item, index }) => {
+        const displayString = Utils.getDisplayString(index,
+            item.meta.capturetimestamp,
+            exisitingImages.length + images.length);
 
-    const renderImg = ({ item, index }) => {
-        const changeimgremark = (text) => {
-            const newImages = images.map((image) => {
-                if (image.name === item.name) {
-                    return {
-                        ...image,
-                        meta: {
-                            ...image.meta,
-                            remark: text,
-                        },
-                    };
-                }
-                return image;
-            });
-            setImages(newImages);
+        if (index < exisitingImages.length) {
+            //existing image, remark uneditable.
+            return <ImageWithUneditableRemark
+                    item={item}
+                    displayString={displayString}
+                    key={index}
+                    onDelete={(item) => {
+                        handleDeleteExistingItem(item.name);
+                    }} />;
         }
-        const indexString = `(${index+1} of ${exisitingImages.length+images.length})\n`
-        // console.log(item.meta);
-        const captureString = 'Captured at:\n' + Utils.getReadableDate(item.meta.capturetimestamp);
-        const displayString = `${indexString} ${captureString}`
-        return (
-            <View style={{
-                marginHorizontal: 10,
-                marginVertical: 4,
-                borderWidth: 2,
-                borderColor: '#5DB075',
-                borderRadius: 10,
-                flexDirection: 'column',
-            }}>
-                <View style={{ margin: 5, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-                    <Image
-                        source={{ uri: `data:image/jpeg;base64,${item.data}` }}
-                        style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
-                    />
-                    <Text style={{ ...commonStyles.text3, textAlign: 'center' }}>{displayString}</Text>
-                    <TouchableOpacity onPress={() => Utils.confirmAction(()=>handleDeleteItem(item.name),Strings.alertMessages.confirmDeleteImage)}>
-                        <Image
-                            source={require('../../assets/icondelete.png')} // Replace with your delete icon image
-                            style={{ width: 20, height: 20, marginLeft: 10 }} // Adjust the icon dimensions and margin
-                        />
-                    </TouchableOpacity>
-                </View>
-
-                <View style={{}}>
-                    {
-                        item.name.startsWith('http')?
-                        <Text style={commonStyles.text4}>
-                            Remark: {item.meta.remark}
-                        </Text>
-                        :<TextInput
-                        style={commonStyles.remark}
-                        placeholder={Strings.messages.enterRemark}
-                        placeholderTextColor={'#000000'}
-                        onChangeText={(text) => changeimgremark(text)}
-                        value={item.meta.remark}
-                    />
-                    }
-                </View>
-            </View>
-        );
+        //otherwise, remark is editable.
+        return <ImageWithEditableRemark
+                key={index}
+                item={item}
+                displayString={displayString}
+                onDelete={(item) => {
+                    handleDeleteItem(item.name)
+                }}
+                onChangeRemark={(text) => {
+                    changeImageRemarkTo(text, item.name);
+                }}
+            />;
     }
-    const commonRenderFunction = ({item,index})=>{
-        if(index<exisitingImages.length){
-            return renderExistingImage({item,index});
-        }
-        return renderImg({item,index});
-    }
-
     const loadDataCallback = useCallback(async () => {
         console.log('fetching data')
         try {
-            if(mode===treeFormModes.addTree){
+            if (mode === treeFormModes.addTree) {
                 let userId = await Utils.getUserId();
                 setUserId(userId);
             }
-            let {treeTypes,plots} = await Utils.getLocalTreeTypesAndPlots();
+            let { treeTypes, plots } = await Utils.getLocalTreeTypesAndPlots();
             setTreeItems(treeTypes);
             setPlotItems(plots);
             let saplingIds = await Utils.fetchSaplingIdsFromLocalDB();
-            saplingIds = saplingIds.map((saplingid)=>saplingid.name)
-            saplingIds = saplingIds.filter((id)=>(id!==inSaplingId));
+            saplingIds = saplingIds.map((saplingid) => saplingid.name)
+            saplingIds = saplingIds.filter((id) => (id !== inSaplingId));
             setLocalSaplingIds(saplingIds);
         } catch (error) {
             console.error(error);
         }
     }, []);
-
-    useEffect(()=>{
+    useEffect(() => {
         loadDataCallback();
     }, []);
-    const requestLocation = async () => {
-        console.log('requesting location');
-        // TODO: handler
-        Geolocation.getCurrentPosition(
-            (position) => {
-                setlat(position.coords.latitude);
-                setlng(position.coords.longitude);
-                console.log(lat);
-                console.log(lng);
-            },
-            (error) => {
-                Alert.alert('Error', 'Have you turned on the location (GPS) on your phone?');
-            },
-            { enableHighAccuracy: false, timeout: 2000 },
-        );
-
-    };
-    const getReadableLocation = (lat,lng)=>{
-        const latval = Math.round(lat*100)/100
-        const lngval = Math.round(lng*100)/100
-        return `${latval},${lngval}`
-    }
-
     return (
         <ScrollView style={{ backgroundColor: '#5DB075', height: '100%' }} scrollEnabled={mainScrollEnabled}>
             <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
                 {
                     [
-                            <View>
-                                <TextInput
+                        <View>
+                            <TextInput
                                 defaultValue={saplingid}
                                 style={commonStyles.txtInput}
                                 placeholder={Strings.labels.SaplingId}
                                 placeholderTextColor={'#000000'}
                                 onChangeText={(text) => { setSaplingId(text) }}
-                                // value={saplingid}
-                                />
-                                {
-                                    localSaplingIds.includes(saplingid)
-                                    &&
-                                    <Text style={{...commonStyles.text5,color:'red',fontWeight:'bold',padding:5}}>Sapling ID {saplingid} already exists locally.</Text>
-                                }
-                            </View>
-                            ,
-                        <View>
-                            <TextInput
-                            defaultValue={inSaplingId}
-                            style={commonStyles.txtInput}
-                            placeholder={Strings.labels.SaplingId}
-                            placeholderTextColor={'#000000'}
-                            onChangeText={(text) => { setSaplingId(text) }}
                             // value={saplingid}
                             />
                             {
                                 localSaplingIds.includes(saplingid)
                                 &&
-                                <Text style={{...commonStyles.text5,color:'red',fontWeight:'bold',padding:5}}>Sapling ID {saplingid} already exists locally.</Text>
+                                <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>Sapling ID {saplingid} already exists locally.</Text>
+                            }
+                        </View>
+                        ,
+                        <View>
+                            <TextInput
+                                defaultValue={inSaplingId}
+                                style={commonStyles.txtInput}
+                                placeholder={Strings.labels.SaplingId}
+                                placeholderTextColor={'#000000'}
+                                onChangeText={(text) => { setSaplingId(text) }}
+                            // value={saplingid}
+                            />
+                            {
+                                localSaplingIds.includes(saplingid)
+                                &&
+                                <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>Sapling ID {saplingid} already exists locally.</Text>
                             }
                         </View>,
                         <Text style={{ ...commonStyles.text4, textAlign: 'center' }}>
@@ -295,15 +208,14 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     label={Strings.labels.SelectPlot}
                     onSelectItem={setSelectedPlot}
                 />
-                {/* <Text style={styles.text2}> Add photos</Text> */}
                 <CoordinateSetter
-                    setInitLocation={mode===treeFormModes.addTree}
+                    setInitLocation={mode === treeFormModes.addTree}
                     inLat={inLat}
                     inLng={inLng}
                     onSetLat={setlat}
                     onSetLng={setlng}
                     setOuterScrollEnabled={setMainScrollEnabled}
-                    plotId={selectedPlot?selectedPlot.value:undefined}
+                    plotId={selectedPlot ? selectedPlot.value : undefined}
                 ></CoordinateSetter>
                 <View style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 15 }}>
                     <Button
@@ -312,13 +224,13 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                         color={'#5DB075'}
                     />
                 </View>
-                    <View style={{ margin: 2, borderColor: '#5DB075', borderRadius: 5, flexDirection: 'column', backgroundColor: 'white' }}>
-                        <FlatList
-                            scrollEnabled={false}
-                            data={[...exisitingImages, ...images]}
-                            renderItem={commonRenderFunction}
-                        />
-                    </View>
+                <View style={{ margin: 2, borderColor: '#5DB075', borderRadius: 5, flexDirection: 'column', backgroundColor: 'white' }}>
+                    <FlatList
+                        scrollEnabled={false}
+                        data={[...exisitingImages, ...images]}
+                        renderItem={renderImage}
+                    />
+                </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: 30, marginTop: 25, marginBottom: 10 }}>
                     {
                         (onCancel !== undefined)
@@ -333,5 +245,4 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             </View>
         </ScrollView>
     )
-
 }

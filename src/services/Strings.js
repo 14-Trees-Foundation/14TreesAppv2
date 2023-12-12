@@ -61,7 +61,7 @@ export class Strings{
             LoadingTrees:"Loading Trees...",
             SaplingNo:"Sapling ID",
             Type : "Type",
-            Plot : "Plot ID: ",
+            Plot : "Plot",
             Synced:"Synced",
             Local:"Local",
             NoImageFound:"No Image Found",
