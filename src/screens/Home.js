@@ -13,6 +13,7 @@ const HomeScreen = ({ navigation }) => {
 
   useEffect(() => {
     Utils.fetchAndStoreHelperData();
+    Utils.fetchAndStorePlotSaplings();
   }
   ,[]);
   

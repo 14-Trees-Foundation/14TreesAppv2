@@ -57,12 +57,12 @@ const LanguageModal = ({ navigation, langModalVisible, setLangModalVisible, onSe
                     }}>
                     {item.selected == true ? (
                       <Image
-                        source={require('../assets/selected.png')}
+                        source={require('../../assets/selected.png')}
                         style={[styles.icon, { tintColor: 'blue' }]}
                       />
                     ) : (
                       <Image
-                        source={require('../assets/non_selected.png')}
+                        source={require('../../assets/non_selected.png')}
                         style={styles.icon}
                       />
                     )}

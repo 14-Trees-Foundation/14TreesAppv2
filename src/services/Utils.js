@@ -1,43 +1,41 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Alert, ToastAndroid, StyleSheet, RootTagContext } from "react-native";
+import { launchCamera, } from 'react-native-image-picker';
+import { Alert, StyleSheet, ToastAndroid } from "react-native";
 import { DataService } from "./DataService";
 import { LocalDatabase } from "./tree_db";
-import { AppRegistry } from 'react-native';
-// import { name as appName } from '../app.json';
-import { Strings } from "./Strings";
 import RNRestart from 'react-native-restart';
-
-// Your app's root component
-import App from '../App'; // Replace with the actual path to your app's root component
+import { Strings } from "./Strings";
+import ImageResizer from "react-native-image-resizer";
+import RNFS from 'react-native-fs';
 const MIN_BATCH_SIZE = 5
 export class Utils {
     static localdb = new LocalDatabase();
-    static async getLocalTreeTypesAndPlots(){
+    static async getLocalTreeTypesAndPlots() {
         let treeTypes = await this.localdb.getAllTreeTypes();
         let plots = await this.localdb.getAllPlots();
-        return {treeTypes,plots};
+        return { treeTypes, plots };
     }
-    static async deleteTreeAndImages(saplingId){
+    static async deleteTreeAndImages(saplingId) {
         await this.localdb.deleteTreeImages(saplingId);
         await this.localdb.deleteTree(saplingId);
         return;
     }
-    static async fetchLocalTree(saplingId){
+    static async fetchLocalTree(saplingId) {
         const results = await this.localdb.getTreeBySaplingID(saplingId);
-        if(results.length>0){
+        if (results.length > 0) {
             return await this.formatLocalTreeToJSON(results[0]);
         }
         return null;
     }
-    static async saveTreeAndImagesToLocalDB(tree,images){
+    static async saveTreeAndImagesToLocalDB(tree, images) {
         await this.localdb.saveTree(tree, 0);
         for (let index = 0; index < images.length; index++) {
             const element = {
-            saplingid: tree.saplingid,
-            image: images[index].data,
-            imageid: images[index].name,
-            remark: images[index].meta.remark,
-            timestamp: images[index].meta.capturetimestamp,
+                saplingid: tree.saplingid,
+                image: images[index].data,
+                imageid: images[index].name,
+                remark: images[index].meta.remark,
+                timestamp: images[index].meta.capturetimestamp,
             };
             await this.localdb.saveTreeImages(element);
         }
@@ -47,14 +45,6 @@ export class Utils {
     }
     // Function to force reload the app
     static async reloadApp() {
-        // let rootTag = await Utils.getAppRootTag();
-        // console.log('app root tag:',(rootTag))
-        // // AppRegistry.unmountApplicationComponentAtRootTag(rootTag);
-        // // const response = AppRegistry.registerComponent(appName, () => App);
-        // // console.log(response,' from register')
-        // // rootTag = await Utils.getAppRootTag();
-        // console.log(rootTag, 'root tag post unmount');
-        // AppRegistry.runApplication(appName,{rootTag: rootTag}); 
         RNRestart.restart();
     }
     static async confirmAction(onConfirm, title = undefined, message = undefined) {
@@ -143,7 +133,7 @@ export class Utils {
             await Promise.all(jsondata.map(async (plot) => {
                 console.log(this)
                 await this.localdb.storePlotSaplings(plot.plot_id, plot.saplings);
-                console.log(plot.plot_id,'plot stored.')
+                console.log(plot.plot_id, 'plot stored.')
             }));
             console.log('data stored.')
             await AsyncStorage.setItem(Constants.hashForPlotSaplingsKey, newHash);
@@ -155,7 +145,7 @@ export class Utils {
         }
 
         //-----------------------------------------
-//Possibly, LDB set to null on app reload
+        //Possibly, LDB set to null on app reload
 
         // const jsonData = DummyData;
         // console.log("got the data")
@@ -176,30 +166,12 @@ export class Utils {
         await this.localdb.deletePlotSaplings();
     }
 
-    // just for testing purposes
-    // static async storeplotsaptest() {
-        // console.log('storing plot saplings', this.localdb);
-        // const jsonData = DummyData;
-        // console.log("got the data")
-        // const jsondata = jsonData['data'];
-
-        // console.log((jsondata ? (jsondata.length + 'is the data length') : 'jsondata null'))
-        // await Promise.all(jsondata.map(async (plot) => {
-        //     const { plot_id, saplings } = plot;
-        //     // console.log(plot_id);
-        //     // console.log(saplings);
-        //     await this.localdb.storePlotSaplings(plot_id, saplings);
-        //     // console.log('plot stored.')
-        // }));
-        // console.log('data stored.')
-    // }
-
     static async getPlotSaplings(plotId) {
-        console.log('getting plot saplings for ',plotId);
+        console.log('getting plot saplings for ', plotId);
         const saplings = await this.localdb.getSaplingsforPlot(plotId);
-        console.log(`# saplings : `,saplings.length);
-        if(saplings.length>0){
-            console.log('example: ',saplings[0]);
+        console.log(`# saplings : `, saplings.length);
+        if (saplings.length > 0) {
+            console.log('example: ', saplings[0]);
         }
         return saplings;
     }
@@ -262,33 +234,33 @@ export class Utils {
     }
     static async deleteSyncedTrees() {
         let newTreesList = await this.localdb.deleteSyncedTrees();
-        newTreesList = await Promise.all(newTreesList.map(async(tree)=>{
+        newTreesList = await Promise.all(newTreesList.map(async (tree) => {
             return await Utils.formatLocalTreeToJSON(tree);
         }))
         return newTreesList;
     }
-    static getReadableDate(date){//string arg
+    static getReadableDate(date) {//string arg
         const epochMilliseconds = Date.parse(date);
-        if(isNaN(epochMilliseconds)){
+        if (isNaN(epochMilliseconds)) {
             return date;
         }
         const dateObj = new Date(date);
         const dateStr = dateObj.toDateString().split(' ').slice(1).join(' ');//remove day
-        const timeStr = dateObj.toTimeString().split(':').slice(0,-1).join(':');//remove seconds
+        const timeStr = dateObj.toTimeString().split(':').slice(0, -1).join(':');//remove seconds
         return dateStr + ', ' + timeStr;
     }
-    static async getSyncCounts(){
+    static async getSyncCounts() {
         const pending = (await Utils.fetchTreesFromLocalDB(0)).length;
         const uploaded = (await Utils.fetchTreesFromLocalDB(1)).length;
-        return {pending,uploaded};
+        return { pending, uploaded };
     }
-    static async batchUpload(batch){
+    static async batchUpload(batch) {
         let failures = batch;
         try {
             let response = await DataService.uploadTrees(batch);
             if (response) {
-                failures = await Utils.setTreeSyncStatus(response,batch);
-                console.log('batch failures: ',failures);
+                failures = await Utils.setTreeSyncStatus(response, batch);
+                console.log('batch failures: ', failures);
             }
         }
         catch (error) {
@@ -296,29 +268,29 @@ export class Utils {
         }
         return failures;
     }
-    static async setLastSyncDateNow(){
+    static async setLastSyncDateNow() {
         const currentTime = new Date().toString();
         await AsyncStorage.setItem(Constants.syncDateKey, currentTime);
     }
-    static async getLastSyncDate(){
+    static async getLastSyncDate() {
         return await AsyncStorage.getItem(Constants.syncDateKey);
     }
-    static async upload(onProgress=undefined) {
+    static async upload(onProgress = undefined) {
         const final = await Utils.fetchTreesFromLocalDB(0);//not uploaded.
-        console.log('Attempting upload with total trees = ',final.length);
+        console.log('Attempting upload with total trees = ', final.length);
         const failures = [];
-        for(let i=0;i<final.length;i+=MIN_BATCH_SIZE){
-            const batchFailures = await Utils.batchUpload(final.slice(i,i+MIN_BATCH_SIZE));
+        for (let i = 0; i < final.length; i += MIN_BATCH_SIZE) {
+            const batchFailures = await Utils.batchUpload(final.slice(i, i + MIN_BATCH_SIZE));
             failures.push(...batchFailures);
-            if(onProgress){
-                onProgress(i/final.length);
+            if (onProgress) {
+                onProgress(i / final.length);
             }
         }
         await Utils.setLastSyncDateNow();
-        if(failures.length===0){
+        if (failures.length === 0) {
             Alert.alert(Strings.alertMessages.SyncSuccess, Strings.alertMessages.CheckLocalList);
         }
-        else{
+        else {
             Alert.alert(Strings.alertMessages.SyncFailure, Strings.alertMessages.ContactExpert);
         }
         return failures;
@@ -327,14 +299,14 @@ export class Utils {
     static adminId;
     static localdb;
     // static lang;
-    static async setTreeSyncStatus(statuses,batch) {
+    static async setTreeSyncStatus(statuses, batch) {
         const failures = [];
         for (let tree of batch) {
             const status = statuses[tree.sapling_id];
-            if(status && status.dataUploaded){
+            if (status && status.dataUploaded) {
                 await this.localdb.updateUpload(tree.sapling_id);
             }
-            else{
+            else {
                 failures.push(tree.sapling_id);
             }
         }
@@ -344,7 +316,7 @@ export class Utils {
 
     static async fetchTreesFromLocalDB(uploaded = undefined) {
         let res;
-        if (uploaded!==undefined) {
+        if (uploaded !== undefined) {
             res = await this.localdb.getTreesByUploadStatus(uploaded);
         }
         else {
@@ -435,13 +407,102 @@ export class Utils {
     static async getLastHash() {
         return await AsyncStorage.getItem(Constants.lastHashKey);
     }
+    static async getImageFromCamera(compressionRequired = false) {
+        const options = {
+            mediaType: 'photo',
+            includeBase64: true,
+            maxHeight: 200,
+            maxWidth: 200,
+        };
 
-    // Language related functions
+        const response = await launchCamera(options);
+        console.log('from launch camera: ', response)
+        if (response.didCancel) {
+            console.log('User cancelled image picker');
+        } else if (response.error) {
+            console.log('ImagePicker Error: ', response.error);
+        } else {
+            // const { fileSize } = response.assets[0];
+            // 
+            const timestamp = new Date().toISOString();
+            // only show time and not date
+            const filesz = response.assets[0].fileSize;
+            let base64Data = response.assets[0].base64;
+            let imagePath = response.assets[0].uri;
+            if(compressionRequired){
+                const compressedData = await Utils.compressImageAt(filesz, imagePath);
+                if(compressedData!==undefined){
+                    base64Data = compressedData;
+                }
+            }
+            const newImage = {
+                data: base64Data,
+                meta: {
+                    capturetimestamp: timestamp,
+                    remark: Strings.messages.defaultRemark,
+                }
+            };
+            return newImage;
+        }
+    }
+    static async formatImageForSapling(image,saplingid){
+        let newImage = {...image}
+        newImage.saplingid = saplingid;
+        const timestamp = newImage.meta.capturetimestamp;
+        const imageName = `${saplingid}_${timestamp}.jpg`;
+        newImage.name = imageName;
+        return newImage;
+    }
+    static async compressImageAt(filesz, imagePath) {
+        console.log("original file size: ", filesz);
+        let maxsz = 1024 * 10;
+        let base64Data;
+        if (filesz > maxsz) {
+            // let compressedQuality = -5.536/10000000*filesz*filesz + 0.0128*filesz + 100;
+            let compressedQuality = -0.00166 * filesz + 129.74;
+            // let compressedQuality = 93;
+            if (filesz < 17000) {
+                if (filesz < 14000) {
+                    compressedQuality = 98;
+                }
+                else if (filesz < 15500) {
+                    compressedQuality = 97;
+                }
+                else if (filesz < 17000) {
+                    compressedQuality = 96;
+                }
 
-    // display the string in currently set language
+            }
 
+            if (compressedQuality < (maxsz / filesz) * 100) {
+                compressedQuality = (maxsz / filesz) * 100;
 
+            }
+
+            // const compressedQuality = 75;
+            console.log("compressed quality: ", compressedQuality);
+            const resizedImage = await ImageResizer.createResizedImage(
+                imagePath,
+                200,
+                200,
+                'JPEG',
+                compressedQuality
+            );
+            const resizedImagePath = resizedImage.uri;
+            try {
+                base64Data = await RNFS.readFile(resizedImagePath, 'base64');
+            }
+            catch (error) {
+                // Handle any errors while reading the file
+                console.error('Error reading file:', error);
+            };
+            console.log("resized image: ", resizedImage.size);
+            console.log('off factor', maxsz / resizedImage.size);
+        }
+        return base64Data;
+    }
 }
+
 export class Constants {
     static userIdKey = 'userid';
     static userDetailsKey = 'userobj';
@@ -452,19 +513,19 @@ export class Constants {
     static syncDateKey = 'date';
     static treeFormTemplateData = { inSaplingId: null, inLat: 0, inLng: 0, inImages: [], inPlot: null, inTreeType: null, inUserId: '' }
     static selectedLangKey = 'LANG';
-    static logoImage(){
-        return require('../assets/logo.png');
+    static logoImage() {
+        return require('../../assets/logo.png');
     }
-    static placeholderImage(){
-        return require('../assets/placeholder.png');
+    static placeholderImage() {
+        return require('../../assets/placeholder.png');
     }
 }
-export const getImageSourceObject = (src)=>{
-    if(src.length===0){
+export const getImageSourceObject = (src) => {
+    if (src.length === 0) {
         return Constants.placeholderImage();
     }
-    else if(src.startsWith('http')){
-        return {uri:src}
+    else if (src.startsWith('http')) {
+        return { uri: src }
     }
     console.log('image src was unexpected.')
     return Constants.placeholderImage()
@@ -479,16 +540,16 @@ export const commonStyles = StyleSheet.create({
         alignContent: 'center',
         color: 'white',
         textAlign: 'center',
-        textAlignVertical:'center',
+        textAlignVertical: 'center',
         padding: 5,
         margin: 5
-      },
-      success: {
+    },
+    success: {
         backgroundColor: 'green',
-      },
-      danger: {
+    },
+    danger: {
         backgroundColor: 'red',
-      },
+    },
     iconBtn: {
         padding: 8,
         margin: 5,
@@ -498,8 +559,8 @@ export const commonStyles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
-    borderedDisplay:{
-        borderColor:'grey',borderWidth:3,borderRadius:5,margin:3,padding:3
+    borderedDisplay: {
+        borderColor: 'grey', borderWidth: 3, borderRadius: 5, margin: 3, padding: 3
     },
     defaultButtonStyle: {
         flexDirection: 'row',
@@ -597,12 +658,13 @@ export const commonStyles = StyleSheet.create({
         textAlign: 'left',
         padding: 5,
     },
-    text5:{
+    text5: {
         fontSize: 20,
         alignContent: 'center',
         justifyContent: 'center',
         alignSelf: 'center',
-        color: 'black' },
+        color: 'black'
+    },
     text3: {
         fontSize: 17,
         color: 'black',
@@ -612,8 +674,8 @@ export const commonStyles = StyleSheet.create({
         fontSize: 17,
         color: 'black',
         textAlign: 'left',
-        backgroundColor:'white',
-        borderRadius:3
+        backgroundColor: 'white',
+        borderRadius: 3
     },
     txtInput: {
         height: 60,

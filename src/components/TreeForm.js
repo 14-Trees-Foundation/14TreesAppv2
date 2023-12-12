@@ -2,13 +2,11 @@ import { Utils, commonStyles } from "../services/Utils";
 import { useEffect,useState,useCallback } from 'react';
 import {KeyboardAvoidingView,Alert,Text,Image,View,ToastAndroid,ScrollView,TouchableOpacity,TextInput, Button, FlatList,StyleSheet} from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
-import {launchCamera, } from 'react-native-image-picker';
 import { CustomButton } from "./Components";
 import { CustomDropdown } from "./CustomDropdown";
 import { Strings } from "../services/Strings";
 import { CoordinateSetter } from "./CoordinateSetter";
-import ImageResizer from "react-native-image-resizer";
-import RNFS from 'react-native-fs';
+
 export const treeFormModes = {
     addTree:0,
     localEdit:1,
@@ -89,99 +87,10 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             }
         };
     }
-    const pickImage = () => {
-        const options = {
-            mediaType: 'photo',
-            includeBase64: true,
-            maxHeight: 200,
-            maxWidth: 200,
-        };
-
-        
-
-        launchCamera(options, async (response) => {
-            console.log('from launch camera: ',response)
-
-            if (response.didCancel) {
-                console.log('User cancelled image picker');
-            } else if (response.error) {
-                console.log('ImagePicker Error: ', response.error);
-            } else {
-                // const { fileSize } = response.assets[0];
-                // 
-                const timestamp = new Date().toISOString();
-                const imageName = `${saplingid}_${timestamp}.jpg`;
-                // only show time and not date
-                const filesz = response.assets[0].fileSize;
-                var base64Data = response.assets[0].base64;
-
-                console.log("original file size: ", filesz);
-                let maxsz = 1024 * 10;
-                if(filesz>maxsz){
-                    // let compressedQuality = -5.536/10000000*filesz*filesz + 0.0128*filesz + 100;
-                    let compressedQuality = -0.00166*filesz + 129.74;
-                    // let compressedQuality = 93;
-                    if(filesz<17000)
-                    {
-                        if(filesz<14000)
-                        {
-                            compressedQuality = 98;
-                        }
-                        else if(filesz<15500){
-                            compressedQuality = 97;
-                        }
-                        else if(filesz<17000){
-                            compressedQuality = 96;
-                        }
-
-                    }
-                    
-                    if(compressedQuality<(maxsz/filesz)*100){
-                        compressedQuality = (maxsz/filesz)*100;
-
-                    }
-                    
-                    // const compressedQuality = 75;
-                    console.log("compressed quality: ", compressedQuality);
-                    const resizedImage = await ImageResizer.createResizedImage(
-                        response.assets[0].uri,
-                        200,
-                        200,
-                        'JPEG',
-                        compressedQuality,
-                    );
-                    const resizedImagePath = resizedImage.uri;
-                    
-                    RNFS.readFile(resizedImagePath, 'base64')
-                      .then((resizedbase64Data) => {
-                        // Handle the base64 data
-                        base64Data = resizedbase64Data;
-                        // console.log(base64Data);
-                      })
-                      .catch((error) => {
-                        // Handle any errors while reading the file
-                        console.error('Error reading file:', error);
-                      });
-                    
-                    console.log("resized image: ", resizedImage.size);
-                    console.log('off factor', maxsz/resizedImage.size);
-                }
-                   
-                // console.log("base64Data: ", base64Data);
-
-                 
-                const newImage = {
-                    saplingid: saplingid,
-                    data: base64Data,
-                    name: imageName,
-                    meta: {
-                        capturetimestamp: timestamp,
-                        remark: Strings.messages.defaultRemark,
-                    }
-                };
-                await handleAddImage(newImage);
-            }
-        });
+    const pickImage = async() => {
+        let newImage = await Utils.getImageFromCamera(true);
+        newImage = await Utils.formatImageForSapling(newImage,saplingid);
+        await handleAddImage(newImage);
     };
     const renderExistingImage = ({item,index})=>{
         const indexString = `(${index+1} of ${exisitingImages.length+images.length})\n`
@@ -205,7 +114,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     <Text style={{ ...commonStyles.text3, textAlign: 'center' }}>{displayString}</Text>
                     <TouchableOpacity onPress={() => Utils.confirmAction(()=>handleDeleteExistingItem(item.name),Strings.alertMessages.confirmDeleteImage)}>
                         <Image
-                            source={require('../assets/icondelete.png')} // Replace with your delete icon image
+                            source={require('../../assets/icondelete.png')} // Replace with your delete icon image
                             style={{ width: 20, height: 20, marginLeft: 10 }} // Adjust the icon dimensions and margin
                         />
                     </TouchableOpacity>
@@ -257,7 +166,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     <Text style={{ ...commonStyles.text3, textAlign: 'center' }}>{displayString}</Text>
                     <TouchableOpacity onPress={() => Utils.confirmAction(()=>handleDeleteItem(item.name),Strings.alertMessages.confirmDeleteImage)}>
                         <Image
-                            source={require('../assets/icondelete.png')} // Replace with your delete icon image
+                            source={require('../../assets/icondelete.png')} // Replace with your delete icon image
                             style={{ width: 20, height: 20, marginLeft: 10 }} // Adjust the icon dimensions and margin
                         />
                     </TouchableOpacity>

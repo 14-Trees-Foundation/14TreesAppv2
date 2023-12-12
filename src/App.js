@@ -99,8 +99,6 @@ const App = () => {
     await Utils.setDBConnection();//ensures ldb setup in Utils
     await Utils.createLocalTablesIfNeeded();
     if (loggedIn) {
-      Utils.fetchAndStoreHelperData();
-      Utils.fetchAndStorePlotSaplings();
       stackNavRef.current?.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
     }
     else{
@@ -120,11 +118,6 @@ const App = () => {
       BackHandler.removeEventListener('hardwareBackPress',backHandler);
     }
   }, []);
-
-  // check dynamically adminIdkey is stored in the async storage after login
-  //TODO: navigation image load in first time login.
-
-
   return (
     <NavigationContainer ref={stackNavRef}>
       <Stack.Navigator>
