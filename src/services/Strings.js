@@ -149,6 +149,8 @@ export class Strings{
             NoImage:"Please add atleast one image.",
             selectPlotFirst:"Select plot to view other trees.",
             confirmDeleteImage:"Delete image?",
+            refresh:"Refresh",
+            continueWithoutLocation:"Continue without GPS",
             //verify users
             UserVerified:"User Verified",
             //localdataview
@@ -173,7 +175,7 @@ export class Strings{
             FailedSaplingIds:"Failed to get sapling ids !",
         },
         "mr":{
-            GPSUnavailable:"त्रुटी: विनंतीची वेळ संपली. GPS सध्या उपलब्ध नाही.",
+            GPSUnavailable:"त्रुटी: विनंतीची वेळ संपली. जीपीएस सध्या उपलब्ध नाही.",
             gpsActionMessage:"स्थान सेवा आणि/किंवा मोबाइल डेटा चालू करा आणि अॅप रीस्टार्ट करा.",
             //login
             LoginFailed:"लॉग इन अयशस्वी",
@@ -207,6 +209,8 @@ export class Strings{
             NoImage:"कृपया किमान एक फोटो घ्या.",
             selectPlotFirst:"इतर झाडे पाहण्यासाठी प्लॉट निवडा.",
             confirmDeleteImage:"इमेज हटवायची??",
+            refresh:"ताजेतवाने",
+            continueWithoutLocation:"GPS शिवाय सुरू ठेवा",
             //verify users
             UserVerified:"वापरकर्ता सत्यापित केला गेला",
             

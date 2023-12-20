@@ -59,9 +59,10 @@ const requestLocation = async (onSetLat,onSetLng,setLat,setLng) => {
             console.log(error)
             if(error.code===error.TIMEOUT){
                 ToastAndroid.show(Strings.alertMessages.GPSUnavailable,ToastAndroid.LONG);
+                requestLocation(onSetLat, onSetLng, setLat, setLng);
             }
             else{
-                Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.LocationError);
+                locationNeededAlert(() => requestLocation(onSetLat, onSetLng, setLat, setLng));
             }
 
         },
@@ -100,7 +101,18 @@ export const pointToRegion = (lat,lng)=>({
     latitudeDelta:coordinateDelta,
     longitudeDelta:coordinateDelta
 });
+export const locationAvailabilityCheck = ()=>{
+    isLocationAllowed().then((available)=>{
+        if(available){
+            return true;
+        }
+        else{
+            return locationNeededAlert(()=>locationAvailabilityCheck());
+        }
+    });
+}
 export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,setInitLocation,setOuterScrollEnabled,plotId})=>{
+    
     const [lat,setLat] = useState(inLat);
     const [lng,setLng] = useState(inLng);
     const [markerMoving,setMarkerMoving]=useState(false);
@@ -114,11 +126,7 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,setInitLocation,
     const [visibleSaplingsRegion,setVisibleSaplingsRegion] = useState(null);
     const [visibleSaplings,setVisibleSaplings] = useState([]);
     useFocusEffect(useCallback(()=>{
-        isLocationAllowed().then((locationOn)=>{
-            if(!locationOn){
-                Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.LocationError);
-            }
-        });
+        locationAvailabilityCheck()
     },[isLocationAllowed]))
     useEffect(()=>{
         if(setInitLocation){
@@ -343,4 +351,21 @@ return <View style={{flexDirection:'column',padding:20}}>
         }
     </MapView>
 </View>
+}
+
+function locationNeededAlert(refreshCallback) {
+    Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.LocationError, [
+        {
+            text: Strings.alertMessages.refresh,
+            onPress: refreshCallback
+        },
+        {
+            text: Strings.alertMessages.continueWithoutLocation,
+            onPress: () => {
+                //dismiss
+            }
+        }
+    ], {
+        cancelable: false,
+    });
 }

@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Button, FlatList, ScrollView, Text, TextInput, View } from 'react-native';
 import { Strings } from "../services/Strings";
 import { Utils, commonStyles } from "../services/Utils";
 import { CustomButton, ImageWithEditableRemark, ImageWithUneditableRemark } from "./Components";
 import { CoordinateSetter } from "./CoordinateSetter";
 import { CustomDropdown } from "./CustomDropdown";
+import { useFocusEffect } from '@react-navigation/native';
 
 export const treeFormModes = {
     addTree: 0,
@@ -152,9 +153,9 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             console.error(error);
         }
     }, []);
-    useEffect(() => {
+    useFocusEffect(React.useCallback(() => {
         loadDataCallback();
-    }, []);
+    },[]));
     return (
         <ScrollView style={{ backgroundColor: '#5DB075', height: '100%' }} scrollEnabled={mainScrollEnabled}>
             <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
