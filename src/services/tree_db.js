@@ -4,6 +4,7 @@ import { Strings } from './Strings';
 const treeTableName = 'tree';
 const treetypeName = 'treetype';
 const plotName = 'plot';
+const logsTableName = 'cloudwatchlogs';
 const users = 'users';
 enablePromise(true);
 export class LocalDatabase {
@@ -21,9 +22,41 @@ export class LocalDatabase {
         const query = `drop table ${treeTableName}`;
         await this.db.executeSql(query);
     };
-
-    // add lat lng later !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+    storeLog = async(log)=>{
+        const query = `INSERT INTO ${logsTableName} (type,details) values (?,?);`
+        await this.db.executeSql(query,[log.type,log.details]);
+    }
+    deleteLogs = async(ids)=>{
+        const idstring = '('+ids.map(id=>id.toString()).join(',')+')';
+        const query = `DELETE FROM ${logsTableName} where localid in `+idstring+` ;`;
+        console.log(query);
+        await this.db.executeSql(query);
+    }
+    getAllLogs = async()=>{
+        const query = `SELECT * FROM ${logsTableName};`;
+        const logs = [];
+        try{
+            const results = await this.db.executeSql(query);
+            results.forEach(result => {
+                for (let index = 0; index < result.rows.length; index++) {
+                    logs.push(result.rows.item(index));
+                }
+            });
+        }
+        catch(e){
+            console.log(e);
+            console.log('Logs fetching error');
+        }
+        return logs;
+    }
+    createLogsTable = async ()=>{
+        const query = `CREATE TABLE IF NOT EXISTS ${logsTableName}(
+            localid INTEGER PRIMARY KEY AUTOINCREMENT,
+            type INTEGER NOT NULL,
+            details TEXT NOT NULL
+        );`;
+        await this.db.executeSql(query);
+    }
     createTreesTable = async () => {
         // create table if not exists
         const query = `CREATE TABLE IF NOT EXISTS ${treeTableName}(

@@ -10,6 +10,25 @@ import RNFS from 'react-native-fs';
 const MIN_BATCH_SIZE = 5
 export class Utils {
     static localdb = new LocalDatabase();
+    static async storeLog(type,details){
+        //store log locally.
+        const log = {
+            type:type,//integer
+            details:details//text
+        }
+        await this.localdb.storeLog(log);
+        if(await DataService.serverAvailable()){
+            const userId = await Utils.getUserId();
+            const logs = await this.localdb.getAllLogs();
+            const response = await DataService.sendLogs(userId,logs);
+            if(response.status===200){
+                //assume all logs done successfully.
+                await this.localdb.deleteLogs((logs).map((log)=>log.localid));
+            }
+        }
+    }
+    
+    
     static async getLocalTreeTypesAndPlots() {
         let treeTypes = await this.localdb.getAllTreeTypes();
         let plots = await this.localdb.getAllPlots();
@@ -71,6 +90,7 @@ export class Utils {
         await this.localdb.createPlotTbl();
         await this.localdb.createTreesTable();
         await this.localdb.createSaplingPlotTbl();
+        await this.localdb.createLogsTable();
 
     }
     static async fetchAndStoreHelperData() {
@@ -712,4 +732,10 @@ export const styleConfigs = {
         headerTitleStyle: commonStyles.headerTitleStyle,
         headerTintColor: commonStyles.headerTitleStyle.color
     }
+}
+export const LOGTYPES = {
+    INFO:0,//control flow details.
+    LOCAL_ERROR:1,//errors due to local functions.
+    API_ERROR:2,//errors in endpoints
+    OTHER_ERROR:3//other errors.
 }

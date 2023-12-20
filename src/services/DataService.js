@@ -77,10 +77,22 @@ export class DataService{
           adminID : adminID
       });
     }
-
-    
+    static async sendLogs(userId,logs){
+      const url = `${DataService.serverBase}/submitLogs`;
+      return await axios.post(url,{
+        userId:userId,
+        logs:logs
+      })
+    }
+    static async serverAvailable(){
+      const url = `${DataService.serverBase}/healthCheck`;
+      const response = await axios.get(url);
+      if(response){
+        return response.status===200;
+      }
+      return false;
+    }
     static async verifyUser(user_id,adminID){
-      console.log('verifying user')
         const url = `${DataService.serverBase}/verifyUser`;
         return await axios.post(url,{
             adminID: adminID,

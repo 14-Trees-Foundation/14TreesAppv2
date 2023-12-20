@@ -4,7 +4,7 @@ import { MyIconButton } from '../components/Components';
 import LanguageModal from '../components/Languagemodal';
 import { Strings } from '../services/Strings';
 import { SyncDisplay } from '../components/SyncDisplay';
-import { Utils } from '../services/Utils';
+import { LOGTYPES, Utils } from '../services/Utils';
 
 const HomeScreen = ({ navigation }) => {
   const [langModalVisible, setLangModalVisible] = useState(false);
@@ -31,7 +31,11 @@ const HomeScreen = ({ navigation }) => {
         <MyIconButton
           name={"cloud-download-alt"}
           text={Strings.buttonLabels.FetchHelperData}
-          onPress={Utils.fetchAndStoreHelperData}
+          // onPress={Utils.fetchAndStoreHelperData}
+          onPress={async()=>{
+            console.log('logging')
+            console.log(await Utils.storeLog(LOGTYPES.INFO,'test details'));
+          }}
         />
         <MyIconButton
           name={"map-marked-alt"}
