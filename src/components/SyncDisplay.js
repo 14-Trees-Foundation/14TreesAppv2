@@ -1,12 +1,10 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useState,useCallback } from 'react';
-import { Button, StyleSheet, Text, View, TouchableOpacity,FlatList } from 'react-native';
-import { Constants, Utils, commonStyles } from '../services/Utils';
-import { CustomButton, MyIconButton, MyIconStack } from './Components';
-import LanguageModal from './Languagemodal';
-import { Strings } from '../services/Strings';
-import * as Progress from 'react-native-progress';
 import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { FlatList, Text, View } from 'react-native';
+import * as Progress from 'react-native-progress';
+import { Strings } from '../services/Strings';
+import { Constants, Utils, commonStyles } from '../services/Utils';
+import { MyIconButton } from './Components';
 const updateSyncStatus = async (setSyncDate,setCounts) => {
     const lsdate = await Utils.getLastSyncDate();
     if (lsdate) {
@@ -43,7 +41,7 @@ export const SyncDisplay = ({onSyncComplete})=>{
         updateSyncStatus(setSyncDate,setTreeCounts);
         setTimeout(() => {
           setShowProgress(false);
-        }, 2000);
+        }, Constants.timeout1);
         if(onSyncComplete){
           onSyncComplete();
         }
@@ -74,7 +72,7 @@ export const SyncDisplay = ({onSyncComplete})=>{
       {
         showProgress &&
         <View style={{flexDirection:'row',justifyContent:'space-around',margin:5,alignItems:'center'}}>
-        <Text style={commonStyles.text5}>Progress: </Text>
+        <Text style={commonStyles.text5}>{Strings.messages.progress}: </Text>
         <Progress.Bar progress={progress} style={{height:6}} />
         <Text style={commonStyles.text5}>{getReadableProgress(progress)}</Text>
       </View>

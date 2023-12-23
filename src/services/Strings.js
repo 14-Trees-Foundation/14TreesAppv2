@@ -41,6 +41,11 @@ export class Strings{
             // home
             Never:"Never",
             LastSynced:"Last Synced: ",
+            LastFetched: "Last Fetched: ",
+            storing:"Storing...",
+            fetching:"Fetching...",
+            failed:"Failed",
+            progress:"Progress",
             pending:"Pending",
             synced:"Synced",
             LocalOrSynced:"Local Or Synced",

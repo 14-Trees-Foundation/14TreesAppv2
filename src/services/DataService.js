@@ -43,7 +43,7 @@ axios.interceptors.response.use(function (response) {
   return null;
 });
 export class DataService{
-    // static productionHostName = 'https://api.14trees.org';
+    static productionHostName = 'https://api.14trees.org';
     static hostName = 'https://vk061k4q-7000.inc1.devtunnels.ms';
     // static hostName = 'http://localhost:7000'
     static serverBase = `${this.hostName}/api/appv2`

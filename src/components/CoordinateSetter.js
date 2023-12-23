@@ -112,7 +112,7 @@ export const locationAvailabilityCheck = ()=>{
     });
 }
 export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,setInitLocation,setOuterScrollEnabled,plotId})=>{
-    
+    //TODO: combine lat,lng into one state, tmplat, tmplng too.
     const [lat,setLat] = useState(inLat);
     const [lng,setLng] = useState(inLng);
     const [markerMoving,setMarkerMoving]=useState(false);
@@ -125,6 +125,9 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,setInitLocation,
     const [plotSaplings,setPlotSaplings] = useState([]);
     const [visibleSaplingsRegion,setVisibleSaplingsRegion] = useState(null);
     const [visibleSaplings,setVisibleSaplings] = useState([]);
+    useFocusEffect(()=>{
+        console.log('useFocusEffect called')
+    })
     useFocusEffect(useCallback(()=>{
         locationAvailabilityCheck()
     },[isLocationAllowed]))
@@ -164,6 +167,7 @@ return <View style={{flexDirection:'column',padding:20}}>
         [
         <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-around'}}>
         <View style={{flexDirection:'column'}}>
+        <MyIconButton name={'refresh'} text={Strings.alertMessages.refresh} />
         <CoordinatesDisplay latitude={lat} longitude={lng} title={Strings.messages.Location}/>
         <CoordinatesDisplay {...userLocation} title={Strings.messages.userLocation}/>
         </View>
