@@ -7,7 +7,7 @@ import { Constants, Utils, commonStyles } from '../services/Utils';
 import { MyIconButton } from './Components';
 import { getReadableProgress } from './SyncDisplay';
 
-const onRequest = (setStatus,setProgress,setShowProgress,requestFunction,lastFetchedKey)=>{
+const onRequest = (setStatus,setProgress,setShowProgress,requestFunction,lastFetchedKey,setLastFetchedDate)=>{
     const preRequest = ()=>{
       setShowProgress(false);
       setStatus(Strings.messages.fetching);
@@ -30,6 +30,7 @@ const onRequest = (setStatus,setProgress,setShowProgress,requestFunction,lastFet
     const onComplete = async()=>{
       await Utils.setLastFetchedDateNowByKey(lastFetchedKey);
       const nowString = await Utils.getLastFetchedDateByKey(lastFetchedKey);
+      setLastFetchedDate(Utils.getReadableDate(nowString));
       const finalStatus = '';
       setStatus(finalStatus);
       setProgress(1);
@@ -59,7 +60,7 @@ export const FetchDataDisplay = ({lastFetchedKey,requestFunction,iconName,button
         })
     }, []));
     const actionFunction = ()=>{
-        onRequest(setStatus,setProgress,setShowProgress,requestFunction,lastFetchedKey);
+        onRequest(setStatus,setProgress,setShowProgress,requestFunction,lastFetchedKey,setLastFetchedDate);
     }
     useEffect(()=>{
         actionFunction();
