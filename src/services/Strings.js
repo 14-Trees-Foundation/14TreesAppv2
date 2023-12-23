@@ -41,6 +41,11 @@ export class Strings{
             // home
             Never:"Never",
             LastSynced:"Last Synced: ",
+            LastFetched: "Last Fetched: ",
+            storing:"Storing...",
+            fetching:"Fetching...",
+            failed:"Failed",
+            progress:"Progress",
             pending:"Pending",
             synced:"Synced",
             LocalOrSynced:"Local Or Synced",
@@ -50,7 +55,7 @@ export class Strings{
             Location:"Tree Location",   
             CapturedAt:"Captured At",
             userLocation:"User Location",
-            confirmSetGPS:"Set tree location current GPS coordinates?",
+            confirmSetGPS:"Set tree location to current GPS coordinates?",
             confirmCoordinateEdit:"Set tree location to given coordinates?",
             confirmDrag:"Set tree location to dragged coordinates?",
             enterRemark:"Enter Remark",
@@ -80,6 +85,10 @@ export class Strings{
             // home
             Never:"कधीच नाही",
             LastSynced:"शेवटचा सिंक केलेला डेटा : ",
+            LastFetched:"शेवटचे मिळवले",
+            storing:"साठवण...",
+            fetching:"आणत आहे...",
+            failed:"अयशस्वी",
             pending:"प्रलंबित",
             synced:"समक्रमित",
             LocalOrSynced:"स्थानिक किंवा समक्रमित",
@@ -133,6 +142,7 @@ export class Strings{
             plotSaplingsDataUpToDate:"Plot sapling data up-to-date",
             FailureSavingTrees:"Failed to save some tree types. See logs.",
             FailureSavingPlots:"Failed to save some plots. See logs.",
+            FailedToFetchData:"Failed to fetch data. Please check internet connection and press fetch button.",
             ConfirmActionTitle:"Are you sure?",
             ConfirmActionMsg:"Please confirm the action.",
             Yes:"Yes",
@@ -149,6 +159,8 @@ export class Strings{
             NoImage:"Please add atleast one image.",
             selectPlotFirst:"Select plot to view other trees.",
             confirmDeleteImage:"Delete image?",
+            refresh:"Refresh",
+            continueWithoutLocation:"Continue without GPS",
             //verify users
             UserVerified:"User Verified",
             //localdataview
@@ -173,7 +185,7 @@ export class Strings{
             FailedSaplingIds:"Failed to get sapling ids !",
         },
         "mr":{
-            GPSUnavailable:"त्रुटी: विनंतीची वेळ संपली. GPS सध्या उपलब्ध नाही.",
+            GPSUnavailable:"त्रुटी: विनंतीची वेळ संपली. जीपीएस सध्या उपलब्ध नाही.",
             gpsActionMessage:"स्थान सेवा आणि/किंवा मोबाइल डेटा चालू करा आणि अॅप रीस्टार्ट करा.",
             //login
             LoginFailed:"लॉग इन अयशस्वी",
@@ -191,6 +203,7 @@ export class Strings{
             plotSaplingsDataUpToDate:"प्लॉट रोपटी डेटा अद्ययावत.",
             FailureSavingTrees:"काही झाडाचे प्रकार सेव करण्यात असफल. लॉग पहा.",
             FailureSavingPlots:"काही प्लॉट सेव करण्यात असफल. लॉग पहा.",
+            FailedToFetchData:"डेटा आणण्यात अयशस्वी. कृपया इंटरनेट कनेक्शन तपासा आणि फेच बटण दाबा.",
             ConfirmActionTitle:"खात्री आहे का?",
             ConfirmActionMsg:"कृपया कृतीची पुष्टी करा.",
             Yes:"होय",
@@ -207,6 +220,8 @@ export class Strings{
             NoImage:"कृपया किमान एक फोटो घ्या.",
             selectPlotFirst:"इतर झाडे पाहण्यासाठी प्लॉट निवडा.",
             confirmDeleteImage:"इमेज हटवायची??",
+            refresh:"ताजेतवाने",
+            continueWithoutLocation:"GPS शिवाय सुरू ठेवा",
             //verify users
             UserVerified:"वापरकर्ता सत्यापित केला गेला",
             

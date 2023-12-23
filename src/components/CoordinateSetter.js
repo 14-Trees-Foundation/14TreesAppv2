@@ -20,61 +20,90 @@ const getReadableCoordinate = (lat)=>{
     const latval = Math.round(lat*10000)/10000
     return `${latval}`
 }
-const getReadableLocation = (lat,lng)=>{
-    const latval = Math.round(lat*1000)/1000
-    const lngval = Math.round(lng*1000)/1000
-    return `${latval}, ${lngval}`
-}
-const isLocationAllowed = async()=>{
+const getLocationUsingGeoLocation = async()=>{
     return new Promise((resolve,reject)=>{
         Geolocation.getCurrentPosition(
-            (_) => {
-                //location available, maps will use it to set tree location.
-                resolve(true);
+            (position) => {
+                //position available, maps will use it to set tree position.
+                resolve({
+                    latitude:position.coords.latitude,
+                    longitude:position.coords.longitude,
+                    accuracy:position.coords.accuracy
+                });
             },
             (error) => {
                 console.log(error)
                 if(error.code===error.TIMEOUT){
                     ToastAndroid.show(Strings.alertMessages.GPSUnavailable,ToastAndroid.LONG);
+                    reject({timeout:true});
+                    return;
                 }
                 else if(error.code === error.POSITION_UNAVAILABLE){
-                    resolve(false);
+                    reject({positionUnavailable:true});
+                    return;
                 }
-                resolve(true);//location turned on, but error anyways.
+                reject(error);
+                //location turned on, but error anyways.
             },
-            { enableHighAccuracy: false, timeout: 20000},
+            { enableHighAccuracy: false, timeout: 10000},
         );
     })
 }
-const requestLocation = async (onSetLat,onSetLng,setLat,setLng) => {
+const isLocationAllowed = async()=>{
+    let locationAllowed = true;
+    try{
+        await getLocationUsingGeoLocation();
+    }
+    catch(err){
+        console.log('err caught in ila: ',err)
+        if(err.positionUnavailable){
+            locationAllowed = false;
+        }
+    }
+    return locationAllowed;
+}
+const requestLocation = async (userLocation) => {
     // console.log('requesting location');
-    Geolocation.getCurrentPosition(
-        (position) => {
-            onSetLat(position.coords.latitude);
-            onSetLng(position.coords.longitude);
-            setLat(position.coords.latitude);
-            setLng(position.coords.longitude);
-        },
-        (error) => {
-            console.log(error)
-            if(error.code===error.TIMEOUT){
-                ToastAndroid.show(Strings.alertMessages.GPSUnavailable,ToastAndroid.LONG);
-            }
-            else{
-                Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.LocationError);
-            }
-
-        },
-        { enableHighAccuracy: false, timeout: 20000},
-    );
+    let position = {latitude:0,longitude:0}
+    let positionAvailable = await isLocationAllowed();
+    if(!positionAvailable){
+        locationNeededAlert(() => requestLocation(userLocation));
+        return null;//handle null return.
+    }
+    let geolocationPosition = {latitude:0,longitude:0,accuracy:Infinity}
+    let userLocationValid = userLocation.latitude+userLocation.longitude>0
+    
+    //positionAvailable
+    try{
+        geolocationPosition = await getLocationUsingGeoLocation();
+        position = {latitude:geolocationPosition.latitude,
+                    longitude:geolocationPosition.longitude}
+        if(userLocationValid && userLocation.accuracy < geolocationPosition.accuracy){
+            position = {latitude:userLocation.latitude,
+                        longitude:userLocation.longitude};
+        }
+        console.log('geo: ',geolocationPosition)
+        console.log('user: ',userLocation)
+    }
+    catch(err){
+        if(userLocationValid){
+            //user maps position. as good as geolocation.
+            position = {latitude:userLocation.latitude,longitude:userLocation.longitude};
+        }
+        else if(err.timeout){
+            //inform user:
+            ToastAndroid.show(Strings.alertMessages.GPSUnavailable,ToastAndroid.LONG);
+            //request location again.
+            return await requestLocation(userLocation);
+        }
+        else{
+            ToastAndroid.show(Strings.alertMessages.GPSUnavailable,ToastAndroid.LONG);
+            //cloudwatch
+        }
+    }
+    return position;
 
 };
-const useMapViewUserLocation = async(setLat,setLng,onSetLat,onSetLng,coords)=>{
-    onSetLat(coords.latitude);
-    onSetLng(coords.longitude);
-    setLat(coords.latitude);
-    setLng(coords.longitude);
-}
 export const CoordinatesDisplay = ({latitude,longitude,title})=>{
     return (
                 <View style={{...commonStyles.borderedDisplay,flexDirection:'column'}}>
@@ -94,37 +123,53 @@ export const CoordinatesDisplay = ({latitude,longitude,title})=>{
                 </View>
                 )
 }
-export const pointToRegion = (lat,lng)=>({
-    latitude:lat,
-    longitude:lng,
+export const pointToRegion = (location)=>({
+    ...location,
     latitudeDelta:coordinateDelta,
     longitudeDelta:coordinateDelta
 });
-export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,setInitLocation,setOuterScrollEnabled,plotId})=>{
-    const [lat,setLat] = useState(inLat);
-    const [lng,setLng] = useState(inLng);
-    const [markerMoving,setMarkerMoving]=useState(false);
-    const [userLocation,setUserLocation] = useState({latitude:0,longitude:0});
+export const locationAvailabilityCheck = ()=>{
+    isLocationAllowed().then((available)=>{
+        if(available){
+            return true;
+        }
+        else{
+            return locationNeededAlert(()=>locationAvailabilityCheck());
+        }
+    });
+}
+//TODO: consolidated formLocationSetterFunction, combining mapview user location and geolocationapi.
+export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,setInitLocation,setOuterScrollEnabled,plotId,sessionId})=>{
+    const [formLocation,setFormLocation] = useState({latitude:inLat,longitude:inLng});
+    const [userLocation,setUserLocation] = useState({latitude:0,longitude:0,accuracy:Infinity});
     const [markerLocation,setMarkerLocation] = useState({latitude:0,longitude:0})
-    const [tmplat,setTmpLat] = useState(inLat);
-    const [tmplng,setTmpLng] = useState(inLng);
+    const [tmpLocation,setTmpLocation] = useState({latitude:inLat,longitude:inLng});
+    const [markerMoving,setMarkerMoving]=useState(false);
     const [coordinatesMode,setCoordinatesMode] = useState(coordinateModes.fixed);
     const [showPlotSaplings,setShowPlotSaplings] = useState(false);
     const [plotSaplings,setPlotSaplings] = useState([]);
     const [visibleSaplingsRegion,setVisibleSaplingsRegion] = useState(null);
     const [visibleSaplings,setVisibleSaplings] = useState([]);
+
     useFocusEffect(useCallback(()=>{
-        isLocationAllowed().then((locationOn)=>{
-            if(!locationOn){
-                Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.LocationError);
-            }
-        });
+        locationAvailabilityCheck()
     },[isLocationAllowed]))
     useEffect(()=>{
-        if(setInitLocation){
-            if(lat+lng==0){
-                useMapViewUserLocation(setLat,setLng,onSetLat,onSetLng,userLocation)
-            }
+        //reset location values for each new session.
+        setUserLocation({latitude:0,longitude:0,accuracy:Infinity});
+        setMarkerLocation({latitude:0,longitude:0});
+        setFormLocation({latitude:inLat,longitude:inLat});
+        setTmpLocation({latitude:inLat,longitude:inLng});
+    },[sessionId])
+    useEffect(()=>{
+        if(setInitLocation && (formLocation.latitude+formLocation.longitude==0)){
+            requestLocation(userLocation).then((position)=>{
+                if(position!==null){
+                    setFormLocation(position);
+                    onSetLat(position.latitude);
+                    onSetLng(position.longitude);
+                }
+            });
         }
     },[userLocation])
     useEffect(()=>{
@@ -135,8 +180,8 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,setInitLocation,
         }
     },[plotId])
     useEffect(()=>{
-        setVisibleSaplingsRegion(pointToRegion(lat,lng));
-    },[lat,lng])
+        setVisibleSaplingsRegion(pointToRegion(formLocation));
+    },[formLocation])
     useEffect(()=>{
         if(showPlotSaplings){
             let saplingsToShow = plotSaplings.filter((sapling)=>{
@@ -156,34 +201,33 @@ return <View style={{flexDirection:'column',padding:20}}>
         [
         <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-around'}}>
         <View style={{flexDirection:'column'}}>
-        <CoordinatesDisplay latitude={lat} longitude={lng} title={Strings.messages.Location}/>
-        <CoordinatesDisplay {...userLocation} title={Strings.messages.userLocation}/>
+        {/* <MyIconButton name={'refresh'} text={Strings.alertMessages.refresh} /> */}
+        <CoordinatesDisplay latitude={formLocation.latitude} longitude={formLocation.longitude} title={Strings.messages.Location}/>
+        <CoordinatesDisplay latitude={userLocation.latitude} longitude={userLocation.longitude} title={Strings.messages.userLocation}/>
         </View>
     
         <View style={{flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
         <MyIconButton name={"crosshairs-gps"} text={Strings.buttonLabels.gps}
-        onPress={()=>Utils.confirmAction(()=>{
-            if(userLocation.latitude+userLocation.longitude>0){
-                useMapViewUserLocation(setLat,setLng,onSetLat,onSetLng,userLocation)
-            }
-            else{
-                requestLocation(onSetLat,onSetLng,setLat,setLng);
+        onPress={()=>Utils.confirmAction(async()=>{
+            let position = await requestLocation(userLocation);
+            if(position!==null){
+                setFormLocation(position);
+                onSetLat(position.latitude);
+                onSetLng(position.longitude);
             }
         }
             ,undefined,Strings.messages.confirmSetGPS)}/>
         <MyIconButton name={"edit"} text={Strings.buttonLabels.edit}
         onPress={()=>{
             setCoordinatesMode(coordinateModes.writeable);
-            setTmpLat(lat);
-            setTmpLng(lng);
+            setTmpLocation(formLocation);
             }}/>
         <MyIconButton name={"hand-rock"} text={Strings.buttonLabels.drag}
         onPress={()=>{
-            setMarkerLocation({latitude:lat,longitude:lng});
+            setMarkerLocation(formLocation);
             setCoordinatesMode(coordinateModes.draggable);
             setOuterScrollEnabled(false);
-            setTmpLat(lat);
-            setTmpLng(lng);
+            setTmpLocation(formLocation);
         }}/>
         <MyIconButton
             names={["forest",showPlotSaplings?"eye-slash":"eye"]}
@@ -215,8 +259,8 @@ return <View style={{flexDirection:'column',padding:20}}>
             style={{...commonStyles.remark,height:30}}
             placeholder="Lat"
             keyboardType="numeric"
-            onChangeText={(text)=>setTmpLat(safeParse(text,lat))}
-            defaultValue={(lat).toString()}
+            onChangeText={(text)=>setTmpLocation({...tmpLocation,latitude:safeParse(text,formLocation.latitude)})}
+            defaultValue={(formLocation.latitude).toString()}
             />
             </View>
             <View style={{flexDirection:'row',alignItems:'center'}}>
@@ -225,28 +269,26 @@ return <View style={{flexDirection:'column',padding:20}}>
             style={{...commonStyles.remark,margin:0,height:30}}
             placeholder="Long"
             keyboardType="numeric"
-            onChangeText={(text)=>setTmpLng(safeParse(text,lng))}
-            defaultValue={(lng).toString()}
+            onChangeText={(text)=>setTmpLocation({...tmpLocation,longitude:safeParse(text,formLocation.longitude)})}
+            defaultValue={(formLocation.longitude).toString()}
             />
             </View>
             </View>
-            <CoordinatesDisplay {...userLocation} title={Strings.messages.userLocation}/>
+            <CoordinatesDisplay latitude={userLocation.latitude} longitude={userLocation.longitude} title={Strings.messages.userLocation}/>
 
             </View>
             <View style={{flexDirection:'column'}}>
                 <SaveButton onPress={
                     ()=>Utils.confirmAction(()=>{
-                        onSetLat(tmplat);
-                        setLat(tmplat);
-                        onSetLng(tmplng);
-                        setLng(tmplng);
+                        onSetLat(tmpLocation.latitude);
+                        onSetLng(tmpLocation.longitude);
+                        setFormLocation(tmpLocation);
                         setCoordinatesMode(coordinateModes.fixed);
                     },undefined,Strings.messages.confirmCoordinateEdit)
                 }/>
                 <CancelButton onPress={()=>{
                     setCoordinatesMode(coordinateModes.fixed);
-                    setTmpLat(lat);
-                    setTmpLng(lng);
+                    setTmpLocation(formLocation);
                 }}/>
             </View>
         </View>
@@ -258,18 +300,17 @@ return <View style={{flexDirection:'column',padding:20}}>
                     ?
                     <CoordinatesDisplay {...markerLocation} title={Strings.messages.Location}/>
                     :
-                    <CoordinatesDisplay latitude={tmplat} longitude={tmplng} title={Strings.messages.Location}/>
+                    <CoordinatesDisplay latitude={tmpLocation.latitude} longitude={tmpLocation.longitude} title={Strings.messages.Location}/>
                 }
-                <CoordinatesDisplay {...userLocation} title={Strings.messages.userLocation}/>
+                <CoordinatesDisplay latitude={userLocation.latitude} longitude={userLocation.longitude} title={Strings.messages.userLocation}/>
             </View>
             
             <View style={{flexDirection:'column'}}>
                 <SaveButton
                 onPress={()=>Utils.confirmAction(()=>{
-                    onSetLat(tmplat);
-                    setLat(tmplat);
-                    onSetLng(tmplng);
-                    setLng(tmplng);
+                    onSetLat(tmpLocation.latitude);
+                    onSetLng(tmpLocation.longitude);
+                    setFormLocation(tmpLocation);
                     setCoordinatesMode(coordinateModes.fixed);
                     setOuterScrollEnabled(true);
                 },undefined,Strings.messages.confirmDrag)}
@@ -279,8 +320,7 @@ return <View style={{flexDirection:'column',padding:20}}>
                     ()=>{
                         setCoordinatesMode(coordinateModes.fixed);
                         setOuterScrollEnabled(true);
-                        setTmpLat(lat);
-                        setTmpLng(lng);
+                        setTmpLocation(formLocation);
                     }
                 }
                 />
@@ -290,7 +330,7 @@ return <View style={{flexDirection:'column',padding:20}}>
     }
     <MapView
     // cacheEnabled={true}
-    region={pointToRegion(lat,lng)}
+    region={pointToRegion(formLocation)}
     onRegionChangeComplete={(event)=>{
         setVisibleSaplingsRegion(event);
     }}
@@ -301,8 +341,7 @@ return <View style={{flexDirection:'column',padding:20}}>
     }}
     onMarkerDragEnd={(event)=>{
         let {latitude,longitude} = event.nativeEvent.coordinate;
-        setTmpLat(latitude);
-        setTmpLng(longitude);
+        setTmpLocation({latitude,longitude});
         setMarkerMoving(false);
     }}
     onMarkerDrag={(event)=>{
@@ -316,20 +355,20 @@ return <View style={{flexDirection:'column',padding:20}}>
     showsUserLocation={true}
     onUserLocationChange={(event)=>{
         let {latitude,longitude,accuracy} = event.nativeEvent.coordinate;
-        setUserLocation({latitude,longitude})
+        setUserLocation({latitude,longitude,accuracy})
     }}
     >
         {
             [
-                <Marker coordinate={{ latitude: lat, longitude: lng }}>
+                <Marker coordinate={formLocation}>
                     <MyIcon name={'tree'} />
                 </Marker>
                 ,
-                <Marker coordinate={{ latitude: tmplat, longitude: tmplng }}>
+                <Marker coordinate={tmpLocation}>
                     <MyIcon name={'tree'} />
                 </Marker>
                 ,
-                <Marker coordinate={{ latitude: tmplat, longitude: tmplng }} draggable={true}>
+                <Marker coordinate={tmpLocation} draggable={true}>
                     <MyIcon name={'tree'} />
                 </Marker>
             ][coordinatesMode]
@@ -343,4 +382,21 @@ return <View style={{flexDirection:'column',padding:20}}>
         }
     </MapView>
 </View>
+}
+
+function locationNeededAlert(refreshCallback) {
+    Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.LocationError, [
+        {
+            text: Strings.alertMessages.refresh,
+            onPress: refreshCallback
+        },
+        {
+            text: Strings.alertMessages.continueWithoutLocation,
+            onPress: () => {
+                //dismiss
+            }
+        }
+    ], {
+        cancelable: false,
+    });
 }

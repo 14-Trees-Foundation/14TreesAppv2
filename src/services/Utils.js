@@ -93,9 +93,10 @@ export class Utils {
         await this.localdb.createLogsTable();
 
     }
-    static async fetchAndStoreHelperData() {
+    static async fetchAndStoreHelperData(preRequest,onError,preStore,duringStore,onComplete) {
         console.log('fetching helper data');
         // console.log('ldb: ', this.localdb)
+        preRequest();
         let lastHash = await AsyncStorage.getItem(Constants.lastHashKey);
         lastHash = String(lastHash);//take care of null values.
         let userId = await Utils.getUserId();
@@ -103,40 +104,46 @@ export class Utils {
         //setStatus(requesting)
         const helperData = await DataService.fetchHelperData(userId, lastHash);
         if (!helperData) {
-            //setStatus(request failed)
+            onError();
             return;//error display, logging done by DataService.
         }
-        // setStatus(storing)
+        preStore();
+
         const data = helperData.data['data'];
         const newHash = helperData.data['hash'];
         if (newHash == lastHash) {
             ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
-            // setStatus(Data updated)
+            onComplete();
             return;
         }
         if (data) {
-            await Utils.storeTreeTypes(data['treeTypes']);
-            await Utils.storePlots(data['plots']);
+            await Utils.storeTreeTypes(data['treeTypes'],duringStore);
+            preStore();
+            await Utils.storePlots(data['plots'],duringStore);
             await AsyncStorage.setItem(Constants.lastHashKey, newHash);
             ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
-            // setstatus(data updated)
+            onComplete();
             return;
         }
-        // setstatus(failed)
+        onError();
     }
 
-    static async fetchAndStorePlotSaplings() {
+    static async fetchAndStorePlotSaplings(preRequest,onError,preStore,duringStore,onComplete) {
         // await AsyncStorage.setItem(Constants.hashForPlotSaplingsKey,'blah');
         // return;
+        console.log('pre request');
+        preRequest();
         let lastHash = await AsyncStorage.getItem(Constants.hashForPlotSaplingsKey);
         lastHash = String(lastHash);//take care of null values.
         let userId = await Utils.getUserId();
         console.log('requesting plot saps: ', userId, lastHash)
         const plotSaplingsData = await DataService.fetchPlotSaplings(userId, lastHash);
-
         if (!plotSaplingsData) {
+            onError();
+            //cloudwatch
             return;//error display, logging done by DataService.
         }
+        preStore();
         // console.log(plotSaplingsData.data)
         const newHash = plotSaplingsData.data['hash'];
         const jsondata = plotSaplingsData.data['data'];
@@ -146,40 +153,34 @@ export class Utils {
         if (newHash === lastHash) {
             console.log('hashes match, returning.')
             ToastAndroid.show(Strings.alertMessages.plotSaplingsDataUpToDate, ToastAndroid.LONG)
+            onComplete();
             return;
         }
         if (jsondata) {
             console.log('Storing Json data...')
-            await Promise.all(jsondata.map(async (plot) => {
-                console.log(this)
-                await this.localdb.storePlotSaplings(plot.plot_id, plot.saplings);
-                console.log(plot.plot_id, 'plot stored.')
-            }));
+            
+            await Utils.storePlotSaplingData(jsondata,duringStore);
             console.log('data stored.')
             await AsyncStorage.setItem(Constants.hashForPlotSaplingsKey, newHash);
             console.log('setting hash: ', newHash);
             ToastAndroid.show(Strings.alertMessages.plotSaplingsDataUpToDate, ToastAndroid.LONG)
+            onComplete();
+            return;
         }
-        else {
-            console.log('data was null.');
-        }
+        console.log('data was null.');
+        onError();
+    }
 
-        //-----------------------------------------
-        //Possibly, LDB set to null on app reload
-
-        // const jsonData = DummyData;
-        // console.log("got the data")
-        // const jsondata = jsonData['data'];
-
-        // console.log((jsondata ? (jsondata.length + 'is the data length') : 'jsondata null'))
-        // await Promise.all(jsondata.map(async (plot) => {
-        //     const { plot_id, saplings } = plot;
-        //     // console.log(plot_id);
-        //     // console.log(saplings);
-        //     await this.localdb.storePlotSaplings(plot_id, saplings);
-        //     // console.log('plot stored.')
-        // }));
-        // console.log('data stored.')
+    static async storePlotSaplingData(jsondata,duringStore) {
+        let plotIndex = 0;
+        let totalPlots = jsondata.length;
+        await Promise.all(jsondata.map(async (plot) => {
+            await this.localdb.storePlotSaplings(plot.plot_id, plot.saplings);
+            plotIndex+=1;
+            if(plotIndex % 5 == 0){
+                duringStore(plotIndex/totalPlots);
+            }
+        }));
     }
 
     static async deletePlotSaplings() {
@@ -197,7 +198,7 @@ export class Utils {
     }
 
 
-    static async storeTreeTypes(treeTypes) {
+    static async storeTreeTypes(treeTypes,duringStore) {
         // console.log(treeTypes[0])
         const treeTypesInLocalDBFormat = treeTypes.map((treeType) => {
             return {
@@ -206,9 +207,15 @@ export class Utils {
             }
         })
         let failure = false;
+        let treeIndex = 0;
+        let totalTrees = treeTypesInLocalDBFormat.length;
         for (let dbTreeType of treeTypesInLocalDBFormat) {
             try {
                 await this.localdb.updateTreeTypeTbl(dbTreeType);
+                treeIndex+=1;
+                if(treeIndex % 5 == 0){
+                    duringStore(treeIndex/totalTrees);
+                }
             }
             catch (err) {
                 console.log('Failed to save treeType: ', dbTreeType);
@@ -217,13 +224,14 @@ export class Utils {
             }
         }
         if (failure) {
+            //cloudwatch.
             ToastAndroid.show(Strings.alertMessages.FailureSavingTrees);
         }
         else {
             console.log('All tree types saved successfully.')
         }
     }
-    static async storePlots(plots) {
+    static async storePlots(plots,duringStore) {
         // console.log(plots[0])
         const plotsInLocalDBFormat = plots.map((plot) => {
             if (plot.name) {
@@ -234,10 +242,16 @@ export class Utils {
                 plot_id: plot.plot_id
             }
         })
+        let plotIndex = 0;
+        let totalPlots = plotsInLocalDBFormat.length;
         let failure = false;
         for (let dbPlot of plotsInLocalDBFormat) {
             try {
                 await this.localdb.updatePlotTbl(dbPlot);
+                plotIndex+=1;
+                if(plotIndex % 5 ==0){
+                    duringStore(plotIndex/totalPlots);
+                }
             }
             catch (err) {
                 console.log('Failed to save plot: ', dbPlot);
@@ -247,6 +261,7 @@ export class Utils {
         }
         if (failure) {
             ToastAndroid.show(Strings.alertMessages.FailureSavingPlots);
+            //cloudwatch
         }
         else {
             console.log('All plots saved successfully.')
@@ -295,11 +310,10 @@ export class Utils {
         return failures;
     }
     static async setLastSyncDateNow() {
-        const currentTime = new Date().toString();
-        await AsyncStorage.setItem(Constants.syncDateKey, currentTime);
+        await this.setLastFetchedDateNowByKey(Constants.syncDateKey);
     }
     static async getLastSyncDate() {
-        return await AsyncStorage.getItem(Constants.syncDateKey);
+        return await this.getLastFetchedDateByKey(Constants.syncDateKey);
     }
     static async upload(onProgress = undefined) {
         const final = await Utils.fetchTreesFromLocalDB(0);//not uploaded.
@@ -527,6 +541,25 @@ export class Utils {
         }
         return base64Data;
     }
+    static async getLastFetchedDateByKey(dateKey){
+        return await AsyncStorage.getItem(dateKey);
+    }
+    static async setLastFetchedDateNowByKey(dateKey){
+        let now = (new Date()).toString();
+        await AsyncStorage.setItem(dateKey,now);
+    }
+    static async getLastFetchedHelperData(){
+        return await this.getLastFetchedDateByKey(Constants.helperDataLastFetchedKey);
+    }
+    static async getLastFetchedPlotSaplingData(){
+        return await this.getLastFetchedDateByKey(Constants.plotSaplingDataLastFetchedKey);
+    }
+    static async setLastFetchedHelperDataNow(){
+        await this.setLastFetchedDateNowByKey(Constants.helperDataLastFetchedKey);
+    }
+    static async setLastFetchedPlotSaplingDataNow(){
+        await this.setLastFetchedDateNowByKey(Constants.plotSaplingDataLastFetchedKey);
+    }
 }
 
 export class Constants {
@@ -537,6 +570,8 @@ export class Constants {
     static hashForPlotSaplingsKey = 'hashForPlotSaplings';
     static appRootTagKey = 'rootTag';
     static syncDateKey = 'date';
+    static helperDataLastFetchedKey = 'helperDataLastFetched';
+    static plotSaplingDataLastFetchedKey = 'plotSaplingDataLastFetched';
     static treeFormTemplateData = { inSaplingId: null, inLat: 0, inLng: 0, inImages: [], inPlot: null, inTreeType: null, inUserId: '' }
     static selectedLangKey = 'LANG';
     static logoImage() {
@@ -545,6 +580,7 @@ export class Constants {
     static placeholderImage() {
         return require('../../assets/placeholder.png');
     }
+    static timeout1 = 2000
 }
 export const getImageSourceObject = (src) => {
     if (src.length === 0) {
