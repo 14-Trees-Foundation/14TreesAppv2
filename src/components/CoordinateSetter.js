@@ -20,61 +20,90 @@ const getReadableCoordinate = (lat)=>{
     const latval = Math.round(lat*10000)/10000
     return `${latval}`
 }
-const isLocationAllowed = async()=>{
+const getLocationUsingGeoLocation = async()=>{
     return new Promise((resolve,reject)=>{
         Geolocation.getCurrentPosition(
-            (_) => {
-                //location available, maps will use it to set tree location.
-                resolve(true);
+            (position) => {
+                //position available, maps will use it to set tree position.
+                resolve({
+                    latitude:position.coords.latitude,
+                    longitude:position.coords.longitude,
+                    accuracy:position.coords.accuracy
+                });
             },
             (error) => {
                 console.log(error)
                 if(error.code===error.TIMEOUT){
                     ToastAndroid.show(Strings.alertMessages.GPSUnavailable,ToastAndroid.LONG);
+                    reject({timeout:true});
+                    return;
                 }
                 else if(error.code === error.POSITION_UNAVAILABLE){
-                    resolve(false);
+                    reject({positionUnavailable:true});
+                    return;
                 }
-                resolve(true);//location turned on, but error anyways.
+                reject(error);
+                //location turned on, but error anyways.
             },
-            { enableHighAccuracy: false, timeout: 20000},
+            { enableHighAccuracy: false, timeout: 10000},
         );
     })
 }
-const requestLocation = async (onSetLat,onSetLng,setFormLocation) => {
+const isLocationAllowed = async()=>{
+    let locationAllowed = true;
+    try{
+        await getLocationUsingGeoLocation();
+    }
+    catch(err){
+        console.log('err caught in ila: ',err)
+        if(err.positionUnavailable){
+            locationAllowed = false;
+        }
+    }
+    return locationAllowed;
+}
+const requestLocation = async (userLocation) => {
     // console.log('requesting location');
-    Geolocation.getCurrentPosition(
-        (position) => {
-            onSetLat(position.coords.latitude);
-            onSetLng(position.coords.longitude);
-            setFormLocation({
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude
-            })
-        },
-        (error) => {
-            console.log(error)
-            if(error.code===error.TIMEOUT){
-                ToastAndroid.show(Strings.alertMessages.GPSUnavailable,ToastAndroid.LONG);
-                requestLocation(onSetLat, onSetLng, setFormLocation);
-            }
-            else{
-                locationNeededAlert(() => requestLocation(onSetLat, onSetLng,setFormLocation));
-            }
-
-        },
-        { enableHighAccuracy: false, timeout: 20000},
-    );
+    let position = {latitude:0,longitude:0}
+    let positionAvailable = await isLocationAllowed();
+    if(!positionAvailable){
+        locationNeededAlert(() => requestLocation(userLocation));
+        return null;//handle null return.
+    }
+    let geolocationPosition = {latitude:0,longitude:0,accuracy:Infinity}
+    let userLocationValid = userLocation.latitude+userLocation.longitude>0
+    
+    //positionAvailable
+    try{
+        geolocationPosition = await getLocationUsingGeoLocation();
+        position = {latitude:geolocationPosition.latitude,
+                    longitude:geolocationPosition.longitude}
+        if(userLocationValid && userLocation.accuracy < geolocationPosition.accuracy){
+            position = {latitude:userLocation.latitude,
+                        longitude:userLocation.longitude};
+        }
+        console.log('geo: ',geolocationPosition)
+        console.log('user: ',userLocation)
+    }
+    catch(err){
+        if(userLocationValid){
+            //user maps position. as good as geolocation.
+            position = {latitude:userLocation.latitude,longitude:userLocation.longitude};
+        }
+        else if(err.timeout){
+            //inform user:
+            ToastAndroid.show(Strings.alertMessages.GPSUnavailable,ToastAndroid.LONG);
+            //request location again.
+            return await requestLocation(userLocation);
+        }
+        else{
+            ToastAndroid.show(Strings.alertMessages.GPSUnavailable,ToastAndroid.LONG);
+            //cloudwatch
+        }
+    }
+    return position;
 
 };
-const useMapViewUserLocation = async(setFormLocation,onSetLat,onSetLng,coords)=>{
-    onSetLat(coords.latitude);
-    onSetLng(coords.longitude);
-    setFormLocation({
-        latitude:coords.latitude,
-        longitude:coords.longitude
-    })
-}
 export const CoordinatesDisplay = ({latitude,longitude,title})=>{
     return (
                 <View style={{...commonStyles.borderedDisplay,flexDirection:'column'}}>
@@ -112,7 +141,7 @@ export const locationAvailabilityCheck = ()=>{
 //TODO: consolidated formLocationSetterFunction, combining mapview user location and geolocationapi.
 export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,setInitLocation,setOuterScrollEnabled,plotId,sessionId})=>{
     const [formLocation,setFormLocation] = useState({latitude:inLat,longitude:inLng});
-    const [userLocation,setUserLocation] = useState({latitude:0,longitude:0});
+    const [userLocation,setUserLocation] = useState({latitude:0,longitude:0,accuracy:Infinity});
     const [markerLocation,setMarkerLocation] = useState({latitude:0,longitude:0})
     const [tmpLocation,setTmpLocation] = useState({latitude:inLat,longitude:inLng});
     const [markerMoving,setMarkerMoving]=useState(false);
@@ -127,16 +156,20 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,setInitLocation,
     },[isLocationAllowed]))
     useEffect(()=>{
         //reset location values for each new session.
-        setUserLocation({latitude:0,longitude:0});
+        setUserLocation({latitude:0,longitude:0,accuracy:Infinity});
         setMarkerLocation({latitude:0,longitude:0});
         setFormLocation({latitude:inLat,longitude:inLat});
         setTmpLocation({latitude:inLat,longitude:inLng});
     },[sessionId])
     useEffect(()=>{
-        if(setInitLocation){
-            if(formLocation.latitude+formLocation.longitude==0){
-                useMapViewUserLocation(setFormLocation,onSetLat,onSetLng,userLocation)
-            }
+        if(setInitLocation && (formLocation.latitude+formLocation.longitude==0)){
+            requestLocation(userLocation).then((position)=>{
+                if(position!==null){
+                    setFormLocation(position);
+                    onSetLat(position.latitude);
+                    onSetLng(position.longitude);
+                }
+            });
         }
     },[userLocation])
     useEffect(()=>{
@@ -170,17 +203,17 @@ return <View style={{flexDirection:'column',padding:20}}>
         <View style={{flexDirection:'column'}}>
         {/* <MyIconButton name={'refresh'} text={Strings.alertMessages.refresh} /> */}
         <CoordinatesDisplay latitude={formLocation.latitude} longitude={formLocation.longitude} title={Strings.messages.Location}/>
-        <CoordinatesDisplay {...userLocation} title={Strings.messages.userLocation}/>
+        <CoordinatesDisplay latitude={userLocation.latitude} longitude={userLocation.longitude} title={Strings.messages.userLocation}/>
         </View>
     
         <View style={{flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
         <MyIconButton name={"crosshairs-gps"} text={Strings.buttonLabels.gps}
-        onPress={()=>Utils.confirmAction(()=>{
-            if(userLocation.latitude+userLocation.longitude>0){
-                useMapViewUserLocation(setFormLocation,onSetLat,onSetLng,userLocation)
-            }
-            else{
-                requestLocation(onSetLat,onSetLng,setFormLocation);
+        onPress={()=>Utils.confirmAction(async()=>{
+            let position = await requestLocation(userLocation);
+            if(position!==null){
+                setFormLocation(position);
+                onSetLat(position.latitude);
+                onSetLng(position.longitude);
             }
         }
             ,undefined,Strings.messages.confirmSetGPS)}/>
@@ -241,7 +274,7 @@ return <View style={{flexDirection:'column',padding:20}}>
             />
             </View>
             </View>
-            <CoordinatesDisplay {...userLocation} title={Strings.messages.userLocation}/>
+            <CoordinatesDisplay latitude={userLocation.latitude} longitude={userLocation.longitude} title={Strings.messages.userLocation}/>
 
             </View>
             <View style={{flexDirection:'column'}}>
@@ -269,7 +302,7 @@ return <View style={{flexDirection:'column',padding:20}}>
                     :
                     <CoordinatesDisplay latitude={tmpLocation.latitude} longitude={tmpLocation.longitude} title={Strings.messages.Location}/>
                 }
-                <CoordinatesDisplay {...userLocation} title={Strings.messages.userLocation}/>
+                <CoordinatesDisplay latitude={userLocation.latitude} longitude={userLocation.longitude} title={Strings.messages.userLocation}/>
             </View>
             
             <View style={{flexDirection:'column'}}>
@@ -322,7 +355,7 @@ return <View style={{flexDirection:'column',padding:20}}>
     showsUserLocation={true}
     onUserLocationChange={(event)=>{
         let {latitude,longitude,accuracy} = event.nativeEvent.coordinate;
-        setUserLocation({latitude,longitude})
+        setUserLocation({latitude,longitude,accuracy})
     }}
     >
         {
