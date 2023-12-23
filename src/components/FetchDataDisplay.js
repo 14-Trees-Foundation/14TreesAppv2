@@ -1,22 +1,12 @@
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, FlatList, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, Text, View } from 'react-native';
 import * as Progress from 'react-native-progress';
 import { Strings } from '../services/Strings';
 import { Constants, Utils, commonStyles } from '../services/Utils';
 import { MyIconButton } from './Components';
-const updateSyncStatus = async (setSyncDate) => {
-    const lsdate = await Utils.getLastSyncDate();
-    if (lsdate) {
-      setSyncDate(Utils.getReadableDate(lsdate));
-    }
-    else {
-      setSyncDate(Strings.messages.Never);
-    }
-  }
-export const getReadableProgress = (progress)=>{
-  return Math.round(progress*100).toString()+'%';
-}
+import { getReadableProgress } from './SyncDisplay';
+
 const onRequest = (setStatus,setProgress,setShowProgress,requestFunction,lastFetchedKey)=>{
     const preRequest = ()=>{
       setShowProgress(false);

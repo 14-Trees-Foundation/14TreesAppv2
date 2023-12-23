@@ -20,11 +20,6 @@ const getReadableCoordinate = (lat)=>{
     const latval = Math.round(lat*10000)/10000
     return `${latval}`
 }
-const getReadableLocation = (lat,lng)=>{
-    const latval = Math.round(lat*1000)/1000
-    const lngval = Math.round(lng*1000)/1000
-    return `${latval}, ${lngval}`
-}
 const isLocationAllowed = async()=>{
     return new Promise((resolve,reject)=>{
         Geolocation.getCurrentPosition(
@@ -46,23 +41,25 @@ const isLocationAllowed = async()=>{
         );
     })
 }
-const requestLocation = async (onSetLat,onSetLng,setLat,setLng) => {
+const requestLocation = async (onSetLat,onSetLng,setFormLocation) => {
     // console.log('requesting location');
     Geolocation.getCurrentPosition(
         (position) => {
             onSetLat(position.coords.latitude);
             onSetLng(position.coords.longitude);
-            setLat(position.coords.latitude);
-            setLng(position.coords.longitude);
+            setFormLocation({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+            })
         },
         (error) => {
             console.log(error)
             if(error.code===error.TIMEOUT){
                 ToastAndroid.show(Strings.alertMessages.GPSUnavailable,ToastAndroid.LONG);
-                requestLocation(onSetLat, onSetLng, setLat, setLng);
+                requestLocation(onSetLat, onSetLng, setFormLocation);
             }
             else{
-                locationNeededAlert(() => requestLocation(onSetLat, onSetLng, setLat, setLng));
+                locationNeededAlert(() => requestLocation(onSetLat, onSetLng,setFormLocation));
             }
 
         },
@@ -70,11 +67,13 @@ const requestLocation = async (onSetLat,onSetLng,setLat,setLng) => {
     );
 
 };
-const useMapViewUserLocation = async(setLat,setLng,onSetLat,onSetLng,coords)=>{
+const useMapViewUserLocation = async(setFormLocation,onSetLat,onSetLng,coords)=>{
     onSetLat(coords.latitude);
     onSetLng(coords.longitude);
-    setLat(coords.latitude);
-    setLng(coords.longitude);
+    setFormLocation({
+        latitude:coords.latitude,
+        longitude:coords.longitude
+    })
 }
 export const CoordinatesDisplay = ({latitude,longitude,title})=>{
     return (
@@ -95,9 +94,8 @@ export const CoordinatesDisplay = ({latitude,longitude,title})=>{
                 </View>
                 )
 }
-export const pointToRegion = (lat,lng)=>({
-    latitude:lat,
-    longitude:lng,
+export const pointToRegion = (location)=>({
+    ...location,
     latitudeDelta:coordinateDelta,
     longitudeDelta:coordinateDelta
 });
@@ -111,30 +109,33 @@ export const locationAvailabilityCheck = ()=>{
         }
     });
 }
-export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,setInitLocation,setOuterScrollEnabled,plotId})=>{
-    //TODO: combine lat,lng into one state, tmplat, tmplng too.
-    const [lat,setLat] = useState(inLat);
-    const [lng,setLng] = useState(inLng);
-    const [markerMoving,setMarkerMoving]=useState(false);
+//TODO: consolidated formLocationSetterFunction, combining mapview user location and geolocationapi.
+export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,setInitLocation,setOuterScrollEnabled,plotId,sessionId})=>{
+    const [formLocation,setFormLocation] = useState({latitude:inLat,longitude:inLng});
     const [userLocation,setUserLocation] = useState({latitude:0,longitude:0});
     const [markerLocation,setMarkerLocation] = useState({latitude:0,longitude:0})
-    const [tmplat,setTmpLat] = useState(inLat);
-    const [tmplng,setTmpLng] = useState(inLng);
+    const [tmpLocation,setTmpLocation] = useState({latitude:inLat,longitude:inLng});
+    const [markerMoving,setMarkerMoving]=useState(false);
     const [coordinatesMode,setCoordinatesMode] = useState(coordinateModes.fixed);
     const [showPlotSaplings,setShowPlotSaplings] = useState(false);
     const [plotSaplings,setPlotSaplings] = useState([]);
     const [visibleSaplingsRegion,setVisibleSaplingsRegion] = useState(null);
     const [visibleSaplings,setVisibleSaplings] = useState([]);
-    useFocusEffect(()=>{
-        console.log('useFocusEffect called')
-    })
+
     useFocusEffect(useCallback(()=>{
         locationAvailabilityCheck()
     },[isLocationAllowed]))
     useEffect(()=>{
+        //reset location values for each new session.
+        setUserLocation({latitude:0,longitude:0});
+        setMarkerLocation({latitude:0,longitude:0});
+        setFormLocation({latitude:inLat,longitude:inLat});
+        setTmpLocation({latitude:inLat,longitude:inLng});
+    },[sessionId])
+    useEffect(()=>{
         if(setInitLocation){
-            if(lat+lng==0){
-                useMapViewUserLocation(setLat,setLng,onSetLat,onSetLng,userLocation)
+            if(formLocation.latitude+formLocation.longitude==0){
+                useMapViewUserLocation(setFormLocation,onSetLat,onSetLng,userLocation)
             }
         }
     },[userLocation])
@@ -146,8 +147,8 @@ export const CoordinateSetter = ({inLat,inLng,onSetLat,onSetLng,setInitLocation,
         }
     },[plotId])
     useEffect(()=>{
-        setVisibleSaplingsRegion(pointToRegion(lat,lng));
-    },[lat,lng])
+        setVisibleSaplingsRegion(pointToRegion(formLocation));
+    },[formLocation])
     useEffect(()=>{
         if(showPlotSaplings){
             let saplingsToShow = plotSaplings.filter((sapling)=>{
@@ -167,8 +168,8 @@ return <View style={{flexDirection:'column',padding:20}}>
         [
         <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-around'}}>
         <View style={{flexDirection:'column'}}>
-        <MyIconButton name={'refresh'} text={Strings.alertMessages.refresh} />
-        <CoordinatesDisplay latitude={lat} longitude={lng} title={Strings.messages.Location}/>
+        {/* <MyIconButton name={'refresh'} text={Strings.alertMessages.refresh} /> */}
+        <CoordinatesDisplay latitude={formLocation.latitude} longitude={formLocation.longitude} title={Strings.messages.Location}/>
         <CoordinatesDisplay {...userLocation} title={Strings.messages.userLocation}/>
         </View>
     
@@ -176,26 +177,24 @@ return <View style={{flexDirection:'column',padding:20}}>
         <MyIconButton name={"crosshairs-gps"} text={Strings.buttonLabels.gps}
         onPress={()=>Utils.confirmAction(()=>{
             if(userLocation.latitude+userLocation.longitude>0){
-                useMapViewUserLocation(setLat,setLng,onSetLat,onSetLng,userLocation)
+                useMapViewUserLocation(setFormLocation,onSetLat,onSetLng,userLocation)
             }
             else{
-                requestLocation(onSetLat,onSetLng,setLat,setLng);
+                requestLocation(onSetLat,onSetLng,setFormLocation);
             }
         }
             ,undefined,Strings.messages.confirmSetGPS)}/>
         <MyIconButton name={"edit"} text={Strings.buttonLabels.edit}
         onPress={()=>{
             setCoordinatesMode(coordinateModes.writeable);
-            setTmpLat(lat);
-            setTmpLng(lng);
+            setTmpLocation(formLocation);
             }}/>
         <MyIconButton name={"hand-rock"} text={Strings.buttonLabels.drag}
         onPress={()=>{
-            setMarkerLocation({latitude:lat,longitude:lng});
+            setMarkerLocation(formLocation);
             setCoordinatesMode(coordinateModes.draggable);
             setOuterScrollEnabled(false);
-            setTmpLat(lat);
-            setTmpLng(lng);
+            setTmpLocation(formLocation);
         }}/>
         <MyIconButton
             names={["forest",showPlotSaplings?"eye-slash":"eye"]}
@@ -227,8 +226,8 @@ return <View style={{flexDirection:'column',padding:20}}>
             style={{...commonStyles.remark,height:30}}
             placeholder="Lat"
             keyboardType="numeric"
-            onChangeText={(text)=>setTmpLat(safeParse(text,lat))}
-            defaultValue={(lat).toString()}
+            onChangeText={(text)=>setTmpLocation({...tmpLocation,latitude:safeParse(text,formLocation.latitude)})}
+            defaultValue={(formLocation.latitude).toString()}
             />
             </View>
             <View style={{flexDirection:'row',alignItems:'center'}}>
@@ -237,8 +236,8 @@ return <View style={{flexDirection:'column',padding:20}}>
             style={{...commonStyles.remark,margin:0,height:30}}
             placeholder="Long"
             keyboardType="numeric"
-            onChangeText={(text)=>setTmpLng(safeParse(text,lng))}
-            defaultValue={(lng).toString()}
+            onChangeText={(text)=>setTmpLocation({...tmpLocation,longitude:safeParse(text,formLocation.longitude)})}
+            defaultValue={(formLocation.longitude).toString()}
             />
             </View>
             </View>
@@ -248,17 +247,15 @@ return <View style={{flexDirection:'column',padding:20}}>
             <View style={{flexDirection:'column'}}>
                 <SaveButton onPress={
                     ()=>Utils.confirmAction(()=>{
-                        onSetLat(tmplat);
-                        setLat(tmplat);
-                        onSetLng(tmplng);
-                        setLng(tmplng);
+                        onSetLat(tmpLocation.latitude);
+                        onSetLng(tmpLocation.longitude);
+                        setFormLocation(tmpLocation);
                         setCoordinatesMode(coordinateModes.fixed);
                     },undefined,Strings.messages.confirmCoordinateEdit)
                 }/>
                 <CancelButton onPress={()=>{
                     setCoordinatesMode(coordinateModes.fixed);
-                    setTmpLat(lat);
-                    setTmpLng(lng);
+                    setTmpLocation(formLocation);
                 }}/>
             </View>
         </View>
@@ -270,7 +267,7 @@ return <View style={{flexDirection:'column',padding:20}}>
                     ?
                     <CoordinatesDisplay {...markerLocation} title={Strings.messages.Location}/>
                     :
-                    <CoordinatesDisplay latitude={tmplat} longitude={tmplng} title={Strings.messages.Location}/>
+                    <CoordinatesDisplay latitude={tmpLocation.latitude} longitude={tmpLocation.longitude} title={Strings.messages.Location}/>
                 }
                 <CoordinatesDisplay {...userLocation} title={Strings.messages.userLocation}/>
             </View>
@@ -278,10 +275,9 @@ return <View style={{flexDirection:'column',padding:20}}>
             <View style={{flexDirection:'column'}}>
                 <SaveButton
                 onPress={()=>Utils.confirmAction(()=>{
-                    onSetLat(tmplat);
-                    setLat(tmplat);
-                    onSetLng(tmplng);
-                    setLng(tmplng);
+                    onSetLat(tmpLocation.latitude);
+                    onSetLng(tmpLocation.longitude);
+                    setFormLocation(tmpLocation);
                     setCoordinatesMode(coordinateModes.fixed);
                     setOuterScrollEnabled(true);
                 },undefined,Strings.messages.confirmDrag)}
@@ -291,8 +287,7 @@ return <View style={{flexDirection:'column',padding:20}}>
                     ()=>{
                         setCoordinatesMode(coordinateModes.fixed);
                         setOuterScrollEnabled(true);
-                        setTmpLat(lat);
-                        setTmpLng(lng);
+                        setTmpLocation(formLocation);
                     }
                 }
                 />
@@ -302,7 +297,7 @@ return <View style={{flexDirection:'column',padding:20}}>
     }
     <MapView
     // cacheEnabled={true}
-    region={pointToRegion(lat,lng)}
+    region={pointToRegion(formLocation)}
     onRegionChangeComplete={(event)=>{
         setVisibleSaplingsRegion(event);
     }}
@@ -313,8 +308,7 @@ return <View style={{flexDirection:'column',padding:20}}>
     }}
     onMarkerDragEnd={(event)=>{
         let {latitude,longitude} = event.nativeEvent.coordinate;
-        setTmpLat(latitude);
-        setTmpLng(longitude);
+        setTmpLocation({latitude,longitude});
         setMarkerMoving(false);
     }}
     onMarkerDrag={(event)=>{
@@ -333,15 +327,15 @@ return <View style={{flexDirection:'column',padding:20}}>
     >
         {
             [
-                <Marker coordinate={{ latitude: lat, longitude: lng }}>
+                <Marker coordinate={formLocation}>
                     <MyIcon name={'tree'} />
                 </Marker>
                 ,
-                <Marker coordinate={{ latitude: tmplat, longitude: tmplng }}>
+                <Marker coordinate={tmpLocation}>
                     <MyIcon name={'tree'} />
                 </Marker>
                 ,
-                <Marker coordinate={{ latitude: tmplat, longitude: tmplng }} draggable={true}>
+                <Marker coordinate={tmpLocation} draggable={true}>
                     <MyIcon name={'tree'} />
                 </Marker>
             ][coordinatesMode]
