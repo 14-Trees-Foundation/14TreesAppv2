@@ -138,6 +138,7 @@ export class Strings{
             plotSaplingsDataUpToDate:"Plot sapling data up-to-date",
             FailureSavingTrees:"Failed to save some tree types. See logs.",
             FailureSavingPlots:"Failed to save some plots. See logs.",
+            FailedToFetchData:"Failed to fetch data. Please check internet connection and press fetch button.",
             ConfirmActionTitle:"Are you sure?",
             ConfirmActionMsg:"Please confirm the action.",
             Yes:"Yes",

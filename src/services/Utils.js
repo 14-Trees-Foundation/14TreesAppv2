@@ -108,18 +108,22 @@ export class Utils {
         onError();
     }
 
-    static async fetchAndStorePlotSaplings() {
+    static async fetchAndStorePlotSaplings(preRequest,onError,preStore,duringStore,onComplete) {
         // await AsyncStorage.setItem(Constants.hashForPlotSaplingsKey,'blah');
         // return;
+        console.log('pre request');
+        preRequest();
         let lastHash = await AsyncStorage.getItem(Constants.hashForPlotSaplingsKey);
         lastHash = String(lastHash);//take care of null values.
         let userId = await Utils.getUserId();
         console.log('requesting plot saps: ', userId, lastHash)
         const plotSaplingsData = await DataService.fetchPlotSaplings(userId, lastHash);
-
         if (!plotSaplingsData) {
+            onError();
+            //cloudwatch
             return;//error display, logging done by DataService.
         }
+        preStore();
         // console.log(plotSaplingsData.data)
         const newHash = plotSaplingsData.data['hash'];
         const jsondata = plotSaplingsData.data['data'];
@@ -129,40 +133,34 @@ export class Utils {
         if (newHash === lastHash) {
             console.log('hashes match, returning.')
             ToastAndroid.show(Strings.alertMessages.plotSaplingsDataUpToDate, ToastAndroid.LONG)
+            onComplete();
             return;
         }
         if (jsondata) {
             console.log('Storing Json data...')
-            await Promise.all(jsondata.map(async (plot) => {
-                console.log(this)
-                await this.localdb.storePlotSaplings(plot.plot_id, plot.saplings);
-                console.log(plot.plot_id, 'plot stored.')
-            }));
+            
+            await Utils.storePlotSaplingData(jsondata,duringStore);
             console.log('data stored.')
             await AsyncStorage.setItem(Constants.hashForPlotSaplingsKey, newHash);
             console.log('setting hash: ', newHash);
             ToastAndroid.show(Strings.alertMessages.plotSaplingsDataUpToDate, ToastAndroid.LONG)
+            onComplete();
+            return;
         }
-        else {
-            console.log('data was null.');
-        }
+        console.log('data was null.');
+        onError();
+    }
 
-        //-----------------------------------------
-        //Possibly, LDB set to null on app reload
-
-        // const jsonData = DummyData;
-        // console.log("got the data")
-        // const jsondata = jsonData['data'];
-
-        // console.log((jsondata ? (jsondata.length + 'is the data length') : 'jsondata null'))
-        // await Promise.all(jsondata.map(async (plot) => {
-        //     const { plot_id, saplings } = plot;
-        //     // console.log(plot_id);
-        //     // console.log(saplings);
-        //     await this.localdb.storePlotSaplings(plot_id, saplings);
-        //     // console.log('plot stored.')
-        // }));
-        // console.log('data stored.')
+    static async storePlotSaplingData(jsondata,duringStore) {
+        let plotIndex = 0;
+        let totalPlots = jsondata.length;
+        await Promise.all(jsondata.map(async (plot) => {
+            await this.localdb.storePlotSaplings(plot.plot_id, plot.saplings);
+            plotIndex+=1;
+            if(plotIndex % 5 == 0){
+                duringStore(plotIndex/totalPlots);
+            }
+        }));
     }
 
     static async deletePlotSaplings() {

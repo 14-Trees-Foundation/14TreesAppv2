@@ -9,39 +9,28 @@ import { FetchDataDisplay } from '../components/FetchDataDisplay';
 
 const HomeScreen = ({ navigation }) => {
   const [langModalVisible, setLangModalVisible] = useState(false);
-  
-  // call utils.fetchAndStoreHelperData() on first load
-
-  useEffect(() => {
-    // Utils.fetchAndStoreHelperData();
-    // Utils.fetchAndStorePlotSaplings();
-  }
-  ,[]);
-  // const onRequestPlotSaplingData = (setStatus,setProgress,setShowProgress)=>{
-  //   Utils.fetchAndStorePlotSaplings(setStatus,setProgress,setShowProgress);
-  // }
-
   return (
     <View >
       <SyncDisplay/>
+      <FetchDataDisplay
+        iconName={"cloud-download-alt"}
+        buttonText={Strings.buttonLabels.FetchHelperData}
+        requestFunction={Utils.fetchAndStoreHelperData}
+        lastFetchedKey={Constants.helperDataLastFetchedKey}
+      />
+      <FetchDataDisplay
+        iconName={"map-marked-alt"}
+        buttonText={Strings.buttonLabels.fetchPlotSaplingData}
+        requestFunction={Utils.fetchAndStorePlotSaplings}
+        lastFetchedKey={Constants.plotSaplingDataLastFetchedKey}
+      />
       <View style={{margin:10 }}>
-        <MyIconButton
+      <MyIconButton
           names={["plus","tree"]}
           styles={[{opacity:0.9},{opacity:0.5}]}
           text={Strings.buttonLabels.AddNewTree}
           onPress={() => navigation.navigate(Strings.screenNames.getString('AddTree',Strings.english))}
         />
-        <FetchDataDisplay
-          iconName={"cloud-download-alt"}
-          buttonText={Strings.buttonLabels.FetchHelperData}
-          requestFunction={Utils.fetchAndStoreHelperData}
-          lastFetchedKey={Constants.helperDataLastFetchedKey}
-        />
-        {/* <MyIconButton
-          name={"map-marked-alt"}
-          text={Strings.buttonLabels.fetchPlotSaplingData}
-          onPress={Utils.fetchAndStorePlotSaplings}
-        /> */}
       <MyIconButton
       name={"language"}
       text={Strings.buttonLabels.SelectLanguage}

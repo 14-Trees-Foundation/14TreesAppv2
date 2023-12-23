@@ -48,7 +48,7 @@ export const SyncDisplay = ({onSyncComplete})=>{
       });
     }
     return (
-    <View style={{ ...commonStyles.borderedDisplay,margin:20 }}>
+    <View style={{ ...commonStyles.borderedDisplay,marginHorizontal:20,marginTop:20}}>
     <Text style={commonStyles.text5}>
         {Strings.messages.LastSynced} {syncDate}
     </Text>

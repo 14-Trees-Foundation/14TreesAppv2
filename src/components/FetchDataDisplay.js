@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, Text, View } from 'react-native';
+import { Alert, FlatList, Text, View } from 'react-native';
 import * as Progress from 'react-native-progress';
 import { Strings } from '../services/Strings';
 import { Constants, Utils, commonStyles } from '../services/Utils';
@@ -24,6 +24,10 @@ const onRequest = (setStatus,setProgress,setShowProgress,requestFunction,lastFet
     }
     const onError = ()=>{
       setStatus(Strings.messages.failed);
+      Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.FailedToFetchData);
+      setTimeout(() => {
+        setStatus('');
+      }, Constants.timeout1);
     }
     const preStore = ()=>{
       setStatus(Strings.messages.storing);
@@ -36,7 +40,7 @@ const onRequest = (setStatus,setProgress,setShowProgress,requestFunction,lastFet
     const onComplete = async()=>{
       await Utils.setLastFetchedDateNowByKey(lastFetchedKey);
       const nowString = await Utils.getLastFetchedDateByKey(lastFetchedKey);
-      const finalStatus = Strings.messages.LastFetched+Utils.getReadableDate(nowString);
+      const finalStatus = '';
       setStatus(finalStatus);
       setProgress(1);
       setTimeout(() => {
@@ -46,7 +50,7 @@ const onRequest = (setStatus,setProgress,setShowProgress,requestFunction,lastFet
     requestFunction(preRequest,onError,preStore,duringStore,onComplete);
   }
 export const FetchDataDisplay = ({lastFetchedKey,requestFunction,iconName,buttonText})=>{
-    const [syncDate, setSyncDate] = useState('');
+    const [lastFetchedDate,setLastFetchedDate] = useState(null);
     const [progress,setProgress] = useState(0);
     const [showProgress,setShowProgress] = useState(false);
     const [status,setStatus] = useState('');
@@ -54,14 +58,14 @@ export const FetchDataDisplay = ({lastFetchedKey,requestFunction,iconName,button
         console.log('focusing...')
         setShowProgress(false);
         Utils.getLastFetchedDateByKey(lastFetchedKey).then((text)=>{
-            let status = Strings.messages.LastFetched;
+            let lastFetchedDateValue = '';
             if(text){
-                status +=Utils.getReadableDate(text);
+                lastFetchedDateValue +=Utils.getReadableDate(text);
             }
             else{
-                status +=Strings.messages.Never; 
+                lastFetchedDateValue +=Strings.messages.Never; 
             }
-            setStatus(status);
+            setLastFetchedDate(lastFetchedDateValue);
         })
     }, []));
     const actionFunction = ()=>{
@@ -71,15 +75,24 @@ export const FetchDataDisplay = ({lastFetchedKey,requestFunction,iconName,button
         actionFunction();
     },[])
     return (
-    <View style={{ ...commonStyles.borderedDisplay,margin:20 }}>
-    <Text style={commonStyles.text5}>
-        {status}
-    </Text>
+    <View style={{ ...commonStyles.borderedDisplay,marginHorizontal:20 }}>
     <MyIconButton
     name={iconName}
     text={buttonText}
     onPress={actionFunction}
     />
+    <Text style={commonStyles.text5}>
+      {Strings.messages.LastFetched + lastFetchedDate}
+    </Text>
+    {status.length>0 &&
+      <View style={{flexDirection:'row',justifyContent:'space-around'}}>
+        <Progress.CircleSnail
+        size={50} color={'blue'} thickness={5} duration={700} spinDuration={2000} />
+        <Text style={commonStyles.text5}>
+            {status}
+        </Text>
+      </View>
+    }
       {
         showProgress &&
         <View style={{flexDirection:'row',justifyContent:'space-around',margin:5,alignItems:'center'}}>
