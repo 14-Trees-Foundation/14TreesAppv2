@@ -11,19 +11,25 @@ const MIN_BATCH_SIZE = 5
 export class Utils {
     static localdb = new LocalDatabase();
     static async storeLog(type,details){
+        if(typeof details === "object"){
+            details = JSON.stringify(details);
+        }
         //store log locally.
         const log = {
             type:type,//integer
             details:details//text
         }
         await this.localdb.storeLog(log);
+        console.log('stored log: ',log);
         if(await DataService.serverAvailable()){
             const userId = await Utils.getUserId();
             const logs = await this.localdb.getAllLogs();
+            console.log('sending logs: ',logs,userId);
             const response = await DataService.sendLogs(userId,logs);
             if(response.status===200){
-                //assume all logs done successfully.
-                await this.localdb.deleteLogs((logs).map((log)=>log.localid));
+                //assumes all logs done successfully.
+                const localIds = (logs).map((log)=>log.localid);
+                await this.localdb.deleteLogs(localIds);
             }
         }
     }
@@ -773,5 +779,7 @@ export const LOGTYPES = {
     INFO:0,//control flow details.
     LOCAL_ERROR:1,//errors due to local functions.
     API_ERROR:2,//errors in endpoints
-    OTHER_ERROR:3//other errors.
+    OTHER_ERROR:3,//other errors.
+    GPS_ERROR:4,//gps related errors.
+    SERVERSIDE_ERROR:5,//used on the server side ONLY.
 }

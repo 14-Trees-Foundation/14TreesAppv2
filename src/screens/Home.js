@@ -4,8 +4,9 @@ import { MyIconButton } from '../components/Components';
 import LanguageModal from '../components/Languagemodal';
 import { Strings } from '../services/Strings';
 import { SyncDisplay } from '../components/SyncDisplay';
-import { Constants, Utils } from '../services/Utils';
+import { Constants, LOGTYPES, Utils } from '../services/Utils';
 import { FetchDataDisplay } from '../components/FetchDataDisplay';
+import { DataService } from '../services/DataService';
 
 const HomeScreen = ({ navigation }) => {
   const [langModalVisible, setLangModalVisible] = useState(false);
@@ -18,18 +19,21 @@ const HomeScreen = ({ navigation }) => {
         requestFunction={Utils.fetchAndStoreHelperData}
         lastFetchedKey={Constants.helperDataLastFetchedKey}
       />
-      <FetchDataDisplay
+      {/* Comment out the button below until we have "representative" saplings that are fetched instead of all the saplings. See notion/talk to Chaitanya about this. */}
+      {/* <FetchDataDisplay
         iconName={"map-marked-alt"}
         buttonText={Strings.buttonLabels.fetchPlotSaplingData}
         requestFunction={Utils.fetchAndStorePlotSaplings}
         lastFetchedKey={Constants.plotSaplingDataLastFetchedKey}
-      />
+      /> */}
       <View style={{margin:10 }}>
       <MyIconButton
           names={["plus","tree"]}
           styles={[{opacity:0.9},{opacity:0.5}]}
           text={Strings.buttonLabels.AddNewTree}
-          onPress={() => navigation.navigate(Strings.screenNames.getString('AddTree',Strings.english))}
+          onPress={
+            () => navigation.navigate(Strings.screenNames.getString('AddTree',Strings.english))
+          }
         />
       <MyIconButton
       name={"language"}

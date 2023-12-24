@@ -4,7 +4,7 @@ import { Text, View,Alert,ToastAndroid,TextInput } from "react-native";
 import { CancelButton, MyIcon, MyIconButton, SaveButton } from "./Components";
 import { useCallback, useEffect,useState } from "react";
 import { Strings } from "../services/Strings";
-import { Utils, commonStyles } from "../services/Utils";
+import { LOGTYPES, Utils, commonStyles } from "../services/Utils";
 import { useFocusEffect } from "@react-navigation/native";
 const coordinateDelta = 0.002;
 const coordinateModes = {
@@ -98,7 +98,10 @@ const requestLocation = async (userLocation) => {
         }
         else{
             ToastAndroid.show(Strings.alertMessages.GPSUnavailable,ToastAndroid.LONG);
-            //cloudwatch
+            //Test:
+            await Utils.storeLog(LOGTYPES.GPS_ERROR,{
+                error:err
+            })
         }
     }
     return position;
