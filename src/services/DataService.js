@@ -12,7 +12,9 @@ axios.interceptors.response.use(function (response) {
     const request = error.request;
     console.log(request)
     if(request.responseURL){
-      requestDescriptor = `${request._method} ${request.responseURL}.`
+      //path excludes domain
+      let path = request.responseURL.split('/').slice(3).join('/')
+      requestDescriptor = `${request._method} ${path}`
     }
     else if(request._response){
       requestDescriptor = `${request._response}.`

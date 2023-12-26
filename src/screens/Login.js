@@ -31,9 +31,11 @@ const LoginScreen = ({navigation}) =>{
       const response = await DataService.loginUser(userDataPayload);
       // check whether adminId field exist in the response
       // if exist, then store it in the async storage
-      console.log(response.data)
-      // console.log('status: ',response.status)
-      console.log(response.data.adminID)
+      if(response===null){
+        //failed login call.
+        //error toasts handled by interceptor.
+        return;
+      }
       if (response.data.adminID) {
         await AsyncStorage.setItem(Constants.adminIdKey, response.data.adminID);
         console.log('adminId stored');
@@ -62,20 +64,11 @@ const LoginScreen = ({navigation}) =>{
       // console.log(response.status);
       // console.log(response.data);
       // console.log(userObj._id);
-      switch (response.status) {
-        case 200:
-          console.log('Login successful');
-          navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
-          break;
-        case 400:
-          Alert.alert(Strings.alertMessages.LoginFailed, Strings.alertMessages.CheckPhoneNumber);
-          break;
-        default:
-          Alert.alert(Strings.alertMessages.LoginFailed,Strings.alertMessages.UnknownError);
-          break;
-      }
+      console.log('Login successful');
+      navigation.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
 
-    } catch (error) {
+      }
+     catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         // user cancelled the login flow
         Alert.alert(Strings.alertMessages.userCancelled)

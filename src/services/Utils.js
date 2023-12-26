@@ -29,6 +29,9 @@ export class Utils {
     static async syncLogs() {
         if (await DataService.serverAvailable()) {
             const userId = await Utils.getUserId();
+            if(userId===null ||userId==undefined || userId.length===0){
+                return;
+            }
             const logs = await this.localdb.getAllLogs();
             console.log('sending logs: ', logs, userId);
             const response = await DataService.sendLogs(userId, logs);
