@@ -42,6 +42,7 @@ const getLocationUsingGeoLocation = async()=>{
                     reject({positionUnavailable:true});
                     return;
                 }
+                Utils.storeLog(LOGTYPES.GPS_ERROR,JSON.stringify(error));
                 reject(error);
                 //location turned on, but error anyways.
             },
@@ -55,7 +56,6 @@ const isLocationAllowed = async()=>{
         await getLocationUsingGeoLocation();
     }
     catch(err){
-        console.log('err caught in ila: ',err)
         if(err.positionUnavailable){
             locationAllowed = false;
         }
@@ -98,10 +98,7 @@ const requestLocation = async (userLocation) => {
         }
         else{
             ToastAndroid.show(Strings.alertMessages.GPSUnavailable,ToastAndroid.LONG);
-            //Test:
-            await Utils.storeLog(LOGTYPES.GPS_ERROR,{
-                error:err
-            })
+            //logging handled by requestFunction.
         }
     }
     return position;

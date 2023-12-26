@@ -21,20 +21,25 @@ export class Utils {
         }
         await this.localdb.storeLog(log);
         console.log('stored log: ',log);
-        if(await DataService.serverAvailable()){
+        //asynchronous sync request:
+        Utils.syncLogs();
+    }
+    
+    
+    static async syncLogs() {
+        if (await DataService.serverAvailable()) {
             const userId = await Utils.getUserId();
             const logs = await this.localdb.getAllLogs();
-            console.log('sending logs: ',logs,userId);
-            const response = await DataService.sendLogs(userId,logs);
-            if(response.status===200){
+            console.log('sending logs: ', logs, userId);
+            const response = await DataService.sendLogs(userId, logs);
+            if (response.status === 200) {
                 //assumes all logs done successfully.
-                const localIds = (logs).map((log)=>log.localid);
+                const localIds = (logs).map((log) => log.localid);
                 await this.localdb.deleteLogs(localIds);
             }
         }
     }
-    
-    
+
     static async getLocalTreeTypesAndPlots() {
         let treeTypes = await this.localdb.getAllTreeTypes();
         let plots = await this.localdb.getAllPlots();
@@ -146,7 +151,7 @@ export class Utils {
         const plotSaplingsData = await DataService.fetchPlotSaplings(userId, lastHash);
         if (!plotSaplingsData) {
             onError();
-            //cloudwatch
+            //logging to server handled by interceptor in Dataservice.
             return;//error display, logging done by DataService.
         }
         preStore();
@@ -224,13 +229,14 @@ export class Utils {
                 }
             }
             catch (err) {
-                console.log('Failed to save treeType: ', dbTreeType);
+                let errorLog = `Failed to save treeType: ${JSON.stringify(dbTreeType)}.`;
+                await Utils.storeLog(LOGTYPES.LOCAL_ERROR,errorLog)
+                console.log(errorLog);
                 console.log(err)
                 failure = true;
             }
         }
         if (failure) {
-            //cloudwatch.
             ToastAndroid.show(Strings.alertMessages.FailureSavingTrees);
         }
         else {
@@ -260,14 +266,15 @@ export class Utils {
                 }
             }
             catch (err) {
-                console.log('Failed to save plot: ', dbPlot);
+                let errorLog = `Failed to save plot: ${JSON.stringify(dbPlot)}`
+                await Utils.storeLog(errorLog);
+                console.log(errorLog);
                 console.log(err)
                 failure = true;
             }
         }
         if (failure) {
             ToastAndroid.show(Strings.alertMessages.FailureSavingPlots);
-            //cloudwatch
         }
         else {
             console.log('All plots saved successfully.')

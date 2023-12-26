@@ -35,18 +35,12 @@ export class LocalDatabase {
     getAllLogs = async()=>{
         const query = `SELECT * FROM ${logsTableName};`;
         const logs = [];
-        try{
-            const results = await this.db.executeSql(query);
-            results.forEach(result => {
-                for (let index = 0; index < result.rows.length; index++) {
-                    logs.push(result.rows.item(index));
-                }
-            });
-        }
-        catch(e){
-            console.log(e);
-            console.log('Logs fetching error');
-        }
+        const results = await this.db.executeSql(query);
+        results.forEach(result => {
+            for (let index = 0; index < result.rows.length; index++) {
+                logs.push(result.rows.item(index));
+            }
+        });
         return logs;
     }
     createLogsTable = async ()=>{
