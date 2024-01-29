@@ -15,6 +15,8 @@ import { Constants, Utils, styleConfigs } from './services/Utils';
 import { checkMultiplePermissions } from './services/check_permissions';
 enableLatestRenderer();
 
+
+
 const Stack = createStackNavigator();
 async function requestPermissions() {
   //https://developer.android.com/training/data-storage/shared/media#storage-permission
@@ -49,8 +51,9 @@ async function requestPermissions() {
 }
 export const stackNavRef = createNavigationContainerRef();
 const App = () => {
-  const rootTag = useContext(RootTagContext);
-  console.log('app roottag: ',rootTag)
+  //Changes made by Namrata
+  // const rootTag = useContext(RootTagContext);
+  // console.log('app roottag: ',rootTag)
   
   AsyncStorage.setItem(Constants.appRootTagKey,rootTag.toString());
   const checkSignInStatus = async () => {
