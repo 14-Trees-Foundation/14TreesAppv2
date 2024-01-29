@@ -49,7 +49,9 @@ async function requestPermissions() {
 }
 export const stackNavRef = createNavigationContainerRef();
 const App = () => {
-  
+  //changes by manjur
+  // const rootTag = useContext(RootTagContext);
+  // console.log('app roottag: ',rootTag)
   
   AsyncStorage.setItem(Constants.appRootTagKey,rootTag.toString());
   const checkSignInStatus = async () => {
