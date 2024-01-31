@@ -54,10 +54,7 @@ export class DataService {
     const url = `${DataService.serverBase}/login`;
     console.log("url: ", url);
     console.log("userdata payload: ", userDataPayload);
-    let result = await axios.post(url, userDataPayload);
-    // result = JSON.parse(result);
-    //console.log("result: ", result);
-    return result;
+    return await axios.post(url, userDataPayload);
   }
 
   static async fetchHelperData(user_id, lasthash, onDownloadProgress = undefined) {

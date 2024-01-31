@@ -118,6 +118,7 @@ const App = () => {
   const backHandler = () => {
     return true;
   }
+  
   useEffect(() => {
     requestPermissions();
     initTasks();
@@ -126,6 +127,7 @@ const App = () => {
       BackHandler.removeEventListener('hardwareBackPress', backHandler);
     }
   }, []);
+
   return (
     <NavigationContainer ref={stackNavRef}>
       <Stack.Navigator>
