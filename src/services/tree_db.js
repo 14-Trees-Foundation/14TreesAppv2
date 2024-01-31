@@ -6,6 +6,7 @@ const treetypeName = 'treetype';
 const plotName = 'plot';
 const users = 'users';
 enablePromise(true);
+
 export class LocalDatabase {
     db = null;
     constructor() {
@@ -19,6 +20,7 @@ export class LocalDatabase {
     };
     deleteTable = async () => {
         const query = `drop table ${treeTableName}`;
+    
         await this.db.executeSql(query);
     };
 
@@ -66,14 +68,15 @@ export class LocalDatabase {
         } catch (error) {
             //TODO: remove raw throw. Convert to Alert.
             console.error(error);
-            Alert.alert(Strings.alertMessages.getString('FailedGetTreedata',Strings.english));
+            Alert.alert(Strings.alertMessages.getString('FailedGetTreedata', Strings.english));
         }
     }
-    getTreeBySaplingID = async(saplingId)=>{
+
+    getTreeBySaplingID = async (saplingId) => {
         const trees = [];
         const queryString = `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng, uploaded FROM ${treeTableName} WHERE sapling_id = ?`
         const results = await this.db.executeSql(
-            queryString,[saplingId]
+            queryString, [saplingId]
         );
         results.forEach(result => {
             for (let index = 0; index < result.rows.length; index++) {
@@ -82,6 +85,7 @@ export class LocalDatabase {
         });
         return trees;
     }
+
     getTreesByUploadStatus = async (uploaded) => {
         try {
             const trees = [];
@@ -97,15 +101,17 @@ export class LocalDatabase {
         } catch (error) {
             //TODO: remove raw throw. Convert to Alert.
             console.error(error);
-            Alert.alert(Strings.alertMessages.getString('FailedGetTreedata',Strings.english));
+            Alert.alert(Strings.alertMessages.getString('FailedGetTreedata', Strings.english));
         }
     };
-    deleteSyncedTrees = async()=>{
+
+    deleteSyncedTrees = async () => {
         const query = `DELETE FROM ${treeTableName} where uploaded = ?`;
         console.log(query);
-        await this.db.executeSql(query,[1]);
+        await this.db.executeSql(query, [1]);
         return await this.getAllTrees();
     }
+
     getTreeImages = async (saplingid) => {
         try {
             const treesimgs = [];
@@ -118,7 +124,7 @@ export class LocalDatabase {
                         name: result.rows.item(index).name,
                         data: result.rows.item(index).data,
                         meta: {
-                            remark: result.rows.item(index).remark.replace("''","'"),
+                            remark: result.rows.item(index).remark.replace("''", "'"),
                             capturetimestamp: result.rows.item(index).captureTimestamp,
                         },
                     };
@@ -128,7 +134,7 @@ export class LocalDatabase {
             return treesimgs;
         } catch (error) {
             console.error(error);
-            Alert.alert(Strings.alertMessages.getString('FailedGetTreeImages',Strings.english));
+            Alert.alert(Strings.alertMessages.getString('FailedGetTreeImages', Strings.english));
         }
     };
 
@@ -138,7 +144,7 @@ export class LocalDatabase {
             return res[0].rows.length;
         } catch (error) {
             console.error(error);
-            Alert.alert(Strings.alertMessages.getString('FailedGetTreeCount',Strings.english));
+            Alert.alert(Strings.alertMessages.getString('FailedGetTreeCount', Strings.english));
         }
     };
 
@@ -148,7 +154,7 @@ export class LocalDatabase {
             return res[0].rows.length;
         } catch (error) {
             console.error(error);
-            Alert.alert(Strings.alertMessages.getString('FailedSetFalse',Strings.english));
+            Alert.alert(Strings.alertMessages.getString('FailedSetFalse', Strings.english));
         }
     };
 
@@ -163,21 +169,23 @@ export class LocalDatabase {
     };
 
     // save tree images
-    deleteTree = async(saplingId)=>{
+    deleteTree = async (saplingId) => {
         const deleteQuery = `DELETE FROM ${treeTableName} where saplingid = ?`;
-        await this.db.executeSql(deleteQuery,[saplingId]);
+        await this.db.executeSql(deleteQuery, [saplingId]);
         return;
     }
-    deleteTreeImages = async (saplingId)=>{
+
+    deleteTreeImages = async (saplingId) => {
         const deleteQuery = `DELETE FROM sapling_images where saplingid = ?`;
-        await this.db.executeSql(deleteQuery,[saplingId]);
+        await this.db.executeSql(deleteQuery, [saplingId]);
         return;
     }
+
     saveTreeImages = async (treeimage) => {
 
         const insertQuery =
             `INSERT OR REPLACE INTO sapling_images(saplingid, image, imageid, remark, timestamp) values` +
-            `('${treeimage.saplingid}', '${treeimage.image}', '${treeimage.imageid}', '${treeimage.remark.replace("'","''")}', '${treeimage.timestamp}')`;
+            `('${treeimage.saplingid}', '${treeimage.image}', '${treeimage.imageid}', '${treeimage.remark.replace("'", "''")}', '${treeimage.timestamp}')`;
         console.log('image stored!')
         return this.db.executeSql(insertQuery);
     };
@@ -220,6 +228,7 @@ export class LocalDatabase {
             console.log(err)
         }
     }
+    
     getTreeTypesUsedByLocalTrees = async () => {
         const selectQuery = `SELECT * FROM ${treetypeName} WHERE value IN (SELECT treeid FROM ${treeTableName})`;
         const treeNames = [];
@@ -235,7 +244,7 @@ export class LocalDatabase {
         }
         catch (error) {
             console.error(error);
-            Alert.alert(Strings.alertMessages.getString('FailedGetTreeNames',Strings.english));
+            Alert.alert(Strings.alertMessages.getString('FailedGetTreeNames', Strings.english));
         }
 
     };
@@ -255,7 +264,7 @@ export class LocalDatabase {
         }
         catch (error) {
             console.error(error);
-            Alert.alert(Strings.alertMessages.getString('FailedGetPlotNames',Strings.english));
+            Alert.alert(Strings.alertMessages.getString('FailedGetPlotNames', Strings.english));
         }
 
     }
@@ -274,7 +283,7 @@ export class LocalDatabase {
             return saplings;
         } catch (error) {
             console.error(error);
-            Alert.alert(Strings.alertMessages.getString('FailedGetSaplingIds',Strings.english));
+            Alert.alert(Strings.alertMessages.getString('FailedGetSaplingIds', Strings.english));
             return [];
         }
     };
@@ -329,7 +338,7 @@ export class LocalDatabase {
     };
 
     // a table of sapling ids with their corresponding plot ids and lat,long
-    
+
 
 
     createSaplingPlotTbl = async () => {
@@ -340,7 +349,7 @@ export class LocalDatabase {
       lat FLOAT(10,7) NOT NULL,
       lng FLOAT(10,7) NOT NULL
     );`;
-            console.log('sapling plot table created')
+        console.log('sapling plot table created')
         await this.db.executeSql(query);
     }
 
@@ -368,21 +377,21 @@ export class LocalDatabase {
 
     storePlotSaplings = async (plot_id, saplings) => {
         let insertQuery =
-               `INSERT OR REPLACE INTO sapling_plot(plotid,saplingid ,lat, lng) VALUES` 
-       for (let i = 0; i < saplings.length; i++) {
+            `INSERT OR REPLACE INTO sapling_plot(plotid,saplingid ,lat, lng) VALUES`
+        for (let i = 0; i < saplings.length; i++) {
             const sapling = saplings[i];
             insertQuery = insertQuery + `('${plot_id}','${sapling[0]}','${sapling[1]}','${sapling[2]}')`;
             if (i != saplings.length - 1) {
                 insertQuery = insertQuery + ",";
-            }   
+            }
         }
         insertQuery = insertQuery + ";";
-            // console.log(insertQuery)
+        // console.log(insertQuery)
         await this.db.executeSql(insertQuery);
-       console.log('trees stored for plot id: ', plot_id)
+        console.log('trees stored for plot id: ', plot_id)
 
     }
-    
+
 
     deletePlotSaplings = async () => {
         const query = `DELETE FROM sapling_plot`;
@@ -415,7 +424,7 @@ export class LocalDatabase {
             `('${sapling_id}', '${plot_id}', '${latitude}', '${longitude}')`;
         return this.db.executeSql(insertQuery);
     }
-    
+
 
     createUsersTbl = async () => {
         // create table if not exists

@@ -1,20 +1,24 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { launchCamera, } from 'react-native-image-picker';
-import { Alert, StyleSheet, ToastAndroid } from "react-native";
+import { Alert, ToastAndroid } from "react-native";
 import { DataService } from "./DataService";
 import { LocalDatabase } from "./tree_db";
 import RNRestart from 'react-native-restart';
 import { Strings } from "./Strings";
 import ImageResizer from "react-native-image-resizer";
 import RNFS from 'react-native-fs';
+
 const MIN_BATCH_SIZE = 5
+
 export class Utils {
     static localdb = new LocalDatabase();
+
     static async getLocalTreeTypesAndPlots() {
         let treeTypes = await this.localdb.getAllTreeTypes();
         let plots = await this.localdb.getAllPlots();
         return { treeTypes, plots };
     }
+
     static async deleteTreeAndImages(saplingId) {
         await this.localdb.deleteTreeImages(saplingId);
         await this.localdb.deleteTree(saplingId);
@@ -27,6 +31,7 @@ export class Utils {
         }
         return null;
     }
+
     static async saveTreeAndImagesToLocalDB(tree, images) {
         await this.localdb.saveTree(tree, 0);
         for (let index = 0; index < images.length; index++) {
@@ -47,6 +52,7 @@ export class Utils {
     static async reloadApp() {
         RNRestart.restart();
     }
+
     static async confirmAction(onConfirm, title = undefined, message = undefined) {
         if (!title) {
             title = Strings.alertMessages.ConfirmActionTitle;
@@ -239,7 +245,8 @@ export class Utils {
         }))
         return newTreesList;
     }
-    static getDisplayString = (index, capturetimestamp,length) => {
+
+    static getDisplayString = (index, capturetimestamp, length) => {
         const indexString = `(${index + 1} of ${length})\n`;
         const captureString = Strings.messages.CapturedAt + ' :\n' + Utils.getReadableDate(capturetimestamp);
         const displayString = `${indexString} ${captureString}`;
@@ -301,6 +308,7 @@ export class Utils {
         }
         return failures;
     };
+
     static userId;
     static adminId;
     static localdb;
@@ -435,9 +443,9 @@ export class Utils {
             const filesz = response.assets[0].fileSize;
             let base64Data = response.assets[0].base64;
             let imagePath = response.assets[0].uri;
-            if(compressionRequired){
+            if (compressionRequired) {
                 const compressedData = await Utils.compressImageAt(filesz, imagePath);
-                if(compressedData!==undefined){
+                if (compressedData !== undefined) {
                     base64Data = compressedData;
                 }
             }
@@ -451,8 +459,8 @@ export class Utils {
             return newImage;
         }
     }
-    static async formatImageForSapling(image,saplingid){
-        let newImage = {...image}
+    static async formatImageForSapling(image, saplingid) {
+        let newImage = { ...image }
         newImage.saplingid = saplingid;
         const timestamp = newImage.meta.capturetimestamp;
         const imageName = `${saplingid}_${timestamp}.jpg`;
@@ -526,6 +534,7 @@ export class Constants {
         return require('../../assets/placeholder.png');
     }
 }
+
 export const getImageSourceObject = (src) => {
     if (src.length === 0) {
         return Constants.placeholderImage();
@@ -535,181 +544,4 @@ export const getImageSourceObject = (src) => {
     }
     console.log('image src was unexpected.')
     return Constants.placeholderImage()
-}
-
-export const commonStyles = StyleSheet.create({
-    label: {
-        borderWidth: 2,
-        borderColor: 'black',
-        borderRadius: 5,
-        fontSize: 15,
-        alignContent: 'center',
-        color: 'white',
-        textAlign: 'center',
-        textAlignVertical: 'center',
-        padding: 5,
-        margin: 5
-    },
-    success: {
-        backgroundColor: 'green',
-    },
-    danger: {
-        backgroundColor: 'red',
-    },
-    iconBtn: {
-        padding: 8,
-        margin: 5,
-        borderRadius: 5,
-        flexDirection: 'row',
-        backgroundColor: 'green',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    borderedDisplay: {
-        borderColor: 'grey', borderWidth: 3, borderRadius: 5, margin: 3, padding: 3
-    },
-    defaultButtonStyle: {
-        flexDirection: 'row',
-        alignContent: 'center',
-        alignItems: 'center',
-        fontSize: 40,
-        borderColor: 'gray',
-        borderWidth: 3,
-        backgroundColor: 'green',
-        margin: 5,
-        padding: 10,
-        borderRadius: 5,
-        shadowColor: 'black',
-        elevation: 3,
-        shadowOffset: {
-            width: 50,
-            height: 50
-        },
-        shadowOpacity: 1
-    },
-    defaultButtonTextStyle: {
-        color: 'white',
-        textAlign: 'center'
-    },
-    drawerHeader: {
-        backgroundColor: '#5DB075',
-    },
-    headerTitleStyle: {
-        color: 'white'
-    },
-    logOutButton: {
-        color: 'white',
-        bottom: 0
-    },
-    remark: {
-        height: 70,
-        borderWidth: 0.5,
-        borderColor: 'grey',
-        borderRadius: 10,
-        backgroundColor: '#f5f5f5',
-        margin: 5,
-        padding: 5,
-        color: 'black', // Change font color here
-        fontSize: 16,
-    },
-    btnview: {
-        justifyContent: 'center',
-        elevation: 3,
-        marginHorizontal: 20,
-        marginVertical: 10,
-    },
-    btn: {
-        paddingHorizontal: 20,
-        borderRadius: 9,
-        backgroundColor: '#1f3625',
-        alignItems: 'center',
-        paddingVertical: 12,
-        height: 50,
-    },
-    btndisabled: {
-        paddingHorizontal: 20,
-        borderRadius: 9,
-        backgroundColor: '#686868',
-        alignItems: 'center',
-        paddingVertical: 12,
-        height: 50,
-    },
-    text: {
-        fontSize: 14,
-        color: 'black',
-        textAlign: 'left',
-    },
-    text2: {
-        fontSize: 25,
-        color: 'white',
-        textAlign: 'center',
-        marginVertical: 5,
-        marginBottom: 40,
-    },
-    recordTxt: {
-        fontSize: 18,
-        color: '#1f3625',
-        marginTop: 5,
-        marginBottom: 5,
-        textAlign: 'center',
-    },
-    btntxt: {
-        fontSize: 18,
-        color: '#ffffff',
-        textAlign: 'center',
-    },
-    text4: {
-        fontSize: 17,
-        color: 'black',
-        textAlign: 'left',
-        padding: 5,
-    },
-    text5: {
-        fontSize: 20,
-        alignContent: 'center',
-        justifyContent: 'center',
-        alignSelf: 'center',
-        color: 'black'
-    },
-    text3: {
-        fontSize: 17,
-        color: 'black',
-        textAlign: 'left',
-    },
-    text6: {
-        fontSize: 17,
-        color: 'black',
-        textAlign: 'left',
-        backgroundColor: 'white',
-        borderRadius: 3
-    },
-    txtInput: {
-        height: 60,
-        width: 310,
-        borderWidth: 0.5,
-        borderColor: 'grey',
-        borderRadius: 10,
-        backgroundColor: '#f5f5f5',
-        marginTop: 10,
-        marginBottom: 10,
-        padding: 10,
-        color: 'black', // Change font color here
-        fontSize: 16,
-        fontWeight: 'bold',
-        alignItems: 'center',
-        justifyContent: 'center',
-        alignSelf: 'center',
-    },
-    headerText: {
-        fontSize: 30, color: 'white', textAlign: 'center', marginTop: 30, marginBottom: 30, fontFamily: 'cochin', fontWeight: 'bold', textShadowColor: 'rgba(0, 0, 0, 0.5)',
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 3,
-    }
-});
-export const styleConfigs = {
-    drawerHeaderOptions: {
-        headerStyle: commonStyles.drawerHeader,
-        headerTitleStyle: commonStyles.headerTitleStyle,
-        headerTintColor: commonStyles.headerTitleStyle.color
-    }
 }

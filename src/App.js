@@ -1,6 +1,4 @@
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useContext, useEffect, useState } from 'react';
@@ -11,8 +9,12 @@ import { DrawerNavigator } from './components/Components';
 import LoadingScreen from './screens/LoadingScreen';
 import LoginScreen from './screens/Login';
 import { Strings } from './services/Strings';
-import { Constants, Utils, styleConfigs } from './services/Utils';
+import { Constants, Utils } from './services/Utils';
 import { checkMultiplePermissions } from './services/check_permissions';
+import DeviceInfo from 'react-native-device-info';
+import { DataService } from './services/DataService';
+import { styleConfigs } from './services/Styles';
+
 enableLatestRenderer();
 
 const Stack = createStackNavigator();
@@ -25,6 +27,7 @@ async function requestPermissions() {
     PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
     PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
     PERMISSIONS.ANDROID.ACCESS_BACKGROUND_LOCATION,
+    PERMISSIONS.ANDROID.READ_PHONE_NUMBERS
   ];
   if (androidVersion < versionOfPermissionChange) {
     permissions.push(...[
@@ -39,6 +42,8 @@ async function requestPermissions() {
       PERMISSIONS.ANDROID.READ_MEDIA_AUDIO
     ])
   }
+  console.log("permission array: ", permissions);
+
   let res = await checkMultiplePermissions(permissions);
   if (!res) {
     Alert.alert(
@@ -49,30 +54,36 @@ async function requestPermissions() {
 }
 export const stackNavRef = createNavigationContainerRef();
 const App = () => {
-  const rootTag = useContext(RootTagContext);
-  console.log('app roottag: ',rootTag)
-  
-  AsyncStorage.setItem(Constants.appRootTagKey,rootTag.toString());
+
+
   const checkSignInStatus = async () => {
     try {
-      const isSignedIn = await GoogleSignin.isSignedIn();
-      if (isSignedIn) {
+
+      const phoneNumber = await DeviceInfo.getPhoneNumber();
+
+      console.log("phone no: ", phoneNumber);
+      
+      const userDataPayload = {
+        phone: phoneNumber,
+      }
+
+      const responseUI = await DataService.loginUser(userDataPayload);
+      const response = responseUI.data;
+      console.log("response data: ", response);
+
+      if (response.success) {
         // User is signed in, navigate to HomeScreen
-        const userId = await AsyncStorage.getItem(Constants.userIdKey);
-        const adminId = await AsyncStorage.getItem(Constants.adminIdKey);
-        let storedUserDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
-          if(storedUserDetails){
-            storedUserDetails = JSON.parse(storedUserDetails);
-          }
-        if (userId === null) {
-            GoogleSignin.signOut();
-            return false;
-        }
+        await AsyncStorage.setItem(Constants.userIdKey, response.user._id);
+        console.log('userId stored: ', response.user._id);
+        response.data = { ...response.user, image: '' }
+        console.log("response data: ", response.data);
+        await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
+        console.log('userDetails stored');
         return true;
       }
       else {
         // User is not signed in, navigate to LoginScreen
-        stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn',Strings.english));
+        stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
         return false;
       }
     } catch (error) {
@@ -80,69 +91,66 @@ const App = () => {
       return false;
     }
   };
+
   const initTasks = async () => {
-    
+
     let storedlang = await Strings.getLanguage();
-      console.log('stored lang: ', storedlang);
-      if (storedlang === null) {
-        Strings.setLanguage(Strings.english);
-      }
-      else {
-        Strings.setLanguage(storedlang);
-      }
-    // Alert.alert('going to call GoogleSignin configure.')
-    console.log('going to call GoogleSignin configure.')
-    GoogleSignin.configure();
-    // Alert.alert('GoogleSignin configure called.')
-    console.log('GoogleSignin configure called.')
+    console.log('stored lang: ', storedlang);
+    if (storedlang === null) {
+      Strings.setLanguage(Strings.english);
+    }
+    else {
+      Strings.setLanguage(storedlang);
+    }
+
     const loggedIn = await checkSignInStatus();
     await Utils.setDBConnection();//ensures ldb setup in Utils
     await Utils.createLocalTablesIfNeeded();
     if (loggedIn) {
-      stackNavRef.current?.navigate(Strings.screenNames.getString('DrawerScreen',Strings.english));
+      stackNavRef.current?.navigate(Strings.screenNames.getString('DrawerScreen', Strings.english));
     }
-    else{
-      stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn',Strings.english));
+    else {
+      stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
     }
   }
-//Code cleanup.
+  //Code cleanup.
 
-  const backHandler = ()=>{
+  const backHandler = () => {
     return true;
   }
   useEffect(() => {
-    initTasks();
-    BackHandler.addEventListener('hardwareBackPress',backHandler)//disables back button presses.
     requestPermissions();
-    return ()=>{
-      BackHandler.removeEventListener('hardwareBackPress',backHandler);
+    initTasks();
+    BackHandler.addEventListener('hardwareBackPress', backHandler)//disables back button presses.
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', backHandler);
     }
   }, []);
   return (
     <NavigationContainer ref={stackNavRef}>
       <Stack.Navigator>
         <Stack.Screen
-          name={Strings.screenNames.getString('startScreen',Strings.english)}
+          name={Strings.screenNames.getString('startScreen', Strings.english)}
           component={LoadingScreen}
-          options={{headerShown:false}}/>
+          options={{ headerShown: false }} />
         <Stack.Screen
-          name={Strings.screenNames.getString('LogIn',Strings.english)}
-           component={LoginScreen}
-           options={{
-            headerLeft:()=>null,
+          name={Strings.screenNames.getString('LogIn', Strings.english)}
+          component={LoginScreen}
+          options={{
+            headerLeft: () => null,
             ...styleConfigs.drawerHeaderOptions,
-            title:Strings.screenNames.LogIn
-            }} />
+            title: Strings.screenNames.LogIn
+          }} />
         <Stack.Screen
-          name={Strings.screenNames.getString('DrawerScreen',Strings.english)}
+          name={Strings.screenNames.getString('DrawerScreen', Strings.english)}
           component={DrawerNavigator}
           options={{
-            headerLeft:()=>null,
+            headerLeft: () => null,
             headerShown: false
-            }} />
+          }} />
       </Stack.Navigator>
     </NavigationContainer>
-    )
+  )
 };
 
 export default App;

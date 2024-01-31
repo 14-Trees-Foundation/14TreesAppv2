@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Button, FlatList, ScrollView, Text, TextInput, View } from 'react-native';
 import { Strings } from "../services/Strings";
-import { Utils, commonStyles } from "../services/Utils";
+import { Utils } from "../services/Utils";
 import { CustomButton, ImageWithEditableRemark, ImageWithUneditableRemark } from "./Components";
 import { CoordinateSetter } from "./CoordinateSetter";
 import { CustomDropdown } from "./CustomDropdown";
+import { commonStyles } from "../services/Styles";
 
 export const treeFormModes = {
     addTree: 0,
     localEdit: 1,
     remoteEdit: 2
 }
+
 export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage, onDeleteImage }) => {
     const { inSaplingId, inLng, inLat, inImages, inTreeType, inPlot, inUserId } = treeData;
     const [saplingid, setSaplingId] = useState(inSaplingId);
@@ -114,25 +116,25 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         if (index < exisitingImages.length) {
             //existing image, remark uneditable.
             return <ImageWithUneditableRemark
-                    item={item}
-                    displayString={displayString}
-                    key={index}
-                    onDelete={(item) => {
-                        handleDeleteExistingItem(item.name);
-                    }} />;
+                item={item}
+                displayString={displayString}
+                key={index}
+                onDelete={(item) => {
+                    handleDeleteExistingItem(item.name);
+                }} />;
         }
         //otherwise, remark is editable.
         return <ImageWithEditableRemark
-                key={index}
-                item={item}
-                displayString={displayString}
-                onDelete={(item) => {
-                    handleDeleteItem(item.name)
-                }}
-                onChangeRemark={(text) => {
-                    changeImageRemarkTo(text, item.name);
-                }}
-            />;
+            key={index}
+            item={item}
+            displayString={displayString}
+            onDelete={(item) => {
+                handleDeleteItem(item.name)
+            }}
+            onChangeRemark={(text) => {
+                changeImageRemarkTo(text, item.name);
+            }}
+        />;
     }
     const loadDataCallback = useCallback(async () => {
         console.log('fetching data')
