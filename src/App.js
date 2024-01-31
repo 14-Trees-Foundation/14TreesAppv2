@@ -54,7 +54,10 @@ async function requestPermissions() {
 }
 export const stackNavRef = createNavigationContainerRef();
 const App = () => {
+  const rootTag = useContext(RootTagContext);
+  console.log('app roottag: ', rootTag)
 
+  AsyncStorage.setItem(Constants.appRootTagKey, rootTag.toString());
 
   const checkSignInStatus = async () => {
     try {
@@ -62,7 +65,7 @@ const App = () => {
       const phoneNumber = await DeviceInfo.getPhoneNumber();
 
       console.log("phone no: ", phoneNumber);
-      
+
       const userDataPayload = {
         phone: phoneNumber,
       }
@@ -118,7 +121,7 @@ const App = () => {
   const backHandler = () => {
     return true;
   }
-  
+
   useEffect(() => {
     requestPermissions();
     initTasks();

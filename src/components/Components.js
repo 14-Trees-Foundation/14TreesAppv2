@@ -143,9 +143,7 @@ const logout = async (navigationRef) => {
 
 export const DrawerContent = (props) => {
   let { isAdmin, userDetails } = props;
-
-  //console.log("userDetails: ", userDetails);
-
+  
   return (
     <DrawerContentScrollView {...props}>
       <View style={{ flexDirection: 'column', alignItems: 'center', marginTop: 50, bottom: 0 }}>
