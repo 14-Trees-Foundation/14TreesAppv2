@@ -46,9 +46,9 @@ class LoginScreen extends Component {
       };
 
       console.log('Sending user data to server.', userDataPayload);
-      const responseUI = await DataService.loginUser(userDataPayload);
+      const isSignedIn = await DataService.loginUser(userDataPayload);
 
-      const response = responseUI.data;
+      const response = isSignedIn.data;
       console.log("response data: ", response);
 
 

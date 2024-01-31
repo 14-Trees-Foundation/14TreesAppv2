@@ -70,8 +70,8 @@ const App = () => {
         phone: phoneNumber,
       }
 
-      const responseUI = await DataService.loginUser(userDataPayload);
-      const response = responseUI.data;
+      const isSignedIn = await DataService.loginUser(userDataPayload);
+      const response = isSignedIn.data;
       console.log("response data: ", response);
 
       if (response.success) {
