@@ -100,9 +100,6 @@ class LoginScreen extends Component {
       }
 
 
-
-
-
       if (response.user.adminID) {
         await AsyncStorage.setItem(Constants.adminIdKey, response.user.adminID);
         console.log('adminId stored');
