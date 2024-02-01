@@ -17,6 +17,8 @@ import VerifyusersScreen from './VerifyUsers';
 import { checkMultiplePermissions } from './check_permissions';
 import { LocalDatabase } from './tree_db';
 
+
+
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 const navigationRef = React.createRef();
