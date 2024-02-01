@@ -17,9 +17,6 @@ import VerifyusersScreen from './VerifyUsers';
 import { checkMultiplePermissions } from './check_permissions';
 import { LocalDatabase } from './tree_db';
 
-  "jetifier": "^2.0.0",
-  "jetify": "^1.0.2",
-
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 const navigationRef = React.createRef();
