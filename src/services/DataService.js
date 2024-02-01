@@ -5,14 +5,16 @@ import { Strings } from './Strings';
 
 axios.interceptors.response.use(function (response) {
   return response;
-}, function (error) {
+}, async function  (error) {
   let errorMsg;
   let requestDescriptor = null;
   if (error.request) {
     const request = error.request;
     console.log(request)
+
     if (request.responseURL) {
       requestDescriptor = `${request._method} ${request.responseURL}.`
+
     }
     else if (request._response) {
       requestDescriptor = `${request._response}.`
@@ -21,9 +23,11 @@ axios.interceptors.response.use(function (response) {
       requestDescriptor = `${request._method} ${request._url}.`
     }
   }
+  
   if (error.response) {
     if (error.response.data) {
       errorMsg = Strings.alertMessages.FailedAtServer + (error.response.data)
+
     }
     else {
       errorMsg = error.message;
@@ -43,6 +47,7 @@ axios.interceptors.response.use(function (response) {
   console.log(error);
   return null;
 });
+
 
 export class DataService {
   // static productionHostName = 'https://api.14trees.org';
@@ -66,6 +71,7 @@ export class DataService {
       onDownloadProgress,
     });
   }
+
 
   static async fetchPlotSaplings(user_id, lasthash) {
     const url = `${DataService.serverBase}/fetchPlotSaplings`;

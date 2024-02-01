@@ -17,6 +17,8 @@ import { styleConfigs } from './services/Styles';
 
 enableLatestRenderer();
 
+
+
 const Stack = createStackNavigator();
 async function requestPermissions() {
   //https://developer.android.com/training/data-storage/shared/media#storage-permission

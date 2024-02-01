@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Button, FlatList, ScrollView, Text, TextInput, View } from 'react-native';
 import { Strings } from "../services/Strings";
 import { Utils } from "../services/Utils";
 import { CustomButton, ImageWithEditableRemark, ImageWithUneditableRemark } from "./Components";
 import { CoordinateSetter } from "./CoordinateSetter";
 import { CustomDropdown } from "./CustomDropdown";
+
 import { commonStyles } from "../services/Styles";
 
 export const treeFormModes = {
@@ -29,7 +30,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     const [selectedTreeType, setSelectedTreeType] = useState(inTreeType);
     const [selectedPlot, setSelectedPlot] = useState(inPlot);
     const [userId, setUserId] = useState(inUserId);
-    console.log('rendered treeform')
+    const [coordinateSetterSessionId,setCoordinateSetterSessionId] = useState(0);
     useEffect(() => {
         console.log(treeData.inSaplingId)
         if (mode === treeFormModes.localEdit) {
@@ -154,9 +155,10 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             console.error(error);
         }
     }, []);
-    useEffect(() => {
+    useFocusEffect(React.useCallback(() => {
+        setCoordinateSetterSessionId((new Date().getMilliseconds()))
         loadDataCallback();
-    }, []);
+    },[]));
     return (
         <ScrollView style={{ backgroundColor: '#5DB075', height: '100%' }} scrollEnabled={mainScrollEnabled}>
             <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
@@ -211,6 +213,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     onSelectItem={setSelectedPlot}
                 />
                 <CoordinateSetter
+                    sessionId={coordinateSetterSessionId}
                     setInitLocation={mode === treeFormModes.addTree}
                     inLat={inLat}
                     inLng={inLng}
