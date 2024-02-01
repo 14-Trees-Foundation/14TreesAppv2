@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Button, StyleSheet, Text, TextInput, ToastAndroid, View } from 'react-native';
+import { Button, Text, TextInput, ToastAndroid, View } from 'react-native';
 import { DataService } from '../services/DataService';
 import { Strings } from '../services/Strings';
 import { TreeForm, treeFormModes } from '../components/TreeForm';
-import { Constants, Utils, commonStyles } from '../services/Utils';
+import { Constants, Utils } from '../services/Utils';
 import { MyIconButton } from '../components/Components';
 import LoadingScreen from './LoadingScreen';
 
-const fetchTreeDetails = async (saplingId,setDetails) => {
+const fetchTreeDetails = async (saplingId, setDetails) => {
     // console.log('fetching tree details');    
     const treeDetails = await Utils.fetchLocalTree(saplingId);
     // console.log(treeDetails);
-    if(!treeDetails){return;}
-    const detailsForTreeForm = {...Constants.treeFormTemplateData};
+    if (!treeDetails) { return; }
+    const detailsForTreeForm = { ...Constants.treeFormTemplateData };
     const treeType = await Utils.treeTypeFromID(treeDetails.type_id);
     const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
     detailsForTreeForm.inImages = treeDetails.images;
@@ -27,40 +27,41 @@ const fetchTreeDetails = async (saplingId,setDetails) => {
     // console.log('details:',detailsForTreeForm);
     setDetails(detailsForTreeForm);
 }
-export const EditLocalTree = ({navigation,route})=>{
-    const {sapling_id} = route.params;
+
+export const EditLocalTree = ({ navigation, route }) => {
+    const { sapling_id } = route.params;
     const [saplingid, setSaplingid] = useState(sapling_id);
-    const [details,setDetails] = useState(null);
-    useEffect(()=>{
+    const [details, setDetails] = useState(null);
+    useEffect(() => {
         setSaplingid(sapling_id);
-    },[sapling_id]);
-    useEffect(()=>{
+    }, [sapling_id]);
+    useEffect(() => {
         setDetails(null);
-        fetchTreeDetails(saplingid,setDetails);
-    },[saplingid])
-    const updateDetails = async(tree, images)=>{
+        fetchTreeDetails(saplingid, setDetails);
+    }, [saplingid])
+    const updateDetails = async (tree, images) => {
         console.log(tree);
         console.log(images);
-        if(tree.saplingid!==details.inSaplingId){
+        if (tree.saplingid !== details.inSaplingId) {
             //delete tree by sapling ID
             await Utils.deleteTreeAndImages(details.inSaplingId);
         }
-        await Utils.saveTreeAndImagesToLocalDB(tree,images);
+        await Utils.saveTreeAndImagesToLocalDB(tree, images);
         navigation.popToTop();
     }
-    if(details){
+    if (details) {
         return <TreeForm
-                 mode={treeFormModes.localEdit}
-                 treeData={details}
-                 onCancel={()=>navigation.popToTop()}
-                 updateUserId={false}
-                 updateLocation={false}
-                 onVerifiedSave={updateDetails}
-                 />
+            mode={treeFormModes.localEdit}
+            treeData={details}
+            onCancel={() => navigation.popToTop()}
+            updateUserId={false}
+            updateLocation={false}
+            onVerifiedSave={updateDetails}
+        />
     }
-    else{
+    else {
         return (
-            <LoadingScreen/>
+            <LoadingScreen />
         )
     }
 }

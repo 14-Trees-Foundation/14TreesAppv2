@@ -1,20 +1,30 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { launchCamera, } from 'react-native-image-picker';
-import { Alert, StyleSheet, ToastAndroid } from "react-native";
+import { Alert, ToastAndroid } from "react-native";
 import { DataService } from "./DataService";
 import { LocalDatabase } from "./tree_db";
 import RNRestart from 'react-native-restart';
 import { Strings } from "./Strings";
 import ImageResizer from "react-native-image-resizer";
 import RNFS from 'react-native-fs';
+
 const MIN_BATCH_SIZE = 5
+
 export class Utils {
     static localdb = new LocalDatabase();
+//treeTypes and PLots
     static async getLocalTreeTypesAndPlots() {
         let treeTypes = await this.localdb.getAllTreeTypes();
         let plots = await this.localdb.getAllPlots();
         return { treeTypes, plots };
     }
+
+    //Namrata
+    static async fetchSaplingIdsFromLiveDB() {
+        let saplings = await this.localdb.getAllSaplingsInLiveDB();
+        return saplings;
+    }
+
     static async deleteTreeAndImages(saplingId) {
         await this.localdb.deleteTreeImages(saplingId);
         await this.localdb.deleteTree(saplingId);
@@ -27,6 +37,7 @@ export class Utils {
         }
         return null;
     }
+
     static async saveTreeAndImagesToLocalDB(tree, images) {
         await this.localdb.saveTree(tree, 0);
         for (let index = 0; index < images.length; index++) {
@@ -47,6 +58,7 @@ export class Utils {
     static async reloadApp() {
         RNRestart.restart();
     }
+
     static async confirmAction(onConfirm, title = undefined, message = undefined) {
         if (!title) {
             title = Strings.alertMessages.ConfirmActionTitle;
@@ -69,34 +81,53 @@ export class Utils {
         // console.log('creating tables if needed.', this.localdb)
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
+        await this.localdb.createSaplingTbl();
         await this.localdb.createTreesTable();
         await this.localdb.createSaplingPlotTbl();
 
     }
+
+//Namrata
+
+   
     static async fetchAndStoreHelperData() {
-        console.log('fetching helper data');
+        console.log('fetching helper data in Utils');
         // console.log('ldb: ', this.localdb)
         let lastHash = await AsyncStorage.getItem(Constants.lastHashKey);
         lastHash = String(lastHash);//take care of null values.
         let userId = await Utils.getUserId();
         console.log('requesting: ', userId, lastHash)
         //setStatus(requesting)
+        
+        // //Time Required to receive a response
+        //const startTime = performance.now();
         const helperData = await DataService.fetchHelperData(userId, lastHash);
+        // const endTime = performance.now();
+        // const elapsedTime = (endTime - startTime)/1000;
+        // console.log(`Time elapsed: ${elapsedTime} seconds`);
+
+        console.log("userId ",userId,"lastHash ",lastHash)
         if (!helperData) {
             //setStatus(request failed)
             return;//error display, logging done by DataService.
         }
         // setStatus(storing)
-        const data = helperData.data['data'];
+        const data = helperData.data['data'];      
         const newHash = helperData.data['hash'];
+        console.log("newHash ",newHash)
         if (newHash == lastHash) {
+            console.log("---------------------------newHash == lastHash-------------")
             ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
             // setStatus(Data updated)
             return;
         }
         if (data) {
+            console.log("---------------------------New Data-------------")
+           
             await Utils.storeTreeTypes(data['treeTypes']);
             await Utils.storePlots(data['plots']);
+            console.log("data['saplings'] :" ,data['saplings'].length)
+            await Utils.storeTrees(data['saplings'])     
             await AsyncStorage.setItem(Constants.lastHashKey, newHash);
             ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
             // setstatus(data updated)
@@ -105,62 +136,63 @@ export class Utils {
         // setstatus(failed)
     }
 
-    static async fetchAndStorePlotSaplings() {
-        // await AsyncStorage.setItem(Constants.hashForPlotSaplingsKey,'blah');
-        // return;
-        let lastHash = await AsyncStorage.getItem(Constants.hashForPlotSaplingsKey);
-        lastHash = String(lastHash);//take care of null values.
-        let userId = await Utils.getUserId();
-        console.log('requesting plot saps: ', userId, lastHash)
-        const plotSaplingsData = await DataService.fetchPlotSaplings(userId, lastHash);
+    // // FETCH STORE SAPLINGS
+    // static async fetchAndStorePlotSaplings() {
+    //     // await AsyncStorage.setItem(Constants.hashForPlotSaplingsKey,'blah');
+    //     // return;
+    //     let lastHash = await AsyncStorage.getItem(Constants.hashForPlotSaplingsKey);
+    //     lastHash = String(lastHash);//take care of null values.
+    //     let userId = await Utils.getUserId();
+    //     console.log('requesting plot saps: ', userId, lastHash)
+    //     const plotSaplingsData = await DataService.fetchPlotSaplings(userId, lastHash);
 
-        if (!plotSaplingsData) {
-            return;//error display, logging done by DataService.
-        }
-        // console.log(plotSaplingsData.data)
-        const newHash = plotSaplingsData.data['hash'];
-        const jsondata = plotSaplingsData.data['data'];
-        console.log((jsondata ? (jsondata.length + 'is the data length') : 'jsondata null'))
-        console.log(newHash, 'is the new hash.');
+    //     if (!plotSaplingsData) {
+    //         return;//error display, logging done by DataService.
+    //     }
+    //     // console.log(plotSaplingsData.data)
+    //     const newHash = plotSaplingsData.data['hash'];
+    //     const jsondata = plotSaplingsData.data['data'];
+    //     console.log((jsondata ? (jsondata.length + 'is the data length') : 'jsondata null'))
+    //     console.log(newHash, 'is the new hash.');
 
-        if (newHash === lastHash) {
-            console.log('hashes match, returning.')
-            ToastAndroid.show(Strings.alertMessages.plotSaplingsDataUpToDate, ToastAndroid.LONG)
-            return;
-        }
-        if (jsondata) {
-            console.log('Storing Json data...')
-            await Promise.all(jsondata.map(async (plot) => {
-                console.log(this)
-                await this.localdb.storePlotSaplings(plot.plot_id, plot.saplings);
-                console.log(plot.plot_id, 'plot stored.')
-            }));
-            console.log('data stored.')
-            await AsyncStorage.setItem(Constants.hashForPlotSaplingsKey, newHash);
-            console.log('setting hash: ', newHash);
-            ToastAndroid.show(Strings.alertMessages.plotSaplingsDataUpToDate, ToastAndroid.LONG)
-        }
-        else {
-            console.log('data was null.');
-        }
+    //     if (newHash === lastHash) {
+    //         console.log('hashes match, returning.')
+    //         ToastAndroid.show(Strings.alertMessages.plotSaplingsDataUpToDate, ToastAndroid.LONG)
+    //         return;
+    //     }
+    //     if (jsondata) {
+    //         console.log('Storing Json data...')
+    //         await Promise.all(jsondata.map(async (plot) => {
+    //             console.log(this)
+    //             await this.localdb.storePlotSaplings(plot.plot_id, plot.saplings);
+    //             console.log(plot.plot_id, 'plot stored.')
+    //         }));
+    //         console.log('data stored.')
+    //         await AsyncStorage.setItem(Constants.hashForPlotSaplingsKey, newHash);
+    //         console.log('setting hash: ', newHash);
+    //         ToastAndroid.show(Strings.alertMessages.plotSaplingsDataUpToDate, ToastAndroid.LONG)
+    //     }
+    //     else {
+    //         console.log('data was null.');
+    //     }
 
-        //-----------------------------------------
-        //Possibly, LDB set to null on app reload
+    //     //-----------------------------------------
+    //     //Possibly, LDB set to null on app reload
 
-        // const jsonData = DummyData;
-        // console.log("got the data")
-        // const jsondata = jsonData['data'];
+    //     // const jsonData = DummyData;
+    //     // console.log("got the data")
+    //     // const jsondata = jsonData['data'];
 
-        // console.log((jsondata ? (jsondata.length + 'is the data length') : 'jsondata null'))
-        // await Promise.all(jsondata.map(async (plot) => {
-        //     const { plot_id, saplings } = plot;
-        //     // console.log(plot_id);
-        //     // console.log(saplings);
-        //     await this.localdb.storePlotSaplings(plot_id, saplings);
-        //     // console.log('plot stored.')
-        // }));
-        // console.log('data stored.')
-    }
+    //     // console.log((jsondata ? (jsondata.length + 'is the data length') : 'jsondata null'))
+    //     // await Promise.all(jsondata.map(async (plot) => {
+    //     //     const { plot_id, saplings } = plot;
+    //     //     // console.log(plot_id);
+    //     //     // console.log(saplings);
+    //     //     await this.localdb.storePlotSaplings(plot_id, saplings);
+    //     //     // console.log('plot stored.')
+    //     // }));
+    //     // console.log('data stored.')
+    // }
 
     static async deletePlotSaplings() {
         await this.localdb.deletePlotSaplings();
@@ -232,6 +264,49 @@ export class Utils {
             console.log('All plots saved successfully.')
         }
     }
+
+    //store all trees - Namrata
+    static async storeTrees(saplingsDocs) {
+        
+        const treesInLocalDBFormat = saplingsDocs.map((doc) => {
+            return {
+                saplingid: doc.sapling_id,
+            }
+        })
+        let failure = false;
+        console.log("length in storeTrees : ",treesInLocalDBFormat.length)
+        
+        // for (let dbTree of treesInLocalDBFormat) {
+        //     try {
+        //         await this.localdb.updateSaplingTbl(dbTree);
+                
+        //     }
+        //     catch (err) {
+        //         console.log('Failed to save sapling: ', dbTree);
+        //         console.log(err)
+        //         failure = true;
+        //     }
+        // }
+
+            try {
+                await this.localdb.updateSaplingTbl(treesInLocalDBFormat);
+                
+            }
+            catch (err) {
+                console.log('Failed to save saplings : ',err);
+                failure = true;
+            }
+        
+        
+        if (failure) {
+            ToastAndroid.show(Strings.alertMessages.FailureSavingSaplings);
+        }
+        else {
+            console.log('All saplings saved successfully.')
+        }
+    }
+
+
     static async deleteSyncedTrees() {
         let newTreesList = await this.localdb.deleteSyncedTrees();
         newTreesList = await Promise.all(newTreesList.map(async (tree) => {
@@ -239,7 +314,8 @@ export class Utils {
         }))
         return newTreesList;
     }
-    static getDisplayString = (index, capturetimestamp,length) => {
+
+    static getDisplayString = (index, capturetimestamp, length) => {
         const indexString = `(${index + 1} of ${length})\n`;
         const captureString = Strings.messages.CapturedAt + ' :\n' + Utils.getReadableDate(capturetimestamp);
         const displayString = `${indexString} ${captureString}`;
@@ -301,6 +377,7 @@ export class Utils {
         }
         return failures;
     };
+
     static userId;
     static adminId;
     static localdb;
@@ -435,9 +512,9 @@ export class Utils {
             const filesz = response.assets[0].fileSize;
             let base64Data = response.assets[0].base64;
             let imagePath = response.assets[0].uri;
-            if(compressionRequired){
+            if (compressionRequired) {
                 const compressedData = await Utils.compressImageAt(filesz, imagePath);
-                if(compressedData!==undefined){
+                if (compressedData !== undefined) {
                     base64Data = compressedData;
                 }
             }
@@ -451,8 +528,8 @@ export class Utils {
             return newImage;
         }
     }
-    static async formatImageForSapling(image,saplingid){
-        let newImage = {...image}
+    static async formatImageForSapling(image, saplingid) {
+        let newImage = { ...image }
         newImage.saplingid = saplingid;
         const timestamp = newImage.meta.capturetimestamp;
         const imageName = `${saplingid}_${timestamp}.jpg`;
@@ -526,6 +603,7 @@ export class Constants {
         return require('../../assets/placeholder.png');
     }
 }
+
 export const getImageSourceObject = (src) => {
     if (src.length === 0) {
         return Constants.placeholderImage();
@@ -535,181 +613,4 @@ export const getImageSourceObject = (src) => {
     }
     console.log('image src was unexpected.')
     return Constants.placeholderImage()
-}
-
-export const commonStyles = StyleSheet.create({
-    label: {
-        borderWidth: 2,
-        borderColor: 'black',
-        borderRadius: 5,
-        fontSize: 15,
-        alignContent: 'center',
-        color: 'white',
-        textAlign: 'center',
-        textAlignVertical: 'center',
-        padding: 5,
-        margin: 5
-    },
-    success: {
-        backgroundColor: 'green',
-    },
-    danger: {
-        backgroundColor: 'red',
-    },
-    iconBtn: {
-        padding: 8,
-        margin: 5,
-        borderRadius: 5,
-        flexDirection: 'row',
-        backgroundColor: 'green',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    borderedDisplay: {
-        borderColor: 'grey', borderWidth: 3, borderRadius: 5, margin: 3, padding: 3
-    },
-    defaultButtonStyle: {
-        flexDirection: 'row',
-        alignContent: 'center',
-        alignItems: 'center',
-        fontSize: 40,
-        borderColor: 'gray',
-        borderWidth: 3,
-        backgroundColor: 'green',
-        margin: 5,
-        padding: 10,
-        borderRadius: 5,
-        shadowColor: 'black',
-        elevation: 3,
-        shadowOffset: {
-            width: 50,
-            height: 50
-        },
-        shadowOpacity: 1
-    },
-    defaultButtonTextStyle: {
-        color: 'white',
-        textAlign: 'center'
-    },
-    drawerHeader: {
-        backgroundColor: '#5DB075',
-    },
-    headerTitleStyle: {
-        color: 'white'
-    },
-    logOutButton: {
-        color: 'white',
-        bottom: 0
-    },
-    remark: {
-        height: 70,
-        borderWidth: 0.5,
-        borderColor: 'grey',
-        borderRadius: 10,
-        backgroundColor: '#f5f5f5',
-        margin: 5,
-        padding: 5,
-        color: 'black', // Change font color here
-        fontSize: 16,
-    },
-    btnview: {
-        justifyContent: 'center',
-        elevation: 3,
-        marginHorizontal: 20,
-        marginVertical: 10,
-    },
-    btn: {
-        paddingHorizontal: 20,
-        borderRadius: 9,
-        backgroundColor: '#1f3625',
-        alignItems: 'center',
-        paddingVertical: 12,
-        height: 50,
-    },
-    btndisabled: {
-        paddingHorizontal: 20,
-        borderRadius: 9,
-        backgroundColor: '#686868',
-        alignItems: 'center',
-        paddingVertical: 12,
-        height: 50,
-    },
-    text: {
-        fontSize: 14,
-        color: 'black',
-        textAlign: 'left',
-    },
-    text2: {
-        fontSize: 25,
-        color: 'white',
-        textAlign: 'center',
-        marginVertical: 5,
-        marginBottom: 40,
-    },
-    recordTxt: {
-        fontSize: 18,
-        color: '#1f3625',
-        marginTop: 5,
-        marginBottom: 5,
-        textAlign: 'center',
-    },
-    btntxt: {
-        fontSize: 18,
-        color: '#ffffff',
-        textAlign: 'center',
-    },
-    text4: {
-        fontSize: 17,
-        color: 'black',
-        textAlign: 'left',
-        padding: 5,
-    },
-    text5: {
-        fontSize: 20,
-        alignContent: 'center',
-        justifyContent: 'center',
-        alignSelf: 'center',
-        color: 'black'
-    },
-    text3: {
-        fontSize: 17,
-        color: 'black',
-        textAlign: 'left',
-    },
-    text6: {
-        fontSize: 17,
-        color: 'black',
-        textAlign: 'left',
-        backgroundColor: 'white',
-        borderRadius: 3
-    },
-    txtInput: {
-        height: 60,
-        width: 310,
-        borderWidth: 0.5,
-        borderColor: 'grey',
-        borderRadius: 10,
-        backgroundColor: '#f5f5f5',
-        marginTop: 10,
-        marginBottom: 10,
-        padding: 10,
-        color: 'black', // Change font color here
-        fontSize: 16,
-        fontWeight: 'bold',
-        alignItems: 'center',
-        justifyContent: 'center',
-        alignSelf: 'center',
-    },
-    headerText: {
-        fontSize: 30, color: 'white', textAlign: 'center', marginTop: 30, marginBottom: 30, fontFamily: 'cochin', fontWeight: 'bold', textShadowColor: 'rgba(0, 0, 0, 0.5)',
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 3,
-    }
-});
-export const styleConfigs = {
-    drawerHeaderOptions: {
-        headerStyle: commonStyles.drawerHeader,
-        headerTitleStyle: commonStyles.headerTitleStyle,
-        headerTintColor: commonStyles.headerTitleStyle.color
-    }
 }

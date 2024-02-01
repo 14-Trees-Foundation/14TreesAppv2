@@ -1,4 +1,4 @@
-import { View, Text, Modal, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Dimensions, Image, RootTagContext, } from 'react-native';
+import { View, Text, Modal, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Dimensions, Image, } from 'react-native';
 import React, { useState, useEffect, useContext } from 'react';
 import { Utils } from '../services/Utils';
 import { Strings } from '../services/Strings';
@@ -7,8 +7,8 @@ const { height, width } = Dimensions.get('window');
 const LanguageModal = ({ navigation, langModalVisible, setLangModalVisible, onSelectLang, }) => {
   const [selectedLang, setSelectedLang] = useState(Strings.english);
   const [languages, setLangauges] = useState([
-    { name: 'English',code:Strings.english, selected: true },
-    { name: 'मराठी', code:Strings.marathi,selected: false },
+    { name: 'English', code: Strings.english, selected: true },
+    { name: 'मराठी', code: Strings.marathi, selected: false },
   ]);
   const onSelect = index => {
     const temp = languages;
@@ -99,7 +99,7 @@ const LanguageModal = ({ navigation, langModalVisible, setLangModalVisible, onSe
                   console.log('reloading app')
                 }
               }}
-              />
+            />
           </View>
         </View>
       </View>
@@ -108,6 +108,7 @@ const LanguageModal = ({ navigation, langModalVisible, setLangModalVisible, onSe
 };
 
 export default LanguageModal;
+
 const styles = StyleSheet.create({
   centeredView: {
     flex: 1,

@@ -155,3 +155,38 @@ const App = () => {
 };
 
 export default App;
+
+// // import SampleComponent from "./Learning/SampleComponent.js"
+
+// // const App = () => {
+// //     return(
+// //       <SampleComponent/>
+// //     )
+  
+// // };
+
+// // export default App;
+
+
+
+// import { Alert, Button, Modal,StyleSheet, Text, View } from 'react-native';
+
+// export default function App() {
+//   return (
+//     <View style={styles.container}>
+//       <Text>Open up App.js to start working on your app!</Text>
+//       <Text style={{margin:16,borderWidth:2, borderColor:"white", padding: 14}} >Another text!</Text>
+      
+//       <Button title='Click' onPress={() => Alert.alert('Button pressed')}></Button>
+//     </View>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: '#458C2B',
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//   },
+// });

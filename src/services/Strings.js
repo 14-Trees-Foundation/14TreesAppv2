@@ -133,6 +133,7 @@ export class Strings{
             plotSaplingsDataUpToDate:"Plot sapling data up-to-date",
             FailureSavingTrees:"Failed to save some tree types. See logs.",
             FailureSavingPlots:"Failed to save some plots. See logs.",
+            FailureSavingSaplings :"Failed to save some sapling_ids. See logs",
             ConfirmActionTitle:"Are you sure?",
             ConfirmActionMsg:"Please confirm the action.",
             Yes:"Yes",
@@ -143,7 +144,8 @@ export class Strings{
             ContactExpert:"Contact an expert, please.",
             //tree form
             invalidSaplingId:"Invalid Sapling Id",
-            alreadyExists:"already exists.",
+            alreadyExists:"already exists in local data.",
+            alreadyExistsInDB :"exists in database. Enter Unique Sapling id.",
             Error:"Error",
             IncompleteFields:"Please fill all fields.",
             NoImage:"Please add atleast one image.",
@@ -171,6 +173,9 @@ export class Strings{
             FailedTreeNames:"Failed to get tree names !",
             FailedPlotNames:"Failed to get plot names !",
             FailedSaplingIds:"Failed to get sapling ids !",
+            IncorrectUser: "Incorrect User",
+            userNotAuthorized: "user not authorized to access app. contact admin",
+            userNotSetup: "user not set up correctly. contact admin"
         },
         "mr":{
             GPSUnavailable:"त्रुटी: विनंतीची वेळ संपली. GPS सध्या उपलब्ध नाही.",
@@ -197,11 +202,12 @@ export class Strings{
             No:"नाही",
             SyncSuccess:"समक्रमण यशस्वी!",
             SyncFailure:"समक्रमण अयशस्वी!",
-            CheckLocalList:" लोकल झाडांची यादी पहा स्थिती तपासण्यासाठी.",
+            CheckLocalList:"लोकल झाडांची यादी पहा स्थिती तपासण्यासाठी.",
             ContactExpert:"कृपया एक तज्ञाशी संपर्क साधा.",
             //tree form
             invalidSaplingId:"अवैध रोपटी आयडी",
-            alreadyExists:"आधिपासूनच अस्तित्वात आहे",
+            alreadyExists:"लोकल डेटामध्ये आधीपासूनच अस्तित्वात आहे.",
+            alreadyExistsInDB :"डेटाबेसमध्ये आधीपासूनच अस्तित्वात आहे. नवीन सेपलिंग आयडी एंटर करा.",
             Error:"त्रुटी",
             IncompleteFields:"कृपया सर्व रिक्त जागा भरा.",
             NoImage:"कृपया किमान एक फोटो घ्या.",
@@ -230,6 +236,9 @@ export class Strings{
             FailedTreeNames:"झाडाचे नाव मिळविण्यात असफल !",
             FailedPlotNames:"प्लॉट नाव मिळविण्यात असफल !",
             FailedSaplingIds:"रोपाची संख्या मिळविण्यात असफल !",
+            IncorrectUser: "चुकीचा वापरकर्ता",
+            userNotAuthorized: "वापरकर्ता ॲपमध्ये प्रवेश करण्यास अधिकृत नाही. प्रशासकाशी संपर्क साधा",
+            userNotSetup: "वापरकर्ता योग्यरित्या सेट नाही. प्रशासकाशी संपर्क साधा"
         }
     })
     static buttonLabels = new LocalizedStrings({
@@ -238,7 +247,7 @@ export class Strings{
             SyncData:"Sync Data",
             AddNewTree:"Add New Tree",
             FetchHelperData:"Fetch Helper Data",
-            fetchPlotSaplingData:"Fetch Plot-Sapling Data",
+            fetchPlotSaplingData:"Fetch pling Data",
             SelectLanguage:"Language/भाषा",
 
             // add tree
