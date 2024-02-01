@@ -357,15 +357,6 @@ export class LocalDatabase {
     };
     
     // //storeSaplings -Namrata
-    
-    // updateSaplingTbl = async (saplingDoc) => {
-    //    // console.log("---------------updated Saplings Table------------")
-    //     const insertQuery =
-    //     `INSERT OR REPLACE INTO ${saplingsTableName} (sapling_id) values` +
-    //     `('${saplingDoc.saplingid}')`;
-    //     return this.db.executeSql(insertQuery);
-    // };
-
     //Insert all saplings at once 
 
     updateSaplingTbl = async (saplingDocs) => {
@@ -378,37 +369,12 @@ export class LocalDatabase {
         const insertQuery = `INSERT OR REPLACE INTO ${saplingsTableName} (sapling_id) VALUES ${values}`;
         return this.db.executeSql(insertQuery);
     };
-    
-    // //Delete the contents of saplingsTable and then insert
-    // updateSaplingTbl = async (saplingDocs) => {
-    //     if (!Array.isArray(saplingDocs) || saplingDocs.length === 0) {
-    //         console.log("Empty sapling array in tree_db.js");
-    //         return; // or handle the error accordingly
-    //     }
-    
-    //     // Start a transaction for atomicity
-    //     await this.db.transaction(async (transaction) => {
-    //         // Delete all existing records
-    //         await transaction.executeSql(`DELETE FROM ${saplingsTableName}`);
-    
-    //         // Insert new records
-    //         const values = saplingDocs.map((saplingDoc) => `('${saplingDoc.saplingid}')`).join(',');
-    //         const insertQuery = `INSERT INTO ${saplingsTableName} (sapling_id) VALUES ${values}`;
-    //         await transaction.executeSql(insertQuery);
-    //     });
-    // };
-    
+     
 
     getAllSaplingsInLiveDB = async () => {
         const saplingsArray = [];
         try {
-            // let tempres = await this.db.executeSql(`SELECT COUNT(*) as rowCount FROM ${saplingsTableName}`);
-            // let rowCount = tempres[0].rows.item(0).rowCount;
-            // console.log('Number of rows in saplings table:', rowCount);
-            ////-------------DELETE---------------
-             // let res = await this.db.executeSql(`DELETE FROM ${saplingsTableName}`);
-            ////----------------------------------
-             let res = await this.db.executeSql(`SELECT * FROM ${saplingsTableName}`);
+            let res = await this.db.executeSql(`SELECT * FROM ${saplingsTableName}`);
             res.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {
                     saplingsArray.push(result.rows.item(index));

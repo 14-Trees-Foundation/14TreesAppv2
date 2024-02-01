@@ -99,12 +99,7 @@ export class Utils {
         console.log('requesting: ', userId, lastHash)
         //setStatus(requesting)
         
-        // //Time Required to receive a response
-        //const startTime = performance.now();
         const helperData = await DataService.fetchHelperData(userId, lastHash);
-        // const endTime = performance.now();
-        // const elapsedTime = (endTime - startTime)/1000;
-        // console.log(`Time elapsed: ${elapsedTime} seconds`);
 
         console.log("userId ",userId,"lastHash ",lastHash)
         if (!helperData) {
@@ -276,18 +271,6 @@ export class Utils {
         let failure = false;
         console.log("length in storeTrees : ",treesInLocalDBFormat.length)
         
-        // for (let dbTree of treesInLocalDBFormat) {
-        //     try {
-        //         await this.localdb.updateSaplingTbl(dbTree);
-                
-        //     }
-        //     catch (err) {
-        //         console.log('Failed to save sapling: ', dbTree);
-        //         console.log(err)
-        //         failure = true;
-        //     }
-        // }
-
             try {
                 await this.localdb.updateSaplingTbl(treesInLocalDBFormat);
                 

@@ -32,11 +32,7 @@ const HomeScreen = ({ navigation }) => {
           text={Strings.buttonLabels.FetchHelperData}
           onPress={Utils.fetchAndStoreHelperData}
         />
-        {/* <MyIconButton
-          name={"map-marked-alt"}
-          text={Strings.buttonLabels.fetchPlotSaplingData}
-          onPress={Utils.fetchAndStorePlotSaplings}
-        /> */}
+       
         <MyIconButton
           name={"language"}
           text={Strings.buttonLabels.SelectLanguage}

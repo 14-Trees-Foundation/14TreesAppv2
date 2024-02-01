@@ -63,11 +63,7 @@ const LocalDataView = ({ navigation }) => {
       setAllTreeTypes(response.treeTypes);
       setAllPlots(response.plots);
     })
-    ////Namrata
-    // Utils.fetchSaplingIdsFromLiveDB().then((saplings)=>{
-    //   console.log("saplings ",saplings)
-    //   setAllSaplings(saplings.map(doc=>doc.sapling_id))
-    // })
+    
     Utils.fetchTreeTypesFromLocalDB().then((types) => {
       console.log('tree types', types)
       setTreeTypeList(types)

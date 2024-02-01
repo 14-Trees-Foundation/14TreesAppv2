@@ -85,21 +85,3 @@ const VerifyusersScreen = ({navigation}) => {
 
 export default VerifyusersScreen;
 
-//made changes in the styles -> commonstyles
-// const styles = StyleSheet.create({
-    
-//     text2: {  
-//         color: 'black',
-//         fontSize:20,
-//         textAlign: 'left',
-//         marginTop: 15,
-//         marginBottom: 30
-        
-//     },
-//     text3: {
-//         color: 'black',
-//         fontSize:18,
-//         textAlign: 'left',
-//         margin:2,
-//     }
-//   });

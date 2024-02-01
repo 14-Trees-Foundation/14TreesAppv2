@@ -247,7 +247,7 @@ export class Strings{
             SyncData:"Sync Data",
             AddNewTree:"Add New Tree",
             FetchHelperData:"Fetch Helper Data",
-            fetchPlotSaplingData:"Fetch pling Data",
+            fetchPlotSaplingData:"Fetch Plot-Sapling Data",
             SelectLanguage:"Language/भाषा",
 
             // add tree

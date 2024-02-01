@@ -176,14 +176,6 @@ export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng, setInitLoca
                             }
                                 , undefined, Strings.messages.confirmSetGPS)} />
 
-                               {/* Edit Tree button  */}
-                        {/* <MyIconButton name={"edit"} text={Strings.buttonLabels.edit}
-                            onPress={() => {
-                                setCoordinatesMode(coordinateModes.fixed);
-                                setTmpLat(lat);
-                                setTmpLng(lng);
-                            }} />
-                             */}
                         <MyIconButton name={"hand-rock"} text={Strings.buttonLabels.drag}
                             onPress={() => {
                                 setMarkerLocation({ latitude: lat, longitude: lng });

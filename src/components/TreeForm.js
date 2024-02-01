@@ -57,6 +57,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         setImages([...images, image]);
     }
     const onSave = async () => {
+        console.log("Sapling id value : ",saplingid)
         if (localSaplingIds.includes(saplingid)) {
             Alert.alert(Strings.alertMessages.invalidSaplingId, Strings.labels.SaplingId + ' ' + saplingid + ' ' + Strings.alertMessages.alreadyExists);
             return;
@@ -199,21 +200,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
 
                         </View>
                         ,
-                        <View>
-                            <TextInput
-                                defaultValue={inSaplingId}
-                                style={commonStyles.txtInput}
-                                placeholder={Strings.labels.SaplingId}
-                                placeholderTextColor={'#000000'}
-                                onChangeText={(text) => { setSaplingId(text) }}
-                            // value={saplingid}
-                            />
-                            {
-                                localSaplingIds.includes(saplingid)
-                                &&
-                                <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>Sapling ID {saplingid} already exists locally.</Text>
-                            }
-                        </View>,
+                        
                         <Text style={{ ...commonStyles.text4, textAlign: 'center' }}>
                             Sapling ID: {saplingid}
                         </Text>
