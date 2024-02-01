@@ -21,8 +21,6 @@
     "@react-navigation/native": "^6.1.8",
     "@react-navigation/stack": "^6.3.17",
     "axios": "^1.5.0",
-    "jetifier": "^2.0.0",
-    "jetify": "^1.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-native": "^0.73.1",
