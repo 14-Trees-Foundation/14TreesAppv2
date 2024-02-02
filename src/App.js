@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useContext, useEffect, useState } from 'react';
@@ -12,11 +11,15 @@ import LoginScreen from './screens/Login';
 import { Strings } from './services/Strings';
 import { Constants, Utils } from './services/Utils';
 import { checkMultiplePermissions } from './services/check_permissions';
+import DeviceInfo from 'react-native-device-info';
+import { DataService } from './services/DataService';
 import { styleConfigs } from './services/Styles';
+
 enableLatestRenderer();
 
-const Stack = createStackNavigator();
 
+
+const Stack = createStackNavigator();
 async function requestPermissions() {
   //https://developer.android.com/training/data-storage/shared/media#storage-permission
   const androidVersion = Number.parseInt(Platform.constants['Release']);
@@ -26,6 +29,7 @@ async function requestPermissions() {
     PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
     PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
     PERMISSIONS.ANDROID.ACCESS_BACKGROUND_LOCATION,
+    PERMISSIONS.ANDROID.READ_PHONE_NUMBERS
   ];
   if (androidVersion < versionOfPermissionChange) {
     permissions.push(...[
@@ -40,6 +44,8 @@ async function requestPermissions() {
       PERMISSIONS.ANDROID.READ_MEDIA_AUDIO
     ])
   }
+  console.log("permission array: ", permissions);
+
   let res = await checkMultiplePermissions(permissions);
   if (!res) {
     Alert.alert(
@@ -48,11 +54,8 @@ async function requestPermissions() {
     );
   }
 }
-
 export const stackNavRef = createNavigationContainerRef();
-
 const App = () => {
-
   const rootTag = useContext(RootTagContext);
   console.log('app roottag: ', rootTag)
 
@@ -60,19 +63,27 @@ const App = () => {
 
   const checkSignInStatus = async () => {
     try {
-      const isSignedIn = await GoogleSignin.isSignedIn();
-      if (isSignedIn) {
+
+      const phoneNumber = await DeviceInfo.getPhoneNumber();
+
+      console.log("phone no: ", phoneNumber);
+
+      const userDataPayload = {
+        phone: phoneNumber,
+      }
+
+      const isSignedIn = await DataService.loginUser(userDataPayload);
+      const response = isSignedIn.data;
+      console.log("response data: ", response);
+
+      if (response.success) {
         // User is signed in, navigate to HomeScreen
-        const userId = await AsyncStorage.getItem(Constants.userIdKey);
-        const adminId = await AsyncStorage.getItem(Constants.adminIdKey);
-        let storedUserDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
-        if (storedUserDetails) {
-          storedUserDetails = JSON.parse(storedUserDetails);
-        }
-        if (userId === null) {
-          GoogleSignin.signOut();
-          return false;
-        }
+        await AsyncStorage.setItem(Constants.userIdKey, response.user._id);
+        console.log('userId stored: ', response.user._id);
+        response.data = { ...response.user, image: '' }
+        console.log("response data: ", response.data);
+        await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
+        console.log('userDetails stored');
         return true;
       }
       else {
@@ -90,18 +101,13 @@ const App = () => {
 
     let storedlang = await Strings.getLanguage();
     console.log('stored lang: ', storedlang);
-    
     if (storedlang === null) {
       Strings.setLanguage(Strings.english);
     }
     else {
       Strings.setLanguage(storedlang);
     }
-    // Alert.alert('going to call GoogleSignin configure.')
-    console.log('going to call GoogleSignin configure.')
-    GoogleSignin.configure();
-    // Alert.alert('GoogleSignin configure called.')
-    console.log('GoogleSignin configure called.')
+
     const loggedIn = await checkSignInStatus();
     await Utils.setDBConnection();//ensures ldb setup in Utils
     await Utils.createLocalTablesIfNeeded();
@@ -119,9 +125,9 @@ const App = () => {
   }
 
   useEffect(() => {
+    requestPermissions();
     initTasks();
     BackHandler.addEventListener('hardwareBackPress', backHandler)//disables back button presses.
-    requestPermissions();
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', backHandler);
     }

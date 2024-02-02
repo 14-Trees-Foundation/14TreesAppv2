@@ -125,6 +125,8 @@ export class Strings{
             signIninProgress:"Operation (e.g. sign in) is in progress already",
             playServicesOutdated:"Play services not available or outdated",
             someError:"Some unidentified error happened",
+            CorrectPhoneNumber: "Please enter 10 digits number",
+            CorrectPin: "Please enter 4 digit pin number",
             //app
             PermissionsRequired:"Permissions Required!",
             Settings:"Please go to Settings and grant permissions",
@@ -188,6 +190,8 @@ export class Strings{
             signIninProgress:"ऑपरेशन (उदा. साइन इन) आधीच प्रगतीपथावर आहे.",
             playServicesOutdated:"प्ले सेवा उपलब्ध नाहीत किंवा कालबाह्य आहेत",
             someError:"काही अज्ञात त्रुटी घडली",
+            CorrectPhoneNumber: "कृपया 10 अंकी क्रमांक प्रविष्ट करा",
+            CorrectPin: "कृपया ४ अंकी पिन नंबर टाका",
             //app
             PermissionsRequired:"परवानगी आवश्यक!",
             Settings:"कृपया सेटिंग्ज वर जाऊन परवानगी द्या",
@@ -272,6 +276,7 @@ export class Strings{
             save:"Save",
             cancel:"Cancel",
             logOut:'Log out',
+            login: "Log in",
         },
         "mr":{
             // home
@@ -302,6 +307,7 @@ export class Strings{
             save:"जतन करा",
             cancel:"रद्द करा",
             logOut:'बाहेर पडणे',
+            login: "लॉगिन",
 
         }
     })

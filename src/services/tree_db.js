@@ -364,6 +364,7 @@ export class LocalDatabase {
             console.log("empty sapling array in tree_db.js")
         }
         //Delete all existing records
+        console.log("----------Deleting old data and inserting latest--------- ")
         await this.db.executeSql(`DELETE FROM ${saplingsTableName}`);
         const values = saplingDocs.map((saplingDoc) => `('${saplingDoc.saplingid}')`).join(',');
         const insertQuery = `INSERT OR REPLACE INTO ${saplingsTableName} (sapling_id) VALUES ${values}`;

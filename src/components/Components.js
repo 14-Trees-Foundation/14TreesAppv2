@@ -136,7 +136,6 @@ const fillInUserDetails = async (setIsAdmin, setUserDetails) => {
 }
 
 const logout = async (navigationRef) => {
-  await GoogleSignin.signOut();
   await AsyncStorage.removeItem(Constants.adminIdKey);
   await AsyncStorage.removeItem(Constants.userIdKey);
   await AsyncStorage.removeItem(Constants.userDetailsKey);
