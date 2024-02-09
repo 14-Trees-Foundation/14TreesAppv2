@@ -1,35 +1,58 @@
-import { View, Text, Modal, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Dimensions, Image, RootTagContext, } from 'react-native';
+import { View, Text, Modal, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Dimensions, Image, } from 'react-native';
 import React, { useState, useEffect, useContext } from 'react';
 import { Utils } from '../services/Utils';
 import { Strings } from '../services/Strings';
 import { CancelButton, MyIconButton, SaveButton } from './Components';
 const { height, width } = Dimensions.get('window');
-const LanguageModal = ({ navigation, langModalVisible, setLangModalVisible, onSelectLang, }) => {
+
+const LanguageModal = ({ langModalVisible, setLangModalVisible, handleLanguageChange }) => {
+
   const [selectedLang, setSelectedLang] = useState(Strings.english);
+
   const [languages, setLangauges] = useState([
-    { name: 'English',code:Strings.english, selected: true },
-    { name: 'मराठी', code:Strings.marathi,selected: false },
+    { name: 'English', code: Strings.english, selected: true },
+    { name: 'मराठी', code: Strings.marathi, selected: false },
   ]);
-  const onSelect = index => {
-    const temp = languages;
-    temp.map((item, ind) => {
-      if (index == ind) {
-        if (item.selected == true) {
-          item.selected = false;
-        } else {
-          item.selected = true;
-          setSelectedLang(item.code);
-        }
+
+  const onSelect = (index) => {
+    const updatedLanguages = languages.map((item, ind) => {
+      if (index === ind) {
+        return { ...item, selected: true };
       } else {
-        item.selected = false;
+        return { ...item, selected: false };
       }
     });
-    let temp2 = [];
-    temp.map(item => {
-      temp2.push(item);
-    });
-    setLangauges(temp2);
+
+    setLangauges(updatedLanguages);
+    setSelectedLang(updatedLanguages[index].code);
   };
+
+  const handleLanguageChanges = async () => {
+    let storedlang = await Strings.getLanguage();
+   
+    if (selectedLang !== storedlang) {
+      console.log("changing language");
+      await Strings.setLanguage(selectedLang);
+      handleLanguageChange(selectedLang); // Notify the HomeScreen about language change
+    } else {
+      console.log("no need to change language");
+    }
+
+    setLangModalVisible(false);
+  };
+
+  const handleCancelChanges = async () => {
+    let storedlang = await Strings.getLanguage();
+  
+    const index = storedlang === "en" ? 0 : 1;
+
+    if (selectedLang !== storedlang) {
+      //correct the selected language
+      onSelect(index);
+    }
+
+    setLangModalVisible(false);
+  }
 
   return (
     <Modal
@@ -39,6 +62,7 @@ const LanguageModal = ({ navigation, langModalVisible, setLangModalVisible, onSe
       onRequestClose={() => {
         setLangModalVisible(!langModalVisible);
       }}>
+
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <Text style={styles.title}>Select Language</Text>
@@ -82,24 +106,11 @@ const LanguageModal = ({ navigation, langModalVisible, setLangModalVisible, onSe
           </View>
           <View style={styles.btns}>
             <CancelButton
-              onPress={() => {
-                setLangModalVisible(false);
-              }}
+              onPress={handleCancelChanges}
             />
             <SaveButton
-              onPress={async () => {
-                setLangModalVisible(false);
-                await Strings.setLanguage(selectedLang);
-                if (navigation.openDrawer) {
-                  // navigation.openDrawer();
-                  // navigation.closeDrawer();
-                  Utils.reloadApp();
-                }
-                else {
-                  console.log('reloading app')
-                }
-              }}
-              />
+              onPress={handleLanguageChanges}
+            />
           </View>
         </View>
       </View>
@@ -108,6 +119,7 @@ const LanguageModal = ({ navigation, langModalVisible, setLangModalVisible, onSe
 };
 
 export default LanguageModal;
+
 const styles = StyleSheet.create({
   centeredView: {
     flex: 1,

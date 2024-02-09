@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Button, FlatList, ScrollView, Text, TextInput, View } from 'react-native';
 import { Strings } from "../services/Strings";
-import { Utils, commonStyles } from "../services/Utils";
+import { Utils } from "../services/Utils";
 import { CustomButton, ImageWithEditableRemark, ImageWithUneditableRemark } from "./Components";
 import { CoordinateSetter } from "./CoordinateSetter";
 import { CustomDropdown } from "./CustomDropdown";
+import { commonStyles } from "../services/Styles";
 
 export const treeFormModes = {
     addTree: 0,
     localEdit: 1,
     remoteEdit: 2
 }
+
 export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage, onDeleteImage }) => {
     const { inSaplingId, inLng, inLat, inImages, inTreeType, inPlot, inUserId } = treeData;
+
     const [saplingid, setSaplingId] = useState(inSaplingId);
     // console.log('saplingid: ',inSaplingId);
     const [lat, setlat] = useState(inLat);
@@ -20,6 +23,8 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     // array of images
     const [exisitingImages, setExistingImages] = useState(inImages)
     const [localSaplingIds, setLocalSaplingIds] = useState([])
+    const [localDataChanged, setLocalDataChanged] = useState(false);
+    const [liveSaplingIds, setLiveSaplingIds] = useState([])
     const [images, setImages] = useState([]);
     const [treeItems, setTreeItems] = useState([]);
     const [plotItems, setPlotItems] = useState([]);
@@ -53,8 +58,13 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         setImages([...images, image]);
     }
     const onSave = async () => {
+        console.log("Sapling id value : ", saplingid)
         if (localSaplingIds.includes(saplingid)) {
             Alert.alert(Strings.alertMessages.invalidSaplingId, Strings.labels.SaplingId + ' ' + saplingid + ' ' + Strings.alertMessages.alreadyExists);
+            return;
+        }
+        else if (liveSaplingIds.includes(saplingid)) {
+            Alert.alert(Strings.alertMessages.invalidSaplingId, Strings.labels.SaplingId + ' ' + saplingid + ' ' + Strings.alertMessages.alreadyExistsInDB);
             return;
         }
         else if (saplingid === null || Object.keys(selectedTreeType).length === 0 || Object.keys(selectedPlot).length === 0) {
@@ -81,11 +91,13 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                 setSelectedPlot({});
                 setImages([]);
                 await onVerifiedSave(tree, images);
+                setLocalDataChanged(true);
             } catch (error) {
                 console.error(error);
             }
         };
     }
+
     const pickImage = async () => {
         let newImage = await Utils.getImageFromCamera(true);
         newImage = await Utils.formatImageForSapling(newImage, saplingid);
@@ -114,26 +126,35 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         if (index < exisitingImages.length) {
             //existing image, remark uneditable.
             return <ImageWithUneditableRemark
-                    item={item}
-                    displayString={displayString}
-                    key={index}
-                    onDelete={(item) => {
-                        handleDeleteExistingItem(item.name);
-                    }} />;
+                item={item}
+                displayString={displayString}
+                key={index}
+                onDelete={(item) => {
+                    handleDeleteExistingItem(item.name);
+                }} />;
         }
         //otherwise, remark is editable.
         return <ImageWithEditableRemark
-                key={index}
-                item={item}
-                displayString={displayString}
-                onDelete={(item) => {
-                    handleDeleteItem(item.name)
-                }}
-                onChangeRemark={(text) => {
-                    changeImageRemarkTo(text, item.name);
-                }}
-            />;
+            key={index}
+            item={item}
+            displayString={displayString}
+            onDelete={(item) => {
+                handleDeleteItem(item.name)
+            }}
+            onChangeRemark={(text) => {
+                changeImageRemarkTo(text, item.name);
+            }}
+        />;
     }
+
+    //Namrata
+    const localDataFetch = useCallback(async () => {
+        let saplingIds = await Utils.fetchSaplingIdsFromLocalDB();
+        saplingIds = saplingIds.map((saplingid) => saplingid.name)
+        saplingIds = saplingIds.filter((id) => (id !== inSaplingId));
+        setLocalSaplingIds(saplingIds);
+    })
+
     const loadDataCallback = useCallback(async () => {
         console.log('fetching data')
         try {
@@ -142,19 +163,26 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                 setUserId(userId);
             }
             let { treeTypes, plots } = await Utils.getLocalTreeTypesAndPlots();
+            let saplingDocsInLiveDB = await Utils.fetchSaplingIdsFromLiveDB();
+            let saplingsInLiveDB = saplingDocsInLiveDB.map((doc) => doc.sapling_id)
+            //console.log("saplings in Live DB ",saplingsInLiveDB)
+            setLiveSaplingIds(saplingsInLiveDB)
             setTreeItems(treeTypes);
             setPlotItems(plots);
-            let saplingIds = await Utils.fetchSaplingIdsFromLocalDB();
-            saplingIds = saplingIds.map((saplingid) => saplingid.name)
-            saplingIds = saplingIds.filter((id) => (id !== inSaplingId));
-            setLocalSaplingIds(saplingIds);
+
         } catch (error) {
             console.error(error);
         }
     }, []);
+
     useEffect(() => {
         loadDataCallback();
     }, []);
+
+    useEffect(() => {
+        localDataFetch();
+    }, [localDataChanged]);
+
     return (
         <ScrollView style={{ backgroundColor: '#5DB075', height: '100%' }} scrollEnabled={mainScrollEnabled}>
             <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
@@ -170,27 +198,22 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                             // value={saplingid}
                             />
                             {
-                                localSaplingIds.includes(saplingid)
-                                &&
-                                <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>Sapling ID {saplingid} already exists locally.</Text>
+                                liveSaplingIds.includes(saplingid) ? (
+                                    <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>
+                                        {saplingid} {Strings.alertMessages.alreadyExistsInDB}
+                                    </Text>
+                                ) : (
+                                    localSaplingIds.includes(saplingid) && (
+                                        <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>
+                                            {saplingid} {Strings.alertMessages.alreadyExists}
+                                        </Text>
+                                    )
+                                )
                             }
+
                         </View>
                         ,
-                        <View>
-                            <TextInput
-                                defaultValue={inSaplingId}
-                                style={commonStyles.txtInput}
-                                placeholder={Strings.labels.SaplingId}
-                                placeholderTextColor={'#000000'}
-                                onChangeText={(text) => { setSaplingId(text) }}
-                            // value={saplingid}
-                            />
-                            {
-                                localSaplingIds.includes(saplingid)
-                                &&
-                                <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>Sapling ID {saplingid} already exists locally.</Text>
-                            }
-                        </View>,
+
                         <Text style={{ ...commonStyles.text4, textAlign: 'center' }}>
                             Sapling ID: {saplingid}
                         </Text>
