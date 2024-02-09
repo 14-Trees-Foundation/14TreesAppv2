@@ -41,7 +41,7 @@ class LoginScreen extends Component {
       }
 
       const userDataPayload = {
-        phone: phoneNumber,
+        phone: phoneNumber.length > 10 ? phoneNumber.substring(2) : phoneNumber,
         pinNumber: pinNumber
       };
 

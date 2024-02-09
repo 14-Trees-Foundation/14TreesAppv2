@@ -69,7 +69,7 @@ const App = () => {
       console.log("phone no: ", phoneNumber);
 
       const userDataPayload = {
-        phone: phoneNumber,
+        phone: phoneNumber.length > 10 ? phoneNumber.substring(2) : phoneNumber,
       }
 
       const isSignedIn = await DataService.loginUser(userDataPayload);

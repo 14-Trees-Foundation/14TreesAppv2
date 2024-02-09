@@ -87,7 +87,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                 console.log(tree);
                 setSaplingId(null);
                 setSelectedTreeType({});
-                setSelectedPlot({});
+                //setSelectedPlot({});
                 setImages([]);
                 await onVerifiedSave(tree, images);
             } catch (error) {
@@ -170,8 +170,9 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     useEffect(() => {
         loadDataCallback();
     }, []);
+    //Namrata
     return (
-        <ScrollView style={{ backgroundColor: '#5DB075', height: '100%' }} scrollEnabled={mainScrollEnabled}>
+        <ScrollView style={{ backgroundColor: '#D2DF7C', height: '100%' }} scrollEnabled={mainScrollEnabled}>
             <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
                 {
                     [
@@ -180,7 +181,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                                 defaultValue={saplingid}
                                 style={commonStyles.txtInput}
                                 placeholder={Strings.labels.SaplingId}
-                                placeholderTextColor={'#000000'}
+                                placeholderTextColor={'black'}
                                 onChangeText={(text) => { setSaplingId(text) }}
                             // value={saplingid}
                             />
@@ -211,12 +212,14 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     items={treeItems}
                     label={Strings.labels.SelectTreeType}
                     onSelectItem={setSelectedTreeType}
+                    showClearButton={false}
                 />
                 <CustomDropdown
                     initItem={selectedPlot}
                     items={plotItems}
                     label={Strings.labels.SelectPlot}
                     onSelectItem={setSelectedPlot}
+                    showClearButton={true}
                 />
                 <CoordinateSetter
                     setInitLocation={mode === treeFormModes.addTree}
@@ -228,10 +231,14 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     plotId={selectedPlot ? selectedPlot.value : undefined}
                 ></CoordinateSetter>
                 <View style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 15 }}>
+                    
                     <Button
                         title={Strings.buttonLabels.ClickPhoto}
                         onPress={() => pickImage()}
-                        color={'#5DB075'}
+                        //color={'#5DB075'}
+                        color = {'#ECD942'}
+                        //Namrata
+                        
                     />
                 </View>
                 <View style={{ margin: 2, borderColor: '#5DB075', borderRadius: 5, flexDirection: 'column', backgroundColor: 'white' }}>

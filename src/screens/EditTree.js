@@ -118,7 +118,7 @@ const EditTreeScreen = ({ navigation }) => {
                     <TextInput
                         style={commonStyles.txtInput}
                         placeholder={Strings.labels.SaplingId}
-                        placeholderTextColor={'#808080'}
+                        placeholderTextColor={'black'}
                         onChangeText={(text) => setSaplingid(text)}
                         value={saplingid}
                     />

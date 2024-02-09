@@ -200,6 +200,7 @@ export class Strings{
             plotSaplingsDataUpToDate:"प्लॉट रोपटी डेटा अद्ययावत.",
             FailureSavingTrees:"काही झाडाचे प्रकार सेव करण्यात असफल. लॉग पहा.",
             FailureSavingPlots:"काही प्लॉट सेव करण्यात असफल. लॉग पहा.",
+            FailureSavingSaplings:"काही रोपे सेव करण्यात असफल. लॉग पहा.",
             ConfirmActionTitle:"खात्री आहे का?",
             ConfirmActionMsg:"कृपया कृतीची पुष्टी करा.",
             Yes:"होय",

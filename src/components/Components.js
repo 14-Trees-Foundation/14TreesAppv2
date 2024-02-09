@@ -84,7 +84,7 @@ export function MyIcon({ name, size = 30, color = 'green' }) {
   }
   return <Text>??</Text>
 }
-
+//Namrata
 export function MyIconButton({ name, names, sizes, styles, size = 30, color = 'green', onPress, iconColor = 'white', text = undefined }) {
   if (name) {
     return <TouchableOpacity style={{ ...commonStyles.iconBtn, backgroundColor: color, }} onPress={onPress}>
