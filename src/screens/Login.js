@@ -41,7 +41,7 @@ class LoginScreen extends Component {
       }
 
       const userDataPayload = {
-        phone: phoneNumber.length > 10 ? phoneNumber.substring(2) : phoneNumber,
+        phone: phoneNumber,
         pinNumber: pinNumber
       };
 
@@ -49,7 +49,7 @@ class LoginScreen extends Component {
       const isSignedIn = await DataService.loginUser(userDataPayload);
 
       const response = isSignedIn.data;
-      console.log("response data: ", response);
+      console.log("---response data login---: ", response);
 
 
 
@@ -102,11 +102,12 @@ class LoginScreen extends Component {
 
       if (response.user.adminID) {
         await AsyncStorage.setItem(Constants.adminIdKey, response.user.adminID);
-        console.log('adminId stored');
+        const admin_id = await AsyncStorage.getItem(Constants.adminIdKey)
+        console.log('--------adminId stored----------',admin_id);
         console.log('adminId : ', response.user.adminID)
       }
       else {
-        console.log('adminId not stored')
+        console.log('------------adminId not stored-------------------')
       }
 
 
@@ -114,7 +115,7 @@ class LoginScreen extends Component {
         await AsyncStorage.setItem(Constants.userIdKey, response.user._id);
         console.log('userId stored: ', response.user._id);
         response.data = { ...response.user, image: '' }
-        console.log("response data: ", response.data);
+        console.log("-----------response data in setUserId--------: ", response.data);
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
         console.log('userDetails stored');
       } catch (error) {

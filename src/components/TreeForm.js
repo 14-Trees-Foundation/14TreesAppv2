@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Button, FlatList, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, Button, FlatList, ScrollView, Text, TextInput, View ,Modal,TouchableOpacity} from 'react-native';
 import { Strings } from "../services/Strings";
 import { Utils } from "../services/Utils";
 import { CustomButton, ImageWithEditableRemark, ImageWithUneditableRemark } from "./Components";
 import { CoordinateSetter } from "./CoordinateSetter";
 import { CustomDropdown } from "./CustomDropdown";
 import { commonStyles } from "../services/Styles";
+import * as ImagePicker from 'react-native-image-picker';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 export const treeFormModes = {
     addTree: 0,
@@ -31,17 +33,20 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     const [selectedTreeType, setSelectedTreeType] = useState(inTreeType);
     const [selectedPlot, setSelectedPlot] = useState(inPlot);
     const [userId, setUserId] = useState(inUserId);
+    const [modalVisible, setModalVisible] = useState(false);
     console.log('rendered treeform')
     useEffect(() => {
         console.log(treeData.inSaplingId)
         if (mode === treeFormModes.localEdit) {
             setExistingImages([]);
+            console.log("---------treeData.inImages------------",treeData.inImages)
             setImages(treeData.inImages);
         }
     }, [treeData])
     const handleDeleteExistingItem = async (name) => {
         const newSetImages = exisitingImages.filter((item) => item.name !== name);
         if (onDeleteImage) {
+            console.log("----new set images-----",newSetImages,"-----onDeleteImage-----",onDeleteImage)
             await onDeleteImage(name);
         }
         setExistingImages(newSetImages);
@@ -54,7 +59,8 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         if (onNewImage) {
             await onNewImage(image);
         }
-        setImages([...images, image]);
+        //setImages([...images, image]) //namrata;
+        setImages([image]);
     }
     const onSave = async () => {
         console.log("Sapling id value : ",saplingid)
@@ -62,7 +68,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             Alert.alert(Strings.alertMessages.invalidSaplingId, Strings.labels.SaplingId + ' ' + saplingid + ' ' + Strings.alertMessages.alreadyExists);
             return;
         }
-        else if(liveSaplingIds.includes(saplingid)){
+        else if(liveSaplingIds.includes(saplingid) && mode!==treeFormModes.remoteEdit){
             Alert.alert(Strings.alertMessages.invalidSaplingId, Strings.labels.SaplingId + ' ' + saplingid + ' ' + Strings.alertMessages.alreadyExistsInDB);
             return;
         }
@@ -95,8 +101,12 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             }
         };
     }
-    const pickImage = async () => {
-        let newImage = await Utils.getImageFromCamera(true);
+
+    //namrata
+    
+    const pickImage = async (selectionId) => {
+        setModalVisible(false)
+        let newImage = await Utils.getImage(true,selectionId);
         newImage = await Utils.formatImageForSapling(newImage, saplingid);
         await handleAddImage(newImage);
     };
@@ -121,6 +131,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             exisitingImages.length + images.length);
 
         if (index < exisitingImages.length) {
+            console.log("----------deleting image--------1----------")
             //existing image, remark uneditable.
             return <ImageWithUneditableRemark
                 item={item}
@@ -131,6 +142,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                 }} />;
         }
         //otherwise, remark is editable.
+        console.log("----------deleting image--------2----------")
         return <ImageWithEditableRemark
             key={index}
             item={item}
@@ -170,9 +182,9 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     useEffect(() => {
         loadDataCallback();
     }, []);
-    //Namrata
+   
     return (
-        <ScrollView style={{ backgroundColor: '#D2DF7C', height: '100%' }} scrollEnabled={mainScrollEnabled}>
+        <ScrollView style={{ backgroundColor: '#5DB075', height: '100%' }} scrollEnabled={mainScrollEnabled}>
             <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
                 {
                     [
@@ -232,14 +244,41 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                 ></CoordinateSetter>
                 <View style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 15 }}>
                     
-                    <Button
+                    {/* <Button
                         title={Strings.buttonLabels.ClickPhoto}
-                        onPress={() => pickImage()}
+                        //onPress={() => pickImage()}
                         //color={'#5DB075'}
                         color = {'#ECD942'}
                         //Namrata
                         
-                    />
+                    /> */}
+                    <TouchableOpacity onPress={() => setModalVisible(true)}   style={{ backgroundColor: '#5DB075', padding: 10, borderRadius: 5, alignItems:"center" }}>
+                        <Text style={{color:"black", fontWeight: 'bold'}}>{Strings.buttonLabels.ClickPhoto}</Text>
+                    </TouchableOpacity>
+                    <Modal
+                        animationType="fade"
+                        transparent={true}
+                        visible={modalVisible}
+                        onRequestClose={() => {
+                            setModalVisible(false);
+                        }}
+                        >
+                        <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                            <View style={{ backgroundColor: 'white', padding: 40 }}>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between',margin:10 }}>
+                                    <Button title={Strings.buttonLabels.openCamera} onPress={() => pickImage(0)} color="green" // Change text color
+                                    />
+                                    <Button title={Strings.buttonLabels.openGallery}  onPress={() => pickImage(1)} color="green" // Change text color
+                                    />
+                                </View>
+                                <TouchableOpacity style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }} onPress={() => setModalVisible(false)}  >
+                                    <Icon name="close-circle" size={25} color="green" /> 
+                                </TouchableOpacity>
+                            </View>
+                            
+                        </View>    
+                    </Modal>
+
                 </View>
                 <View style={{ margin: 2, borderColor: '#5DB075', borderRadius: 5, flexDirection: 'column', backgroundColor: 'white' }}>
                     <FlatList

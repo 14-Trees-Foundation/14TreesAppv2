@@ -50,7 +50,8 @@ export const commonStyles = StyleSheet.create({
     },
     //Namrata
     borderedDisplay: {
-        borderColor: '#F2E47D', borderWidth: 3, borderRadius: 5, margin: 3, padding: 3
+        //borderColor: '#F2E47D', borderWidth: 3, borderRadius: 5, margin: 3, padding: 3
+        borderColor: 'gray', borderWidth: 3, borderRadius: 5, margin: 3, padding: 3
     },
     defaultButtonStyle: {
         flexDirection: 'row',
@@ -78,7 +79,6 @@ export const commonStyles = StyleSheet.create({
     //Namrata
     drawerHeader: {
         backgroundColor: '#5DB075',
-        //backgroundColor:"#859424"
     },
     headerTitleStyle: {
         color: 'white'
@@ -177,8 +177,8 @@ export const commonStyles = StyleSheet.create({
         borderWidth: 0.5,
         borderColor: 'grey',
         borderRadius: 10,
-        //backgroundColor: '#f5f5f5',
-        backgroundColor:"#ECD942",
+        backgroundColor: '#f5f5f5',
+        //backgroundColor:"#ECD942",
         marginTop: 10,
         marginBottom: 10,
         padding: 10,

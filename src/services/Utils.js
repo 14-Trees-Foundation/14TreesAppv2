@@ -1,12 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { launchCamera, } from 'react-native-image-picker';
-import { Alert, ToastAndroid } from "react-native";
+import { launchCamera } from 'react-native-image-picker';
+import { Alert, ToastAndroid, Modal } from "react-native";
 import { DataService } from "./DataService";
 import { LocalDatabase } from "./tree_db";
 import RNRestart from 'react-native-restart';
 import { Strings } from "./Strings";
 import ImageResizer from "react-native-image-resizer";
 import RNFS from 'react-native-fs';
+import React, { useState } from 'react';
+//namrata
+import * as ImagePicker from 'react-native-image-picker';
 
 const MIN_BATCH_SIZE = 5
 
@@ -25,7 +28,13 @@ export class Utils {
         return saplings;
     }
 
+    static async deleteTreeImages(saplingId) {
+        //deleting previous images
+        await this.localdb.deleteTreeImages(saplingId);
+    }
+
     static async deleteTreeAndImages(saplingId) {
+     
         await this.localdb.deleteTreeImages(saplingId);
         await this.localdb.deleteTree(saplingId);
         return;
@@ -39,8 +48,10 @@ export class Utils {
     }
 
     static async saveTreeAndImagesToLocalDB(tree, images) {
+        console.log("--------------updating image------------------")
         await this.localdb.saveTree(tree, 0);
         for (let index = 0; index < images.length; index++) {
+            console.log("image while adding tree: ",images[index].data)
             const element = {
                 saplingid: tree.saplingid,
                 image: images[index].data,
@@ -48,6 +59,8 @@ export class Utils {
                 remark: images[index].meta.remark,
                 timestamp: images[index].meta.capturetimestamp,
             };
+
+            //namrata - delete previous image first
             await this.localdb.saveTreeImages(element);
         }
     }
@@ -260,6 +273,7 @@ export class Utils {
         }
     }
 
+   
     //store all trees - Namrata
     static async storeTrees(saplingsDocs) {
         
@@ -473,16 +487,24 @@ export class Utils {
     static async getLastHash() {
         return await AsyncStorage.getItem(Constants.lastHashKey);
     }
-    static async getImageFromCamera(compressionRequired = false) {
+    static async getImage(compressionRequired = false,selectionId) {
         const options = {
             mediaType: 'photo',
             includeBase64: true,
             maxHeight: 200,
             maxWidth: 200,
         };
-
-        const response = await launchCamera(options);
-        console.log('from launch camera: ', response)
+            //namrata
+        let response = {}
+        if(selectionId === 0){
+            response = await launchCamera(options);
+            console.log('from launch camera: ', response)
+        }else{
+            response =  await ImagePicker.launchImageLibrary(options)
+            console.log('from launch gallery: ', response)
+        }
+        
+        
         if (response.didCancel) {
             console.log('User cancelled image picker');
         } else if (response.error) {
@@ -510,6 +532,7 @@ export class Utils {
             };
             return newImage;
         }
+    
     }
     static async formatImageForSapling(image, saplingid) {
         let newImage = { ...image }

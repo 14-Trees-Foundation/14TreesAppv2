@@ -8,7 +8,7 @@ import { MyIconButton } from '../components/Components';
 import LoadingScreen from './LoadingScreen';
 
 const fetchTreeDetails = async (saplingId, setDetails) => {
-    // console.log('fetching tree details');    
+    console.log('-------fetching tree details-----------');    
     const treeDetails = await Utils.fetchLocalTree(saplingId);
     // console.log(treeDetails);
     if (!treeDetails) { return; }
@@ -41,11 +41,12 @@ export const EditLocalTree = ({ navigation, route }) => {
     }, [saplingid])
     const updateDetails = async (tree, images) => {
         console.log(tree);
-        console.log(images);
-        if (tree.saplingid !== details.inSaplingId) {
+        console.log("---------------------Editting Images locally----------------------");
+        if (tree.saplingid !== details.inSaplingId) {   
             //delete tree by sapling ID
             await Utils.deleteTreeAndImages(details.inSaplingId);
         }
+        await Utils.deleteTreeImages(tree.saplingid);
         await Utils.saveTreeAndImagesToLocalDB(tree, images);
         navigation.popToTop();
     }

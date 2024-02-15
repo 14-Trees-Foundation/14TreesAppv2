@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React, { useContext, useEffect, useState } from 'react';
 import { Alert, BackHandler, Platform, RootTagContext } from 'react-native';
 import { enableLatestRenderer } from 'react-native-maps';
-import { PERMISSIONS } from 'react-native-permissions';
+import { PERMISSIONS, request } from 'react-native-permissions';
 import { DrawerNavigator } from './components/Components';
 import LoadingScreen from './screens/LoadingScreen';
 import LoginScreen from './screens/Login';
@@ -17,11 +17,7 @@ import { styleConfigs } from './services/Styles';
 
 enableLatestRenderer();
 
-
-
-const Stack = createStackNavigator();
 async function requestPermissions() {
-  //https://developer.android.com/training/data-storage/shared/media#storage-permission
   const androidVersion = Number.parseInt(Platform.constants['Release']);
   const versionOfPermissionChange = 13;
   const permissions = [
@@ -45,16 +41,21 @@ async function requestPermissions() {
     ])
   }
   console.log("permission array: ", permissions);
+  let ungrantedPermissions = await checkMultiplePermissions(permissions);
+  console.log("ungrantedPermissions: ", ungrantedPermissions);
 
-  let res = await checkMultiplePermissions(permissions);
-  if (!res) {
-    Alert.alert(
-      Strings.alertMessages.PermissionsRequired,
-      Strings.alertMessages.Settings,
-    );
+  if (ungrantedPermissions.length > 0) {
+    Alert.alert(Strings.alertMessages.PermissionsRequired, Strings.alertMessages.Settings);
   }
+
 }
+
+
+const Stack = createStackNavigator();
+
+
 export const stackNavRef = createNavigationContainerRef();
+
 const App = () => {
   const rootTag = useContext(RootTagContext);
   console.log('app roottag: ', rootTag)
@@ -64,33 +65,65 @@ const App = () => {
   const checkSignInStatus = async () => {
     try {
 
-      const phoneNumber = await DeviceInfo.getPhoneNumber();
+      let phoneNumber, deviceinfo, deviceName, device;
 
-      console.log("phone no: ", phoneNumber);
+      try {
+        phoneNumber = await DeviceInfo.getPhoneNumber();
+        deviceinfo = await DeviceInfo.getManufacturer();
+        deviceName = await DeviceInfo.getDeviceName();
+        device = deviceinfo + "" + deviceName;
+        console.log("phone no: ", phoneNumber, " device: ", device);
+      } catch (error) {
+        const errorLog = error.toString();
+        console.log("error phone: ", errorLog);
+        //await Utils.logException(null, device, "not found", errorLog);
+      }
+
+      // const logs = await Utils.getLogsFromLocalDB();
+      // console.log("logs from local db: ", logs);
 
       const userDataPayload = {
-        phone: phoneNumber.length > 10 ? phoneNumber.substring(2) : phoneNumber,
+        phone: phoneNumber,
       }
 
-      const isSignedIn = await DataService.loginUser(userDataPayload);
-      const response = isSignedIn.data;
-      console.log("response data: ", response);
-
-      if (response.success) {
-        // User is signed in, navigate to HomeScreen
-        await AsyncStorage.setItem(Constants.userIdKey, response.user._id);
-        console.log('userId stored: ', response.user._id);
-        response.data = { ...response.user, image: '' }
-        console.log("response data: ", response.data);
-        await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
-        console.log('userDetails stored');
-        return true;
-      }
-      else {
+      if (!phoneNumber) {
         // User is not signed in, navigate to LoginScreen
         stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
         return false;
       }
+
+      const isSignedIn = await DataService.loginUser(userDataPayload);
+      const response = isSignedIn.data;
+      console.log("response data inside app.js: ", response);
+
+      if (response.success === false) {
+        // User is not signed in, navigate to LoginScreen
+        stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
+        return false;
+      }
+
+      if (response.user.adminID) {
+        await AsyncStorage.setItem(Constants.adminIdKey, response.user.adminID);
+        const admin_id = await AsyncStorage.getItem(Constants.adminIdKey);
+        console.log('adminId stored from async: ', admin_id);
+        console.log('adminId : ', response.user.adminID);
+      } else {
+        console.log('adminId not stored');
+      }
+
+      try {
+        await AsyncStorage.setItem(Constants.userIdKey, response.user._id);
+        console.log('userId stored: ', response.user._id);
+        response.data = { ...response.user, image: '' };
+        console.log("response data modified: ", response.data);
+        await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
+        console.log('userDetails stored');
+      } catch (error) {
+        console.log('Error storing userId', error);
+      }
+
+      return true;
+
     } catch (error) {
       console.error('Error checking sign-in status:', error);
       return false;
@@ -100,7 +133,7 @@ const App = () => {
   const initTasks = async () => {
 
     let storedlang = await Strings.getLanguage();
-    console.log('stored lang: ', storedlang);
+
     if (storedlang === null) {
       Strings.setLanguage(Strings.english);
     }
@@ -108,9 +141,13 @@ const App = () => {
       Strings.setLanguage(storedlang);
     }
 
-    const loggedIn = await checkSignInStatus();
+    console.log('stored lang: ', storedlang,);
+
     await Utils.setDBConnection();//ensures ldb setup in Utils
     await Utils.createLocalTablesIfNeeded();
+
+    const loggedIn = await checkSignInStatus();
+
     if (loggedIn) {
       stackNavRef.current?.navigate(Strings.screenNames.getString('DrawerScreen', Strings.english));
     }
@@ -118,16 +155,21 @@ const App = () => {
       stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
     }
   }
-  //Code cleanup.
 
   const backHandler = () => {
     return true;
   }
 
   useEffect(() => {
-    requestPermissions();
-    initTasks();
-    BackHandler.addEventListener('hardwareBackPress', backHandler)//disables back button presses.
+
+    const initializeApp = async () => {
+      await requestPermissions();
+      await initTasks();
+      BackHandler.addEventListener('hardwareBackPress', backHandler);
+    };
+
+    initializeApp();
+
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', backHandler);
     }

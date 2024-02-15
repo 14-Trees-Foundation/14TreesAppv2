@@ -263,6 +263,8 @@ export class Strings{
             drag:"Drag",
             hideAll:"Hide All",
             showAll:"Show All",
+            openGallery :"Open Gallery",
+            openCamera : "Open Camera",
             // local data view
             DeleteSyncedTrees:"Delete Synced Trees",
             Filters:"Filters",
@@ -294,6 +296,8 @@ export class Strings{
             drag:"ड्रॅग करा",
             hideAll:"सर्व लपवा",
             showAll:"सगळं दाखवा",
+            openGallery :"गॅलरी उघडा",
+            openCamera : "कॅमेरा उघडा",
             // local data view
             DeleteSyncedTrees:"सिंक केलेले झाडे हटवा",
             Filters:"फिल्टर",

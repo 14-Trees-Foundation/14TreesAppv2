@@ -182,6 +182,7 @@ export class LocalDatabase {
         return;
     }
 
+    //namrata
     deleteTreeImages = async (saplingId) => {
         const deleteQuery = `DELETE FROM sapling_images where saplingid = ?`;
         await this.db.executeSql(deleteQuery, [saplingId]);
