@@ -16,6 +16,7 @@ class LoginScreen extends Component {
       pinNumber: '',
       langModalVisible: false
     };
+    this.loginUser = this.loginUser.bind(this);
   }
 
   loginUser = async () => {
