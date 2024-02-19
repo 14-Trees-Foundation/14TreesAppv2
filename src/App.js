@@ -65,35 +65,93 @@ const App = () => {
   const checkSignInStatus = async () => {
     try {
 
-      const phoneNumber = await DeviceInfo.getPhoneNumber();
+      let phoneNumber;
 
-      console.log("phone no: ", phoneNumber);
+      try {
+        phoneNumber = await DeviceInfo.getPhoneNumber();
+      } catch (error) {
+        //const errorLog = error.toString();
+        const stackTrace = error.stack;
+        //console.log("stacktrace: ", stackTrace);
+        const errorLog = {
+          msg: "happened while detecting phone number",
+          error: JSON.stringify(error),
+          stackTrace: stackTrace
+        }
+        //console.log("error phone: ", errorLog);
+        await Utils.logException(JSON.stringify(errorLog));
+      }
 
+      const logsArray = await Utils.getLogsFromLocalDB();
+
+      console.log("logs from local db: ", logsArray.length);
+      for (const logData of logsArray) {
+        //const {logs} = logData
+        console.log("logData: ", logData);
+      }
       const userDataPayload = {
         phone: phoneNumber,
       }
 
-      const isSignedIn = await DataService.loginUser(userDataPayload);
-      const response = isSignedIn.data;
-      console.log("response data: ", response);
-
-      if (response.success) {
-        // User is signed in, navigate to HomeScreen
-        await AsyncStorage.setItem(Constants.userIdKey, response.user._id);
-        console.log('userId stored: ', response.user._id);
-        response.data = { ...response.user, image: '' }
-        console.log("response data: ", response.data);
-        await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
-        console.log('userDetails stored');
-        return true;
-      }
-      else {
+      if (!phoneNumber) {
         // User is not signed in, navigate to LoginScreen
         stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
         return false;
       }
+
+      const isSignedIn = await DataService.loginUser(userDataPayload);
+      const response = isSignedIn.data;
+      console.log("response data inside app.js: ", response);
+
+      if (response.success === false) {
+        // User is not signed in, navigate to LoginScreen
+        stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
+        return false;
+      }
+
+      if (response.user.adminID) {
+        await AsyncStorage.setItem(Constants.adminIdKey, response.user.adminID);
+        const admin_id = await AsyncStorage.getItem(Constants.adminIdKey);
+        console.log('adminId stored from async: ', admin_id);
+        console.log('adminId : ', response.user.adminID);
+      } else {
+        console.log('adminId not stored');
+      }
+
+      try {
+        await AsyncStorage.setItem(Constants.userIdKey, response.user._id);
+        console.log('userId stored: ', response.user._id);
+        await AsyncStorage.setItem(Constants.phoneNumber, response.user.phone.toString());
+        response.data = { ...response.user, image: '' };
+        console.log("response data modified: ", response.data);
+        await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
+
+        console.log('userDetails stored');
+      } catch (error) {
+        console.log('Error storing userId', error);
+        const stackTrace = error.stack;
+        //console.log("stacktrace: ", stackTrace);
+        const errorLog = {
+          msg: "happened while trying to store userId during login",
+          error: JSON.stringify(error),
+          stackTrace: stackTrace
+        }
+        //console.log("error phone: ", errorLog);
+        await Utils.logException(JSON.stringify(errorLog));
+      }
+
+      return true;
+
     } catch (error) {
       console.error('Error checking sign-in status:', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: "happened while trying to auto login through auto detect phone number",
+        error: JSON.stringify(error),
+        stackTrace: stackTrace
+      }
+      //console.log("error phone: ", errorLog);
+      await Utils.logException(JSON.stringify(errorLog));
       return false;
     }
   };
@@ -101,7 +159,7 @@ const App = () => {
   const initTasks = async () => {
 
     let storedlang = await Strings.getLanguage();
-   
+
     if (storedlang === null) {
       Strings.setLanguage(Strings.english);
     }
@@ -109,11 +167,13 @@ const App = () => {
       Strings.setLanguage(storedlang);
     }
 
-    console.log('stored lang: ', storedlang, );
-    
-    const loggedIn = await checkSignInStatus();
+    console.log('stored lang: ', storedlang,);
+
     await Utils.setDBConnection();//ensures ldb setup in Utils
     await Utils.createLocalTablesIfNeeded();
+
+    const loggedIn = await checkSignInStatus();
+
     if (loggedIn) {
       stackNavRef.current?.navigate(Strings.screenNames.getString('DrawerScreen', Strings.english));
     }
@@ -127,7 +187,7 @@ const App = () => {
   }
 
   useEffect(() => {
-    
+
     const initializeApp = async () => {
       await requestPermissions();
       await initTasks();

@@ -11,7 +11,11 @@ const EditTreeScreen = ({ navigation }) => {
     const [details, setDetails] = useState(null);
     const [newImages, setNewImages] = useState([]);
     const [deletedImages, setDeletedImages] = useState([]);
+    
     const updateDetails = async (tree, images) => {
+        console.log("tree details from edit----",  tree);
+        //console.log("images details from edit----",  images);
+
         const saplingData = {
             location: {
                 type: "Point",
@@ -23,6 +27,7 @@ const EditTreeScreen = ({ navigation }) => {
             plot_id: "",//plot id
         };
         const adminID = await Utils.getAdminId();
+        console.log("adminID inside edit tree screen----", adminID);
         saplingData.location.coordinates = [
             tree.lat, tree.lng
         ];
@@ -41,6 +46,9 @@ const EditTreeScreen = ({ navigation }) => {
             newImages: newImages,
             deletedImages: deletedImages,
         }
+
+        console.log("new images: ", newImages.length, "deleted images: ", deletedImages.length);
+        
         const response = await DataService.updateSapling(adminID, requestData);
         if (!response) {
             return;

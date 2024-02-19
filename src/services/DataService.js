@@ -2,6 +2,7 @@ import axios from 'axios';
 import { Buffer } from "buffer";
 import { ToastAndroid } from 'react-native';
 import { Strings } from './Strings';
+import { Utils } from './Utils';
 
 axios.interceptors.response.use(function (response) {
   return response;
@@ -46,10 +47,10 @@ axios.interceptors.response.use(function (response) {
 
 export class DataService {
 
-  
+
   static productionHostName = 'https://api.14trees.org';
-  //static hostName = 'https://vk061k4q-7000.inc1.devtunnels.ms';
   static hostName = 'http://10.0.2.2:7000';
+  //static phoneHostName = "http://192.168.31.11:7000";
   static serverBase = `${this.hostName}/api/appv2`;
 
   static async loginUser(userDataPayload) {
@@ -104,6 +105,12 @@ export class DataService {
     const url = `${DataService.serverBase}/updateSapling`;
     return await axios.post(url, { adminID: adminID, sapling: sapling });
   }
+  //manjur
+  static async uploadLogs(logs) {
+    const url = `${DataService.serverBase}/uploadLogs`;
+    const response = await axios.post(url, logs);
+    return response.data;
+  }
 
   static async uploadTrees(treeList) {
     const url = `${DataService.serverBase}/uploadTrees`;
@@ -116,10 +123,11 @@ export class DataService {
 
   static async fetchTreeDetails(saplingID, adminID) {
     const url = `${DataService.serverBase}/getSapling`
-    const response = (await axios.post(url, {
+    const response = await axios.post(url, {
       adminID: adminID,
       saplingID: saplingID
-    }))
+    })
+    //console.log("response from fetchTreeDetails:- ", response);
     if (response) {
       return response.data;
     }
@@ -136,6 +144,13 @@ export class DataService {
       return base64String;
     } catch (error) {
       console.error('Error:', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: "happened while trying to convert fileURLToBase64",
+        error: JSON.stringify(error),
+        stackTrace: stackTrace
+      }
+      await Utils.logException(JSON.stringify(errorLog));
     }
   }
 

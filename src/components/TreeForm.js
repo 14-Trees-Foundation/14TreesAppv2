@@ -15,7 +15,7 @@ export const treeFormModes = {
 
 export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage, onDeleteImage }) => {
     const { inSaplingId, inLng, inLat, inImages, inTreeType, inPlot, inUserId } = treeData;
-
+    console.log("mode is: ", mode);
     const [saplingid, setSaplingId] = useState(inSaplingId);
     // console.log('saplingid: ',inSaplingId);
     const [lat, setlat] = useState(inLat);
@@ -23,6 +23,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     // array of images
     const [exisitingImages, setExistingImages] = useState(inImages)
     const [localSaplingIds, setLocalSaplingIds] = useState([])
+    const [imageForModal, setImageForModal] = useState([]); //imageForModal
     const [localDataChanged, setLocalDataChanged] = useState(false);
     const [liveSaplingIds, setLiveSaplingIds] = useState([])
     const [images, setImages] = useState([]);
@@ -40,30 +41,34 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             setImages(treeData.inImages);
         }
     }, [treeData])
-    const handleDeleteExistingItem = async (name) => {
+
+    const handleDeleteExistingItem = async (name, time) => {
+        console.log("deleteing images from edit---------");
         const newSetImages = exisitingImages.filter((item) => item.name !== name);
+        if (newSetImages) {
+            console.log("image found delete--------", newSetImages.length, "time: ", time);
+        } else {
+            console.log("image not found delete---------", newSetImages.length, "time: ", time);
+        }
         if (onDeleteImage) {
             await onDeleteImage(name);
         }
         setExistingImages(newSetImages);
     }
+
     const handleDeleteItem = async (name) => {
         const newImages = images.filter((item) => item.name !== name);
         setImages(newImages);
     };
-    const handleAddImage = async (image) => {
-        if (onNewImage) {
-            await onNewImage(image);
-        }
-        setImages([...images, image]);
-    }
+
+
     const onSave = async () => {
         console.log("Sapling id value : ", saplingid)
         if (localSaplingIds.includes(saplingid)) {
             Alert.alert(Strings.alertMessages.invalidSaplingId, Strings.labels.SaplingId + ' ' + saplingid + ' ' + Strings.alertMessages.alreadyExists);
             return;
         }
-        else if (liveSaplingIds.includes(saplingid)) {
+        else if (liveSaplingIds.includes(saplingid) && mode !== treeFormModes.remoteEdit) {
             Alert.alert(Strings.alertMessages.invalidSaplingId, Strings.labels.SaplingId + ' ' + saplingid + ' ' + Strings.alertMessages.alreadyExistsInDB);
             return;
         }
@@ -94,15 +99,44 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                 setLocalDataChanged(true);
             } catch (error) {
                 console.error(error);
+                const stackTrace = error.stack;
+                const errorLog = {
+                    msg: "happened while trying to save tree details in onSave() of TreeForm",
+                    error: JSON.stringify(error),
+                    stackTrace: stackTrace
+                }
+                //console.log("error phone: ", errorLog);
+                await Utils.logException(JSON.stringify(errorLog));
             }
         };
     }
 
+    const handleAddImage = async (image) => {
+        //console.log("image: ", image);
+
+        if (onNewImage) {
+            await onNewImage(image);
+        }
+        setImages([...images, image]);
+
+        //changes for edit tree
+        // setExistingImages([]);
+        // setImages([image]);
+    }
+
     const pickImage = async () => {
-        let newImage = await Utils.getImageFromCamera(true);
+        let newImageResponse = await Utils.getImageFromCamera(true);
+        if (newImageResponse == undefined) return;
+        //console.log("new image response: ", newImageResponse);
+        let newImage = newImageResponse.newImage;
         newImage = await Utils.formatImageForSapling(newImage, saplingid);
         await handleAddImage(newImage);
+
+        let imageForModal = newImageResponse.imageForModal;
+        //console.log("this image:", imageForModal);
+        setImageForModal(imageForModal);
     };
+
     const changeImageRemarkTo = (text, name) => {
         const newImages = images.map((image) => {
             if (image.name === name) {
@@ -118,10 +152,12 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         });
         setImages(newImages);
     }
+
     const renderImage = ({ item, index }) => {
         const displayString = Utils.getDisplayString(index,
             item.meta.capturetimestamp,
             exisitingImages.length + images.length);
+
 
         if (index < exisitingImages.length) {
             //existing image, remark uneditable.
@@ -129,15 +165,18 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                 item={item}
                 displayString={displayString}
                 key={index}
+                imageForModal={imageForModal}
                 onDelete={(item) => {
-                    handleDeleteExistingItem(item.name);
+                    handleDeleteExistingItem(item.name, item.meta.capturetimestamp,);
                 }} />;
+
         }
         //otherwise, remark is editable.
         return <ImageWithEditableRemark
             key={index}
             item={item}
             displayString={displayString}
+            imageForModal={imageForModal}
             onDelete={(item) => {
                 handleDeleteItem(item.name)
             }}
@@ -172,6 +211,14 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
 
         } catch (error) {
             console.error(error);
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: "happened while trying to fetch tree details from local db(loadDataCallback())",
+                error: JSON.stringify(error),
+                stackTrace: stackTrace
+            }
+            //console.log("error phone: ", errorLog);
+            await Utils.logException(JSON.stringify(errorLog));
         }
     }, []);
 
@@ -247,12 +294,15 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                         color={'#5DB075'}
                     />
                 </View>
+
                 <View style={{ margin: 2, borderColor: '#5DB075', borderRadius: 5, flexDirection: 'column', backgroundColor: 'white' }}>
+
                     <FlatList
                         scrollEnabled={false}
                         data={[...exisitingImages, ...images]}
                         renderItem={renderImage}
                     />
+
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: 30, marginTop: 25, marginBottom: 10 }}>
                     {

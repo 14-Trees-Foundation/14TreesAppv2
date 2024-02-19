@@ -32,7 +32,7 @@ export const SyncDisplay = ({ onSyncComplete }) => {
   const [progress, setProgress] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
   const [failedTrees, setFailedTrees] = useState([]);
-  
+
   useEffect(() => {
 
   }, []);
@@ -41,9 +41,26 @@ export const SyncDisplay = ({ onSyncComplete }) => {
     updateSyncStatus(setSyncDate, setTreeCounts);
     console.log('sync date updated')
   }, []))
-  
-  const commenceUpload = () => {
+
+  const syncLogs = async () => {
+    const response = await Utils.syncLogs();
+    console.log("response logs from server: ", response);
+
+    if (response.success) {
+      await Utils.deleteLogsFromLocalDB();
+    }
+
+    const logsArray = await Utils.getLogsFromLocalDB();
+
+    console.log("logs array length from local db after sync: ", logsArray.length);
+    // for (const logData of logsArray) {
+    //   console.log("logData: ", logData);
+    // }
+  }
+
+  const commenceUpload = async () => {
     setShowProgress(true);
+    await syncLogs();
     Utils.upload(setProgress).then(async (failures) => {
       setFailedTrees(failures);
       setProgress(1);

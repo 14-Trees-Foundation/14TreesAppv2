@@ -12,11 +12,31 @@ const MIN_BATCH_SIZE = 5
 
 export class Utils {
     static localdb = new LocalDatabase();
-//treeTypes and PLots
+    //treeTypes and PLots
     static async getLocalTreeTypesAndPlots() {
         let treeTypes = await this.localdb.getAllTreeTypes();
         let plots = await this.localdb.getAllPlots();
         return { treeTypes, plots };
+    }
+
+    //Manjur
+    static async logException(logs) {
+        await this.localdb.logExceptionLocalDB(logs);
+        return;
+    }
+
+    static async getLogsFromLocalDB() {
+        return await this.localdb.getAllLogs();
+    }
+
+    static async deleteLogsFromLocalDB() {
+        await this.localdb.deleteAllLogs();
+    }
+
+    static async syncLogs() {
+        const logs = await Utils.getLogsFromLocalDB();
+        const response = await DataService.uploadLogs(logs);
+        return response;
     }
 
     //Namrata
@@ -24,6 +44,9 @@ export class Utils {
         let saplings = await this.localdb.getAllSaplingsInLiveDB();
         return saplings;
     }
+
+
+
 
     static async deleteTreeAndImages(saplingId) {
         await this.localdb.deleteTreeImages(saplingId);
@@ -83,13 +106,14 @@ export class Utils {
         await this.localdb.createPlotTbl();
         await this.localdb.createSaplingTbl();
         await this.localdb.createTreesTable();
+        await this.localdb.createLogsTable();
         await this.localdb.createSaplingPlotTbl();
 
     }
 
-//Namrata
+    //Namrata
 
-   
+
     static async fetchAndStoreHelperData() {
         console.log('fetching helper data in Utils');
         // console.log('ldb: ', this.localdb)
@@ -98,18 +122,18 @@ export class Utils {
         let userId = await Utils.getUserId();
         console.log('requesting: ', userId, lastHash)
         //setStatus(requesting)
-        
+
         const helperData = await DataService.fetchHelperData(userId, lastHash);
 
-        console.log("userId ",userId,"lastHash ",lastHash)
+        console.log("userId ", userId, "lastHash ", lastHash)
         if (!helperData) {
             //setStatus(request failed)
             return;//error display, logging done by DataService.
         }
         // setStatus(storing)
-        const data = helperData.data['data'];      
+        const data = helperData.data['data'];
         const newHash = helperData.data['hash'];
-        console.log("newHash ",newHash)
+        console.log("newHash ", newHash)
         if (newHash == lastHash) {
             console.log("---------------------------newHash == lastHash-------------")
             ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
@@ -118,11 +142,11 @@ export class Utils {
         }
         if (data) {
             console.log("---------------------------New Data-------------")
-           
+
             await Utils.storeTreeTypes(data['treeTypes']);
             await Utils.storePlots(data['plots']);
-            console.log("data['saplings'] :" ,data['saplings'].length)
-            await Utils.storeTrees(data['saplings'])     
+            console.log("data['saplings'] :", data['saplings'].length)
+            await Utils.storeTrees(data['saplings'])
             await AsyncStorage.setItem(Constants.lastHashKey, newHash);
             ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
             // setstatus(data updated)
@@ -217,10 +241,16 @@ export class Utils {
             try {
                 await this.localdb.updateTreeTypeTbl(dbTreeType);
             }
-            catch (err) {
+            catch (error) {
                 console.log('Failed to save treeType: ', dbTreeType);
-                console.log(err)
                 failure = true;
+                const stackTrace = error.stack;
+                const errorLog = {
+                    msg: "happened while trying to save treeType(inside Utils)",
+                    error: JSON.stringify(error),
+                    stackTrace: stackTrace
+                }
+                await this.logException(JSON.stringify(errorLog));
             }
         }
         if (failure) {
@@ -246,10 +276,17 @@ export class Utils {
             try {
                 await this.localdb.updatePlotTbl(dbPlot);
             }
-            catch (err) {
+            catch (error) {
                 console.log('Failed to save plot: ', dbPlot);
-                console.log(err)
+                console.log(error);
                 failure = true;
+                const stackTrace = error.stack;
+                const errorLog = {
+                    msg: "happened while trying to save plot(inside Utils)",
+                    error: JSON.stringify(error),
+                    stackTrace: stackTrace
+                }
+                await this.logException(JSON.stringify(errorLog));
             }
         }
         if (failure) {
@@ -262,25 +299,32 @@ export class Utils {
 
     //store all trees - Namrata
     static async storeTrees(saplingsDocs) {
-        
+
         const treesInLocalDBFormat = saplingsDocs.map((doc) => {
             return {
                 saplingid: doc.sapling_id,
             }
         })
         let failure = false;
-        console.log("length in storeTrees : ",treesInLocalDBFormat.length)
-        
-            try {
-                await this.localdb.updateSaplingTbl(treesInLocalDBFormat);
-                
+        console.log("length in storeTrees : ", treesInLocalDBFormat.length)
+
+        try {
+            await this.localdb.updateSaplingTbl(treesInLocalDBFormat);
+
+        }
+        catch (error) {
+            console.log('Failed to save saplings : ', error);
+            failure = true;
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: "happened while trying to save saplings(inside Utils)",
+                error: JSON.stringify(error),
+                stackTrace: stackTrace
             }
-            catch (err) {
-                console.log('Failed to save saplings : ',err);
-                failure = true;
-            }
-        
-        
+            await this.logException(JSON.stringify(errorLog));
+        }
+
+
         if (failure) {
             ToastAndroid.show(Strings.alertMessages.FailureSavingSaplings);
         }
@@ -314,15 +358,19 @@ export class Utils {
         const timeStr = dateObj.toTimeString().split(':').slice(0, -1).join(':');//remove seconds
         return dateStr + ', ' + timeStr;
     }
+
+
     static async getSyncCounts() {
         const pending = (await Utils.fetchTreesFromLocalDB(0)).length;
         const uploaded = (await Utils.fetchTreesFromLocalDB(1)).length;
         return { pending, uploaded };
     }
+
     static async batchUpload(batch) {
         let failures = batch;
         try {
             let response = await DataService.uploadTrees(batch);
+            console.log("response from uploadTrees: ", response);
             if (response) {
                 failures = await Utils.setTreeSyncStatus(response, batch);
                 console.log('batch failures: ', failures);
@@ -330,9 +378,17 @@ export class Utils {
         }
         catch (error) {
             console.error(error);
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: "happened while trying to batchUpload(inside Utils)",
+                error: JSON.stringify(error),
+                stackTrace: stackTrace
+            }
+            await this.logException(JSON.stringify(errorLog));
         }
         return failures;
     }
+
     static async setLastSyncDateNow() {
         const currentTime = new Date().toString();
         await AsyncStorage.setItem(Constants.syncDateKey, currentTime);
@@ -482,19 +538,27 @@ export class Utils {
         };
 
         const response = await launchCamera(options);
-        console.log('from launch camera: ', response)
+        //console.log('from launch camera: ', response)
+
         if (response.didCancel) {
             console.log('User cancelled image picker');
         } else if (response.error) {
             console.log('ImagePicker Error: ', response.error);
         } else {
-            // const { fileSize } = response.assets[0];
-            // 
-            const timestamp = new Date().toISOString();
-            // only show time and not date
+
+            let imageForModal = {
+                data: response.assets[0].base64,
+                filesz: response.assets[0].fileSize
+            }
+
+            const timestamp = new Date().toISOString(); // only show time and not date
             const filesz = response.assets[0].fileSize;
             let base64Data = response.assets[0].base64;
+
+
+
             let imagePath = response.assets[0].uri;
+
             if (compressionRequired) {
                 const compressedData = await Utils.compressImageAt(filesz, imagePath);
                 if (compressedData !== undefined) {
@@ -506,11 +570,13 @@ export class Utils {
                 meta: {
                     capturetimestamp: timestamp,
                     remark: Strings.messages.defaultRemark,
+
                 }
             };
-            return newImage;
+            return { newImage: newImage, imageForModal: imageForModal };
         }
     }
+
     static async formatImageForSapling(image, saplingid) {
         let newImage = { ...image }
         newImage.saplingid = saplingid;
@@ -519,6 +585,7 @@ export class Utils {
         newImage.name = imageName;
         return newImage;
     }
+
     static async compressImageAt(filesz, imagePath) {
         console.log("original file size: ", filesz);
         let maxsz = 1024 * 10;
@@ -561,6 +628,13 @@ export class Utils {
             catch (error) {
                 // Handle any errors while reading the file
                 console.error('Error reading file:', error);
+                const stackTrace = error.stack;
+                const errorLog = {
+                    msg: "happened while trying to read base64 image file(inside Utils)",
+                    error: JSON.stringify(error),
+                    stackTrace: stackTrace
+                }
+                await this.logException(JSON.stringify(errorLog));
             };
             console.log("resized image: ", resizedImage.size);
             console.log('off factor', maxsz / resizedImage.size);
@@ -573,6 +647,7 @@ export class Constants {
     static userIdKey = 'userid';
     static userDetailsKey = 'userobj';
     static adminIdKey = 'adminid';
+    static phoneNumber = 'phoneNo';
     static lastHashKey = 'lasthash';
     static hashForPlotSaplingsKey = 'hashForPlotSaplings';
     static appRootTagKey = 'rootTag';

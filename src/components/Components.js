@@ -1,4 +1,4 @@
-import { TouchableOpacity, View, Image, Text, Button, TextInput } from "react-native";
+import { TouchableOpacity, View, Image, Text, Button, TextInput, Modal } from "react-native";
 import { Constants, Utils, getImageSourceObject, logoSrc } from "../services/Utils";
 import { fontAwesome5List, materialCommunityList } from '../services/IconLists';
 import Fa5Icon from 'react-native-vector-icons/FontAwesome5';
@@ -189,7 +189,7 @@ export const DrawerNavigator = ({ route }) => {
     fillInUserDetails(setIsAdmin, setUserDetails);
   }, [fillInUserDetails]))
 
-  
+
   return (
     <Drawer.Navigator
       drawerContent={(props) =>
@@ -243,7 +243,17 @@ export const DrawerNavigator = ({ route }) => {
   );
 }
 
-export const ImageWithUneditableRemark = ({ item, displayString, onDelete }) => {
+export const ImageWithUneditableRemark = ({ item, displayString, imageForModal, onDelete }) => {
+  const [imageModalVisible, setImageModalVisible] = useState(false);
+
+  const openImageModal = () => {
+    setImageModalVisible(true);
+  };
+
+  const closeImageModal = () => {
+    setImageModalVisible(false);
+  };
+  //console.log("imageForModal size: ", imageForModal.filesz, "response size: ", imageForModal.response);
   return (
     <View style={{
       marginHorizontal: 10,
@@ -254,10 +264,14 @@ export const ImageWithUneditableRemark = ({ item, displayString, onDelete }) => 
       flexDirection: 'column',
     }}>
       <View style={{ margin: 5, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-        <Image
-          source={{ uri: `data:image/jpeg;base64,${item.data}` }}
-          style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
-        />
+        {/* changes by manjur */}
+        <TouchableOpacity onPress={openImageModal}
+          style={{ alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#5DB075', borderRadius: 5, padding: 5 }}>
+          <Image
+            source={{ uri: `data:image/jpeg;base64,${item.data}` }}
+            style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
+          />
+        </TouchableOpacity>
         <Text style={{ ...commonStyles.text3, textAlign: 'center' }}>{displayString}</Text>
         <TouchableOpacity onPress={() => Utils.confirmAction(() => onDelete(item), Strings.alertMessages.confirmDeleteImage)}>
           <Image
@@ -266,6 +280,25 @@ export const ImageWithUneditableRemark = ({ item, displayString, onDelete }) => 
           />
         </TouchableOpacity>
       </View>
+
+      <Modal
+        visible={imageModalVisible}
+        transparent={true}
+        onRequestClose={false}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+          <TouchableOpacity onPress={closeImageModal} style={{ position: 'absolute', top: 20, right: 20 }}>
+            <Image
+              source={require('../../assets/icondelete.png')} // Replace with your delete icon image
+              style={{ width: 50, height: 50, marginLeft: 10 }} // Adjust the icon dimensions and margin
+            />
+          </TouchableOpacity>
+          <Image
+            source={{ uri: `data:image/jpeg;base64,${item.data}`}}
+            style={{ width: 350, height: 350 }} // Set your desired larger image dimensions
+          />
+        </View>
+      </Modal>
 
       <View style={{}}>
         <Text style={commonStyles.text4}>
@@ -276,7 +309,18 @@ export const ImageWithUneditableRemark = ({ item, displayString, onDelete }) => 
   );
 }
 
-export const ImageWithEditableRemark = ({ item, displayString, onChangeRemark, onDelete }) => {
+export const ImageWithEditableRemark = ({ item, displayString, imageForModal, onChangeRemark, onDelete }) => {
+  const [imageModalVisible, setImageModalVisible] = useState(false);
+  //console.log("imageForModal:", imageForModal);
+
+  const openImageModal = () => {
+    setImageModalVisible(true);
+  };
+
+  const closeImageModal = () => {
+    setImageModalVisible(false);
+  };
+
   return (
     <View style={{
       marginHorizontal: 10,
@@ -287,10 +331,14 @@ export const ImageWithEditableRemark = ({ item, displayString, onChangeRemark, o
       flexDirection: 'column',
     }}>
       <View style={{ margin: 5, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-        <Image
-          source={{ uri: `data:image/jpeg;base64,${item.data}` }}
-          style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
-        />
+        {/* changes by manjur */}
+        <TouchableOpacity onPress={openImageModal}
+          style={{ alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#5DB075', borderRadius: 5, padding: 5 }}>
+          <Image
+            source={{ uri: `data:image/jpeg;base64,${item.data}` }}
+            style={{ width: 100, height: 100, }} // Set your desired image dimensions and margin
+          />
+        </TouchableOpacity>
         <Text style={{ ...commonStyles.text3, textAlign: 'center' }}>{displayString}</Text>
         <TouchableOpacity onPress={() => Utils.confirmAction(() => onDelete(item), Strings.alertMessages.confirmDeleteImage)}>
           <Image
@@ -299,6 +347,27 @@ export const ImageWithEditableRemark = ({ item, displayString, onChangeRemark, o
           />
         </TouchableOpacity>
       </View>
+
+
+      <Modal
+        visible={imageModalVisible}
+        transparent={true}
+        onRequestClose={false}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+          <TouchableOpacity onPress={closeImageModal} style={{ position: 'absolute', top: 20, right: 20 }}>
+            <Image
+              source={require('../../assets/icondelete.png')} // Replace with your delete icon image
+              style={{ width: 50, height: 50, marginLeft: 10 }} // Adjust the icon dimensions and margin
+            />
+          </TouchableOpacity>
+          <Image
+            source={{ uri: `data:image/jpeg;base64,${item.data}`}}
+            style={{ width: 345, height: 350 }} // Set your desired larger image dimensions
+          />
+        </View>
+      </Modal>
+
 
       <View>
         {

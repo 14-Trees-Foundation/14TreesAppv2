@@ -10,7 +10,7 @@ import LoadingScreen from './LoadingScreen';
 const fetchTreeDetails = async (saplingId, setDetails) => {
     // console.log('fetching tree details');    
     const treeDetails = await Utils.fetchLocalTree(saplingId);
-    // console.log(treeDetails);
+    //console.log("treeDetails: ", treeDetails);
     if (!treeDetails) { return; }
     const detailsForTreeForm = { ...Constants.treeFormTemplateData };
     const treeType = await Utils.treeTypeFromID(treeDetails.type_id);
@@ -40,8 +40,8 @@ export const EditLocalTree = ({ navigation, route }) => {
         fetchTreeDetails(saplingid, setDetails);
     }, [saplingid])
     const updateDetails = async (tree, images) => {
-        console.log(tree);
-        console.log(images);
+        console.log("tree received----- ",tree);
+        console.log("images received----- ",images);
         if (tree.saplingid !== details.inSaplingId) {
             //delete tree by sapling ID
             await Utils.deleteTreeAndImages(details.inSaplingId);

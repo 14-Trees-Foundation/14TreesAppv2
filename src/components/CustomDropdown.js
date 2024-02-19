@@ -26,7 +26,7 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
     }
     const [optionsVisible, setOptionsVisible] = useState(false);
     const selectItem = (item) => {
-        Keyboard.dismiss();
+        //Keyboard.dismiss();
         onSelectItem(item);
         setOptionsVisible(false);
         setSelectedItem(item);
