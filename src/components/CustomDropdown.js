@@ -28,6 +28,7 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
         }
     }
     const [optionsVisible, setOptionsVisible] = useState(false);
+    
     const selectItem = (item) => {
         Keyboard.dismiss();
         onSelectItem(item);
@@ -36,17 +37,17 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
     }
     const renderOption = ({ item, index }) => {
         return (<TouchableOpacity
-            style={commonStyles.defaultButtonStyle}
+            style={commonStyles.dropdownOptions}
             onPress={(e) => {
                 selectItem(item);
             }}
+            
         >
-            <Text style={{ ...commonStyles.text3, color: 'white' }}>{item.name}</Text>
+            <Text style={{ ...commonStyles.dropdownOptionsContent, color: 'black' }}>{item.name}</Text>
         </TouchableOpacity>);
     }
 
     const clearSelection = () => {
-        //onSelectItem(null); // Clear the selected item
         setSelectedItem({ name: '', value: -1 });
     };
 
@@ -69,6 +70,7 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
         )}
         </View>
         {optionsVisible && <FlatList
+            keyboardShouldPersistTaps='handled'
             data={filteredOptions}
             renderItem={renderOption}
             scrollEnabled={scrollEnabled}

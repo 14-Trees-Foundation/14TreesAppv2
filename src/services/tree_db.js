@@ -382,7 +382,7 @@ export class LocalDatabase {
                     saplingsArray.push(result.rows.item(index));
                 }
             });
-            console.log("resposnse from select query Saplings: ",res)
+            
             return saplingsArray;
         } 
      

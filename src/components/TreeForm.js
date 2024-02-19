@@ -46,7 +46,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     const handleDeleteExistingItem = async (name) => {
         const newSetImages = exisitingImages.filter((item) => item.name !== name);
         if (onDeleteImage) {
-            console.log("----new set images-----",newSetImages,"-----onDeleteImage-----",onDeleteImage)
+            console.log("----new set images-----",newSetImages,"-----onDeleteImage-----",onDeleteImage,"------exisitingImages-----",exisitingImages)
             await onDeleteImage(name);
         }
         setExistingImages(newSetImages);
@@ -57,6 +57,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     };
     const handleAddImage = async (image) => {
         if (onNewImage) {
+            console.log("-------------in handleAddImage--------------")
             await onNewImage(image);
         }
         //setImages([...images, image]) //namrata;
@@ -93,7 +94,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                 console.log(tree);
                 setSaplingId(null);
                 setSelectedTreeType({});
-                //setSelectedPlot({});
+                //setSelectedPlot({}); //to default the plot
                 setImages([]);
                 await onVerifiedSave(tree, images);
             } catch (error) {
@@ -110,6 +111,10 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         newImage = await Utils.formatImageForSapling(newImage, saplingid);
         await handleAddImage(newImage);
     };
+
+    const clickPhotoEditRemoteTree = async() => {
+
+    }
     const changeImageRemarkTo = (text, name) => {
         const newImages = images.map((image) => {
             if (image.name === name) {
@@ -131,7 +136,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             exisitingImages.length + images.length);
 
         if (index < exisitingImages.length) {
-            console.log("----------deleting image--------1----------")
+            
             //existing image, remark uneditable.
             return <ImageWithUneditableRemark
                 item={item}
@@ -142,7 +147,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                 }} />;
         }
         //otherwise, remark is editable.
-        console.log("----------deleting image--------2----------")
+        
         return <ImageWithEditableRemark
             key={index}
             item={item}
@@ -184,7 +189,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     }, []);
    
     return (
-        <ScrollView style={{ backgroundColor: '#5DB075', height: '100%' }} scrollEnabled={mainScrollEnabled}>
+        <ScrollView keyboardShouldPersistTaps='handled' style={{ backgroundColor: '#5DB075', height: '100%' }} scrollEnabled={mainScrollEnabled}>
             <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
                 {
                     [
@@ -224,7 +229,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     items={treeItems}
                     label={Strings.labels.SelectTreeType}
                     onSelectItem={setSelectedTreeType}
-                    showClearButton={false}
+                    showClearButton={true}
                 />
                 <CustomDropdown
                     initItem={selectedPlot}
@@ -252,8 +257,9 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                         //Namrata
                         
                     /> */}
-                    <TouchableOpacity onPress={() => setModalVisible(true)}   style={{ backgroundColor: '#5DB075', padding: 10, borderRadius: 5, alignItems:"center" }}>
-                        <Text style={{color:"black", fontWeight: 'bold'}}>{Strings.buttonLabels.ClickPhoto}</Text>
+                
+                    <TouchableOpacity onPress={() => setModalVisible(true)}   style={{ backgroundColor: '#ECD942', padding: 10, borderRadius: 5, alignItems:"center", borderWidth:2,  marginTop : 0}} >
+                        <Text style={{color:"black",fontWeight: 'bold'}}>{Strings.buttonLabels.ClickPhoto}</Text>
                     </TouchableOpacity>
                     <Modal
                         animationType="fade"
@@ -281,7 +287,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
 
                 </View>
                 <View style={{ margin: 2, borderColor: '#5DB075', borderRadius: 5, flexDirection: 'column', backgroundColor: 'white' }}>
-                    <FlatList
+                    <FlatList 
                         scrollEnabled={false}
                         data={[...exisitingImages, ...images]}
                         renderItem={renderImage}

@@ -62,7 +62,7 @@ export const commonStyles = StyleSheet.create({
         borderWidth: 3,
         backgroundColor: 'green',
         margin: 5,
-        padding: 10,
+        padding: 20,
         borderRadius: 5,
         shadowColor: 'black',
         elevation: 3,
@@ -71,6 +71,33 @@ export const commonStyles = StyleSheet.create({
             height: 50
         },
         shadowOpacity: 1
+    },
+   
+    dropdownOptions : {
+        
+            flexDirection: 'row',
+            alignContent: 'center',
+            alignItems: 'center',
+            fontSize: 40,
+            borderColor: 'gray',
+            borderWidth: 3,
+            backgroundColor: 'yellow',
+            margin: 5,
+            padding: 10,
+            borderRadius: 5,
+            shadowColor: 'black',
+            elevation: 3,
+            shadowOffset: {
+                width: 50,
+                height: 50
+            },
+            shadowOpacity: 1
+        
+    },
+    dropdownOptionsContent: {
+        color: 'black',
+        textAlign: 'center',
+        fontWeight: 'bold',
     },
     defaultButtonTextStyle: {
         color: 'white',
@@ -174,11 +201,11 @@ export const commonStyles = StyleSheet.create({
     txtInput: {
         height: 60,
         width: 310,
-        borderWidth: 0.5,
+        borderWidth: 1.5,
         borderColor: 'grey',
         borderRadius: 10,
         backgroundColor: '#f5f5f5',
-        //backgroundColor:"#ECD942",
+        //backgroundColor:"white",
         marginTop: 10,
         marginBottom: 10,
         padding: 10,

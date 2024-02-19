@@ -59,7 +59,7 @@ const EditTreeScreen = ({ navigation }) => {
     const fetchTreeDetails = async () => {
         // console.log('fetching tree details');
         const adminID = await Utils.getAdminId();
-        console.log("------admin id in fetchTreeDetails-------")
+        
         setDetails(null);
         setNewImages([]);
         setDeletedImages([]);

@@ -32,7 +32,7 @@ export const CustomButton = ({ text, opacityStyle, textStyle, onPress }) => {
   }
   return (<TouchableOpacity onPress={onPress}>
     <View style={finalOpacityStyle}>
-      <Text style={finalTextStyle}>{text}</Text>
+    <Text style={{...finalTextStyle, fontSize: 18}}>{text}</Text>
     </View>
   </TouchableOpacity>);
 }
