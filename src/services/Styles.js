@@ -198,3 +198,5 @@ export const styleConfigs = {
         headerTintColor: commonStyles.headerTitleStyle.color
     }
 }
+
+

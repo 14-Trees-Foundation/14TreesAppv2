@@ -243,7 +243,7 @@ export const DrawerNavigator = ({ route }) => {
   );
 }
 
-export const ImageWithUneditableRemark = ({ item, displayString, imageForModal, onDelete }) => {
+export const ImageWithUneditableRemark = ({ item, displayString, onDelete }) => {
   const [imageModalVisible, setImageModalVisible] = useState(false);
 
   const openImageModal = () => {
@@ -253,7 +253,7 @@ export const ImageWithUneditableRemark = ({ item, displayString, imageForModal, 
   const closeImageModal = () => {
     setImageModalVisible(false);
   };
-  //console.log("imageForModal size: ", imageForModal.filesz, "response size: ", imageForModal.response);
+
   return (
     <View style={{
       marginHorizontal: 10,
@@ -309,9 +309,9 @@ export const ImageWithUneditableRemark = ({ item, displayString, imageForModal, 
   );
 }
 
-export const ImageWithEditableRemark = ({ item, displayString, imageForModal, onChangeRemark, onDelete }) => {
+export const ImageWithEditableRemark = ({ item, displayString, onChangeRemark, onDelete }) => {
   const [imageModalVisible, setImageModalVisible] = useState(false);
-  //console.log("imageForModal:", imageForModal);
+  
 
   const openImageModal = () => {
     setImageModalVisible(true);

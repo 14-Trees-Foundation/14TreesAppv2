@@ -176,7 +176,8 @@ export class Strings {
             FailedSaplingIds: "Failed to get sapling ids !",
             IncorrectUser: "Incorrect User",
             userNotAuthorized: "user not authorized to access app. contact admin",
-            userNotSetup: "user not set up correctly. contact admin"
+            userNotSetup: "user not set up correctly. contact admin",
+            deleteImageEdit: "Delete the existing image to add a new image"
         },
         "mr": {
             GPSUnavailable: "त्रुटी: विनंतीची वेळ संपली. GPS सध्या उपलब्ध नाही.",
@@ -242,7 +243,8 @@ export class Strings {
             FailedSaplingIds: "रोपाची संख्या मिळविण्यात असफल !",
             IncorrectUser: "चुकीचा वापरकर्ता",
             userNotAuthorized: "वापरकर्ता ॲपमध्ये प्रवेश करण्यास अधिकृत नाही. प्रशासकाशी संपर्क साधा",
-            userNotSetup: "वापरकर्ता योग्यरित्या सेट नाही. प्रशासकाशी संपर्क साधा"
+            userNotSetup: "वापरकर्ता योग्यरित्या सेट नाही. प्रशासकाशी संपर्क साधा",
+            deleteImageEdit: "नवीन फोटो जोडण्यासाठी सध्याचा फोटो हटवा"
         }
     })
     static buttonLabels = new LocalizedStrings({

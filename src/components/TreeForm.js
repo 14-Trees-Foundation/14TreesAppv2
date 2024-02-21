@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Button, FlatList, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, Button, FlatList, ScrollView, Text, TextInput, View, ToastAndroid } from 'react-native';
 import { Strings } from "../services/Strings";
 import { Utils } from "../services/Utils";
 import { CustomButton, ImageWithEditableRemark, ImageWithUneditableRemark } from "./Components";
 import { CoordinateSetter } from "./CoordinateSetter";
 import { CustomDropdown } from "./CustomDropdown";
 import { commonStyles } from "../services/Styles";
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 
 export const treeFormModes = {
     addTree: 0,
@@ -23,7 +24,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     // array of images
     const [exisitingImages, setExistingImages] = useState(inImages)
     const [localSaplingIds, setLocalSaplingIds] = useState([])
-    const [imageForModal, setImageForModal] = useState([]); //imageForModal
+    // const [imageForModal, setImageForModal] = useState([]); //imageForModal
     const [localDataChanged, setLocalDataChanged] = useState(false);
     const [liveSaplingIds, setLiveSaplingIds] = useState([])
     const [images, setImages] = useState([]);
@@ -33,12 +34,24 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     const [selectedTreeType, setSelectedTreeType] = useState(inTreeType);
     const [selectedPlot, setSelectedPlot] = useState(inPlot);
     const [userId, setUserId] = useState(inUserId);
-    console.log('rendered treeform')
+    const [disableButton, setDisableButton] = useState(true);
+
     useEffect(() => {
         console.log(treeData.inSaplingId)
         if (mode === treeFormModes.localEdit) {
+            console.log("-- now mode is local edit---");
             setExistingImages([]);
             setImages(treeData.inImages);
+        }
+
+        if (mode === treeFormModes.remoteEdit) {
+            console.log("-- now mode is remote edit---");
+            console.log("treeData.image.length-- ", treeData.inImages.length);
+            if (treeData.inImages.length === 0) {
+                setDisableButton(false);
+            } else {
+                setDisableButton(true);
+            }
         }
     }, [treeData])
 
@@ -50,10 +63,17 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         } else {
             console.log("image not found delete---------", newSetImages.length, "time: ", time);
         }
+
+        if (newSetImages.length === 0 && mode === treeFormModes.remoteEdit) {
+            setDisableButton(false);
+        }
+
         if (onDeleteImage) {
             await onDeleteImage(name);
         }
         setExistingImages(newSetImages);
+
+
     }
 
     const handleDeleteItem = async (name) => {
@@ -117,11 +137,11 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         if (onNewImage) {
             await onNewImage(image);
         }
-        setImages([...images, image]);
+        //setImages([...images, image]);
 
-        //changes for edit tree
-        // setExistingImages([]);
-        // setImages([image]);
+        console.log("handling setting image----");
+        setExistingImages([]);
+        setImages([image]);
     }
 
     const pickImage = async () => {
@@ -132,9 +152,9 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         newImage = await Utils.formatImageForSapling(newImage, saplingid);
         await handleAddImage(newImage);
 
-        let imageForModal = newImageResponse.imageForModal;
-        //console.log("this image:", imageForModal);
-        setImageForModal(imageForModal);
+        // let imageForModal = newImageResponse.imageForModal;
+        // //console.log("this image:", imageForModal);
+        // setImageForModal(imageForModal);
     };
 
     const changeImageRemarkTo = (text, name) => {
@@ -165,7 +185,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                 item={item}
                 displayString={displayString}
                 key={index}
-                imageForModal={imageForModal}
                 onDelete={(item) => {
                     handleDeleteExistingItem(item.name, item.meta.capturetimestamp,);
                 }} />;
@@ -176,7 +195,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             key={index}
             item={item}
             displayString={displayString}
-            imageForModal={imageForModal}
             onDelete={(item) => {
                 handleDeleteItem(item.name)
             }}
@@ -287,13 +305,35 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     setOuterScrollEnabled={setMainScrollEnabled}
                     plotId={selectedPlot ? selectedPlot.value : undefined}
                 ></CoordinateSetter>
-                <View style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 15 }}>
-                    <Button
-                        title={Strings.buttonLabels.ClickPhoto}
-                        onPress={() => pickImage()}
-                        color={'#5DB075'}
-                    />
+
+                <View style={{
+                    marginHorizontal: 20,
+                    marginTop: 10,
+                    marginBottom: 15,
+                    opacity: (mode === treeFormModes.remoteEdit && disableButton) ? 0.5 : 1,
+                }}>
+                    <TouchableWithoutFeedback
+                        style={{
+                            backgroundColor: (mode === treeFormModes.remoteEdit && disableButton) ? "#696969" : "#04AA6D",
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            padding: 9,
+                            borderRadius: 5
+                        }}
+                        onPress={() => {
+                            console.log("mode: ", mode, "disable button: ", disableButton);
+
+                            if (mode === treeFormModes.remoteEdit && disableButton) {
+                                ToastAndroid.show(Strings.alertMessages.deleteImageEdit, ToastAndroid.SHORT);
+                            } else {
+                                pickImage();
+                            }
+                        }}
+                    >
+                        <Text style={{ color: 'white' }}>{Strings.buttonLabels.ClickPhoto}</Text>
+                    </TouchableWithoutFeedback>
                 </View>
+
 
                 <View style={{ margin: 2, borderColor: '#5DB075', borderRadius: 5, flexDirection: 'column', backgroundColor: 'white' }}>
 
