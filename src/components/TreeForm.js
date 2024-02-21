@@ -112,9 +112,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         await handleAddImage(newImage);
     };
 
-    const clickPhotoEditRemoteTree = async() => {
-
-    }
+    
     const changeImageRemarkTo = (text, name) => {
         const newImages = images.map((image) => {
             if (image.name === name) {
@@ -189,8 +187,8 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     }, []);
    
     return (
-        <ScrollView keyboardShouldPersistTaps='handled' style={{ backgroundColor: '#5DB075', height: '100%' }} scrollEnabled={mainScrollEnabled}>
-            <View style={{ backgroundColor: 'white', margin: 10, borderRadius: 10 }}>
+        <ScrollView keyboardShouldPersistTaps='handled' style={{ backgroundColor: '#125441', height: '100%' }} scrollEnabled={mainScrollEnabled}>
+            <View style={{ backgroundColor: '#0F4334', margin: 10, borderRadius: 10 }}>
                 {
                     [
                         <View>
@@ -258,8 +256,8 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                         
                     /> */}
                 
-                    <TouchableOpacity onPress={() => setModalVisible(true)}   style={{ backgroundColor: '#ECD942', padding: 10, borderRadius: 5, alignItems:"center", borderWidth:2,  marginTop : 0}} >
-                        <Text style={{color:"black",fontWeight: 'bold'}}>{Strings.buttonLabels.ClickPhoto}</Text>
+                    <TouchableOpacity onPress={() => setModalVisible(true)}   style={{ backgroundColor: '#1A894E', padding: 10, borderColor:"white", borderRadius: 5, alignItems:"center", borderWidth: 1,  marginTop : 0}} >
+                        <Text style={{color:"white",fontWeight: 'bold',fontSize: 17}}>{Strings.buttonLabels.ClickPhoto}</Text>
                     </TouchableOpacity>
                     <Modal
                         animationType="fade"
@@ -272,13 +270,19 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                         <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                             <View style={{ backgroundColor: 'white', padding: 40 }}>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between',margin:10 }}>
-                                    <Button title={Strings.buttonLabels.openCamera} onPress={() => pickImage(0)} color="green" // Change text color
+                                    {/* <Button title={Strings.buttonLabels.openCamera} onPress={() => pickImage(0)} color="green" // Change text color
                                     />
                                     <Button title={Strings.buttonLabels.openGallery}  onPress={() => pickImage(1)} color="green" // Change text color
-                                    />
+                                    /> */}
+                                    <TouchableOpacity onPress={() => pickImage(0)} style={{backgroundColor:"green",padding: 10,}}>
+                                        <Text style={{color:"white",fontWeight: 'bold',fontSize: 15}}> {Strings.buttonLabels.openCamera}</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => pickImage(1)} style={{backgroundColor:"green",padding: 10,}}>
+                                        <Text style={{color:"white",fontWeight: 'bold',fontSize: 15}}> {Strings.buttonLabels.openGallery}</Text>
+                                    </TouchableOpacity>
                                 </View>
                                 <TouchableOpacity style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }} onPress={() => setModalVisible(false)}  >
-                                    <Icon name="close-circle" size={25} color="green" /> 
+                                    <Icon name="close-circle" size={28} color="green" /> 
                                 </TouchableOpacity>
                             </View>
                             

@@ -606,7 +606,7 @@ export class Constants {
         return require('../../assets/logo.png');
     }
     static placeholderImage() {
-        return require('../../assets/placeholder.png');
+        return require('../../assets/placeholder1.png');
     }
 }
 

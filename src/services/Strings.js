@@ -257,14 +257,14 @@ export class Strings{
 
             // add tree
             ClickPhoto:"Click Photo",
-            Submit:"Submit",
+            Submit:"SUBMIT",
             gps:"GPS",
             edit:"Edit",
             drag:"Drag",
             hideAll:"Hide All",
             showAll:"Show All",
-            openGallery :"Open Gallery",
-            openCamera : "Open Camera",
+            openGallery :"OPEN GALLERY",
+            openCamera : "OPEN CAMERA",
             // local data view
             DeleteSyncedTrees:"Delete Synced Trees",
             Filters:"Filters",

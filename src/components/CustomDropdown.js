@@ -43,7 +43,7 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
             }}
             
         >
-            <Text style={{ ...commonStyles.dropdownOptionsContent, color: 'black' }}>{item.name}</Text>
+            <Text style={{ ...commonStyles.dropdownOptionsContent, color: 'white' }}>{item.name}</Text>
         </TouchableOpacity>);
     }
 

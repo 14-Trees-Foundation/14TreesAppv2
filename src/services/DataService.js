@@ -45,12 +45,12 @@ axios.interceptors.response.use(function (response) {
 });
 
 export class DataService {
-  static productionHostName = 'https://api.14trees.org';
+  //static productionHostName = 'https://api.14trees.org';
   //static hostName = 'https://vk061k4q-7000.inc1.devtunnels.ms';
   //static hostName = 'http://10.0.2.2:7000' //for emulator
-  //static hostName = 'http://192.168.1.10:7000'; //for device,machine's ip adrr is required
+  static hostName = 'http://192.168.1.10:7000'; //for device,machine's ip adrr is required
  
-  static serverBase = `${this.productionHostName}/api/appv2`
+  static serverBase = `${this.hostName}/api/appv2`
 
   static async loginUser(userDataPayload) {
     const url = `${DataService.serverBase}/login`;
