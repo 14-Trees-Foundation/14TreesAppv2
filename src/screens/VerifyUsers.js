@@ -5,11 +5,13 @@ import { CustomButton } from '../components/Components';
 import { DataService } from '../services/DataService';
 import { Strings } from '../services/Strings';
 import { Utils } from '../services/Utils';
+import { commonStyles } from "../services/Styles";
 
 const VerifyusersScreen = ({navigation}) => {
   
     const [users, setUsers] = useState([]);
     const [adminID,setAdminID] = useState('');
+    
     const fetchUsers = async (adminIDValue) => {
         const userlist = await DataService.fetchUsers(adminIDValue);
         setUsers(userlist.data);
@@ -46,8 +48,8 @@ const VerifyusersScreen = ({navigation}) => {
                    
                 
                 <View >
-                    <Text style={styles.text3}>{Strings.messages.Name} {item.name} </Text>
-                    <Text style={styles.text3}>{Strings.messages.Email} {item.email} </Text>
+                    <Text style={commonStyles.text3}>{Strings.messages.Name} {item.name} </Text>
+                    <Text style={commonStyles.text3}>{Strings.messages.Email} {item.email} </Text>
                 </View>
                 
                 
@@ -66,7 +68,7 @@ const VerifyusersScreen = ({navigation}) => {
     return (
         <View style={{backgroundColor:'white', height:'100%'}}>
             <View style={{marginTop:5,flexDirection:'row',justifyContent:'space-around'}}>
-            <Text style={styles.text2}> {Strings.messages.ListUnverifiedUsers} </Text>
+            <Text style={commonStyles.text2}> {Strings.messages.ListUnverifiedUsers} </Text>
             <CustomButton text={Strings.buttonLabels.Refresh} onPress={()=>fetchUsers(adminID)}></CustomButton>
             </View>
             <View style={{height:500,margin:5,borderWidth:2,borderColor: '#5DB075',borderRadius: 5,flexDirection:'column',}}>
@@ -83,24 +85,3 @@ const VerifyusersScreen = ({navigation}) => {
 
 export default VerifyusersScreen;
 
-const styles = StyleSheet.create({
-    headerText: {
-      fontSize: 30, color: 'white', textAlign: 'center', marginTop: 30, marginBottom: 30, fontFamily:'cochin', fontWeight:'bold' , textShadowColor: 'rgba(0, 0, 0, 0.5)', 
-      textShadowOffset: { width: 1, height: 1 },
-      textShadowRadius: 3, 
-    },
-    text2: {  
-        color: 'black',
-        fontSize:20,
-        textAlign: 'left',
-        marginTop: 15,
-        marginBottom: 30
-        
-    },
-    text3: {
-        color: 'black',
-        fontSize:18,
-        textAlign: 'left',
-        margin:2,
-    }
-  });
