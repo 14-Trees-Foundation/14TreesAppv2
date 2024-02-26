@@ -46,6 +46,7 @@ export const EditLocalTree = ({ navigation, route }) => {
             //delete tree by sapling ID
             await Utils.deleteTreeAndImages(details.inSaplingId);
         }
+        await Utils.deleteTreeImages(tree.saplingid);
         await Utils.saveTreeAndImagesToLocalDB(tree, images);
         navigation.popToTop();
     }

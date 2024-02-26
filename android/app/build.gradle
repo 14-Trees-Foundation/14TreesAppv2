@@ -72,11 +72,14 @@ Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream()) 
 def googleMapsAPIKey = properties.getProperty('secrets.googleMapsAPIKey')
 
+
 android {
+    
     
     ndkVersion rootProject.ext.ndkVersion
     compileSdkVersion rootProject.ext.compileSdkVersion
     namespace "com.androidappv2"
+
 
     defaultConfig {
         applicationId "com.androidappv2"
@@ -87,6 +90,7 @@ android {
         //multiDexEnabled true
         manifestPlaceholders = [googleMapsAPIKey: googleMapsAPIKey]
     }
+    
     
     signingConfigs {
         release {
@@ -116,10 +120,7 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
-    lintOptions {
-        checkReleaseBuilds false
-        abortOnError false
-    }
+   
 }
 
 dependencies {

@@ -1,12 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { launchCamera, } from 'react-native-image-picker';
-import { Alert, ToastAndroid } from "react-native";
+import { launchCamera } from 'react-native-image-picker';
+import { Alert, ToastAndroid, Modal } from "react-native";
 import { DataService } from "./DataService";
 import { LocalDatabase } from "./tree_db";
 import RNRestart from 'react-native-restart';
 import { Strings } from "./Strings";
 import ImageResizer from "react-native-image-resizer";
 import RNFS from 'react-native-fs';
+import React, { useState } from 'react';
+//namrata
+import * as ImagePicker from 'react-native-image-picker';
 
 const MIN_BATCH_SIZE = 5
 
@@ -39,16 +42,29 @@ export class Utils {
         return response;
     }
 
+    // //Namrata
+    // static async fetchSaplingIdsFromLiveDB() {
+    //     let saplings = await this.localdb.getAllSaplingsInLiveDB();
+    //     return saplings;
+    // }
+
+
+
+
+
     //Namrata
     static async fetchSaplingIdsFromLiveDB() {
         let saplings = await this.localdb.getAllSaplingsInLiveDB();
         return saplings;
     }
 
-
-
+    static async deleteTreeImages(saplingId) {
+        //deleting previous images
+        await this.localdb.deleteTreeImages(saplingId);
+    }
 
     static async deleteTreeAndImages(saplingId) {
+     
         await this.localdb.deleteTreeImages(saplingId);
         await this.localdb.deleteTree(saplingId);
         return;
@@ -62,8 +78,10 @@ export class Utils {
     }
 
     static async saveTreeAndImagesToLocalDB(tree, images) {
+        console.log("--------------updating image------------------")
         await this.localdb.saveTree(tree, 0);
         for (let index = 0; index < images.length; index++) {
+            console.log("image while adding tree: ",images[index].data)
             const element = {
                 saplingid: tree.saplingid,
                 image: images[index].data,
@@ -71,6 +89,8 @@ export class Utils {
                 remark: images[index].meta.remark,
                 timestamp: images[index].meta.capturetimestamp,
             };
+
+            //namrata - delete previous image first
             await this.localdb.saveTreeImages(element);
         }
     }
@@ -111,9 +131,9 @@ export class Utils {
 
     }
 
-    //Namrata
+//Namrata
 
-
+   
     static async fetchAndStoreHelperData() {
         console.log('fetching helper data in Utils');
         // console.log('ldb: ', this.localdb)
@@ -122,18 +142,18 @@ export class Utils {
         let userId = await Utils.getUserId();
         console.log('requesting: ', userId, lastHash)
         //setStatus(requesting)
-
+        
         const helperData = await DataService.fetchHelperData(userId, lastHash);
 
-        console.log("userId ", userId, "lastHash ", lastHash)
+        console.log("userId ",userId,"lastHash ",lastHash)
         if (!helperData) {
             //setStatus(request failed)
             return;//error display, logging done by DataService.
         }
         // setStatus(storing)
-        const data = helperData.data['data'];
+        const data = helperData.data['data'];      
         const newHash = helperData.data['hash'];
-        console.log("newHash ", newHash)
+        console.log("newHash ",newHash)
         if (newHash == lastHash) {
             console.log("---------------------------newHash == lastHash-------------")
             ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
@@ -142,11 +162,11 @@ export class Utils {
         }
         if (data) {
             console.log("---------------------------New Data-------------")
-
+           
             await Utils.storeTreeTypes(data['treeTypes']);
             await Utils.storePlots(data['plots']);
-            console.log("data['saplings'] :", data['saplings'].length)
-            await Utils.storeTrees(data['saplings'])
+            console.log("data['saplings'] :" ,data['saplings'].length)
+            await Utils.storeTrees(data['saplings'])     
             await AsyncStorage.setItem(Constants.lastHashKey, newHash);
             ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
             // setstatus(data updated)
@@ -348,6 +368,7 @@ export class Utils {
         const displayString = `${indexString} ${captureString}`;
         return displayString;
     }
+    
     static getReadableDate(date) {//string arg
         const epochMilliseconds = Date.parse(date);
         if (isNaN(epochMilliseconds)) {
@@ -529,27 +550,29 @@ export class Utils {
     static async getLastHash() {
         return await AsyncStorage.getItem(Constants.lastHashKey);
     }
-    static async getImageFromCamera(compressionRequired = false) {
+    static async getImage(compressionRequired = false,selectionId) {
         const options = {
             mediaType: 'photo',
             includeBase64: true,
             maxHeight: 200,
             maxWidth: 200,
         };
-
-        const response = await launchCamera(options);
-        //console.log('from launch camera: ', response)
-
+            //namrata
+        let response = {}
+        if(selectionId === 0){
+            response = await launchCamera(options);
+            //console.log('from launch camera: ', response)
+        }else{
+            response =  await ImagePicker.launchImageLibrary(options)
+            //console.log('from launch gallery: ', response)
+        }
+        
+        
         if (response.didCancel) {
             console.log('User cancelled image picker');
         } else if (response.error) {
             console.log('ImagePicker Error: ', response.error);
         } else {
-
-            let imageForModal = {
-                data: response.assets[0].base64,
-                filesz: response.assets[0].fileSize
-            }
 
             const timestamp = new Date().toISOString(); // only show time and not date
             const filesz = response.assets[0].fileSize;
@@ -558,7 +581,6 @@ export class Utils {
 
 
             let imagePath = response.assets[0].uri;
-
             if (compressionRequired) {
                 const compressedData = await Utils.compressImageAt(filesz, imagePath);
                 if (compressedData !== undefined) {
@@ -573,10 +595,11 @@ export class Utils {
 
                 }
             };
-            return { newImage: newImage, imageForModal: imageForModal };
+            return newImage;
+            //return { newImage: newImage, imageForModal: imageForModal };
         }
+    
     }
-
     static async formatImageForSapling(image, saplingid) {
         let newImage = { ...image }
         newImage.saplingid = saplingid;
@@ -658,7 +681,7 @@ export class Constants {
         return require('../../assets/logo.png');
     }
     static placeholderImage() {
-        return require('../../assets/placeholder.png');
+        return require('../../assets/placeholder1.png');
     }
 }
 

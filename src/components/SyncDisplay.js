@@ -59,7 +59,7 @@ export const SyncDisplay = ({ onSyncComplete }) => {
   }
 
   const commenceUpload = async () => {
-    setShowProgress(true);
+    setShowProgress(true); 
     await syncLogs();
     Utils.upload(setProgress).then(async (failures) => {
       setFailedTrees(failures);

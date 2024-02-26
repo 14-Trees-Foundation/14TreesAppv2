@@ -257,13 +257,15 @@ export class Strings {
             SelectLanguage: "Language/भाषा",
 
             // add tree
-            ClickPhoto: "Click Photo",
-            Submit: "Submit",
-            gps: "GPS",
-            edit: "Edit",
-            drag: "Drag",
-            hideAll: "Hide All",
-            showAll: "Show All",
+            ClickPhoto:"Click Photo",
+            Submit:"SUBMIT",
+            gps:"GPS",
+            edit:"Edit",
+            drag:"Drag",
+            hideAll:"Hide All",
+            showAll:"Show All",
+            openGallery :"OPEN GALLERY",
+            openCamera : "OPEN CAMERA",
             // local data view
             DeleteSyncedTrees: "Delete Synced Trees",
             Filters: "Filters",
@@ -288,13 +290,15 @@ export class Strings {
             fetchPlotSaplingData: "प्लॉट-सॅपलिंग डेटा मिळवा",
             SelectLanguage: "भाषा/Language",
             // add tree
-            ClickPhoto: "फोटो घ्या",
-            Submit: "सबमिट करा",
-            gps: "जीपीएस",
-            edit: "सुधारणे",
-            drag: "ड्रॅग करा",
-            hideAll: "सर्व लपवा",
-            showAll: "सगळं दाखवा",
+            ClickPhoto:"फोटो घ्या",
+            Submit:"सबमिट करा",
+            gps:"जीपीएस",
+            edit:"सुधारणे",
+            drag:"ड्रॅग करा",
+            hideAll:"सर्व लपवा",
+            showAll:"सगळं दाखवा",
+            openGallery :"गॅलरी उघडा",
+            openCamera : "कॅमेरा उघडा",
             // local data view
             DeleteSyncedTrees: "सिंक केलेले झाडे हटवा",
             Filters: "फिल्टर",
@@ -353,7 +357,7 @@ export class Strings {
         this.labels.setLanguage(lang);
         this.languageEvent.emit('change');
     }
-
+    
     // get currently set language
 
     static getLanguage = async () => {

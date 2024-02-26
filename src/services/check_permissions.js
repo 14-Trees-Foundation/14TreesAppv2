@@ -17,6 +17,5 @@ export async function checkMultiplePermissions(permissions) {
     }
   }
 
-
   return ungrantedPermissions;
 }

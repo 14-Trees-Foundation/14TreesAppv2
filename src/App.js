@@ -14,6 +14,7 @@ import { checkMultiplePermissions } from './services/check_permissions';
 import DeviceInfo from 'react-native-device-info';
 import { DataService } from './services/DataService';
 import { styleConfigs } from './services/Styles';
+import { LangProvider } from './context/LangContext ';
 
 enableLatestRenderer();
 
@@ -65,30 +66,23 @@ const App = () => {
   const checkSignInStatus = async () => {
     try {
 
-      let phoneNumber;
+      let phoneNumber, deviceinfo, deviceName, device;
 
       try {
         phoneNumber = await DeviceInfo.getPhoneNumber();
+        deviceinfo = await DeviceInfo.getManufacturer();
+        deviceName = await DeviceInfo.getDeviceName();
+        device = deviceinfo + "" + deviceName;
+        console.log("phone no: ", phoneNumber, " device: ", device);
       } catch (error) {
-        //const errorLog = error.toString();
-        const stackTrace = error.stack;
-        //console.log("stacktrace: ", stackTrace);
-        const errorLog = {
-          msg: "happened while detecting phone number",
-          error: JSON.stringify(error),
-          stackTrace: stackTrace
-        }
-        //console.log("error phone: ", errorLog);
-        await Utils.logException(JSON.stringify(errorLog));
+        const errorLog = error.toString();
+        console.log("error phone: ", errorLog);
+        //await Utils.logException(null, device, "not found", errorLog);
       }
 
-      const logsArray = await Utils.getLogsFromLocalDB();
+      // const logs = await Utils.getLogsFromLocalDB();
+      // console.log("logs from local db: ", logs);
 
-      console.log("logs from local db: ", logsArray.length);
-      for (const logData of logsArray) {
-        //const {logs} = logData
-        console.log("logData: ", logData);
-      }
       const userDataPayload = {
         phone: phoneNumber,
       }
@@ -121,37 +115,18 @@ const App = () => {
       try {
         await AsyncStorage.setItem(Constants.userIdKey, response.user._id);
         console.log('userId stored: ', response.user._id);
-        await AsyncStorage.setItem(Constants.phoneNumber, response.user.phone.toString());
         response.data = { ...response.user, image: '' };
         console.log("response data modified: ", response.data);
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
-
         console.log('userDetails stored');
       } catch (error) {
         console.log('Error storing userId', error);
-        const stackTrace = error.stack;
-        //console.log("stacktrace: ", stackTrace);
-        const errorLog = {
-          msg: "happened while trying to store userId during login",
-          error: JSON.stringify(error),
-          stackTrace: stackTrace
-        }
-        //console.log("error phone: ", errorLog);
-        await Utils.logException(JSON.stringify(errorLog));
       }
 
       return true;
 
     } catch (error) {
       console.error('Error checking sign-in status:', error);
-      const stackTrace = error.stack;
-      const errorLog = {
-        msg: "happened while trying to auto login through auto detect phone number",
-        error: JSON.stringify(error),
-        stackTrace: stackTrace
-      }
-      //console.log("error phone: ", errorLog);
-      await Utils.logException(JSON.stringify(errorLog));
       return false;
     }
   };
@@ -202,29 +177,31 @@ const App = () => {
   }, []);
 
   return (
-    <NavigationContainer ref={stackNavRef}>
-      <Stack.Navigator>
-        <Stack.Screen
-          name={Strings.screenNames.getString('startScreen', Strings.english)}
-          component={LoadingScreen}
-          options={{ headerShown: false }} />
-        <Stack.Screen
-          name={Strings.screenNames.getString('LogIn', Strings.english)}
-          component={LoginScreen}
-          options={{
-            headerLeft: () => null,
-            ...styleConfigs.drawerHeaderOptions,
-            title: Strings.screenNames.LogIn
-          }} />
-        <Stack.Screen
-          name={Strings.screenNames.getString('DrawerScreen', Strings.english)}
-          component={DrawerNavigator}
-          options={{
-            headerLeft: () => null,
-            headerShown: false
-          }} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <LangProvider>
+      <NavigationContainer ref={stackNavRef}>
+        <Stack.Navigator>
+          <Stack.Screen
+            name={Strings.screenNames.getString('startScreen', Strings.english)}
+            component={LoadingScreen}
+            options={{ headerShown: false }} />
+          <Stack.Screen
+            name={Strings.screenNames.getString('LogIn', Strings.english)}
+            component={LoginScreen}
+            options={{
+              headerLeft: () => null,
+              ...styleConfigs.drawerHeaderOptions,
+              title: Strings.screenNames.LogIn
+            }} />
+          <Stack.Screen
+            name={Strings.screenNames.getString('DrawerScreen', Strings.english)}
+            component={DrawerNavigator}
+            options={{
+              headerLeft: () => null,
+              headerShown: false
+            }} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </LangProvider>
   )
 };
 

@@ -47,11 +47,10 @@ axios.interceptors.response.use(function (response) {
 
 export class DataService {
 
-
   static productionHostName = 'https://api.14trees.org';
-  static hostName = 'http://10.0.2.2:7000';
-  static phoneHostName = "http://192.168.201.115:7000";
-  static serverBase = `${this.hostName}/api/appv2`;
+  // static hostName = 'http://10.0.2.2:7000';
+  // static phoneHostName = "http://192.168.43.232:7000";
+  static serverBase = `${this.productionHostName}/api/appv2`;
 
   static async loginUser(userDataPayload) {
     const url = `${DataService.serverBase}/login`;

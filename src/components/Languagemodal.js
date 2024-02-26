@@ -4,8 +4,10 @@ import { Utils } from '../services/Utils';
 import { Strings } from '../services/Strings';
 import { CancelButton, MyIconButton, SaveButton } from './Components';
 const { height, width } = Dimensions.get('window');
+import LangContext from '../context/LangContext ';
 
-const LanguageModal = ({ langModalVisible, setLangModalVisible, handleLanguageChange }) => {
+const LanguageModal = ({ langModalVisible, setLangModalVisible }) => {
+  const { langChanged, setLangChanged } = useContext(LangContext);
 
   const [selectedLang, setSelectedLang] = useState(Strings.english);
 
@@ -29,11 +31,11 @@ const LanguageModal = ({ langModalVisible, setLangModalVisible, handleLanguageCh
 
   const handleLanguageChanges = async () => {
     let storedlang = await Strings.getLanguage();
-   
+
     if (selectedLang !== storedlang) {
       console.log("changing language");
       await Strings.setLanguage(selectedLang);
-      handleLanguageChange(selectedLang); // Notify the HomeScreen about language change
+      setLangChanged(!langChanged);
     } else {
       console.log("no need to change language");
     }
@@ -43,7 +45,7 @@ const LanguageModal = ({ langModalVisible, setLangModalVisible, handleLanguageCh
 
   const handleCancelChanges = async () => {
     let storedlang = await Strings.getLanguage();
-  
+
     const index = storedlang === "en" ? 0 : 1;
 
     if (selectedLang !== storedlang) {
