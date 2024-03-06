@@ -1,16 +1,32 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { View } from 'react-native';
+import React, { useEffect, useState, useContext, useCallback } from 'react';
+import { View, BackHandler, Alert } from 'react-native';
 import { MyIconButton } from '../components/Components';
 import LanguageModal from '../components/Languagemodal';
 import { Strings } from '../services/Strings';
 import { SyncDisplay } from '../components/SyncDisplay';
 import { Utils } from '../services/Utils';
 import LangContext from '../context/LangContext ';
+import { useFocusEffect } from '@react-navigation/native';
 
 const HomeScreen = ({ navigation }) => {
   const [langModalVisible, setLangModalVisible] = useState(false);
 
   const { langChanged } = useContext(LangContext);
+
+
+
+  useFocusEffect(useCallback(() => {
+    const backAction = () => {
+      console.log("exiting from homescreen-----");
+
+      BackHandler.exitApp();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => backHandler.remove();
+  }, []))
 
   useEffect(() => {
     console.log("langChanged inside HomeScreen: ", langChanged);
@@ -19,6 +35,7 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     Utils.fetchAndStoreHelperData();
   }, []);
+
 
   return (
     <View>
@@ -53,7 +70,7 @@ const HomeScreen = ({ navigation }) => {
       <LanguageModal
         langModalVisible={langModalVisible}
         setLangModalVisible={setLangModalVisible}
-      
+
       />
     </View>
   );

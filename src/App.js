@@ -1,11 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import React, { useContext, useEffect, useState } from 'react';
-import { Alert, BackHandler, Platform, RootTagContext } from 'react-native';
+import React, { useContext, useEffect } from 'react';
+import { Alert, Platform, RootTagContext } from 'react-native';
 import { enableLatestRenderer } from 'react-native-maps';
 import { PERMISSIONS, request } from 'react-native-permissions';
-import { DrawerNavigator } from './components/Components';
+import { DrawerNavigator } from './components/DrawerNavigator';
 import LoadingScreen from './screens/LoadingScreen';
 import LoginScreen from './screens/Login';
 import { Strings } from './services/Strings';
@@ -157,23 +157,17 @@ const App = () => {
     }
   }
 
-  const backHandler = () => {
-    return true;
-  }
 
   useEffect(() => {
 
     const initializeApp = async () => {
       await requestPermissions();
       await initTasks();
-      BackHandler.addEventListener('hardwareBackPress', backHandler);
+
     };
 
     initializeApp();
 
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', backHandler);
-    }
   }, []);
 
   return (
@@ -197,7 +191,7 @@ const App = () => {
             component={DrawerNavigator}
             options={{
               headerLeft: () => null,
-              headerShown: false
+              headerShown: false,
             }} />
         </Stack.Navigator>
       </NavigationContainer>

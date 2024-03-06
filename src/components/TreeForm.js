@@ -283,19 +283,17 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     items={treeItems}
                     label={Strings.labels.SelectTreeType}
                     onSelectItem={setSelectedTreeType}
-                    showClearButton={true}
                 />
                 <CustomDropdown
                     initItem={selectedPlot}
                     items={plotItems}
                     label={Strings.labels.SelectPlot}
                     onSelectItem={setSelectedPlot}
-                    showClearButton={true}
                 />
                 <CoordinateSetter
                     setInitLocation={mode === treeFormModes.addTree}
-                    inLat={inLat?inLat:0}
-                    inLng={inLng?inLng:0}
+                    inLat={inLat ? inLat : 0}
+                    inLng={inLng ? inLng : 0}
                     onSetLat={setlat}
                     onSetLng={setlng}
                     setOuterScrollEnabled={setMainScrollEnabled}
@@ -313,6 +311,8 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                         onPress={() => {
                             if (mode === treeFormModes.remoteEdit && disableButton) {
                                 ToastAndroid.show(Strings.alertMessages.deleteImageEdit, ToastAndroid.SHORT);
+                            } else if (mode === treeFormModes.addTree) {
+                                pickImage(0) //open camera
                             } else {
                                 setModalVisible(true);
                             }

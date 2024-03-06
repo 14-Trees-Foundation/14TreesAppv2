@@ -64,7 +64,7 @@ export class Utils {
     }
 
     static async deleteTreeAndImages(saplingId) {
-     
+
         await this.localdb.deleteTreeImages(saplingId);
         await this.localdb.deleteTree(saplingId);
         return;
@@ -81,7 +81,7 @@ export class Utils {
         console.log("--------------updating image------------------")
         await this.localdb.saveTree(tree, 0);
         for (let index = 0; index < images.length; index++) {
-            console.log("image while adding tree: ",images[index].data)
+            //console.log("image while adding tree: ", images[index].data)
             const element = {
                 saplingid: tree.saplingid,
                 image: images[index].data,
@@ -131,9 +131,9 @@ export class Utils {
 
     }
 
-//Namrata
+    //Namrata
 
-   
+
     static async fetchAndStoreHelperData() {
         console.log('fetching helper data in Utils');
         // console.log('ldb: ', this.localdb)
@@ -142,18 +142,18 @@ export class Utils {
         let userId = await Utils.getUserId();
         console.log('requesting: ', userId, lastHash)
         //setStatus(requesting)
-        
+
         const helperData = await DataService.fetchHelperData(userId, lastHash);
 
-        console.log("userId ",userId,"lastHash ",lastHash)
+        console.log("userId ", userId, "lastHash ", lastHash)
         if (!helperData) {
             //setStatus(request failed)
             return;//error display, logging done by DataService.
         }
         // setStatus(storing)
-        const data = helperData.data['data'];      
+        const data = helperData.data['data'];
         const newHash = helperData.data['hash'];
-        console.log("newHash ",newHash)
+        console.log("newHash ", newHash)
         if (newHash == lastHash) {
             console.log("---------------------------newHash == lastHash-------------")
             ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
@@ -162,11 +162,11 @@ export class Utils {
         }
         if (data) {
             console.log("---------------------------New Data-------------")
-           
+
             await Utils.storeTreeTypes(data['treeTypes']);
             await Utils.storePlots(data['plots']);
-            console.log("data['saplings'] :" ,data['saplings'].length)
-            await Utils.storeTrees(data['saplings'])     
+            console.log("data['saplings'] :", data['saplings'].length)
+            await Utils.storeTrees(data['saplings'])
             await AsyncStorage.setItem(Constants.lastHashKey, newHash);
             ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
             // setstatus(data updated)
@@ -368,7 +368,7 @@ export class Utils {
         const displayString = `${indexString} ${captureString}`;
         return displayString;
     }
-    
+
     static getReadableDate(date) {//string arg
         const epochMilliseconds = Date.parse(date);
         if (isNaN(epochMilliseconds)) {
@@ -550,24 +550,25 @@ export class Utils {
     static async getLastHash() {
         return await AsyncStorage.getItem(Constants.lastHashKey);
     }
-    static async getImage(compressionRequired = false,selectionId) {
+
+    static async getImage(compressionRequired = false, selectionId) {
+
         const options = {
             mediaType: 'photo',
             includeBase64: true,
-            maxHeight: 200,
-            maxWidth: 200,
+            maxHeight: 960,
+            maxWidth: 720,
         };
-            //namrata
+
+        //namrata
         let response = {}
-        if(selectionId === 0){
+        if (selectionId === 0) {
             response = await launchCamera(options);
-            //console.log('from launch camera: ', response)
-        }else{
-            response =  await ImagePicker.launchImageLibrary(options)
-            //console.log('from launch gallery: ', response)
+        } else {
+            response = await ImagePicker.launchImageLibrary(options)
         }
-        
-        
+
+
         if (response.didCancel) {
             console.log('User cancelled image picker');
         } else if (response.error) {
@@ -575,16 +576,22 @@ export class Utils {
         } else {
 
             const timestamp = new Date().toISOString(); // only show time and not date
-            const filesz = response.assets[0].fileSize;
+            let filesz = response.assets[0].fileSize;
             let base64Data = response.assets[0].base64;
 
 
 
             let imagePath = response.assets[0].uri;
+
+            console.log("response.assets[0]----", filesz);
+
             if (compressionRequired) {
                 const compressedData = await Utils.compressImageAt(filesz, imagePath);
-                if (compressedData !== undefined) {
+                //console.log("compressedData: ", compressedData.size);
+                if (compressedData) {
                     base64Data = compressedData;
+                } else {
+                    console.log("could not compressed------");
                 }
             }
             const newImage = {
@@ -593,12 +600,13 @@ export class Utils {
                     capturetimestamp: timestamp,
                     remark: Strings.messages.defaultRemark,
 
-                }
+                },
             };
+
             return newImage;
             //return { newImage: newImage, imageForModal: imageForModal };
         }
-    
+
     }
     static async formatImageForSapling(image, saplingid) {
         let newImage = { ...image }
@@ -606,65 +614,86 @@ export class Utils {
         const timestamp = newImage.meta.capturetimestamp;
         const imageName = `${saplingid}_${timestamp}.jpg`;
         newImage.name = imageName;
+        newImage.size = newImage.size
         return newImage;
     }
 
     static async compressImageAt(filesz, imagePath) {
-        console.log("original file size: ", filesz);
-        let maxsz = 1024 * 10;
-        let base64Data;
+        console.log("Original file size:", filesz);
+        const maxsz = 1024 * 900; // 900 KB ->
+
         if (filesz > maxsz) {
-            // let compressedQuality = -5.536/10000000*filesz*filesz + 0.0128*filesz + 100;
-            let compressedQuality = -0.00166 * filesz + 129.74;
-            // let compressedQuality = 93;
-            if (filesz < 17000) {
-                if (filesz < 14000) {
-                    compressedQuality = 98;
-                }
-                else if (filesz < 15500) {
-                    compressedQuality = 97;
-                }
-                else if (filesz < 17000) {
-                    compressedQuality = 96;
-                }
+            console.log("File size exceeds maxsz:", maxsz);
 
+            // Initialize quality parameters
+            let minQuality = 1; // Minimum quality
+            let maxQuality = 100; // Maximum quality
+            let compressedQuality = 100; // Initial quality
+
+            // Binary search to find optimal quality
+            while (maxQuality - minQuality > 1) {
+                compressedQuality = Math.floor((minQuality + maxQuality) / 2);
+
+                // Compress the image
+                const resizedImage = await ImageResizer.createResizedImage(
+                    imagePath,
+                    960, // Target width
+                    720, // Target height
+                    'JPEG', // Format
+                    compressedQuality // Quality
+                );
+
+                const resizedImageSize = resizedImage.size;
+                console.log("resizedImage----:", resizedImageSize);
+
+
+
+                if (resizedImageSize > maxsz) {
+                    // Image size is still too large, reduce quality
+                    maxQuality = compressedQuality;
+                } else {
+                    // Image size is within limits, increase quality
+                    minQuality = compressedQuality;
+                }
             }
 
-            if (compressedQuality < (maxsz / filesz) * 100) {
-                compressedQuality = (maxsz / filesz) * 100;
-
-            }
-
-            // const compressedQuality = 75;
-            console.log("compressed quality: ", compressedQuality);
-            const resizedImage = await ImageResizer.createResizedImage(
+            // Final compressed image
+            const finalResizedImage = await ImageResizer.createResizedImage(
                 imagePath,
-                200,
-                200,
-                'JPEG',
-                compressedQuality
+                960, // Target width
+                720, // Target height
+                'JPEG', // Format
+                minQuality // Final quality
             );
-            const resizedImagePath = resizedImage.uri;
+
+            const finalResizedImagePath = finalResizedImage.uri;
+
             try {
-                base64Data = await RNFS.readFile(resizedImagePath, 'base64');
-            }
-            catch (error) {
+                // Read the final compressed image file as base64
+                const base64Data = await RNFS.readFile(finalResizedImagePath, 'base64');
+                console.log("Final resized image:", finalResizedImage.size);
+                console.log('Off factor:', maxsz / finalResizedImage.size);
+                return base64Data;
+            } catch (error) {
                 // Handle any errors while reading the file
                 console.error('Error reading file:', error);
                 const stackTrace = error.stack;
                 const errorLog = {
-                    msg: "happened while trying to read base64 image file(inside Utils)",
+                    msg: "Error occurred while trying to read base64 image file (inside Utils)",
                     error: JSON.stringify(error),
                     stackTrace: stackTrace
-                }
+                };
                 await this.logException(JSON.stringify(errorLog));
-            };
-            console.log("resized image: ", resizedImage.size);
-            console.log('off factor', maxsz / resizedImage.size);
+                return null; // Return null if there's an error
+            }
         }
-        return base64Data;
+
+        return null; // Return null if file size is already within limit
     }
+
+
 }
+
 
 export class Constants {
     static userIdKey = 'userid';

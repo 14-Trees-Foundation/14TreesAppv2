@@ -1,5 +1,5 @@
 //TODO bug fix in filters.
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   FlatList,
@@ -9,17 +9,18 @@ import {
   Text,
   ToastAndroid,
   View,
+  BackHandler
 } from 'react-native';
 // import * as ImagePicker from 'react-native-image-picker';
-import {useFocusEffect} from '@react-navigation/native';
-import {CustomButton, MyIconButton} from '../components/Components';
-import {CustomDropdown} from '../components/CustomDropdown';
-import {Strings} from '../services/Strings';
-import {Utils} from '../services/Utils';
-import {SyncDisplay} from '../components/SyncDisplay';
-import {commonStyles} from '../services/Styles';
+import { useFocusEffect } from '@react-navigation/native';
+import { CustomButton, MyIconButton } from '../components/Components';
+import { CustomDropdown } from '../components/CustomDropdown';
+import { Strings } from '../services/Strings';
+import { Utils } from '../services/Utils';
+import { SyncDisplay } from '../components/SyncDisplay';
+import { commonStyles } from '../services/Styles';
 
-const LocalDataView = ({navigation}) => {
+const LocalDataView = ({ navigation }) => {
   const [treeList, setTreeList] = useState(null);
   const [finalList, setFinalList] = useState(null);
   const [treeTypeList, setTreeTypeList] = useState([]);
@@ -34,9 +35,9 @@ const LocalDataView = ({navigation}) => {
   const [allTreeTypes, setAllTreeTypes] = useState([]);
   const [allSaplings, setAllSaplings] = useState([]);
   const uploadStatuses = [
-    {name: Strings.messages.LocalOrSynced, value: 0},
-    {name: Strings.messages.Local, value: 1},
-    {name: Strings.messages.synced, value: 2},
+    { name: Strings.messages.LocalOrSynced, value: 0 },
+    { name: Strings.messages.Local, value: 1 },
+    { name: Strings.messages.synced, value: 2 },
   ];
   const [selectedUploadStatus, setSelectedUploadStatus] = useState(
     uploadStatuses[0],
@@ -53,6 +54,18 @@ const LocalDataView = ({navigation}) => {
       console.log('setting both lists to: ', trees);
     });
   };
+
+  useEffect(() => {
+    const backAction = () => {
+      navigation.goBack()
+      return true; // Prevent default behavior (exit app)
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => backHandler.remove();
+  }, [])
+
   useEffect(() => {
     setUploadStatusList(uploadStatuses);
     Utils.getUserId().then(id => {
@@ -165,10 +178,10 @@ const LocalDataView = ({navigation}) => {
   const renderImg = item => {
     // console.log(item.data.slice(0,30));
     return (
-      <View style={{margin: 0, flexDirection: 'row', flexWrap: 'wrap'}}>
+      <View style={{ margin: 0, flexDirection: 'row', flexWrap: 'wrap' }}>
         <Image
-          source={{uri: `data:image/jpeg;base64,${item.data}`}}
-          style={{width: 100, height: 100}} // Set your desired image dimensions and margin
+          source={{ uri: `data:image/jpeg;base64,${item.data}` }}
+          style={{ width: 100, height: 100 }} // Set your desired image dimensions and margin
         />
       </View>
     );
@@ -181,26 +194,26 @@ const LocalDataView = ({navigation}) => {
           flexDirection: 'row',
           justifyContent: 'space-around',
         }}>
-        <View style={{justifyContent: 'space-around', flexGrow: 1}}>
-          <Text style={{...commonStyles.text}}>
+        <View style={{ justifyContent: 'space-around', flexGrow: 1 }}>
+          <Text style={{ ...commonStyles.text }}>
             {Strings.messages.SaplingNo}: {tree.sapling_id}
           </Text>
           {/* Namrata */}
-          <View style={{ width: 250 }}> 
-      <Text style={{ ...commonStyles.text }}>{Strings.messages.Plot}: {plotNameFromId(tree.plot_id)}</Text>
-    </View>
-          <Text style={{...commonStyles.text}}>
+          <View style={{ width: 250 }}>
+            <Text style={{ ...commonStyles.text }}>{Strings.messages.Plot}: {plotNameFromId(tree.plot_id)}</Text>
+          </View>
+          <Text style={{ ...commonStyles.text }}>
             {Strings.messages.Type}: {typeNameFromId(tree.type_id)}
           </Text>
 
           {tree.uploaded ? (
-            <Text style={{...commonStyles.success, ...commonStyles.label}}>
+            <Text style={{ ...commonStyles.success, ...commonStyles.label }}>
               {Strings.messages.Synced}
             </Text>
           ) : (
             <View
-              style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-              <Text style={{...commonStyles.danger, ...commonStyles.label}}>
+              style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+              <Text style={{ ...commonStyles.danger, ...commonStyles.label }}>
                 {Strings.messages.Local}
               </Text>
               <MyIconButton
@@ -212,7 +225,7 @@ const LocalDataView = ({navigation}) => {
                       'EditLocalTree',
                       Strings.english,
                     ),
-                    {sapling_id: tree.sapling_id},
+                    { sapling_id: tree.sapling_id },
                   );
                 }}
               />
@@ -220,7 +233,7 @@ const LocalDataView = ({navigation}) => {
           )}
         </View>
         {tree.images.length ? (
-          <View style={{padding: 10}}>{renderImg(tree.images[0])}</View>
+          <View style={{ padding: 10 }}>{renderImg(tree.images[0])}</View>
         ) : (
           <Text
             style={{
@@ -254,20 +267,20 @@ const LocalDataView = ({navigation}) => {
   };
 
   return (
-    <View style={{backgroundColor: '#5DB075', height: '100%'}}>
+    <View style={{ backgroundColor: '#5DB075', height: '100%' }}>
       <Modal
         animationType="slide"
         transparent={false}
         visible={modalVisible}
         onRequestClose={closeModal}
         presentationStyle="formSheet">
-        <ScrollView style={{margin: 10}}>
-          <Text style={{...commonStyles.text5}}>
+        <ScrollView style={{ margin: 10 }}>
+          <Text style={{ ...commonStyles.text5 }}>
             {Strings.messages.Filters}
           </Text>
           <View>
-            <View style={{...commonStyles.borderedDisplay}}>
-              <Text style={{...commonStyles.text3}}>
+            <View style={{ ...commonStyles.borderedDisplay }}>
+              <Text style={{ ...commonStyles.text3 }}>
                 {Strings.labels.UploadStatus}:{' '}
               </Text>
               <CustomDropdown
@@ -277,8 +290,8 @@ const LocalDataView = ({navigation}) => {
                 initItem={selectedUploadStatus}
               />
             </View>
-            <View style={{...commonStyles.borderedDisplay}}>
-              <Text style={{...commonStyles.text3}}>
+            <View style={{ ...commonStyles.borderedDisplay }}>
+              <Text style={{ ...commonStyles.text3 }}>
                 {Strings.labels.SaplingId}:{' '}
               </Text>
               <CustomDropdown
@@ -288,8 +301,8 @@ const LocalDataView = ({navigation}) => {
                 initItem={selectedSaplingId}
               />
             </View>
-            <View style={{...commonStyles.borderedDisplay}}>
-              <Text style={{...commonStyles.text3}}>
+            <View style={{ ...commonStyles.borderedDisplay }}>
+              <Text style={{ ...commonStyles.text3 }}>
                 {Strings.labels.TreeType}:{' '}
               </Text>
               <CustomDropdown
@@ -299,8 +312,8 @@ const LocalDataView = ({navigation}) => {
                 initItem={selectedTreeType}
               />
             </View>
-            <View style={{...commonStyles.borderedDisplay}}>
-              <Text style={{...commonStyles.text3}}>
+            <View style={{ ...commonStyles.borderedDisplay }}>
+              <Text style={{ ...commonStyles.text3 }}>
                 {Strings.labels.Plot}:{' '}
               </Text>
               <CustomDropdown
@@ -311,7 +324,7 @@ const LocalDataView = ({navigation}) => {
               />
             </View>
           </View>
-          <View style={{margin: 20}}>
+          <View style={{ margin: 20 }}>
             <Button
               title={Strings.buttonLabels.Apply}
               onPress={applychanges}
@@ -325,10 +338,10 @@ const LocalDataView = ({navigation}) => {
         <Text style={commonStyles.text2}>{Strings.messages.LoadingTrees}</Text>
       ) : (
         <FlatList
-          style={{backgroundColor: 'white'}}
+          style={{ backgroundColor: 'white' }}
           ListEmptyComponent={() => (
-            <View style={{...commonStyles.borderedDisplay}}>
-              <Text style={{...commonStyles.text5}}>
+            <View style={{ ...commonStyles.borderedDisplay }}>
+              <Text style={{ ...commonStyles.text5 }}>
                 {Strings.messages.NoTreesFound}
               </Text>
             </View>
@@ -358,7 +371,7 @@ const LocalDataView = ({navigation}) => {
                   />
                 </View>
                 {finalList !== treeList && (
-                  <View style={{margin: 20, marginBottom: 5}}>
+                  <View style={{ margin: 20, marginBottom: 5 }}>
                     <Button
                       title={Strings.buttonLabels.ClearFilters}
                       onPress={clearFilters}
@@ -370,7 +383,7 @@ const LocalDataView = ({navigation}) => {
             )
           }
           data={finalList}
-          renderItem={({item}) => renderTree(item)}></FlatList>
+          renderItem={({ item }) => renderTree(item)}></FlatList>
       )}
     </View>
   );

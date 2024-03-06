@@ -17,6 +17,7 @@ export class Strings {
             LogIn: 'Log In',
             DrawerScreen: 'Homescreen',
             startScreen: 'start',
+            AppInfo: "App Info",
         },
         "mr": {
             HomePage: "मुख्य पृष्ठ",
@@ -29,6 +30,7 @@ export class Strings {
             LogIn: 'लॉग इन',
             DrawerScreen: 'होम स्क्रीन',
             startScreen: 'प्रारंभ स्क्रीन',
+            AppInfo: "अ‍ॅपची माहिती",
         }
     })
 
@@ -200,7 +202,7 @@ export class Strings {
             plotSaplingsDataUpToDate: "प्लॉट रोपटी डेटा अद्ययावत.",
             FailureSavingTrees: "काही झाडाचे प्रकार सेव करण्यात असफल. लॉग पहा.",
             FailureSavingPlots: "काही प्लॉट सेव करण्यात असफल. लॉग पहा.",
-            FailureSavingSaplings:"काही रोपे जतन करण्यात अयशस्वी. नोंदी पहा",
+            FailureSavingSaplings: "काही रोपे जतन करण्यात अयशस्वी. नोंदी पहा",
             ConfirmActionTitle: "खात्री आहे का?",
             ConfirmActionMsg: "कृपया कृतीची पुष्टी करा.",
             Yes: "होय",
@@ -257,15 +259,15 @@ export class Strings {
             SelectLanguage: "Language/भाषा",
 
             // add tree
-            ClickPhoto:"Click Photo",
-            Submit:"SUBMIT",
-            gps:"GPS",
-            edit:"Edit",
-            drag:"Drag",
-            hideAll:"Hide All",
-            showAll:"Show All",
-            openGallery :"OPEN GALLERY",
-            openCamera : "OPEN CAMERA",
+            ClickPhoto: "Click Photo",
+            Submit: "SUBMIT",
+            gps: "GPS",
+            edit: "Edit",
+            drag: "Drag",
+            hideAll: "Hide All",
+            showAll: "Show All",
+            openGallery: "OPEN GALLERY",
+            openCamera: "OPEN CAMERA",
             // local data view
             DeleteSyncedTrees: "Delete Synced Trees",
             Filters: "Filters",
@@ -290,15 +292,15 @@ export class Strings {
             fetchPlotSaplingData: "प्लॉट-सॅपलिंग डेटा मिळवा",
             SelectLanguage: "भाषा/Language",
             // add tree
-            ClickPhoto:"फोटो घ्या",
-            Submit:"सबमिट करा",
-            gps:"जीपीएस",
-            edit:"सुधारणे",
-            drag:"ड्रॅग करा",
-            hideAll:"सर्व लपवा",
-            showAll:"सगळं दाखवा",
-            openGallery :"गॅलरी उघडा",
-            openCamera : "कॅमेरा उघडा",
+            ClickPhoto: "फोटो घ्या",
+            Submit: "सबमिट करा",
+            gps: "जीपीएस",
+            edit: "सुधारणे",
+            drag: "ड्रॅग करा",
+            hideAll: "सर्व लपवा",
+            showAll: "सगळं दाखवा",
+            openGallery: "गॅलरी उघडा",
+            openCamera: "कॅमेरा उघडा",
             // local data view
             DeleteSyncedTrees: "सिंक केलेले झाडे हटवा",
             Filters: "फिल्टर",
@@ -357,7 +359,7 @@ export class Strings {
         this.labels.setLanguage(lang);
         this.languageEvent.emit('change');
     }
-    
+
     // get currently set language
 
     static getLanguage = async () => {

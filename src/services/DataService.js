@@ -112,6 +112,7 @@ export class DataService {
   }
 
   static async uploadTrees(treeList) {
+    console.log("treelist images:---", treeList.images);
     const url = `${DataService.serverBase}/uploadTrees`;
     const response = await axios.post(url, treeList);
     if (response) {

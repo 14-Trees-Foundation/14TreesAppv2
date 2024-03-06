@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Button, StyleSheet, Text, TextInput, ToastAndroid, View, TouchableOpacity } from 'react-native';
+import { Button, StyleSheet, Text, TextInput, ToastAndroid, View, BackHandler, TouchableOpacity } from 'react-native';
 import { DataService } from '../services/DataService';
 import { Strings } from '../services/Strings';
 import { TreeForm, treeFormModes } from '../components/TreeForm';
@@ -16,7 +16,18 @@ const EditTreeScreen = ({ navigation }) => {
     const { langChanged } = useContext(LangContext);
 
     useEffect(() => {
-      console.log("langChanged inside EditTreeScreen: ", langChanged);
+        const backAction = () => {
+            navigation.goBack()
+            return true; // Prevent default behavior (exit app)
+        };
+
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+        return () => backHandler.remove();
+    }, [])
+
+    useEffect(() => {
+        console.log("langChanged inside EditTreeScreen: ", langChanged);
     }, [langChanged]);
 
     const updateDetails = async (tree, images) => {

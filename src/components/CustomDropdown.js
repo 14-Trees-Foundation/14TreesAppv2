@@ -4,18 +4,27 @@ import { commonStyles } from '../services/Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 
-export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, label, showClearButton }) => {
+export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, label }) => {
     const [filteredOptions, setFilteredOptions] = useState(items);
     const [selectedItem, setSelectedItem] = useState({ value: -1, name: "" });
+    const [clearButton, setClearButton] = useState(true);
 
     useEffect(() => {
-        if (initItem === undefined) {
+        console.log("item: ---", initItem);
+        console.log("re-rendered custom dropdown");
+
+        if (initItem) {
+            setSelectedItem(initItem);
+        } else {
             setSelectedItem({ name: '', value: -1 });
         }
-        else {
-            setSelectedItem(initItem);
+
+        if (initItem && Object.keys(initItem).length === 0) {
+            setClearButton(false);
         }
+
     }, [initItem])
+
     if (scrollEnabled === undefined) {
         scrollEnabled = false;
     }
@@ -34,7 +43,9 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
         onSelectItem(item);
         setOptionsVisible(false);
         setSelectedItem(item);
+        setClearButton(true);
     }
+    
     const renderOption = ({ item, index }) => {
         return (<TouchableOpacity
             style={commonStyles.dropdownOptions}
@@ -63,8 +74,9 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
                 onBlur={(e) => { }}
             />
 
-            {showClearButton && selectedItem && selectedItem.value !== -1 && (
-                <TouchableOpacity style={{ position: 'absolute', top: 27, right: 50, zIndex: 1 }} onPress={clearSelection}  >
+            {clearButton && selectedItem && selectedItem.value !== -1 && (
+                <TouchableOpacity style={{ position: 'absolute', top: 27, right: 50, zIndex: 1 }}
+                    onPress={clearSelection}  >
                     <Icon name="close-circle" size={25} color="black" />
                 </TouchableOpacity>
             )}

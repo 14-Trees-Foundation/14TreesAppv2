@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Text, TextInput, ToastAndroid, View } from 'react-native';
+import { Button, Text, TextInput, ToastAndroid, View, BackHandler } from 'react-native';
 import { DataService } from '../services/DataService';
 import { Strings } from '../services/Strings';
 import { TreeForm, treeFormModes } from '../components/TreeForm';
@@ -32,6 +32,18 @@ export const EditLocalTree = ({ navigation, route }) => {
     const { sapling_id } = route.params;
     const [saplingid, setSaplingid] = useState(sapling_id);
     const [details, setDetails] = useState(null);
+
+    useEffect(() => {
+        const backAction = () => {
+            navigation.goBack()
+            return true; // Prevent default behavior (exit app)
+        };
+    
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    
+        return () => backHandler.remove();
+    },[])
+
     useEffect(() => {
         setSaplingid(sapling_id);
     }, [sapling_id]);
