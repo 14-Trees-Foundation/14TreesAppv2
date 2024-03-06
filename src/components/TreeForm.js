@@ -15,9 +15,10 @@ export const treeFormModes = {
     remoteEdit: 2
 }
 
-export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage, onDeleteImage }) => {
+export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage, onDeleteImage, selectedPlotUser }) => {
     const { inSaplingId, inLng, inLat, inImages, inTreeType, inPlot, inUserId } = treeData;
     console.log("mode is: ", mode);
+    //console.log("inTreeTpe: ", inTreeType, "inPlot: ", inPlot);
     const [saplingid, setSaplingId] = useState(inSaplingId);
     // console.log('saplingid: ',inSaplingId);
     const [lat, setlat] = useState(inLat);
@@ -31,7 +32,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     const [plotItems, setPlotItems] = useState([]);
     const [mainScrollEnabled, setMainScrollEnabled] = useState(true);
     const [selectedTreeType, setSelectedTreeType] = useState(inTreeType);
-    const [selectedPlot, setSelectedPlot] = useState(inPlot);
+    const [selectedPlot, setSelectedPlot] = useState(selectedPlotUser);
     const [userId, setUserId] = useState(inUserId);
     const [modalVisible, setModalVisible] = useState(false);
     const [disableButton, setDisableButton] = useState(true);
@@ -86,6 +87,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
 
     const onSave = async () => {
         console.log("Sapling id value : ", saplingid)
+
         if (localSaplingIds.includes(saplingid)) {
             Alert.alert(Strings.alertMessages.invalidSaplingId, Strings.labels.SaplingId + ' ' + saplingid + ' ' + Strings.alertMessages.alreadyExists);
             return;
@@ -109,7 +111,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     saplingid: saplingid,
                     lat: lat,
                     lng: lng,
-                    plotid: selectedPlot.value,
+                    plotid: selectedPlotUser ? selectedPlotUser.value : selectedPlot.value,
                     user_id: userId,
                 };
                 console.log(tree);
@@ -245,6 +247,12 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     return (
         <ScrollView keyboardShouldPersistTaps='handled' style={{ backgroundColor: '#125441', height: '100%' }} scrollEnabled={mainScrollEnabled}>
             <View style={{ backgroundColor: '#0F4334', margin: 10, borderRadius: 10 }}>
+                <View>
+                    {selectedPlotUser && <Text style={{ ...commonStyles.text4, fontSize: 20, textAlign: 'center', color: "white" }}>
+                        Selected Plot: {selectedPlotUser.name}
+                    </Text>}
+                </View>
+
                 {
                     [
                         <View>
@@ -273,23 +281,26 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                         </View>
                         ,
 
-                        <Text style={{ ...commonStyles.text4, textAlign: 'center' }}>
+                        <Text style={{ ...commonStyles.text4, textAlign: 'center', color: "white" }}>
                             Sapling ID: {saplingid}
                         </Text>
                     ][mode]
                 }
+
+
+
                 <CustomDropdown
                     initItem={selectedTreeType}
                     items={treeItems}
                     label={Strings.labels.SelectTreeType}
                     onSelectItem={setSelectedTreeType}
                 />
-                <CustomDropdown
+                {mode === treeFormModes.remoteEdit && <CustomDropdown
                     initItem={selectedPlot}
                     items={plotItems}
                     label={Strings.labels.SelectPlot}
                     onSelectItem={setSelectedPlot}
-                />
+                />}
                 <CoordinateSetter
                     setInitLocation={mode === treeFormModes.addTree}
                     inLat={inLat ? inLat : 0}

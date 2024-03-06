@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useContext, useEffect } from 'react';
-import { Alert, Platform, RootTagContext } from 'react-native';
+import { Alert, Platform, RootTagContext, TouchableOpacity } from 'react-native';
 import { enableLatestRenderer } from 'react-native-maps';
 import { PERMISSIONS, request } from 'react-native-permissions';
 import { DrawerNavigator } from './components/DrawerNavigator';
@@ -15,6 +15,9 @@ import DeviceInfo from 'react-native-device-info';
 import { DataService } from './services/DataService';
 import { styleConfigs } from './services/Styles';
 import { LangProvider } from './context/LangContext ';
+import Shfit from './screens/Shift';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import AddTreeScreen from './screens/AddTree';
 
 enableLatestRenderer();
 
@@ -179,6 +182,34 @@ const App = () => {
             component={LoadingScreen}
             options={{ headerShown: false }} />
           <Stack.Screen
+            name={Strings.screenNames.getString('Shift', Strings.english)}
+            component={Shfit}
+            options={{
+              headerRight: () => {
+                <TouchableOpacity
+                  onPress={() => navigation.goBack()}
+                  style={{ marginLeft: 10 }}>
+                  <Icon name="chevron-left" size={24} color="white" />
+                </TouchableOpacity>
+              },
+              ...styleConfigs.drawerHeaderOptions,
+              title: Strings.screenNames.Shift
+            }} />
+          <Stack.Screen
+            name={Strings.screenNames.getString('AddTree', Strings.english)}
+            component={AddTreeScreen}
+            options={{
+              headerRight: () => {
+                <TouchableOpacity
+                  onPress={() => navigation.goBack()}
+                  style={{ marginLeft: 10 }}>
+                  <Icon name="chevron-left" size={24} color="white" />
+                </TouchableOpacity>
+              },
+              ...styleConfigs.drawerHeaderOptions,
+              title: Strings.screenNames.AddTree
+            }} />
+          <Stack.Screen
             name={Strings.screenNames.getString('LogIn', Strings.english)}
             component={LoginScreen}
             options={{
@@ -191,7 +222,7 @@ const App = () => {
             component={DrawerNavigator}
             options={{
               headerLeft: () => null,
-              headerShown: false,
+              headerShown: false
             }} />
         </Stack.Navigator>
       </NavigationContainer>

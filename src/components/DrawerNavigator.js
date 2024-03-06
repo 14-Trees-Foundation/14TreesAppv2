@@ -15,6 +15,7 @@ import { Constants, Utils, getImageSourceObject, logoSrc } from "../services/Uti
 import { DrawerContentScrollView, DrawerItemList, createDrawerNavigator, } from '@react-navigation/drawer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import About from '../screens/About';
+import Shfits from "../screens/Shifts";
 
 const Drawer = createDrawerNavigator();
 
@@ -155,6 +156,14 @@ export const DrawerNavigator = ({ navigation, route }) => {
                 }}
             />
             <Drawer.Screen
+                name={Strings.screenNames.getString('Shifts', Strings.english)}
+                component={Shfits}
+                options={{
+                    ...styleConfigs.drawerHeaderOptions,
+                    title: Strings.screenNames.Shifts,
+                }}
+            />
+            <Drawer.Screen
                 name={Strings.screenNames.getString(
                     'LocalDataNavigator',
                     Strings.english,
@@ -201,7 +210,7 @@ export const DrawerNavigator = ({ navigation, route }) => {
                     title: Strings.screenNames.AppInfo,
                 }}
             />
-        
+
         </Drawer.Navigator >
     );
 };

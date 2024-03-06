@@ -1,16 +1,6 @@
 //TODO bug fix in filters.
 import React, { useEffect, useState } from 'react';
-import {
-  Button,
-  FlatList,
-  Image,
-  Modal,
-  ScrollView,
-  Text,
-  ToastAndroid,
-  View,
-  BackHandler
-} from 'react-native';
+import { Button, FlatList, Image, Modal, ScrollView, Text, ToastAndroid, View,BackHandler } from 'react-native';
 // import * as ImagePicker from 'react-native-image-picker';
 import { useFocusEffect } from '@react-navigation/native';
 import { CustomButton, MyIconButton } from '../components/Components';
@@ -21,6 +11,8 @@ import { SyncDisplay } from '../components/SyncDisplay';
 import { commonStyles } from '../services/Styles';
 
 const LocalDataView = ({ navigation }) => {
+  console.log("---inside the local data view---");
+
   const [treeList, setTreeList] = useState(null);
   const [finalList, setFinalList] = useState(null);
   const [treeTypeList, setTreeTypeList] = useState([]);
@@ -33,7 +25,9 @@ const LocalDataView = ({ navigation }) => {
   const [selectedSaplingId, setSelectedSaplingId] = useState({});
   const [allPlots, setAllPlots] = useState([]);
   const [allTreeTypes, setAllTreeTypes] = useState([]);
-  const [allSaplings, setAllSaplings] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  
+  //const [allSaplings, setAllSaplings] = useState([]);
   const uploadStatuses = [
     { name: Strings.messages.LocalOrSynced, value: 0 },
     { name: Strings.messages.Local, value: 1 },
@@ -102,7 +96,7 @@ const LocalDataView = ({ navigation }) => {
   const plotNameFromId = id => {
     return allPlots.find(type => type.value === id).name;
   };
-  const [modalVisible, setModalVisible] = useState(false);
+ 
 
   const openModal = () => {
     setModalVisible(true);

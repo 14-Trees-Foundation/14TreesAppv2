@@ -120,6 +120,26 @@ export class Utils {
             }
         ])
     }
+
+    static getCurrentTime12Hr() {
+        const date = new Date();
+        let hours = date.getHours();
+        let minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+
+        // Convert hours to 12-hour format
+        hours = hours % 12;
+        hours = hours ? hours : 12; // Handle midnight (0 hours)
+
+        // Add leading zero to single-digit minutes
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+
+        // Construct the 12-hour time string
+        const time12Hr = hours + ':' + minutes + ' ' + ampm;
+
+        return time12Hr;
+    }
+    
     static async createLocalTablesIfNeeded() {
         // console.log('creating tables if needed.', this.localdb)
         await this.localdb.createTreetTypesTbl();

@@ -44,13 +44,23 @@ const HomeScreen = ({ navigation }) => {
         <MyIconButton
           names={['plus', 'tree']}
           styles={[{ opacity: 0.9 }, { opacity: 0.5 }]}
+          text={Strings.buttonLabels.Shifts}
+          onPress={() =>
+            navigation.navigate(
+              Strings.screenNames.getString('Shifts', Strings.english),
+            )
+          }
+        />
+        {/* <MyIconButton
+          names={['plus', 'tree']}
+          styles={[{ opacity: 0.9 }, { opacity: 0.5 }]}
           text={Strings.buttonLabels.AddNewTree}
           onPress={() =>
             navigation.navigate(
               Strings.screenNames.getString('AddTree', Strings.english),
             )
           }
-        />
+        /> */}
         <MyIconButton
           name={'cloud-download-alt'}
           text={Strings.buttonLabels.FetchHelperData}

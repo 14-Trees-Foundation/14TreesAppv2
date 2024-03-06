@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 
 export const commonStyles = StyleSheet.create({
   pop: {
@@ -125,8 +125,8 @@ export const commonStyles = StyleSheet.create({
   searchButton: {
     backgroundColor: "#5883E7",
     paddingTop: 6,
-    borderWidth :1,
-    borderColor:"white",
+    borderWidth: 1,
+    borderColor: "white",
     borderRadius: 3,
     alignItems: 'center',
     height: 38,
@@ -203,7 +203,7 @@ export const commonStyles = StyleSheet.create({
     color: 'black',
   },
   //namrata
-  textX:{
+  textX: {
     fontSize: 17,
     color: 'black',
     textAlign: 'left',
@@ -250,9 +250,13 @@ export const commonStyles = StyleSheet.create({
     fontFamily: 'cochin',
     fontWeight: 'bold',
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: {width: 1, height: 1},
+    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
   },
+  shiftButton: {
+    backgroundColor: "green",
+    color: "white"
+  }
 });
 
 export const styleConfigs = {
