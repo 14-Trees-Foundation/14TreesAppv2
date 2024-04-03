@@ -6,14 +6,14 @@ import { DataService } from '../services/DataService';
 import { Strings } from '../services/Strings';
 import { Utils } from '../services/Utils';
 import { commonStyles } from "../services/Styles";
-import LangContext from '../context/LangContext ';
+import GlobalContext from '../context/GlobalContext ';
 
 const VerifyusersScreen = ({ navigation }) => {
 
     const [users, setUsers] = useState([]);
     const [adminID, setAdminID] = useState('');
 
-    const { langChanged } = useContext(LangContext);
+    const { langChanged } = useContext(GlobalContext);
 
     useEffect(() => {
         const backAction = () => {

@@ -17,12 +17,12 @@ export const CustomButton = ({ text, opacityStyle, textStyle, onPress }) => {
   if (textStyle) {
     finalTextStyle = { ...finalTextStyle, ...textStyle };
   }
-  const extraStyle = text === Strings.buttonLabels.login ? { backgroundColor: "green" } : {};
+  const extraStyle = text === Strings.buttonLabels.login ? { backgroundColor: "green", paddingHorizontal: 30, borderRadius: 53, paddingVertical: 10 } : { paddingHorizontal: 30, borderRadius: 53, paddingVertical: 10 };
 
   return (
     <TouchableOpacity onPress={onPress}>
       <View style={{ ...finalOpacityStyle, ...extraStyle }}>
-        <Text style={{ ...finalTextStyle, fontSize: 20 }}>{text}</Text>
+        <Text style={{ ...finalTextStyle, fontFamily: 'Inter-Regular', color: 'white', fontSize: 20, fontWeight: "bold" }}>{text}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -81,7 +81,7 @@ export function MyIconButton({
   sizes,
   styles,
   size = 30,
-  color = '#1A894E',
+  color = '#059636',
   onPress,
   iconColor = 'white',
   text = undefined,
@@ -90,11 +90,11 @@ export function MyIconButton({
     const lngStyle = text === Strings.buttonLabels.SelectLanguage ? { backgroundColor: 'grey', borderColor: "#C2C2C2", borderWidth: 1, fontSize: 10, width: 230, height: 50 } : {}
     return (
       <TouchableOpacity
-        style={{ ...commonStyles.iconBtn, backgroundColor: color, ...lngStyle }}
+        style={{ ...styles, ...commonStyles.iconBtn, backgroundColor: color, ...lngStyle }}
         onPress={onPress}>
         <MyIcon name={name} size={size} color={iconColor}></MyIcon>
         {text && (
-          <Text style={{ color: iconColor, fontSize: size * 0.8 }}> {text}</Text>
+          <Text style={{ fontFamily: 'Inter-Regular', fontWeight: '700', color: iconColor, fontSize: size * 0.8 }}> {text}</Text>
         )}
       </TouchableOpacity>
     );
@@ -115,7 +115,7 @@ export function MyIconButton({
           color={iconColor}
         />
         {text && (
-          <Text style={{ color: iconColor, fontSize: size * 0.8 }}> {text}</Text>
+          <Text style={{ fontFamily: 'Inter-Regular', fontWeight: '700', color: iconColor, fontSize: size * 0.8 }}> {text}</Text>
         )}
       </TouchableOpacity>
     );
@@ -136,7 +136,7 @@ export function MyIconButton({
 export const SaveButton = ({
   onPress,
   text = Strings.buttonLabels.save,
-  size = 30,
+  size = 25,
 }) => {
   return (
     <MyIconButton
@@ -150,7 +150,7 @@ export const SaveButton = ({
 export const CancelButton = ({
   onPress,
   text = Strings.buttonLabels.cancel,
-  size = 30,
+  size = 25,
 }) => {
   return (
     <MyIconButton

@@ -1,19 +1,22 @@
-import React, { useEffect, useState, useContext, useCallback } from 'react';
-import { View, BackHandler, Alert } from 'react-native';
-import { MyIconButton } from '../components/Components';
-import LanguageModal from '../components/Languagemodal';
+import React, { useEffect, useContext, useCallback } from 'react';
+import { View, BackHandler, Alert, TouchableOpacity, Image, Text, Dimensions, ScrollView } from 'react-native';
 import { Strings } from '../services/Strings';
-import { SyncDisplay } from '../components/SyncDisplay';
 import { Utils } from '../services/Utils';
-import LangContext from '../context/LangContext ';
+import GlobalContext from '../context/GlobalContext ';
 import { useFocusEffect } from '@react-navigation/native';
 
 const HomeScreen = ({ navigation }) => {
-  const [langModalVisible, setLangModalVisible] = useState(false);
 
-  const { langChanged } = useContext(LangContext);
+  const { langChanged, lightTheme } = useContext(GlobalContext);
 
+  useEffect(() => {
+    console.log("fetching from homescreen----");
+    Utils.fetchAndStoreHelperData();
+  }, []);
 
+  useEffect(() => {
+    console.log("langChanged inside HomeScreen: ", langChanged);
+  }, [langChanged]);
 
   useFocusEffect(useCallback(() => {
     const backAction = () => {
@@ -28,61 +31,138 @@ const HomeScreen = ({ navigation }) => {
     return () => backHandler.remove();
   }, []))
 
-  useEffect(() => {
-    console.log("langChanged inside HomeScreen: ", langChanged);
-  }, [langChanged]);
-
-  useEffect(() => {
-    Utils.fetchAndStoreHelperData();
-  }, []);
-
 
   return (
-    <View>
-      <SyncDisplay />
+    <ScrollView style={{ backgroundColor: 'white', height: '100%' }}>
+
       <View style={{ margin: 10 }}>
-        <MyIconButton
-          names={['plus', 'tree']}
-          styles={[{ opacity: 0.9 }, { opacity: 0.5 }]}
-          text={Strings.buttonLabels.Shifts}
+        <TouchableOpacity
+          style={{
+            width: 'auto',
+            marginBottom: 2,
+            marginTop: 22,
+            backgroundColor: lightTheme ? '#e5e7ea' : 'lightgrey',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginHorizontal: 82,
+            borderColor: lightTheme ? '' : 'black',
+            borderWidth: lightTheme ? 0 : 1,
+            borderRadius: 50,
+            shadowColor: lightTheme ? '#52525c' : 'black', // Shadow color
+            shadowOffset: {
+              width: 0,
+              height: 0.5,
+            },
+            shadowOpacity: lightTheme ? 0.3 : 1,
+            shadowRadius: 1,
+            elevation: 3,
+          }}
+
           onPress={() =>
             navigation.navigate(
               Strings.screenNames.getString('Shifts', Strings.english),
             )
           }
-        />
-        {/* <MyIconButton
-          names={['plus', 'tree']}
-          styles={[{ opacity: 0.9 }, { opacity: 0.5 }]}
-          text={Strings.buttonLabels.AddNewTree}
+        >
+          <View
+            style={{ padding: 20, alignItems: 'center', }}
+          >
+            <Image source={require('../../assets/icon-add-new-tree.png')}
+              style={{ width: 100, height: 100, }} />
+            <Text
+              style={{
+                fontFamily: 'Inter-Regular', fontSize: 20, fontWeight: '700',
+                color: lightTheme ? '#113160' : 'black', textAlign: 'center'
+              }}
+            >{Strings.buttonLabels.Shifts}</Text>
+          </View>
+
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            width: 'auto',
+            marginBottom: 2,
+            marginTop: 25,
+            backgroundColor: lightTheme ? '#e5e7ea' : 'lightgrey',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginHorizontal: 82,
+            borderColor: lightTheme ? '' : 'black',
+            borderWidth: lightTheme ? 0 : 1,
+            borderRadius: 50,
+            shadowColor: lightTheme ? '#52525c' : 'black', // Shadow color
+            shadowOffset: {
+              width: 0,
+              height: 0.5,
+            },
+            shadowOpacity: lightTheme ? 0.3 : 1,
+            shadowRadius: 1,
+            elevation: 3,
+          }}
+          onPress={Utils.fetchAndStoreHelperData}
+        >
+          <View
+            style={{ padding: 20, alignItems: 'center', }}
+          >
+            <Image source={require('../../assets/icon-fetch-data.png')}
+              style={{ width: 100, height: 100, }} />
+            <Text
+              style={{
+                fontFamily: 'Inter-Regular', fontSize: 20, fontWeight: '700',
+                color: lightTheme ? '#113160' : 'black', textAlign: 'center'
+              }}
+            >{Strings.buttonLabels.FetchHelperData}</Text>
+          </View>
+
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{
+            width: 'auto',
+            marginBottom: 2,
+            marginTop: 25,
+            backgroundColor: lightTheme ? '#e5e7ea' : 'lightgrey',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginHorizontal: 82,
+            borderColor: lightTheme ? '' : 'black',
+            borderWidth: lightTheme ? 0 : 1,
+            borderRadius: 50,
+            shadowColor: lightTheme ? '#52525c' : 'black', // Shadow color
+            shadowOffset: {
+              width: 0,
+              height: 0.5,
+            },
+            shadowOpacity: lightTheme ? 0.3 : 1,
+            shadowRadius: 1,
+            elevation: 3,
+          }}
           onPress={() =>
             navigation.navigate(
-              Strings.screenNames.getString('AddTree', Strings.english),
+              Strings.screenNames.getString('SyncDisplay', Strings.english),
+              { data: 0 }
             )
           }
-        /> */}
-        <MyIconButton
-          name={'cloud-download-alt'}
-          text={Strings.buttonLabels.FetchHelperData}
-          onPress={Utils.fetchAndStoreHelperData}
-        />
-        <View style={{ alignItems: 'center' }}>
-          <MyIconButton
-            name={'language'}
-            text={Strings.buttonLabels.SelectLanguage}
-            onPress={() => {
-              console.log('set your language');
-              setLangModalVisible(!langModalVisible);
-            }}
-          />
-        </View>
-      </View>
-      <LanguageModal
-        langModalVisible={langModalVisible}
-        setLangModalVisible={setLangModalVisible}
+        >
+          <View
+            style={{ padding: 20, alignItems: 'center', }}
+          >
+            <Image source={require('../../assets/icon-sync-data.png')}
+              style={{ width: 130, height: 100, }} />
+            <Text
+              style={{
+                fontFamily: 'Inter-Regular', fontSize: 20, fontWeight: '700',
+                color: lightTheme ? '#113160' : 'black', textAlign: 'center'
+              }}
+            >{Strings.buttonLabels.SyncData}</Text>
+          </View>
 
-      />
-    </View>
+        </TouchableOpacity>
+      </View>
+
+
+
+    </ScrollView >
   );
 };
 

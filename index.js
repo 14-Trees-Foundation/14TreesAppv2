@@ -1,6 +1,15 @@
 import 'react-native-gesture-handler';
-import {AppRegistry} from 'react-native';
+import { AppRegistry } from 'react-native';
 import App from './src/App';
-import {name as appName} from './app.json';
+import { name as appName } from './app.json';
+import { GlobalContextProvider } from './src/context/GlobalContext ';
 
-AppRegistry.registerComponent(appName, () => App);
+const Main = () => (
+    <GlobalContextProvider>
+        <App />
+    </GlobalContextProvider>
+);
+
+AppRegistry.registerComponent(appName, () => Main);
+
+//AppRegistry.registerComponent(appName, () => App);

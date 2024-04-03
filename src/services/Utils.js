@@ -32,6 +32,14 @@ export class Utils {
         return await this.localdb.getAllLogs();
     }
 
+    static async getShiftsIDLocalDB(upload) {
+        if (upload != undefined) {
+            return await this.localdb.getShiftsLocalDB();
+        }
+
+        return await this.localdb.getAllShiftID();
+    }
+
     static async deleteLogsFromLocalDB() {
         await this.localdb.deleteAllLogs();
     }
@@ -40,6 +48,12 @@ export class Utils {
         const logs = await Utils.getLogsFromLocalDB();
         const response = await DataService.uploadLogs(logs);
         return response;
+    }
+
+    static async syncShifts() {
+        const shifts = await Utils.getShiftsIDLocalDB(1);
+        //console.log("before upload shift data:---", shifts);
+        return await DataService.uploadShifts(shifts);
     }
 
     // //Namrata
@@ -64,7 +78,6 @@ export class Utils {
     }
 
     static async deleteTreeAndImages(saplingId) {
-
         await this.localdb.deleteTreeImages(saplingId);
         await this.localdb.deleteTree(saplingId);
         return;
@@ -75,6 +88,10 @@ export class Utils {
             return await this.formatLocalTreeToJSON(results[0]);
         }
         return null;
+    }
+
+    static async saveShiftsToLocalDB(shiftData) {
+        await this.localdb.saveShifts(shiftData);
     }
 
     static async saveTreeAndImagesToLocalDB(tree, images) {
@@ -121,6 +138,42 @@ export class Utils {
         ])
     }
 
+    static getShiftID(shifts) {
+        // Get the current date and time
+        const currentDate = new Date();
+
+        // Extract the year, month, day, hour, minute, and second components from the current date and time
+        const year = currentDate.getFullYear();
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+        const day = String(currentDate.getDate()).padStart(2, '0');
+        const hour = String(currentDate.getHours()).padStart(2, '0');
+        const minute = String(currentDate.getMinutes()).padStart(2, '0');
+
+        // Combine the year, month, day, hour, minute, and second components to form a date-time string
+        const dateTimeString = `${year}-${month}-${day}_${hour}:${minute}`;
+
+
+
+        // Create the shiftID by concatenating 'shift', the value of shifts + 1, and the date-time string
+        const shiftID = `shift${shifts + 1}_${dateTimeString}`;
+        //console.log("shiftID---", shiftID);
+        return shiftID;
+    }
+
+    static formatTime(seconds) {
+        //console.log("seconds----", seconds);
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+
+        if (minutes >= 60) {
+            const hours = Math.floor(minutes / 60);
+            const remainingMinutes = minutes % 60;
+            return `${hours}h ${remainingMinutes}m ${remainingSeconds}s`;
+        }
+
+        return `${minutes}m ${remainingSeconds}s`;
+    }
+
     static getCurrentTime12Hr() {
         const date = new Date();
         let hours = date.getHours();
@@ -139,7 +192,7 @@ export class Utils {
 
         return time12Hr;
     }
-    
+
     static async createLocalTablesIfNeeded() {
         // console.log('creating tables if needed.', this.localdb)
         await this.localdb.createTreetTypesTbl();
@@ -409,12 +462,13 @@ export class Utils {
 
     static async batchUpload(batch) {
         let failures = batch;
+
         try {
             let response = await DataService.uploadTrees(batch);
-            console.log("response from uploadTrees: ", response);
+            //console.log("response from uploadTrees: ", response);
             if (response) {
                 failures = await Utils.setTreeSyncStatus(response, batch);
-                console.log('batch failures: ', failures);
+                //console.log('batch failures: ', failures);
             }
         }
         catch (error) {
@@ -427,6 +481,7 @@ export class Utils {
             }
             await this.logException(JSON.stringify(errorLog));
         }
+        //console.log("failed upload response: ---", failures);
         return failures;
     }
 
@@ -437,9 +492,11 @@ export class Utils {
     static async getLastSyncDate() {
         return await AsyncStorage.getItem(Constants.syncDateKey);
     }
+
     static async upload(onProgress = undefined) {
         const final = await Utils.fetchTreesFromLocalDB(0);//not uploaded.
         console.log('Attempting upload with total trees = ', final.length);
+
         const failures = [];
         for (let i = 0; i < final.length; i += MIN_BATCH_SIZE) {
             const batchFailures = await Utils.batchUpload(final.slice(i, i + MIN_BATCH_SIZE));
@@ -449,6 +506,7 @@ export class Utils {
             }
         }
         await Utils.setLastSyncDateNow();
+        console.log("failed upload: ---", failures);
         if (failures.length === 0) {
             Alert.alert(Strings.alertMessages.SyncSuccess, Strings.alertMessages.CheckLocalList);
         }
@@ -481,13 +539,14 @@ export class Utils {
         let res;
         if (uploaded !== undefined) {
             res = await this.localdb.getTreesByUploadStatus(uploaded);
+            //console.log("res---", res)
         }
         else {
             res = await this.localdb.getAllTrees();
-            console.log(res)
+            //console.log("res---", res)
         }
 
-        // console.log(res);
+        //console.log(res);
         var final = [];
         for (let index = 0; index < res.length; index++) {
             let tree = await Utils.formatLocalTreeToJSON(res[index]);
@@ -503,23 +562,24 @@ export class Utils {
         if (element.lng === 'undefined') {
             element.lng = 0;
         }
-        console.log(element.lat, element.lng);
+        //console.log(element.lat, element.lng);
         let images = await this.localdb.getTreeImages(element.sapling_id);
-        for (let index = 0; index < images.length; index++) {
-            console.log(images[index].name);
-        }
-        // console.log(element);
+
         const tree = {
             sapling_id: element.sapling_id,
             type_id: element.type_id,
             plot_id: element.plot_id,
             coordinates: [element.lat, element.lng],
             images: images,
-            uploaded: (element.uploaded === 1)
+            shiftID: element.shiftID,
+            uploaded: (element.uploaded === 1),
+            sequenceNo: element.sequenceNo,
+            timestamp: element.timestamp
         };
         if (element.uploaded !== undefined) {
             tree.uploaded = (element.uploaded === 1);
         }
+        //console.log("treeJSON---", tree);
         tree.user_id = await this.getUserId();
         return tree;
     }
@@ -569,6 +629,33 @@ export class Utils {
 
     static async getLastHash() {
         return await AsyncStorage.getItem(Constants.lastHashKey);
+    }
+
+    static aspectCalculate() {
+
+        const originalWidth = 720; // maxWidth
+        const originalHeight = 960; // maxHeight
+
+        const desiredWidth = 320;
+        const desiredHeight = 200;
+        const aspectRatio = originalWidth / originalHeight; // Calculate the aspect ratio of the original image
+
+        // Calculate the actual width and height of the displayed image while maintaining the aspect ratio
+        let width, height;
+
+        if (desiredWidth / aspectRatio <= desiredHeight) {
+            // If the width calculated based on aspect ratio fits within the desired height, use the desired width and calculated height
+            width = desiredWidth;
+            height = desiredWidth / aspectRatio;
+        } else {
+            // If the calculated height based on aspect ratio fits within the desired width, use the desired height and calculated width
+            width = desiredHeight * aspectRatio;
+            height = desiredHeight;
+        }
+
+        // Now, you can use the calculated width and height to display the image
+        console.log("height:--- ", height, "width:--", width);
+
     }
 
     static async getImage(compressionRequired = false, selectionId) {
@@ -715,6 +802,7 @@ export class Utils {
 }
 
 
+
 export class Constants {
     static userIdKey = 'userid';
     static userDetailsKey = 'userobj';
@@ -724,13 +812,14 @@ export class Constants {
     static hashForPlotSaplingsKey = 'hashForPlotSaplings';
     static appRootTagKey = 'rootTag';
     static syncDateKey = 'date';
-    static treeFormTemplateData = { inSaplingId: null, inLat: 0, inLng: 0, inImages: [], inPlot: null, inTreeType: null, inUserId: '' }
+    static treeFormTemplateData = { inSaplingId: null, inLat: 0, inLng: 0, inImages: [], inPlot: null, inTreeType: null, inUserId: '', inShiftId: '', inSequenceNo: '' }
     static selectedLangKey = 'LANG';
+    static selectedTheme = 'DARK';
     static logoImage() {
-        return require('../../assets/logo.png');
+        return require('../../assets/14-trees-logo.png');
     }
     static placeholderImage() {
-        return require('../../assets/placeholder1.png');
+        return require('../../assets/icon-profile.png');
     }
 }
 

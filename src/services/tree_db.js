@@ -9,6 +9,7 @@ const treetypeName = 'treetype';
 const plotName = 'plot';
 const users = 'users';
 const saplingsTableName = "saplings";
+const shiftTable = 'Shifts';
 
 enablePromise(true);
 
@@ -41,7 +42,11 @@ export class LocalDatabase {
             lng TEXT ,
             plotid TEXT NOT NULL,
             uploaded INTEGER NOT NULL,
-            user_id TEXT NOT NULL
+            user_id TEXT NOT NULL,
+            shiftID TEXT NOT NULL,
+            sequenceNo TEXT NOT NULL,
+            timestamp TEXT NOT NULL, 
+            Foreign Key (shiftID) references ${shiftTable}(shiftID)
         );`;
 
 
@@ -56,11 +61,25 @@ export class LocalDatabase {
             Foreign Key (saplingid) references ${treeTableName}(saplingid)
         );`;
 
+        const query3 = `
+            CREATE TABLE IF NOT EXISTS ${shiftTable} (
+                shiftID TEXT NOT NULL PRIMARY KEY,
+                shifttype TEXT,
+                user_id TEXT NOT NULL,
+                plotselected TEXT NOT NULL,
+                starttime TEXT NOT NULL,
+                endtime TEXT NOT NULL,
+                timetaken TEXT NOT NULL,
+                treesplanted TEXT NOT NULL,
+                timestamp TEXT NOT NULL          
+               )`;
 
         await this.db.executeSql(query);
         await this.db.executeSql(query2);
-
+        await this.db.executeSql(query3);
+        console.log('Shift table created successfully---------');
     };
+
 
     createLogsTable = async () => {
 
@@ -134,6 +153,83 @@ export class LocalDatabase {
         }
     };
 
+    getShiftsLocalDB = async () => {
+        try {
+            const shiftData = [];
+            const query = `SELECT * FROM ${shiftTable}`;
+            const results = await this.db.executeSql(query);
+            // console.log("results 123----: ", results);
+
+            for (let index = 0; index < results.length; index++) {
+                const result = results[index];
+
+                for (let i = 0; i < result.rows.length; i++) {
+                    let item = result.rows.item(i);
+                    //console.log("shift id in treedb--", item.shiftID, 'item', item);
+                    const saplingsInfo = await this.getTreesByShiftID(item.shiftID);
+                    //console.log('trees got in thsis---', saplingsInfo);
+                    item = { ...item, saplings: saplingsInfo };
+                    //console.log("final item---", item);
+                    shiftData.push(item);
+
+                    // const finalData = {
+                    //     shiftID: shift_id,
+                    //     shifttype: result.rows.item(i).shifttype,
+                    //     user_id: result.rows.item(i).user_id,
+                    //     saplings: saplingsInfo,
+                    //     plotselected: result.rows.item(i).plotselected,
+                    //     starttime: result.rows.item(i).starttime,
+                    //     endtime: result.rows.item(i).endtime,
+                    //     timetaken: result.rows.item(i).timetaken,
+                    //     treesplanted: result.rows.item(i).treesplanted,
+                    //     timestamp: result.rows.item(i).timestamp
+                    // };
+
+
+                }
+            }
+
+            console.log("final shift data---", shiftData);
+            return shiftData;
+        } catch (error) {
+            console.error('Error fetching shiftd:', error);
+            return [];
+        }
+    }
+
+    getTreesByShiftID = async (shift_id) => {
+        try {
+            const trees = [];
+            const query = `SELECT  saplingid as sapling_id, sequenceNo FROM ${treeTableName} WHERE shiftID = ?`;
+            const results = await this.db.executeSql(
+                query, [shift_id]
+            );
+            results.forEach(result => {
+                for (let index = 0; index < result.rows.length; index++) {
+                    trees.push(result.rows.item(index));
+                }
+            });
+            //console.log("getTreesByShiftID----", trees);
+            return trees;
+        } catch (error) {
+            console.error('Error fetching trees:', error);
+            return [];
+        }
+    }
+
+    getAllShiftID = async () => {
+        try {
+            const query = `SELECT * FROM ${shiftTable}`;
+            const [results] = await this.db.executeSql(query);
+            //console.log('sending Logs--------------');
+            const logs = results.rows.raw();
+            return logs;
+        } catch (error) {
+            console.error('Error fetching shiftd:', error);
+            return [];
+        }
+    }
+
     deleteAllLogs = async () => {
         const deleteQuery = `DELETE FROM logs_table`;
         await this.db.executeSql(deleteQuery);
@@ -143,7 +239,7 @@ export class LocalDatabase {
         try {
             const trees = [];
             const results = await this.db.executeSql(
-                `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng, uploaded FROM ${treeTableName}`,
+                `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng, uploaded, shiftID, sequenceNo, timestamp FROM ${treeTableName}`,
             );
             results.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {
@@ -167,7 +263,7 @@ export class LocalDatabase {
 
     getTreeBySaplingID = async (saplingId) => {
         const trees = [];
-        const queryString = `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng, uploaded FROM ${treeTableName} WHERE sapling_id = ?`
+        const queryString = `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng, uploaded, shiftID,sequenceNo  FROM ${treeTableName} WHERE sapling_id = ?`
         const results = await this.db.executeSql(
             queryString, [saplingId]
         );
@@ -183,7 +279,7 @@ export class LocalDatabase {
         try {
             const trees = [];
             const results = await this.db.executeSql(
-                `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng FROM ${treeTableName} where uploaded=${uploaded}`,
+                `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng, shiftID, sequenceNo, timestamp FROM ${treeTableName} where uploaded=${uploaded}`,
             );
             results.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {
@@ -279,12 +375,55 @@ export class LocalDatabase {
         }
     };
 
+    saveShifts = async (shiftData) => {
+        try {
+            console.log('inserting into shift table---', shiftData.shiftID); // Add the value you want to log here
+            const [results] = await this.db.executeSql(`
+        SELECT * FROM ${shiftTable} 
+        WHERE shiftID = ? `,
+                [shiftData.shiftID]
+            );
+            const existingShift = results.rows.raw();
+            console.log("existing shift: ", existingShift);
+
+            // If the shift already exists, update it with incoming data
+            if (existingShift.length > 0) {
+                console.log("shift already exists, updating row");
+                const updateQuery = `UPDATE ${shiftTable} 
+                             SET plotselected='${shiftData.plotselected}', 
+                                 starttime='${shiftData.starttime}', 
+                                 endtime='${shiftData.endtime}', 
+                                 timetaken='${shiftData.timetaken}', 
+                                 treesplanted='${shiftData.treesplanted}' 
+                             WHERE shiftID='${shiftData.shiftID}'`;
+                return this.db.executeSql(updateQuery);
+            } else {
+                // If the shift doesn't exist, insert it into the table
+                console.log("shift does not exist, inserting row");
+                const dateString = new Date(); // Current timestamp
+                let timestamp = dateString.toISOString().split('T')[0];
+                timestamp = timestamp.split('-').reverse().join('-');
+
+                const insertQuery = `INSERT INTO ${shiftTable} 
+                             (shiftID, shifttype, user_id,  plotselected, starttime, endtime, timetaken, treesplanted, timestamp) 
+                             VALUES ('${shiftData.shiftID}','add saplings', '${shiftData.user_id}', '${shiftData.plotselected}', '${shiftData.starttime}', '${shiftData.endtime}', '${shiftData.timetaken}', '${shiftData.treesplanted}', '${timestamp}')`;
+
+                return this.db.executeSql(insertQuery);
+            }
+        } catch (error) {
+            console.log("Error inserting shift---", error);
+        }
+    }
+
+
     saveTree = async (tree, uploaded) => {
+        //console.log('insterting tree---', tree);
+
 
         const insertQuery =
-            `INSERT OR REPLACE INTO ${treeTableName}(treeid, saplingid, lat, lng, plotid, uploaded, user_id) values` +
-            `('${tree.treeid}', '${tree.saplingid}', '${tree.lat}', '${tree.lng}', '${tree.plotid}', ${uploaded}, '${tree.user_id}')`;
-        console.log('insterting tree');
+            `INSERT OR REPLACE INTO ${treeTableName}(treeid, saplingid, lat, lng, plotid, uploaded, user_id, shiftID, sequenceNo,timestamp ) values` +
+            `('${tree.treeid}', '${tree.saplingid}', '${tree.lat}', '${tree.lng}', '${tree.plotid}', ${uploaded}, '${tree.user_id}', '${tree.shiftID}', '${tree.sequenceNo}', '${tree.timestamp}')`;
+
         return this.db.executeSql(insertQuery);
 
     };

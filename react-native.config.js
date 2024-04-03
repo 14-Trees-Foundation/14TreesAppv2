@@ -1,7 +1,7 @@
-module.Exports = {
+module.exports = {
     project: {
         ios: {},
-        android: {},
+        android: {}
     },
     assets: ['./assets/fonts/'], // path of your assert file
 };

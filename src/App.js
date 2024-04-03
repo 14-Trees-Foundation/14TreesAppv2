@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Alert, Platform, RootTagContext, TouchableOpacity } from 'react-native';
 import { enableLatestRenderer } from 'react-native-maps';
 import { PERMISSIONS, request } from 'react-native-permissions';
@@ -13,11 +13,15 @@ import { Constants, Utils } from './services/Utils';
 import { checkMultiplePermissions } from './services/check_permissions';
 import DeviceInfo from 'react-native-device-info';
 import { DataService } from './services/DataService';
-import { styleConfigs } from './services/Styles';
-import { LangProvider } from './context/LangContext ';
-import Shfit from './screens/Shift';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import AddTreeScreen from './screens/AddTree';
+import { commonStyles } from './services/Styles';
+import GlobalContext from './context/GlobalContext ';
+import Shift from './screens/Shift';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { Text, View } from 'react-native';
+import { EditLocalTree } from './screens/EditLocalTree';
+import TreesInShift from './screens/TreesInShift';
+import SyncDisplay from './screens/SyncDisplay';
+import StartScreen from './screens/StartScreen';
 
 enableLatestRenderer();
 
@@ -62,29 +66,33 @@ export const stackNavRef = createNavigationContainerRef();
 
 const App = () => {
   const rootTag = useContext(RootTagContext);
-  console.log('app roottag: ', rootTag)
+  //console.log('app roottag app.js: ')
+
+  const { userName, setUserName, lightTheme } = useContext(GlobalContext);
 
   AsyncStorage.setItem(Constants.appRootTagKey, rootTag.toString());
 
   const checkSignInStatus = async () => {
+    console.log('app roottag app.js1: ')
     try {
 
-      let phoneNumber, deviceinfo, deviceName, device;
+      let phoneNumber;
 
       try {
         phoneNumber = await DeviceInfo.getPhoneNumber();
-        deviceinfo = await DeviceInfo.getManufacturer();
-        deviceName = await DeviceInfo.getDeviceName();
-        device = deviceinfo + "" + deviceName;
-        console.log("phone no: ", phoneNumber, " device: ", device);
       } catch (error) {
-        const errorLog = error.toString();
-        console.log("error phone: ", errorLog);
-        //await Utils.logException(null, device, "not found", errorLog);
+        const stackTrace = error.stack;
+
+        const errorLog = {
+          msg: "happened while trying to auto login when user starts the app inside app.js",
+          error: JSON.stringify(error),
+          stackTrace: stackTrace
+        }
+
+        await Utils.logException(JSON.stringify(errorLog));
       }
 
-      // const logs = await Utils.getLogsFromLocalDB();
-      // console.log("logs from local db: ", logs);
+
 
       const userDataPayload = {
         phone: phoneNumber,
@@ -97,6 +105,10 @@ const App = () => {
       }
 
       const isSignedIn = await DataService.loginUser(userDataPayload);
+      if (!isSignedIn) {
+        stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
+        return false;
+      }
       const response = isSignedIn.data;
       console.log("response data inside app.js: ", response);
 
@@ -119,17 +131,42 @@ const App = () => {
         await AsyncStorage.setItem(Constants.userIdKey, response.user._id);
         console.log('userId stored: ', response.user._id);
         response.data = { ...response.user, image: '' };
-        console.log("response data modified: ", response.data);
+        //console.log("response data modified: ", response.data);
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
         console.log('userDetails stored');
+
+        let userKeyDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
+        if (userKeyDetails) {
+          userKeyDetails = JSON.parse(userKeyDetails);
+          let name = userKeyDetails.name;
+          if (name) {
+            const firstName = name.split(' ')[0];
+            console.log("user name in app.js and header---- ", firstName);
+            setUserName(firstName);
+          }
+        }
       } catch (error) {
         console.log('Error storing userId', error);
+        const stackTrace = error.stack;
+        const errorLog = {
+          msg: "happened while trying to store userId during auto login inside app.js",
+          error: JSON.stringify(error),
+          stackTrace: stackTrace
+        }
+        await Utils.logException(JSON.stringify(errorLog));
       }
 
       return true;
 
     } catch (error) {
       console.error('Error checking sign-in status:', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: "happened while trying to auto login inside app.js",
+        error: JSON.stringify(error),
+        stackTrace: stackTrace
+      }
+      await Utils.logException(JSON.stringify(errorLog));
       return false;
     }
   };
@@ -138,6 +175,7 @@ const App = () => {
 
     let storedlang = await Strings.getLanguage();
 
+
     if (storedlang === null) {
       Strings.setLanguage(Strings.english);
     }
@@ -145,7 +183,21 @@ const App = () => {
       Strings.setLanguage(storedlang);
     }
 
-    console.log('stored lang: ', storedlang,);
+    //let storedTheme = await AsyncStorage.getItem(Constants.selectedTheme);
+    // if (storedTheme === null) {
+    //   await AsyncStorage.setItem(Constants.selectedTheme, 'DARK');
+    //   setLightTheme(false);
+    // } else {
+    //   await AsyncStorage.setItem(Constants.selectedTheme, storedTheme);
+    //   if (storedTheme === 'DARK') {
+    //     setLightTheme(false);
+    //   } else {
+    //     setLightTheme(true);
+    //   }
+
+    // }
+
+    console.log('stored lang: ', storedlang);
 
     await Utils.setDBConnection();//ensures ldb setup in Utils
     await Utils.createLocalTablesIfNeeded();
@@ -162,7 +214,7 @@ const App = () => {
 
 
   useEffect(() => {
-
+    console.log('app roottag app.js2: ')
     const initializeApp = async () => {
       await requestPermissions();
       await initTasks();
@@ -173,60 +225,161 @@ const App = () => {
 
   }, []);
 
+
+
   return (
-    <LangProvider>
-      <NavigationContainer ref={stackNavRef}>
-        <Stack.Navigator>
-          <Stack.Screen
-            name={Strings.screenNames.getString('startScreen', Strings.english)}
-            component={LoadingScreen}
-            options={{ headerShown: false }} />
-          <Stack.Screen
-            name={Strings.screenNames.getString('Shift', Strings.english)}
-            component={Shfit}
-            options={{
-              headerRight: () => {
-                <TouchableOpacity
-                  onPress={() => navigation.goBack()}
-                  style={{ marginLeft: 10 }}>
-                  <Icon name="chevron-left" size={24} color="white" />
+    <NavigationContainer ref={stackNavRef}>
+      <Stack.Navigator>
+        <Stack.Screen
+          name={Strings.screenNames.getString('startScreen', Strings.english)}
+          component={StartScreen}
+          options={{ headerShown: false }} />
+        <Stack.Screen
+          name={Strings.screenNames.getString('LoadingScreen', Strings.english)}
+          component={LoadingScreen}
+          options={{ headerShown: false }} />
+        <Stack.Screen
+          name={Strings.screenNames.getString('Shift', Strings.english)}
+          component={Shift}
+          options={{
+            headerLeft: () => null,
+            // headerLeft: () => (
+            //   <View style={{ marginLeft: 10 }}>
+            //     <TouchableOpacity onPress={() => {
+            //       Alert.alert(
+            //         Strings.alertMessages.FinishShift,
+            //         "",
+            //         [
+            //           {
+            //             text: "No",
+            //             onPress: () => null,
+            //             style: "cancel"
+            //           },
+            //           {
+            //             text: "Yes",
+            //             onPress: () => stackNavRef.current.goBack() // Go back when the button is pressed }
+            //           }
+            //         ]
+            //       );
+
+            //     }}>
+            //       <Icon name="arrow-back" size={24} color="black" />
+            //     </TouchableOpacity>
+            //   </View>
+            // ),
+            headerRight: () => (
+              <View style={{
+                marginRight: 35,
+              }}>
+                <Text style={{
+                  fontFamily: 'Inter-Regular',
+                  color: lightTheme ? '#52525C' : 'black',
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  padding: 15,
+                }}>
+                  {userName}
+                </Text>
+              </View>
+            ),
+            headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+            headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+            headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+            title: Strings.screenNames.Shift
+          }} />
+        <Stack.Screen
+          name={Strings.screenNames.getString('SyncDisplay', Strings.english)}
+          component={SyncDisplay}
+          options={{
+            headerLeft: () => (
+              <View style={{ marginLeft: 10 }}>
+                <TouchableOpacity onPress={() => {
+                  console.log('Custom headerLeft button pressed');
+                  stackNavRef.current.goBack() // Go back when the button is pressed
+                }}>
+                  <Icon name="arrow-back" size={24} color="black" />
                 </TouchableOpacity>
-              },
-              ...styleConfigs.drawerHeaderOptions,
-              title: Strings.screenNames.Shift
-            }} />
-          <Stack.Screen
-            name={Strings.screenNames.getString('AddTree', Strings.english)}
-            component={AddTreeScreen}
-            options={{
-              headerRight: () => {
-                <TouchableOpacity
-                  onPress={() => navigation.goBack()}
-                  style={{ marginLeft: 10 }}>
-                  <Icon name="chevron-left" size={24} color="white" />
-                </TouchableOpacity>
-              },
-              ...styleConfigs.drawerHeaderOptions,
-              title: Strings.screenNames.AddTree
-            }} />
-          <Stack.Screen
-            name={Strings.screenNames.getString('LogIn', Strings.english)}
-            component={LoginScreen}
-            options={{
-              headerLeft: () => null,
-              ...styleConfigs.drawerHeaderOptions,
-              title: Strings.screenNames.LogIn
-            }} />
-          <Stack.Screen
-            name={Strings.screenNames.getString('DrawerScreen', Strings.english)}
-            component={DrawerNavigator}
-            options={{
-              headerLeft: () => null,
-              headerShown: false
-            }} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </LangProvider>
+              </View>
+            ),
+            headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+            headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+            headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+            title: Strings.screenNames.SyncDisplay,
+          }}
+        />
+        <Stack.Screen
+          name={Strings.screenNames.getString('TreesInShift', Strings.english)}
+          component={TreesInShift}
+          options={{
+            //headerLeft: () => null,
+            headerRight: () => (
+              <View style={{
+                marginRight: 35,
+              }}>
+                <Text style={{
+                  fontFamily: 'Inter-Regular',
+                  color: lightTheme ? '#52525C' : 'black',
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  padding: 15,
+                }}>
+                  {userName}
+                </Text>
+              </View>
+            ),
+            headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+            headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+            headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+            title: Strings.screenNames.TreesInShift
+          }} />
+        <Stack.Screen
+          name={Strings.screenNames.getString('LogIn', Strings.english)}
+          component={LoginScreen}
+          options={{
+            headerLeft: () => null,
+            headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+            headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+            headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+            title: Strings.screenNames.LogIn
+          }} />
+        <Stack.Screen
+          name={Strings.screenNames.getString('DrawerScreen', Strings.english)}
+          component={DrawerNavigator}
+          options={{
+            headerLeft: () => null,
+            headerShown: false
+          }} />
+        <Stack.Screen
+          name={Strings.screenNames.getString('EditLocalTree', Strings.english)}
+          component={EditLocalTree}
+          options={{
+            //headerLeft: () => null,
+            headerRight: () => (
+              <View style={{
+                //backgroundColor: 'lightgrey',
+                //borderRadius: 70,
+                marginRight: 70,
+              }}>
+                <Text style={{
+                  fontFamily: 'Inter-Regular',
+                  color: lightTheme ? '#52525C' : 'black',
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  padding: 8,
+                }}>
+                  {userName}
+                </Text>
+              </View>
+            ),
+            headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+            headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+            headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+            title: Strings.screenNames.EditLocalTree
+          }} />
+
+      </Stack.Navigator>
+    </NavigationContainer>
+
   )
 };
 
