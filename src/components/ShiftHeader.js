@@ -3,7 +3,7 @@ import GlobalContext from '../context/GlobalContext ';
 import Timer from "../components/Timer";
 import Sound from 'react-native-sound';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import React, { useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { ScrollView, Text, TouchableOpacity, View, } from 'react-native';
 import { MyIconButton } from '../components/Components';
 import { Strings } from '../services/Strings';

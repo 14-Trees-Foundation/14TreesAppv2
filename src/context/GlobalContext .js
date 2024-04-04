@@ -1,19 +1,21 @@
 // GlobalContext.js
 import React, { createContext, useState } from 'react';
 
-const GlobalContext  = createContext();
+const GlobalContext = createContext();
 
 export const GlobalContextProvider = ({ children }) => {
     const [langChanged, setLangChanged] = useState(false);
     const [userName, setUserName] = useState("");
-    const [treesPlanted, setTreesPlanted] = useState(0);
     const [lightTheme, setLightTheme] = useState(false);
     const [shiftDone, setShiftDone] = useState(true);
+
+    const [shiftID, setShiftID] = useState(null);
+    const [treesPlanted, setTreesPlanted] = useState(0);
     const [shiftTime, setShiftTime] = useState(null);
     const [plotSelected, setPlotSelected] = useState(null);
-    const [shiftID, setShiftID] = useState(null);
     const [playSound, setPlaySound] = useState(false);
-    
+    const [second, setSecond] = useState(0);
+
     return (
         <GlobalContext.Provider value={{
             langChanged, setLangChanged,
@@ -24,6 +26,7 @@ export const GlobalContextProvider = ({ children }) => {
             shiftTime, setShiftTime,
             plotSelected, setPlotSelected,
             shiftID, setShiftID,
+            second, setSecond,
             playSound, setPlaySound
         }}>
             {children}
@@ -31,4 +34,4 @@ export const GlobalContextProvider = ({ children }) => {
     );
 };
 
-export default GlobalContext ;
+export default GlobalContext;

@@ -22,6 +22,7 @@ import { EditLocalTree } from './screens/EditLocalTree';
 import TreesInShift from './screens/TreesInShift';
 import SyncDisplay from './screens/SyncDisplay';
 import StartScreen from './screens/StartScreen';
+import ScreenHeaderContent from './components/ScreenHeaderContent';
 
 enableLatestRenderer();
 
@@ -337,6 +338,9 @@ const App = () => {
           component={LoginScreen}
           options={{
             headerLeft: () => null,
+            headerRight: () => (
+              <ScreenHeaderContent />
+            ),
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
             headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
             headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,

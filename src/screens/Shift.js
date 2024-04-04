@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import React, { useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { FlatList, Text, TouchableOpacity, View, Alert, ScrollView, BackHandler, ToastAndroid } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MyIconButton } from '../components/Components';
@@ -7,8 +7,6 @@ import { Utils } from '../services/Utils';
 import { commonStyles } from '../services/Styles';
 import GlobalContext from '../context/GlobalContext ';
 import ShiftHeader from '../components/ShiftHeader';
-import SyncDisplay from './SyncDisplay';
-import { stackNavRef } from '../App';
 import CustomModal from '../components/CustomModal';
 import { treeFormModes } from '../components/TreeForm';
 import LoadingScreen from './LoadingScreen';
@@ -87,7 +85,7 @@ const Shift = ({ navigation, route }) => {
 
     //useEffect(() =>)
     useFocusEffect(
-        React.useCallback(() => {
+        useCallback(() => {
             console.log('focus');
             fetchTreesFromLocalDB();
         }, []),
@@ -129,9 +127,9 @@ const Shift = ({ navigation, route }) => {
         setShiftID(null);
     }
 
-    const RenderHeader2 = useMemo(() => {
-        //console.log('item1, item2');
-        return () => (
+    const RenderHeader2 = () => {
+
+        return (
             <View style={{ backgroundColor: "white", padding: 2, margin: 4, borderRadius: 10, borderColor: '#ccc', borderWidth: 3 }}>
                 <View style={{ margin: 2 }}>
                     <MyIconButton
@@ -176,7 +174,7 @@ const Shift = ({ navigation, route }) => {
 
             </View>
         );
-    }, []);
+    };
 
     // console.log("rendered shift screen");
 
@@ -372,5 +370,4 @@ const Shift = ({ navigation, route }) => {
 
 }
 
-export default React.memo(Shift);;
-
+export default Shift;;

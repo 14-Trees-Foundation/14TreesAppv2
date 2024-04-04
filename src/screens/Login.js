@@ -12,7 +12,6 @@ import GlobalContext from '../context/GlobalContext ';
 const LoginScreen = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [pinNumber, setPinNumber] = useState('');
-  const [langModalVisible, setLangModalVisible] = useState(false);
 
   const { langChanged, lightTheme, setUserName } = useContext(GlobalContext);
 
@@ -173,7 +172,7 @@ const LoginScreen = ({ navigation }) => {
           <TextInput
             style={{
               ...commonStyles.txtInput,
-              color: lightTheme ? '#52525C' : 'black', 
+              color: lightTheme ? '#52525C' : 'black',
               fontSize: 15, borderRadius: 13,
               fontWeight: (pinNumber) ? 'bold' : 'normal'
             }}
@@ -194,14 +193,7 @@ const LoginScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* <TouchableOpacity style={commonStyles.selLang} onPress={() => { setLangModalVisible(!langModalVisible); }}>
-        <Text style={{ color: '#36454F', fontWeight: 'bold' }}>{Strings.buttonLabels.SelectLanguage}</Text>
-      </TouchableOpacity> */}
 
-      <LanguageModal
-        langModalVisible={langModalVisible}
-        setLangModalVisible={(visible) => setLangModalVisible(visible)}
-      />
     </View>
   );
 };
