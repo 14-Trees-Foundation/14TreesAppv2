@@ -73,7 +73,7 @@ const Shifts = ({ navigation }) => {
                     )
                 }}
             >
-                <View style={{ flex: 1, flexDirection: 'column' }}>
+                <View style={{ flex: 1, flexDirection: 'column', paddingVertical: 8 }}>
                     <Text style={{
                         ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
                         fontSize: 18, textAlign: 'center'
@@ -81,39 +81,44 @@ const Shifts = ({ navigation }) => {
                         {item.plotselected}
                     </Text>
 
-                    <View style={{ flex: 1, flexDirection: 'row', marginTop: 12 }}>
-                        <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-around', width: '70%', marginLeft: 12 }}>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: '100%', padding: 4 }}>
+                        {/* First View */}
 
+                        <View style={{
+                            //flex: 1, 
+                            flexDirection: 'column', flexWrap: 'wrap', width: '50%', marginBottom: 1, marginTop: 0,
+                            marginLeft: 12
+                        }}>
                             <Text style={{
                                 ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
-                                fontSize: 12
+                                fontSize: 14
                             }}>
                                 {Strings.labels.Date} : {item.timestamp}
                             </Text>
                             <Text style={{
                                 ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
-                                fontSize: 12
+                                fontSize: 14
                             }}>
                                 {Strings.labels.StartTime} :{item.starttime}
                             </Text>
                             <Text style={{
                                 ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
-                                fontSize: 12
+                                fontSize: 14
                             }}>
                                 {Strings.labels.EndTime} : {item.endtime}
                             </Text>
                             <Text style={{
                                 ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
-                                fontSize: 12
+                                fontSize: 14
                             }}>
                                 {Strings.labels.TimeTaken} :{item.timetaken}
                             </Text>
                         </View>
+                        {/* Second View */}
 
-
-                        <View style={{ ...commonStyles.secondView, backgroundColor: 'lightgrey', marginRight: 20, marginLeft: 22, width: '30%' }}>
+                        <View style={{ ...commonStyles.secondView, backgroundColor: 'lightgrey', marginRight: 2, marginLeft: 22, width: '30%' }}>
                             {/* Icon */}
-                            <View style={{ margin: 6, flex: 1 }}>
+                            <View style={{ margin: 6, flex: 1, marginTop: 12, marginLeft: 11, marginRight: 12 }}>
                                 <View style={{ backgroundColor: 'green', borderRadius: 70, padding: 10, margin: 2 }}>
                                     <Icon name="tree" size={32} color="white" style={{ marginLeft: 5 }} />
                                 </View>
@@ -124,12 +129,11 @@ const Shifts = ({ navigation }) => {
                             <View style={{ flex: 1 }}>
                                 <Text style={{
                                     color: lightTheme ? '#52525C' : 'black',
-                                    fontSize: 18, fontWeight: 'bold', padding: 10, textAlign: 'center'
+                                    fontSize: 28, fontWeight: 'bold', padding: 0, textAlign: 'center', marginRight: 2
                                 }}>
                                     {item.treesplanted}
                                 </Text>
                             </View>
-
 
                         </View>
                     </View>
