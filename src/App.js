@@ -3,7 +3,7 @@ import { NavigationContainer, createNavigationContainerRef } from '@react-naviga
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useContext, useEffect, useState } from 'react';
 import { Alert, Platform, RootTagContext, TouchableOpacity } from 'react-native';
-import { enableLatestRenderer } from 'react-native-maps';
+//import { enableLatestRenderer } from 'react-native-maps';
 import { PERMISSIONS, request } from 'react-native-permissions';
 import { DrawerNavigator } from './components/DrawerNavigator';
 import LoadingScreen from './screens/LoadingScreen';
@@ -24,7 +24,7 @@ import SyncDisplay from './screens/SyncDisplay';
 import StartScreen from './screens/StartScreen';
 import ScreenHeaderContent from './components/ScreenHeaderContent';
 
-enableLatestRenderer();
+//enableLatestRenderer();
 
 async function requestPermissions() {
   const androidVersion = Number.parseInt(Platform.constants['Release']);

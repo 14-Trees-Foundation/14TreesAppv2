@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { launchCamera } from 'react-native-image-picker';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { Alert, ToastAndroid, Modal } from "react-native";
 import { DataService } from "./DataService";
 import { LocalDatabase } from "./tree_db";
@@ -8,8 +8,6 @@ import { Strings } from "./Strings";
 import ImageResizer from "react-native-image-resizer";
 import RNFS from 'react-native-fs';
 import React, { useState } from 'react';
-//namrata
-import * as ImagePicker from 'react-native-image-picker';
 
 const MIN_BATCH_SIZE = 5
 
@@ -667,52 +665,59 @@ export class Utils {
             maxWidth: 720,
         };
 
-        //namrata
-        let response = {}
-        if (selectionId === 0) {
-            response = await launchCamera(options);
-        } else {
-            response = await ImagePicker.launchImageLibrary(options)
-        }
-
-
-        if (response.didCancel) {
-            console.log('User cancelled image picker');
-        } else if (response.error) {
-            console.log('ImagePicker Error: ', response.error);
-        } else {
-
-            const timestamp = new Date().toISOString(); // only show time and not date
-            let filesz = response.assets[0].fileSize;
-            let base64Data = response.assets[0].base64;
-
-
-
-            let imagePath = response.assets[0].uri;
-
-            console.log("response.assets[0]----", filesz);
-
-            if (compressionRequired) {
-                const compressedData = await Utils.compressImageAt(filesz, imagePath);
-                //console.log("compressedData: ", compressedData.size);
-                if (compressedData) {
-                    base64Data = compressedData;
-                } else {
-                    console.log("could not compressed------");
-                }
+        try {
+            //namrata
+            let response = {}
+            if (selectionId === 0) {
+                response = await launchCamera(options);
+            } else {
+                response = await launchImageLibrary(options)
             }
-            const newImage = {
-                data: base64Data,
-                meta: {
-                    capturetimestamp: timestamp,
-                    remark: Strings.messages.defaultRemark,
 
-                },
-            };
 
-            return newImage;
-            //return { newImage: newImage, imageForModal: imageForModal };
+            if (response.didCancel) {
+                console.log('User cancelled image picker');
+            } else if (response.error) {
+                console.log('ImagePicker Error: ', response.error);
+            } else {
+
+                const timestamp = new Date().toISOString(); // only show time and not date
+                let filesz = response.assets[0].fileSize;
+                let base64Data = response.assets[0].base64;
+
+
+
+                let imagePath = response.assets[0].uri;
+
+                console.log("response.assets[0]----", filesz);
+
+                if (compressionRequired) {
+                    const compressedData = await Utils.compressImageAt(filesz, imagePath);
+                    //console.log("compressedData: ", compressedData.size);
+                    if (compressedData) {
+                        base64Data = compressedData;
+                    } else {
+                        console.log("could not compressed------");
+                    }
+                }
+                const newImage = {
+                    data: base64Data,
+                    meta: {
+                        capturetimestamp: timestamp,
+                        remark: Strings.messages.defaultRemark,
+
+                    },
+                };
+
+                return newImage;
+            }
+        } catch (error) {
+            console.log('An error occurred while accessing the camera:', error);
+            return null;
         }
+
+        //return { newImage: newImage, imageForModal: imageForModal };
+
 
     }
     static async formatImageForSapling(image, saplingid) {
@@ -727,7 +732,7 @@ export class Utils {
 
     static async compressImageAt(filesz, imagePath) {
         console.log("Original file size:", filesz);
-        const maxsz = 1024 * 900; // 900 KB ->
+        const maxsz = 1024 * 900; // 900 KB 
 
         if (filesz > maxsz) {
             console.log("File size exceeds maxsz:", maxsz);

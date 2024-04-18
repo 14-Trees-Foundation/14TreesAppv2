@@ -1,7 +1,5 @@
-//import MapView, { PROVIDER_GOOGLE, Marker } from "react-native-maps";
 import Geolocation from "@react-native-community/geolocation"
 import { Text, View, Alert, ToastAndroid, TextInput, TouchableOpacity } from "react-native";
-//import { CancelButton, MyIcon, SaveButton } from "./Components";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Strings } from "../services/Strings";
 import { Utils } from "../services/Utils";

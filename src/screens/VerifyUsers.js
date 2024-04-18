@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Button, StyleSheet, Text, ToastAndroid, View, BackHandler } from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
+import { Button, StyleSheet, Text, ToastAndroid, View, BackHandler, FlatList } from 'react-native';
 import { CustomButton } from '../components/Components';
 import { DataService } from '../services/DataService';
 import { Strings } from '../services/Strings';

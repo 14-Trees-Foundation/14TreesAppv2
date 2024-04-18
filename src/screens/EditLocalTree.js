@@ -1,12 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Button, Text, TextInput, ToastAndroid, View, BackHandler } from 'react-native';
+import {ScrollView, Button, Text, TextInput, ToastAndroid, View, BackHandler } from 'react-native';
 import { DataService } from '../services/DataService';
 import { Strings } from '../services/Strings';
 import { TreeForm, treeFormModes } from '../components/TreeForm';
 import { Constants, Utils } from '../services/Utils';
 import { MyIconButton } from '../components/Components';
 import LoadingScreen from './LoadingScreen';
-import { ScrollView } from 'react-native-gesture-handler';
 
 const fetchTreeDetails = async (saplingId, setDetails) => {
     // console.log('fetching tree details');    
