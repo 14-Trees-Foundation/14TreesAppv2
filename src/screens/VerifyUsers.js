@@ -1,18 +1,19 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Button, StyleSheet, Text, ToastAndroid, View, BackHandler, FlatList } from 'react-native';
+import { Button, StyleSheet, Text, ToastAndroid, View, BackHandler } from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
 import { CustomButton } from '../components/Components';
 import { DataService } from '../services/DataService';
 import { Strings } from '../services/Strings';
 import { Utils } from '../services/Utils';
 import { commonStyles } from "../services/Styles";
-import GlobalContext from '../context/GlobalContext ';
+import LangContext from '../context/LangContext ';
 
 const VerifyusersScreen = ({ navigation }) => {
 
     const [users, setUsers] = useState([]);
     const [adminID, setAdminID] = useState('');
 
-    const { langChanged } = useContext(GlobalContext);
+    const { langChanged } = useContext(LangContext);
 
     useEffect(() => {
         const backAction = () => {

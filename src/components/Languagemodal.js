@@ -1,12 +1,13 @@
-import { View, Text, Modal, StyleSheet, FlatList, TouchableOpacity, Dimensions, Image, } from 'react-native';
-import React, { useState, useContext } from 'react';
+import { View, Text, Modal, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Dimensions, Image, } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { Utils } from '../services/Utils';
 import { Strings } from '../services/Strings';
-import { CancelButton, SaveButton } from './Components';
+import { CancelButton, MyIconButton, SaveButton } from './Components';
 const { height, width } = Dimensions.get('window');
-import GlobalContext from '../context/GlobalContext ';
+import LangContext from '../context/LangContext ';
 
 const LanguageModal = ({ langModalVisible, setLangModalVisible }) => {
-  const { langChanged, setLangChanged } = useContext(GlobalContext);
+  const { langChanged, setLangChanged } = useContext(LangContext);
 
   const [selectedLang, setSelectedLang] = useState(Strings.english);
 
@@ -126,7 +127,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    //marginTop: 192,
+    marginTop: 22,
     backgroundColor: 'rgba(0,0,0,.5)',
   },
   modalView: {

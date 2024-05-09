@@ -1,9 +1,11 @@
 import { Strings } from '../services/Strings';
 import HomeScreen from '../screens/Home';
+import AddTreeScreen from '../screens/AddTree';
 import EditTreeScreen from '../screens/EditTree';
 import VerifyusersScreen from '../screens/VerifyUsers';
 import { stackNavRef } from '../App';
-import GlobalContext from "../context/GlobalContext ";
+import { LocalDataNavigator } from './LocalDataNavigator';
+import LangContext from "../context/LangContext ";
 import { commonStyles } from "../services/Styles";
 import { styleConfigs } from "../services/Styles";
 import { useState, useEffect, useCallback, useContext } from 'react';
@@ -13,8 +15,6 @@ import { Constants, Utils, getImageSourceObject, logoSrc } from "../services/Uti
 import { DrawerContentScrollView, DrawerItemList, createDrawerNavigator, } from '@react-navigation/drawer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import About from '../screens/About';
-import Shifts from "../screens/Shifts";
-import ScreenHeaderContent from './ScreenHeaderContent';
 
 const Drawer = createDrawerNavigator();
 
@@ -53,12 +53,12 @@ const DrawerContent = (props) => {
                     bottom: 0,
                 }}>
                 <Image
-                    source={Constants.logoImage()}
-                    style={{ width: '50%', height: 150, marginLeft: 10, marginBottom: '2rem' }}
+                    source={Constants.logoImage()} // Replace with your delete icon image
+                    style={{ width: 100, height: 100, marginLeft: 10 }} // Adjust the icon dimensions and margin
                 />
-                {/* <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>
                     14 Trees
-                </Text> */}
+                </Text>
                 {userDetails ? (
                     <View
                         style={{
@@ -71,19 +71,19 @@ const DrawerContent = (props) => {
                         <Image
                             source={getImageSourceObject(userDetails.image)}
                             style={{ width: 75, height: 75, borderRadius: 37.5 }}></Image>
-                        <View style={{ flexDirection: 'column', marginLeft: 15 }}>
+                        <View style={{ flexDirection: 'column', marginLeft: 5 }}>
                             <View style={{ width: 160 }}>
-                                <Text style={{ fontFamily: 'Inter-Regular', fontSize: 20, color: 'black', fontWeight: 'bold' }}>
+                                <Text style={{ fontSize: 20, color: 'black' }}>
                                     {userDetails.name}
                                 </Text>
                             </View>
-                            <Text style={{ fontFamily: 'Inter-Regular', fontSize: 16, color: "green" }}>
+                            <Text style={{ fontSize: 16, color: "green" }}>
                                 {isAdmin ? Strings.labels.admin : Strings.labels.logger}
                             </Text>
                         </View>
                     </View>
                 ) : (
-                    <Text style={{ fontFamily: 'Inter-Regular' }}>Loading user details...</Text>
+                    <Text>Loading user details...</Text>
                 )}
             </View>
             <DrawerItemList {...props} />
@@ -91,13 +91,13 @@ const DrawerContent = (props) => {
                 style={{
                     flexDirection: 'column',
                     position: 'relative',
-                    //marginTop: 100,
+                    marginTop: 100,
                     alignSelf: 'center',
                 }}>
                 <TouchableOpacity
                     style={{ ...commonStyles.logOutButton }}
                     onPress={() => Utils.confirmAction(() => logout(props.navigationRef), undefined, Strings.messages.logoutConfirm)}>
-                    <Text style={{ fontFamily: 'Inter-Regular', color: 'white', fontSize: 18 }}>
+                    <Text style={{ color: 'white', fontSize: 18 }}>
                         {Strings.buttonLabels.logOut}
                     </Text>
                 </TouchableOpacity>
@@ -110,7 +110,7 @@ export const DrawerNavigator = ({ navigation, route }) => {
     const [isAdmin, setIsAdmin] = useState(false);
     const navigationRef = stackNavRef;
     const [userDetails, setUserDetails] = useState(null);
-    const { langChanged, lightTheme } = useContext(GlobalContext);
+    const { langChanged } = useContext(LangContext);
 
     useEffect(() => {
 
@@ -150,53 +150,36 @@ export const DrawerNavigator = ({ navigation, route }) => {
                 name={Strings.screenNames.getString('HomePage', Strings.english)}
                 component={HomeScreen}
                 options={{
-                    headerRight: () => (
-                        <ScreenHeaderContent />
-                    ),
-                    headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
-                    headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
-                    headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                    ...styleConfigs.drawerHeaderOptions,
                     title: Strings.screenNames.HomePage,
-                    drawerActiveBackgroundColor: '#F1FAEE',
-                    drawerActiveTintColor: 'blue',
-                    drawerStyle: {
-                        backgroundColor: '#f0f3f7',
-                        fontFamily: 'Inter-Regular'
-                    }
                 }}
             />
             <Drawer.Screen
-                name={Strings.screenNames.getString('Shifts', Strings.english)}
-                component={Shifts}
+                name={Strings.screenNames.getString(
+                    'LocalDataNavigator',
+                    Strings.english,
+                )}
+                component={LocalDataNavigator}
                 options={{
-                    headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
-                    headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
-                    headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
-                    title: Strings.screenNames.Shifts,
-                    drawerActiveBackgroundColor: '#F1FAEE',
-                    drawerActiveTintColor: 'blue',
-                    drawerStyle: {
-                        backgroundColor: '#f0f3f7',
-                        fontFamily: 'Inter-Regular'
-                    }
+                    ...styleConfigs.drawerHeaderOptions,
+                    title: Strings.screenNames.LocalDataView,
                 }}
             />
-            
+            <Drawer.Screen
+                name={Strings.screenNames.getString('AddTree', Strings.english)}
+                component={AddTreeScreen}
+                options={{
+                    ...styleConfigs.drawerHeaderOptions,
+                    title: Strings.screenNames.AddTree,
+                }}
+            />
             {isAdmin && (
                 <Drawer.Screen
                     name={Strings.screenNames.getString('EditTree', Strings.english)}
                     component={EditTreeScreen}
                     options={{
-                        headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
-                        headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
-                        headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                        ...styleConfigs.drawerHeaderOptions,
                         title: Strings.screenNames.EditTree,
-                        drawerActiveBackgroundColor: '#F1FAEE',
-                        drawerActiveTintColor: 'blue',
-                        drawerStyle: {
-                            backgroundColor: '#f0f3f7',
-                            fontFamily: 'Inter-Regular'
-                        }
                     }}
                 />
             )}
@@ -205,16 +188,8 @@ export const DrawerNavigator = ({ navigation, route }) => {
                     name={Strings.screenNames.getString('VerifyUsers', Strings.english)}
                     component={VerifyusersScreen}
                     options={{
-                        headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
-                        headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
-                        headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                        ...styleConfigs.drawerHeaderOptions,
                         title: Strings.screenNames.VerifyUsers,
-                        drawerActiveBackgroundColor: '#F1FAEE',
-                        drawerActiveTintColor: 'blue',
-                        drawerStyle: {
-                            backgroundColor: '#f0f3f7',
-                            fontFamily: 'Inter-Regular'
-                        }
                     }}
                 />
             )}
@@ -222,19 +197,11 @@ export const DrawerNavigator = ({ navigation, route }) => {
                 name={Strings.screenNames.getString('AppInfo', Strings.english)}
                 component={About}
                 options={{
-                    headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
-                    headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
-                    headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                    ...styleConfigs.drawerHeaderOptions,
                     title: Strings.screenNames.AppInfo,
-                    drawerActiveBackgroundColor: '#F1FAEE',
-                    drawerActiveTintColor: 'blue',
-                    drawerStyle: {
-                        backgroundColor: '#f0f3f7',
-                        fontFamily: 'Inter-Regular'
-                    }
                 }}
             />
-
+        
         </Drawer.Navigator >
     );
 };

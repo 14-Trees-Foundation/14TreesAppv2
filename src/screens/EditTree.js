@@ -5,15 +5,15 @@ import { Strings } from '../services/Strings';
 import { TreeForm, treeFormModes } from '../components/TreeForm';
 import { Constants, Utils } from '../services/Utils';
 import { commonStyles } from "../services/Styles";
-import GlobalContext from '../context/GlobalContext ';
+import LangContext from '../context/LangContext ';
 
 const EditTreeScreen = ({ navigation }) => {
-    const [saplingid, setSaplingid] = useState(null);
+    const [saplingid, setSaplingid] = useState('');
     const [details, setDetails] = useState(null);
     const [newImages, setNewImages] = useState([]);
     const [deletedImages, setDeletedImages] = useState([]);
 
-    const { langChanged, lightTheme } = useContext(GlobalContext);
+    const { langChanged } = useContext(LangContext);
 
     useEffect(() => {
         const backAction = () => {
@@ -31,7 +31,7 @@ const EditTreeScreen = ({ navigation }) => {
     }, [langChanged]);
 
     const updateDetails = async (tree, images) => {
-        // console.log("tree details from edit----", tree);
+        console.log("tree details from edit----", tree);
         //console.log("images details from edit----",  images);
 
         const saplingData = {
@@ -70,19 +70,19 @@ const EditTreeScreen = ({ navigation }) => {
         }
 
         console.log("new images: ", newImagesArr.length, "deleted images: ", deletedImages.length);
-        console.log("tree details from edit----", requestData.data);
-        
-        console.log("new last images: ", newImages[newImages.length - 1]);
+        //console.log("new images: ", newImages);
+        //console.log("new last images: ", newImages[newImages.length - 1]);
         const response = await DataService.updateSapling(adminID, requestData);
         if (!response) {
             return;
         }
+        //console.log(requestData);
         let toastmsg = Strings.alertMessages.TreeUpdatedfirsthalf + response.data.sapling_id + Strings.alertMessages.TreeUpdatedsecondhalf;
         ToastAndroid.show(toastmsg, ToastAndroid.LONG);
         setDetails(null);
         setNewImages([]);
         setDeletedImages([]);
-        setSaplingid(null);
+
         //Format saplingData using tree,newIamges, deletedImages.
         // Dataservice.updateSapling call...
         // check reply.
@@ -127,9 +127,7 @@ const EditTreeScreen = ({ navigation }) => {
         detailsForTreeForm.inTreeType = treeType;
         detailsForTreeForm.inPlot = plot;
         detailsForTreeForm.inUserId = treeDetails.user_id;
-        // detailsForTreeForm.inShiftId = treeDetails.shiftID;
-        // detailsForTreeForm.inSequenceNo = treeDetails.sequenceNo
-         console.log(detailsForTreeForm.inShiftId, detailsForTreeForm.inSequenceNo);
+        // console.log(detailsForTreeForm);
         setDetails(detailsForTreeForm);
     }
 
@@ -148,24 +146,23 @@ const EditTreeScreen = ({ navigation }) => {
     else {
         return (
             <View style={{ backgroundColor: 'white', height: '100%' }}>
-                <Text style={{ ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black', margin: 20, fontSize: 20 }}>{Strings.messages.EnterSaplingId}</Text>
-
-                <TextInput
-                    style={{ ...commonStyles.txtInput, color: lightTheme ? '#52525C' : 'black', fontSize: 15, borderRadius: 13, width: '85%' }}
-                    placeholder={Strings.labels.SaplingId}
-                    placeholderTextColor={'#52525C'}
-                    onChangeText={(text) => setSaplingid(text)}
-                    value={saplingid}
-                />
-
-                <View style={{ margin: 20, marginHorizontal: 80 }}>
-                    <TouchableOpacity style={commonStyles.searchButton} onPress={() => fetchTreeDetails()}>
-                        <Text style={{ fontFamily: 'Inter-Regular', fontWeight: 'bold', color: 'white', fontSize: 20, marginTop: 3 }}>
-                            {Strings.buttonLabels.Search}
-                        </Text>
-                    </TouchableOpacity>
+                <View style={{ backgroundColor: '#0F4334', margin: 10, borderRadius: 10 }}>
+                    <Text style={{ color: 'white', marginLeft: 20, margin: 10, fontSize: 18 }}>{Strings.messages.EnterSaplingId}</Text>
+                    <TextInput
+                        style={commonStyles.txtInput}
+                        placeholder={Strings.labels.SaplingId}
+                        placeholderTextColor={'black'}
+                        onChangeText={(text) => setSaplingid(text)}
+                        value={saplingid}
+                    />
+                    <View style={{ margin: 20 }}>
+                        <TouchableOpacity style={commonStyles.searchButton} onPress={() => fetchTreeDetails()}>
+                            <Text style={{ color: 'white', fontSize: 18, fontWeight: "bold" }}>
+                                {Strings.buttonLabels.Search}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-
             </View>
         )
     }
