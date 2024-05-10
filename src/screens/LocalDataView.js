@@ -1,5 +1,5 @@
 //TODO bug fix in filters.
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState,useContext} from 'react';
 import {
   Button,
   FlatList,
@@ -9,8 +9,8 @@ import {
   Text,
   ToastAndroid,
   View,
+  BackHandler,
 } from 'react-native';
-// import * as ImagePicker from 'react-native-image-picker';
 import {useFocusEffect} from '@react-navigation/native';
 import {CustomButton, MyIconButton} from '../components/Components';
 import {CustomDropdown} from '../components/CustomDropdown';
@@ -18,6 +18,9 @@ import {Strings} from '../services/Strings';
 import {Utils} from '../services/Utils';
 import {SyncDisplay} from '../components/SyncDisplay';
 import {commonStyles} from '../services/Styles';
+//import LangContext from '../context/LangContext ';
+
+
 
 const LocalDataView = ({navigation}) => {
   const [treeList, setTreeList] = useState(null);
@@ -33,6 +36,9 @@ const LocalDataView = ({navigation}) => {
   const [allPlots, setAllPlots] = useState([]);
   const [allTreeTypes, setAllTreeTypes] = useState([]);
   const [allSaplings, setAllSaplings] = useState([]);
+
+  //const {unSyncedTrees,syncedTrees} = useContext(LangContext);
+
   const uploadStatuses = [
     {name: Strings.messages.LocalOrSynced, value: 0},
     {name: Strings.messages.Local, value: 1},
@@ -44,15 +50,42 @@ const LocalDataView = ({navigation}) => {
 
   const fetchTreesFromLocalDB = () => {
     Utils.fetchTreesFromLocalDB().then(trees => {
-      // console.log(trees)
       const syncedTrees = trees.filter(tree => tree.uploaded === true);
       const localTrees = trees.filter(tree => tree.uploaded !== true);
       trees = [...localTrees, ...syncedTrees];
       setTreeList(trees);
-      setFinalList(trees);
-      console.log('setting both lists to: ', trees);
+      setFinalList(trees); 
     });
   };
+
+  // useEffect(() => {
+  //   const unSyncedTreesIds = unSyncedTrees.map(tree => tree.sapling_id);
+  //   const syncedTreesIds = syncedTrees.map(tree => tree.sapling_id);
+  //   console.log("----------unSyncedTrees-----------",unSyncedTrees.length,"-------------------syncedTrees-------",syncedTrees.length)
+
+
+  //   // Filter out objects from unSyncedTrees that are not present in syncedTrees
+  //   const unSyncedTreesNotInSynced = unSyncedTrees.filter(
+  //     tree => !syncedTreesIds.includes(tree.sapling_id),
+  //   );
+
+  //   console.log("---------------trees to be synced------------",unSyncedTreesNotInSynced)
+  // });
+
+  useEffect(() => {
+    const backAction = () => {
+      navigation.goBack();
+      return true; // Prevent default behavior (exit app)
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
   useEffect(() => {
     setUploadStatusList(uploadStatuses);
     Utils.getUserId().then(id => {
@@ -65,14 +98,14 @@ const LocalDataView = ({navigation}) => {
     });
 
     Utils.fetchTreeTypesFromLocalDB().then(types => {
-      console.log('tree types', types);
+      //console.log('tree types', types);
       setTreeTypeList(types);
     });
     Utils.fetchPlotNamesFromLocalDB().then(plots => {
       setPlotList(plots);
     });
     Utils.fetchSaplingIdsFromLocalDB().then(ids => {
-      console.log(ids);
+      //console.log(ids);
       setsaplingIdList(ids);
     });
     console.log('local data view');
@@ -84,10 +117,12 @@ const LocalDataView = ({navigation}) => {
     }, []),
   );
   const typeNameFromId = id => {
+    //console.log("----------all TreeTypes---------",allTreeTypes)
     return allTreeTypes.find(type => type.value === id).name;
+    //return "ABC"
   };
   const plotNameFromId = id => {
-    return allPlots.find(type => type.value === id).name;
+    const plot = allPlots.find(type => type.value === id).name;
   };
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -185,9 +220,12 @@ const LocalDataView = ({navigation}) => {
           <Text style={{...commonStyles.text}}>
             {Strings.messages.SaplingNo}: {tree.sapling_id}
           </Text>
-          <View style={{ width: 250 }}> 
-      <Text style={{ ...commonStyles.text }}>{Strings.messages.Plot}: {plotNameFromId(tree.plot_id)}</Text>
-    </View>
+          {/* Namrata */}
+          <View style={{width: 250}}>
+            <Text style={{...commonStyles.text}}>
+              {Strings.messages.Plot}: {plotNameFromId(tree.plot_id)}
+            </Text>
+          </View>
           <Text style={{...commonStyles.text}}>
             {Strings.messages.Type}: {typeNameFromId(tree.type_id)}
           </Text>

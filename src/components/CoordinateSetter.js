@@ -215,7 +215,7 @@ export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng, setInitLoca
                                     placeholder="Lat"
                                     keyboardType="numeric"
                                     onChangeText={(text) => setTmpLat(safeParse(text, lat))}
-                                    defaultValue={(lat).toString()}
+                                    defaultValue= {lat?(lat).toString():"0"}
                                 />
                             </View>
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -225,7 +225,7 @@ export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng, setInitLoca
                                     placeholder="Long"
                                     keyboardType="numeric"
                                     onChangeText={(text) => setTmpLng(safeParse(text, lng))}
-                                    defaultValue={(lng).toString()}
+                                    defaultValue={lng?(lng).toString():"0"}
                                 />
                             </View>
                         </View>

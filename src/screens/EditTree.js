@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   Button,
   StyleSheet,
@@ -6,21 +6,75 @@ import {
   TextInput,
   ToastAndroid,
   View,
-  TouchableOpacity
-
+  BackHandler,
+  TouchableOpacity,
 } from 'react-native';
 import {DataService} from '../services/DataService';
 import {Strings} from '../services/Strings';
-import {TreeForm, treeFormModes} from '../components/TreeForm';
+//import {TreeForm, treeFormModes} from '../components/TreeForm';
+import {TreeFormEditTree, treeFormModes} from '../components/TreeFormEditTree'
 import {Constants, Utils} from '../services/Utils';
 import {commonStyles} from '../services/Styles';
+import LangContext from '../context/LangContext ';
+import {
+  trees,
+  RealmContext,
+  plots,
+  tree_types,
+} from '../models/Tree';
+import {BSON} from 'realm';
+
+
+const {useRealm,useQuery,} = RealmContext;
+const realm = useRealm();
+
+
+
+//Realm.open({trees});
 
 const EditTreeScreen = ({navigation}) => {
+  
+     //const realm = realmRef.current
+    //  const treesUsingRef = realm.objects('trees')
+    // console.log("-------------treesUsingRef------------",treesUsingRef)
+
   const [saplingid, setSaplingid] = useState('');
   const [details, setDetails] = useState(null);
   const [newImages, setNewImages] = useState([]);
   const [deletedImages, setDeletedImages] = useState([]);
+  const {langChanged} = useContext(LangContext);
+
+  const treesObjects = useQuery(trees);
+  //const treesObjects = realm.objects('trees')
+  console.log("-------------in Edit tree screen--------",treesObjects.length)
+//   useEffect(() => {
+//     setTreesObjects(treesInRealm)
+//   },[treesInRealm]);
+
+
+
+  useEffect(() => {
+    const backAction = () => {
+      navigation.goBack();
+      return true; // Prevent default behavior (exit app)
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
+  useEffect(() => {
+    console.log('langChanged inside EditTreeScreen: ', langChanged);
+  }, [langChanged]);
+
   const updateDetails = async (tree, images) => {
+    console.log('tree details from edit----', tree);
+    //console.log("images details from edit----",  images);
+
     const saplingData = {
       location: {
         type: 'Point',
@@ -32,10 +86,12 @@ const EditTreeScreen = ({navigation}) => {
       plot_id: '', //plot id
     };
     const adminID = await Utils.getAdminId();
+    console.log('adminID inside edit tree screen----', adminID);
     saplingData.location.coordinates = [tree.lat, tree.lng];
     saplingData.sapling_id = tree.saplingid;
     saplingData.plot_id = tree.plotid;
     saplingData.tree_id = tree.treeid; //tree type.
+
     for (let image of images) {
       let newImageIndex = newImages.findIndex(item => item.name === image.name);
       if (newImageIndex !== -1) {
@@ -43,16 +99,28 @@ const EditTreeScreen = ({navigation}) => {
         setNewImages(newImages);
       }
     }
+
+    let newImagesArr = newImages.slice(-1);
+
     const requestData = {
       data: saplingData,
-      newImages: newImages,
+      newImages: newImagesArr,
       deletedImages: deletedImages,
     };
+
+    console.log(
+      'new images: ',
+      newImagesArr.length,
+      'deleted images: ',
+      deletedImages.length,
+    );
+    //console.log("new images: ", newImages);
+    //console.log("new last images: ", newImages[newImages.length - 1]);
     const response = await DataService.updateSapling(adminID, requestData);
     if (!response) {
       return;
     }
-    console.log(requestData);
+    //console.log(requestData);
     let toastmsg =
       Strings.alertMessages.TreeUpdatedfirsthalf +
       response.data.sapling_id +
@@ -61,42 +129,55 @@ const EditTreeScreen = ({navigation}) => {
     setDetails(null);
     setNewImages([]);
     setDeletedImages([]);
+
     //Format saplingData using tree,newIamges, deletedImages.
     // Dataservice.updateSapling call...
     // check reply.
   };
 
   const fetchTreeDetails = async () => {
-    // console.log('fetching tree details');
-    const adminID = await Utils.getAdminId();
 
+    const treeDetails = treesObjects.find(
+      tree => tree.sapling_id === saplingid,
+    );
+    
+
+    const adminID = await Utils.getAdminId();
+    console.log(adminID);
     setDetails(null);
     setNewImages([]);
     setDeletedImages([]);
 
-    const treeDetails = await DataService.fetchTreeDetails(saplingid, adminID);
+    
+
+    //fetching remote tree details
+    //const treeDetails = await DataService.fetchTreeDetails(saplingid, adminID);
+    
     if (!treeDetails) {
       return;
     }
     const detailsForTreeForm = {...Constants.treeFormTemplateData};
-    const treeType = await Utils.treeTypeFromID(treeDetails.tree_id);
-    const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
+
+    console.log("---------treedetails------------",treeDetails)
+    const treeType = await Utils.treeTypeFromObjectID(treeDetails.tree_id);
+    const plot = await Utils.plotFromObjectID(treeDetails.plot_id);
+
+    //---------------------------------------------------------------
+    // const treeType = await Utils.treeTypeFromID(treeDetails.tree_id);
+    // const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
+
+    console.log("------------treeDetails---------------",treeDetails)
+
     detailsForTreeForm.inImages = treeDetails.image; //TODO: server should return:
+    
     for (let image of detailsForTreeForm.inImages) {
+      //console.log('-----------image in Edit tree-----------------', image);
       image.data = await DataService.fileURLToBase64(image.name);
+      //treeDetails.imageData = await DataService.fileURLToBase64(image);
     }
-    /*
-         {
-             data: generate on spot,
-             name: s3url,
-             meta: {
-                 capturetimestamp: timestamp,
-                 remark: 'default remark',
-             }
-         }
-        */
-    //   console.log(detailsForTreeForm);
-    //   detailsForTreeForm.inImages = [];
+
+    //console.log("-------------------------detailsForTreeForm.inImages------------",detailsForTreeForm.inImages)
+
     detailsForTreeForm.inLat = 0;
     detailsForTreeForm.inLng = 0;
     if (treeDetails.location) {
@@ -110,9 +191,10 @@ const EditTreeScreen = ({navigation}) => {
     // console.log(detailsForTreeForm);
     setDetails(detailsForTreeForm);
   };
+
   if (details) {
     return (
-      <TreeForm
+      <TreeFormEditTree
         mode={treeFormModes.remoteEdit}
         treeData={details}
         onCancel={() => setDetails(null)}
@@ -145,11 +227,9 @@ const EditTreeScreen = ({navigation}) => {
           />
           <View style={{margin: 20}}>
             <TouchableOpacity
-              style={
-                commonStyles.searchButton
-              }
+              style={commonStyles.searchButton}
               onPress={() => fetchTreeDetails()}>
-              <Text style={{color: 'white', fontSize: 18}}>
+              <Text style={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>
                 {Strings.buttonLabels.Search}
               </Text>
             </TouchableOpacity>

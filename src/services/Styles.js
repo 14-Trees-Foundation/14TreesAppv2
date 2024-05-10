@@ -23,10 +23,10 @@ export const commonStyles = StyleSheet.create({
   },
   label: {
     width: 70,
-    borderWidth: 2,
-    borderColor: 'black',
+    //borderWidth: 2,
+    //borderColor: 'black',
     borderRadius: 5,
-    fontSize: 17,
+    fontSize: 18,
     alignContent: 'center',
     color: 'white',
     textAlign: 'center',
@@ -65,10 +65,10 @@ export const commonStyles = StyleSheet.create({
     fontSize: 40,
     borderColor: 'white',
     borderWidth: 1,
-    backgroundColor: '#6285D0',
+    backgroundColor: "#5883E7",
     margin: 5,
     padding: 20,
-    borderRadius: 15,
+    borderRadius: 30,
     shadowColor: '#1A894E',
     elevation: 4,
     shadowOffset: {
@@ -121,9 +121,12 @@ export const commonStyles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
   },
+  //namrata
   searchButton: {
-    backgroundColor: '#5DB075',
+    backgroundColor: "#5883E7",
     paddingTop: 6,
+    borderWidth :1,
+    borderColor:"white",
     borderRadius: 3,
     alignItems: 'center',
     height: 38,
@@ -200,6 +203,12 @@ export const commonStyles = StyleSheet.create({
     color: 'black',
   },
   //namrata
+  textX:{
+    fontSize: 17,
+    color: 'black',
+    textAlign: 'left',
+    margin: 2,
+  },
   text3: {
     fontSize: 17,
     color: 'white',
@@ -216,7 +225,7 @@ export const commonStyles = StyleSheet.create({
   //Namrata
   txtInput: {
     height: 60,
-    width: 350,
+    width: 320,
     borderWidth: 1.5,
     borderColor: 'grey',
     borderRadius: 10,

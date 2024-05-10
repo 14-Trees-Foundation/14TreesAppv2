@@ -9,6 +9,9 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactNativeHost;
 import com.facebook.soloader.SoLoader;
 import java.util.List;
+//react native exception handler
+// import com.masteratul.exceptionhandler.ReactNativeExceptionHandlerModule;
+// import com.masteratul.exceptionhandler.NativeExceptionHandlerIfc;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -58,6 +61,14 @@ public class MainApplication extends Application implements ReactApplication {
       // If you opted-in for the New Architecture, we load the native entry point for this app.
       DefaultNewArchitectureEntryPoint.load();
     }
+
+//react native exception handler
+    // ReactNativeExceptionHandlerModule.setNativeExceptionHandler(new NativeExceptionHandlerIfc() {
+    //   @Override
+    //   public void handleNativeException(Thread thread, Throwable throwable, Thread.UncaughtExceptionHandler originalHandler) {
+    //     //Log.e("Native Exception", "Thread: " + thread.getName() + ", Exception: " + throwable.getMessage());
+    //   }
+    // });
 
     //ReactNativeFlipper.initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
   }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Text, TextInput, ToastAndroid, View } from 'react-native';
+import { Button, Text, TextInput, ToastAndroid, View, BackHandler } from 'react-native';
 import { DataService } from '../services/DataService';
 import { Strings } from '../services/Strings';
 import { TreeForm, treeFormModes } from '../components/TreeForm';
@@ -8,9 +8,9 @@ import { MyIconButton } from '../components/Components';
 import LoadingScreen from './LoadingScreen';
 
 const fetchTreeDetails = async (saplingId, setDetails) => {
-    console.log('-------fetching tree details-----------');    
+    // console.log('fetching tree details');    
     const treeDetails = await Utils.fetchLocalTree(saplingId);
-    // console.log(treeDetails);
+    //console.log("treeDetails: ", treeDetails);
     if (!treeDetails) { return; }
     const detailsForTreeForm = { ...Constants.treeFormTemplateData };
     const treeType = await Utils.treeTypeFromID(treeDetails.type_id);
@@ -32,6 +32,18 @@ export const EditLocalTree = ({ navigation, route }) => {
     const { sapling_id } = route.params;
     const [saplingid, setSaplingid] = useState(sapling_id);
     const [details, setDetails] = useState(null);
+
+    useEffect(() => {
+        const backAction = () => {
+            navigation.goBack()
+            return true; // Prevent default behavior (exit app)
+        };
+    
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    
+        return () => backHandler.remove();
+    },[])
+
     useEffect(() => {
         setSaplingid(sapling_id);
     }, [sapling_id]);
@@ -40,9 +52,9 @@ export const EditLocalTree = ({ navigation, route }) => {
         fetchTreeDetails(saplingid, setDetails);
     }, [saplingid])
     const updateDetails = async (tree, images) => {
-        console.log(tree);
-        console.log("---------------------Editting Images locally----------------------");
-        if (tree.saplingid !== details.inSaplingId) {   
+        console.log("tree received----- ",tree);
+        console.log("images received----- ",images);
+        if (tree.saplingid !== details.inSaplingId) {
             //delete tree by sapling ID
             await Utils.deleteTreeAndImages(details.inSaplingId);
         }

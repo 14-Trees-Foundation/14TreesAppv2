@@ -1,11 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import React, { useContext, useEffect, useState } from 'react';
-import { Alert, BackHandler, Platform, RootTagContext } from 'react-native';
+import React, { useContext, useEffect, } from 'react';
+import { Alert, Platform, RootTagContext } from 'react-native';
 import { enableLatestRenderer } from 'react-native-maps';
 import { PERMISSIONS, request } from 'react-native-permissions';
-import { DrawerNavigator } from './components/Components';
+import { DrawerNavigator } from './components/DrawerNavigator';
 import LoadingScreen from './screens/LoadingScreen';
 import LoginScreen from './screens/Login';
 import { Strings } from './services/Strings';
@@ -14,6 +14,8 @@ import { checkMultiplePermissions } from './services/check_permissions';
 import DeviceInfo from 'react-native-device-info';
 import { DataService } from './services/DataService';
 import { styleConfigs } from './services/Styles';
+import { LangProvider } from './context/LangContext ';
+import Instabug, {InvocationEvent} from 'instabug-reactnative';
 
 enableLatestRenderer();
 
@@ -40,9 +42,9 @@ async function requestPermissions() {
       PERMISSIONS.ANDROID.READ_MEDIA_AUDIO
     ])
   }
-  console.log("permission array: ", permissions);
+  //console.log("permission array: ", permissions);
   let ungrantedPermissions = await checkMultiplePermissions(permissions);
-  console.log("ungrantedPermissions: ", ungrantedPermissions);
+  //console.log("ungrantedPermissions: ", ungrantedPermissions);
 
   if (ungrantedPermissions.length > 0) {
     Alert.alert(Strings.alertMessages.PermissionsRequired, Strings.alertMessages.Settings);
@@ -94,7 +96,7 @@ const App = () => {
 
       const isSignedIn = await DataService.loginUser(userDataPayload);
       const response = isSignedIn.data;
-      console.log("response data inside app.js: ", response);
+      //console.log("response data inside app.js: ", response);
 
       if (response.success === false) {
         // User is not signed in, navigate to LoginScreen
@@ -105,8 +107,8 @@ const App = () => {
       if (response.user.adminID) {
         await AsyncStorage.setItem(Constants.adminIdKey, response.user.adminID);
         const admin_id = await AsyncStorage.getItem(Constants.adminIdKey);
-        console.log('adminId stored from async: ', admin_id);
-        console.log('adminId : ', response.user.adminID);
+        // console.log('adminId stored from async: ', admin_id);
+        // console.log('adminId : ', response.user.adminID);
       } else {
         console.log('adminId not stored');
       }
@@ -156,49 +158,44 @@ const App = () => {
     }
   }
 
-  const backHandler = () => {
-    return true;
-  }
 
   useEffect(() => {
 
     const initializeApp = async () => {
       await requestPermissions();
       await initTasks();
-      BackHandler.addEventListener('hardwareBackPress', backHandler);
     };
 
     initializeApp();
 
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', backHandler);
-    }
   }, []);
 
   return (
-    <NavigationContainer ref={stackNavRef}>
-      <Stack.Navigator>
-        <Stack.Screen
-          name={Strings.screenNames.getString('startScreen', Strings.english)}
-          component={LoadingScreen}
-          options={{ headerShown: false }} />
-        <Stack.Screen
-          name={Strings.screenNames.getString('LogIn', Strings.english)}
-          component={LoginScreen}
-          options={{
-            headerLeft: () => null,
-            ...styleConfigs.drawerHeaderOptions,
-            title: Strings.screenNames.LogIn
-          }} />
-        <Stack.Screen
-          name={Strings.screenNames.getString('DrawerScreen', Strings.english)}
-          component={DrawerNavigator}
-          options={{
-            headerLeft: () => null,
-            headerShown: false
-          }} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <LangProvider>
+      <NavigationContainer ref={stackNavRef}>
+        <Stack.Navigator>
+          <Stack.Screen
+            name={Strings.screenNames.getString('startScreen', Strings.english)}
+            component={LoadingScreen}
+            options={{ headerShown: false }} />
+          <Stack.Screen
+            name={Strings.screenNames.getString('LogIn', Strings.english)}
+            component={LoginScreen}
+            options={{
+              headerLeft: () => null,
+              ...styleConfigs.drawerHeaderOptions,
+              title: Strings.screenNames.LogIn
+            }} />
+          <Stack.Screen
+            name={Strings.screenNames.getString('DrawerScreen', Strings.english)}
+            component={DrawerNavigator}
+            options={{
+              headerLeft: () => null,
+              headerShown: false,
+            }} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </LangProvider>
   )
 };
 

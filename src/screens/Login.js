@@ -1,43 +1,40 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { Component } from 'react';
-import { Alert, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState, useContext, useEffect } from 'react';
+import { Alert, Text, TouchableOpacity, View, TextInput } from 'react-native';
 import { DataService } from '../services/DataService';
 import LanguageModal from '../components/Languagemodal';
 import { Strings } from '../services/Strings';
 import { Utils, Constants } from '../services/Utils';
-import { TextInput } from 'react-native-gesture-handler';
 import { commonStyles } from "../services/Styles";
 import { CustomButton } from '../components/Components';
+import LangContext from '../context/LangContext ';
 
-class LoginScreen extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      phoneNumber: '',
-      langModalVisible: false,
-      pinNumber: ''
-    };
-    this.loginUser = this.loginUser.bind(this);
-  }
+const LoginScreen = ({ navigation }) => {
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [pinNumber, setPinNumber] = useState('');
+  const [langModalVisible, setLangModalVisible] = useState(false);
 
+  const { langChanged } = useContext(LangContext);
 
-  async loginUser() {
+  useEffect(() => {
+    console.log("langChanged inside LoginScreen: ", langChanged);
+    navigation.setOptions({
+      title: Strings.screenNames.LogIn
+    });
+  }, [langChanged]);
 
-    const { navigation } = this.props;
-    const { phoneNumber, pinNumber } = this.state;
-
+  const loginUser = async () => {
     console.log("phone: ", phoneNumber, "pin: ", pinNumber);
 
     try {
-
       if (phoneNumber.length !== 10) {
-        Alert.alert(Strings.alertMessages.CorrectPhoneNumber); 
-        return
+        Alert.alert(Strings.alertMessages.CorrectPhoneNumber);
+        return;
       }
 
       if (pinNumber.length !== 4) {
-        Alert.alert(Strings.alertMessages.CorrectPin); 
-        return
+        Alert.alert(Strings.alertMessages.CorrectPin);
+        return;
       }
 
       const userDataPayload = {
@@ -49,9 +46,7 @@ class LoginScreen extends Component {
       const isSignedIn = await DataService.loginUser(userDataPayload);
 
       const response = isSignedIn.data;
-      console.log("---response data login---: ", response);
-
-
+      console.log("response data from login-----: ", response);
 
       if (response.success === false) {
         const errorMsg = response.error.errorMsg;
@@ -63,134 +58,128 @@ class LoginScreen extends Component {
           const userRole = user.userRole;
           console.log("userRole: ", userRole);
 
+          let message = Strings.alertMessages.IncorrectUser;
           if (userRole === null) {
-            Alert.alert(Strings.alertMessages.LoginFailed, Strings.alertMessages.userNotAuthorized,
-              [
-                {
-                  onPress: () => {
-                    Utils.reloadApp(); // Call Utils.reloadApp() on pressing "OK"
-                  },
-                },
-              ]);
+            message = Strings.alertMessages.userNotAuthorized;
           } else {
-            Alert.alert(Strings.alertMessages.LoginFailed, Strings.alertMessages.userNotSetup,
-              [
-                {
-                  onPress: () => {
-                    Utils.reloadApp(); // Call Utils.reloadApp() on pressing "OK"
-                  },
-                },
-              ]);
+            message = Strings.alertMessages.userNotSetup;
           }
 
-
+          Alert.alert(Strings.alertMessages.LoginFailed, message,
+            [
+              {
+                onPress: () => {
+                  Utils.reloadApp();
+                },
+              },
+            ]);
         } else {
-
           Alert.alert(Strings.alertMessages.LoginFailed, Strings.alertMessages.IncorrectUser,
             [
               {
                 onPress: () => {
-                  Utils.reloadApp(); // Call Utils.reloadApp() on pressing "OK"
+                  Utils.reloadApp();
                 },
               },
             ]);
         }
-
         return;
       }
 
+      const logsArray = await Utils.getLogsFromLocalDB();
+      for (const logData of logsArray) {
+        //console.log("logs from local db: ", logData);
+      }
 
       if (response.user.adminID) {
         await AsyncStorage.setItem(Constants.adminIdKey, response.user.adminID);
-        const admin_id = await AsyncStorage.getItem(Constants.adminIdKey)
-        console.log('--------adminId stored----------',admin_id);
-        console.log('adminId : ', response.user.adminID)
+        const admin_id = await AsyncStorage.getItem(Constants.adminIdKey);
+        console.log('adminId stored from async: ', admin_id);
+        console.log('adminId : ', response.user.adminID);
+      } else {
+        console.log('adminId not stored');
       }
-      else {
-        console.log('------------adminId not stored-------------------')
-      }
-
 
       try {
         await AsyncStorage.setItem(Constants.userIdKey, response.user._id);
         console.log('userId stored: ', response.user._id);
-        response.data = { ...response.user, image: '' }
-        console.log("-----------response data in setUserId--------: ", response.data);
+        await AsyncStorage.setItem(Constants.phoneNumber, response.user.phone.toString());
+        response.data = { ...response.user, image: '' };
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
         console.log('userDetails stored');
       } catch (error) {
         console.log('Error storing userId', error);
+        const stackTrace = error.stack;
+        const errorLog = {
+          msg: "happened while trying to store userId during login",
+          error: JSON.stringify(error),
+          stackTrace: stackTrace
+        }
+        await Utils.logException(JSON.stringify(errorLog));
       }
 
       if (response.success === true) {
-        //when role is trelogging or admin
         console.log('Login successful');
         navigation.navigate(Strings.screenNames.getString('DrawerScreen', Strings.english));
-
-        // Clear the TextInput values after successful login
-        this.setState({ phoneNumber: '', pinNumber: '' });
+        setPhoneNumber('');
+        setPinNumber('');
       }
 
-
-
     } catch (error) {
-      Alert.alert(Strings.alertMessages.LoginFailed)
+      Alert.alert(Strings.alertMessages.LoginFailed);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: "login failed",
+        error: JSON.stringify(error),
+        stackTrace: stackTrace
+      }
+      await Utils.logException(JSON.stringify(errorLog));
     }
   };
 
-  render() {
 
-    const { navigation } = this.props;
-    const { langModalVisible, phoneNumber, pinNumber } = this.state;
+  return (
+    <View style={{ backgroundColor: 'white', height: '100%' }}>
+      <View style={commonStyles.pop}>
+        <View style={{ marginVertical: 30 }}>
+          <TextInput
+            style={commonStyles.txtInput}
+            placeholder="Enter your phone number"
+            placeholderTextColor="grey"
+            onChangeText={(text) => setPhoneNumber(text)}
+            value={phoneNumber}
+            keyboardType="number-pad"
+            maxLength={10}
+          />
+          <TextInput
+            style={commonStyles.txtInput}
+            placeholder="Enter your pin"
+            placeholderTextColor="grey"
+            onChangeText={(text) => setPinNumber(text)}
+            value={pinNumber}
+            keyboardType="number-pad"
+            maxLength={4}
+          />
 
-    return (
-      <View style={{ backgroundColor: 'white', height: '100%' }}>
-        <View style={commonStyles.pop}>
-          <View style={{ marginVertical: 30 }}>
-            <TextInput
-              style={commonStyles.txtInput}
-              placeholder="Enter your phone number"
-              placeholderTextColor="grey"
-              onChangeText={(text) => this.setState({ phoneNumber: text })}
-              value={phoneNumber}
-              keyboardType="number-pad"
-              maxLength={10}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: 30, marginTop: 25, marginBottom: 10 }}>
+            <CustomButton
+              text={Strings.buttonLabels.login}
+              onPress={loginUser}
             />
-            <TextInput
-              style={commonStyles.txtInput}
-              placeholder="Enter your pin"
-              placeholderTextColor="grey"
-              onChangeText={(text) => this.setState({ pinNumber: text })}
-              value={pinNumber}
-              keyboardType="number-pad"
-              maxLength={4}
-            />
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: 30, marginTop: 25, marginBottom: 10 }}>
-
-              <CustomButton
-                text={Strings.buttonLabels.login} //here
-                onPress={this.loginUser}
-              />
-            </View>
-
           </View>
-
         </View>
-
-
-        <TouchableOpacity style={commonStyles.selLang} onPress={() => { this.setState({ langModalVisible: !langModalVisible }); }}>
-          <Text style={{ color: '#36454F', fontWeight: 'bold' }}>{Strings.buttonLabels.SelectLanguage}</Text>
-        </TouchableOpacity>
-        <LanguageModal
-          navigation={navigation}
-          langModalVisible={langModalVisible}
-          setLangModalVisible={(visible) => this.setState({ langModalVisible: visible })}
-        />
       </View>
-    );
 
-  }
-}
+      <TouchableOpacity style={commonStyles.selLang} onPress={() => { setLangModalVisible(!langModalVisible); }}>
+        <Text style={{ color: '#36454F', fontWeight: 'bold' }}>{Strings.buttonLabels.SelectLanguage}</Text>
+      </TouchableOpacity>
+
+      <LanguageModal
+        langModalVisible={langModalVisible}
+        setLangModalVisible={(visible) => setLangModalVisible(visible)}
+      />
+    </View>
+  );
+};
 
 export default LoginScreen;
