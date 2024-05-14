@@ -48,8 +48,8 @@ axios.interceptors.response.use(function (response) {
 export class DataService {
 
   static productionHostName = 'https://api.14trees.org';
-   static hostName = 'http://10.0.2.2:7000';
-   //static phoneHostName = "http://192.168.43.232:7000";
+  static hostName = 'http://10.0.2.2:7000';
+  static phoneHostName = "http://192.168.31.11:7000";
   static serverBase = `${this.productionHostName}/api/appv2`;
 
   static async loginUser(userDataPayload) {
@@ -111,8 +111,14 @@ export class DataService {
     return response.data;
   }
 
+  static async uploadShifts(shifts) {
+    const url = `${DataService.serverBase}/uploadShifts`;
+    const response = await axios.post(url, shifts);
+    return response.data;
+  }
+
   static async uploadTrees(treeList) {
-    console.log("treelist images:---", treeList.images);
+    console.log("treelist images:---", treeList, treeList.length);
     const url = `${DataService.serverBase}/uploadTrees`;
     const response = await axios.post(url, treeList);
     if (response) {
@@ -140,9 +146,9 @@ export class DataService {
 
       // Convert the response data to a Base64 string
       const base64String = Buffer.from(response.data, 'binary').toString('base64');
-
+    
       return base64String;
-      
+
     } catch (error) {
       console.error('Error:', error);
       const stackTrace = error.stack;

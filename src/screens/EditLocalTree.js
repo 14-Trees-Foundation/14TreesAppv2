@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Text, TextInput, ToastAndroid, View, BackHandler } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import {ScrollView, Button, Text, TextInput, ToastAndroid, View, BackHandler } from 'react-native';
 import { DataService } from '../services/DataService';
 import { Strings } from '../services/Strings';
 import { TreeForm, treeFormModes } from '../components/TreeForm';
@@ -24,6 +24,8 @@ const fetchTreeDetails = async (saplingId, setDetails) => {
     detailsForTreeForm.inTreeType = treeType;
     detailsForTreeForm.inPlot = plot;
     detailsForTreeForm.inUserId = treeDetails.user_id;
+    detailsForTreeForm.inShiftId = treeDetails.shiftID;
+    detailsForTreeForm.inSequenceNo = treeDetails.sequenceNo
     // console.log('details:',detailsForTreeForm);
     setDetails(detailsForTreeForm);
 }
@@ -33,16 +35,19 @@ export const EditLocalTree = ({ navigation, route }) => {
     const [saplingid, setSaplingid] = useState(sapling_id);
     const [details, setDetails] = useState(null);
 
+
     useEffect(() => {
+
+        console.log("inside local tree edit");
         const backAction = () => {
             navigation.goBack()
             return true; // Prevent default behavior (exit app)
         };
-    
+
         const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-    
+
         return () => backHandler.remove();
-    },[])
+    }, [])
 
     useEffect(() => {
         setSaplingid(sapling_id);
@@ -51,26 +56,38 @@ export const EditLocalTree = ({ navigation, route }) => {
         setDetails(null);
         fetchTreeDetails(saplingid, setDetails);
     }, [saplingid])
+
     const updateDetails = async (tree, images) => {
-        console.log("tree received----- ",tree);
-        console.log("images received----- ",images);
+        //console.log("tree received----- ",tree);
+        //console.log("images received----- ",images);
+        navigation.goBack();
+
+        let toastmsg = Strings.alertMessages.TreeUpdatedfirsthalf + saplingid + Strings.alertMessages.TreeUpdatedsecondhalf;
+        ToastAndroid.show(toastmsg, ToastAndroid.LONG);
+
         if (tree.saplingid !== details.inSaplingId) {
             //delete tree by sapling ID
             await Utils.deleteTreeAndImages(details.inSaplingId);
         }
         await Utils.deleteTreeImages(tree.saplingid);
         await Utils.saveTreeAndImagesToLocalDB(tree, images);
-        navigation.popToTop();
+        
     }
+
     if (details) {
-        return <TreeForm
-            mode={treeFormModes.localEdit}
-            treeData={details}
-            onCancel={() => navigation.popToTop()}
-            updateUserId={false}
-            updateLocation={false}
-            onVerifiedSave={updateDetails}
-        />
+        return (
+            <ScrollView keyboardShouldPersistTaps='handled' style={{ flex: 1 }}>
+                <TreeForm
+                    mode={treeFormModes.localEdit}
+                    treeData={details}
+                    onCancel={() => navigation.goBack()}
+                    updateUserId={false}
+                    updateLocation={false}
+                    onVerifiedSave={updateDetails}
+                    selectedPlotUser={details.inPlot}
+                />
+            </ScrollView>
+        )
     }
     else {
         return (

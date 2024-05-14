@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 
 export const commonStyles = StyleSheet.create({
   pop: {
@@ -43,32 +43,48 @@ export const commonStyles = StyleSheet.create({
   iconBtn: {
     padding: 8,
     margin: 5,
-    borderRadius: 5,
+    borderRadius: 15,
     flexDirection: 'row',
-    backgroundColor: 'green',
+    backgroundColor: '#059636',
     justifyContent: 'center',
     alignItems: 'center',
   },
   //Namrata
+  borderText: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+  },
   borderedDisplay: {
     //borderColor: '#F2E47D', borderWidth: 3, borderRadius: 5, margin: 3, padding: 3
-    borderColor: 'gray',
-    borderWidth: 3,
+    borderColor: '#ccc',
+    borderWidth: 2,
     borderRadius: 5,
-    margin: 3,
+    margin: 5,
     padding: 3,
+    marginTop: 10
+  },
+  borderedDisplay2: {
+    //borderColor: '#F2E47D', borderWidth: 3, borderRadius: 5, margin: 3, padding: 3
+    borderColor: '#ccc',
+    borderWidth: 0,
+    borderRadius: 5,
+    margin: 5,
+    padding: 3,
+    marginTop: 10
   },
   defaultButtonStyle: {
+    fontFamily: 'Inter-Regular',
     flexDirection: 'row',
     alignContent: 'center',
     alignItems: 'center',
     fontSize: 40,
     borderColor: 'white',
     borderWidth: 1,
-    backgroundColor: "#5883E7",
+    backgroundColor: "#1D4ED8",
     margin: 5,
     padding: 20,
-    borderRadius: 30,
+    borderRadius: 20,
     shadowColor: '#1A894E',
     elevation: 4,
     shadowOffset: {
@@ -77,17 +93,19 @@ export const commonStyles = StyleSheet.create({
     },
     shadowOpacity: 1,
     shadowRadius: 10,
+    marginTop: 0
   },
 
   dropdownOptions: {
+    fontFamily: 'Inter-Regular',
     flexDirection: 'row',
     alignContent: 'center',
     alignItems: 'center',
     fontSize: 45,
     borderColor: 'white',
     borderWidth: 2,
-    backgroundColor: '#125441',
-    margin: 5,
+    backgroundColor: '#059636',
+    //margin: 5,
     padding: 10,
     borderRadius: 5,
     shadowColor: 'black',
@@ -99,39 +117,62 @@ export const commonStyles = StyleSheet.create({
     shadowOpacity: 1,
   },
   dropdownOptionsContent: {
+    fontFamily: 'Inter-Regular',
     color: 'black',
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 20,
   },
   defaultButtonTextStyle: {
+    fontFamily: 'Inter-Regular',
     color: 'white',
     textAlign: 'center',
   },
-  //Namrata
-  drawerHeader: {
-    backgroundColor: '#125441',
+  //Namrata #FFD700
+  drawerHeaderLight: {
+    backgroundColor: '#F1FAEE',
   },
-  headerTitleStyle: {
-    color: 'white',
+  drawerHeaderDark: {
+    backgroundColor: '#FFD700'
   },
+  headerTitleStyleDark: {
+    fontFamily: 'Inter-Regular',
+    color: '#000',
+    fontWeight: '700'
+  },
+  headerTitleStyleLight: {
+    fontFamily: 'Inter-Regular',
+    color: '#113160',
+    fontWeight: '700'
+  },
+
   logOutButton: {
     backgroundColor: 'red',
-    padding: 15,
-    borderRadius: 5,
+    color: 'red',
+    padding: 12,
+    borderRadius: 53,
     alignItems: 'center',
+    marginTop: 13
   },
   //namrata
   searchButton: {
-    backgroundColor: "#5883E7",
-    paddingTop: 6,
-    borderWidth :1,
-    borderColor:"white",
-    borderRadius: 3,
+    backgroundColor: "#1D4ED8",
+    padding: 3,
+    borderWidth: 1,
+    borderColor: "white",
+    borderRadius: 13,
     alignItems: 'center',
-    height: 38,
+    height: 40,
   },
-
+  continueButton: {
+    backgroundColor: "#059636",
+    padding: 5,
+    borderWidth: 1,
+    borderColor: "white",
+    borderRadius: 13,
+    alignItems: 'center',
+    height: 40,
+  },
   remark: {
     height: 70,
     borderWidth: 0.5,
@@ -166,19 +207,23 @@ export const commonStyles = StyleSheet.create({
     height: 50,
   },
   text: {
-    fontSize: 15,
+    fontSize: 18,
+    fontFamily: 'Inter-Regular',
     color: 'black',
     textAlign: 'left',
+    fontWeight: 'bold'
   },
   text2: {
     fontSize: 25,
     color: 'white',
+    fontFamily: 'Inter-Regular',
     textAlign: 'center',
     marginVertical: 5,
     marginBottom: 40,
   },
   recordTxt: {
     fontSize: 18,
+    fontFamily: 'Inter-Regular',
     color: '#1f3625',
     marginTop: 5,
     marginBottom: 5,
@@ -186,63 +231,77 @@ export const commonStyles = StyleSheet.create({
   },
   btntxt: {
     fontSize: 18,
+    fontFamily: 'Inter-Regular',
     color: '#ffffff',
     textAlign: 'center',
   },
   text4: {
     fontSize: 17,
+    fontFamily: 'Inter-Regular',
     color: 'black',
     textAlign: 'left',
     padding: 5,
   },
+  textSync: {
+    fontSize: 20,
+    fontFamily: 'Inter-Regular',
+    color: 'black',
+    fontWeight: '700'
+  },
   text5: {
     fontSize: 20,
+    fontFamily: 'Inter-Regular',
     alignContent: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
-    color: 'black',
+    color: '#52525C',
   },
   //namrata
-  textX:{
+  textX: {
     fontSize: 17,
+    fontFamily: 'Inter-Regular',
     color: 'black',
     textAlign: 'left',
     margin: 2,
   },
   text3: {
-    fontSize: 17,
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
     color: 'white',
     textAlign: 'left',
     margin: 2,
   },
   text6: {
     fontSize: 17,
+    fontFamily: 'Inter-Regular',
     color: 'black',
     textAlign: 'left',
     backgroundColor: 'white',
     borderRadius: 3,
   },
   //Namrata
+
   txtInput: {
-    height: 60,
-    width: 320,
-    borderWidth: 1.5,
-    borderColor: 'grey',
-    borderRadius: 10,
+    height: 50,
+    fontFamily: 'Inter-Regular',
+    width: '93%',
+    borderWidth: 2,
+    borderColor: '#ccc',
+    borderRadius: 5,
     backgroundColor: 'white',
-    //backgroundColor:"#FFF01B",
     marginTop: 10,
     marginBottom: 10,
     padding: 10,
-    color: 'black', // Change font color here
+    color: '#52525C', // Change font color here
     fontSize: 18,
-    fontWeight: 'bold',
+    //fontWeight: 'bold',
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
   },
   headerText: {
     fontSize: 30,
+    fontFamily: 'Inter-Regular',
     color: 'white',
     textAlign: 'center',
     marginTop: 30,
@@ -250,15 +309,41 @@ export const commonStyles = StyleSheet.create({
     fontFamily: 'cochin',
     fontWeight: 'bold',
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: {width: 1, height: 1},
+    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
   },
+  shiftButton: {
+    backgroundColor: "green",
+    color: "white",
+    fontFamily: 'Inter-Regular',
+  },
+
+  //manjur
+  secondView: {
+    flex: 1,
+    flexDirection: 'row',
+    fontFamily: 'Inter-Regular',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    //width: '50%',
+    borderRadius: 80,
+  },
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  timerText: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 18,
+    fontWeight: '700'
+  }
 });
 
-export const styleConfigs = {
-  drawerHeaderOptions: {
-    headerStyle: commonStyles.drawerHeader,
-    headerTitleStyle: commonStyles.headerTitleStyle,
-    headerTintColor: commonStyles.headerTitleStyle.color,
-  },
-};
+// export const styleConfigs = {
+//   drawerHeaderOptions: {
+//     headerStyle: commonStyles.drawerHeader,
+//     headerTitleStyle: commonStyles.headerTitleStyle,
+//     headerTintColor: commonStyles.headerTitleStyle.color,
+//   },
+// };

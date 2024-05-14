@@ -7,14 +7,13 @@ import { Strings } from '../services/Strings';
 import { Utils, Constants } from '../services/Utils';
 import { commonStyles } from "../services/Styles";
 import { CustomButton } from '../components/Components';
-import LangContext from '../context/LangContext ';
+import GlobalContext from '../context/GlobalContext ';
 
 const LoginScreen = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [pinNumber, setPinNumber] = useState('');
-  const [langModalVisible, setLangModalVisible] = useState(false);
 
-  const { langChanged } = useContext(LangContext);
+  const { langChanged, lightTheme, setUserName } = useContext(GlobalContext);
 
   useEffect(() => {
     console.log("langChanged inside LoginScreen: ", langChanged);
@@ -28,12 +27,12 @@ const LoginScreen = ({ navigation }) => {
 
     try {
       if (phoneNumber.length !== 10) {
-        Alert.alert(Strings.alertMessages.CorrectPhoneNumber);
+        Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.CorrectPhoneNumber);
         return;
       }
 
       if (pinNumber.length !== 4) {
-        Alert.alert(Strings.alertMessages.CorrectPin);
+        Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.CorrectPin);
         return;
       }
 
@@ -44,7 +43,10 @@ const LoginScreen = ({ navigation }) => {
 
       console.log('Sending user data to server.', userDataPayload);
       const isSignedIn = await DataService.loginUser(userDataPayload);
-
+      if (!isSignedIn) {
+        stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
+        return false;
+      }
       const response = isSignedIn.data;
       console.log("response data from login-----: ", response);
 
@@ -107,6 +109,17 @@ const LoginScreen = ({ navigation }) => {
         response.data = { ...response.user, image: '' };
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
         console.log('userDetails stored');
+
+        let userKeyDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
+        if (userKeyDetails) {
+          userKeyDetails = JSON.parse(userKeyDetails);
+          let name = userKeyDetails.name;
+          if (name) {
+            const firstName = name.split(' ')[0];
+            console.log("user name in login screen and header---- ", firstName);
+            setUserName(firstName);
+          }
+        }
       } catch (error) {
         console.log('Error storing userId', error);
         const stackTrace = error.stack;
@@ -139,11 +152,16 @@ const LoginScreen = ({ navigation }) => {
 
 
   return (
-    <View style={{ backgroundColor: 'white', height: '100%' }}>
-      <View style={commonStyles.pop}>
+    <View style={{ backgroundColor: 'white', height: '100%', marginTop: 40 }}>
+      <View style={{ padding: 2, margin: 4, borderRadius: 10, borderColor: '#ccc', borderWidth: 3, }}>
         <View style={{ marginVertical: 30 }}>
           <TextInput
-            style={commonStyles.txtInput}
+            style={{
+              ...commonStyles.txtInput,
+              color: lightTheme ? '#52525C' : 'black',
+              fontSize: 15, borderRadius: 13,
+              fontWeight: (phoneNumber) ? 'bold' : 'normal'
+            }}
             placeholder="Enter your phone number"
             placeholderTextColor="grey"
             onChangeText={(text) => setPhoneNumber(text)}
@@ -152,7 +170,12 @@ const LoginScreen = ({ navigation }) => {
             maxLength={10}
           />
           <TextInput
-            style={commonStyles.txtInput}
+            style={{
+              ...commonStyles.txtInput,
+              color: lightTheme ? '#52525C' : 'black',
+              fontSize: 15, borderRadius: 13,
+              fontWeight: (pinNumber) ? 'bold' : 'normal'
+            }}
             placeholder="Enter your pin"
             placeholderTextColor="grey"
             onChangeText={(text) => setPinNumber(text)}
@@ -170,14 +193,7 @@ const LoginScreen = ({ navigation }) => {
         </View>
       </View>
 
-      <TouchableOpacity style={commonStyles.selLang} onPress={() => { setLangModalVisible(!langModalVisible); }}>
-        <Text style={{ color: '#36454F', fontWeight: 'bold' }}>{Strings.buttonLabels.SelectLanguage}</Text>
-      </TouchableOpacity>
 
-      <LanguageModal
-        langModalVisible={langModalVisible}
-        setLangModalVisible={(visible) => setLangModalVisible(visible)}
-      />
     </View>
   );
 };

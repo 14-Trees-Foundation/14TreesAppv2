@@ -26,7 +26,7 @@ const About = ({ navigation }) => {
                 }}>
                 Sapling Upload App
             </Text>
-            <Text style={{ color: '#0F4334', fontSize: 18, paddingBottom: 15 }}>Version 2.3</Text>
+            <Text style={{ color: '#0F4334', fontSize: 18, paddingBottom: 15 }}>Version 2.2</Text>
             <View>
                 <Image
                     source={require('../../assets/logo.png')}
