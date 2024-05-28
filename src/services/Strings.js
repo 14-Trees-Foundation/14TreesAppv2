@@ -92,7 +92,7 @@ export class Strings {
             //general:
             logoutConfirm: "Do you want to log out?",
             PlotName: "Plot Name",
-            Shift: "Shift" //manjur
+            Shift: "shift" //manjur
         },
         "mr": {
             SignIn: "साइन इन करा",
@@ -159,6 +159,7 @@ export class Strings {
             Settings: "Please go to Settings and grant permissions",
             //utils
             DataUptodate: "Tree types and plot up to date.",
+            ShiftDataUptodate: "Shift data up to date",
             plotSaplingsDataUpToDate: "Plot sapling data up-to-date",
             FailureSavingTrees: "Failed to save some tree types. See logs.",
             FailureSavingPlots: "Failed to save some plots. See logs.",
@@ -169,6 +170,7 @@ export class Strings {
             No: "No",
             SyncSuccess: "Sync Successful!",
             SyncFailure: "Sync Failed!",
+            NothingToSync : "No trees to sync. Please Add trees",
             CheckLocalList: "See local tree list to check statuses.",
             ContactExpert: "Contact an expert, please.",
             //tree form
@@ -210,7 +212,9 @@ export class Strings {
             SelectPlot: "Please Select a Plot",
             NoPlotSelected: "No Plot Selected",
             FinishShift: "Do you want to finish the Shift ?", //manjur,
-            Synched: "Synched"
+            Synched: "Synched",
+            FailedUpdateSapling : "Failed to update sapling: ",
+            UnaableToFetchData: "Unable to fetch helper data",
         },
         "mr": {
             GPSUnavailable: "त्रुटी: विनंतीची वेळ संपली. GPS सध्या उपलब्ध नाही.",
@@ -230,6 +234,7 @@ export class Strings {
             Settings: "कृपया सेटिंग्ज वर जाऊन परवानगी द्या",
             //utils
             DataUptodate: "झाडाचे प्रकार आणि प्लॉट अद्याप अपडेट आहेत.",
+            ShiftDataUptodate: "डेटा अद्ययावत शिफ्ट करा", //manjur
             plotSaplingsDataUpToDate: "प्लॉट रोपटी डेटा अद्ययावत.",
             FailureSavingTrees: "काही झाडाचे प्रकार सेव करण्यात असफल. लॉग पहा.",
             FailureSavingPlots: "काही प्लॉट सेव करण्यात असफल. लॉग पहा.",
@@ -240,6 +245,7 @@ export class Strings {
             No: "नाही",
             SyncSuccess: "समक्रमण यशस्वी!",
             SyncFailure: "समक्रमण अयशस्वी!",
+            NothingToSync: "समक्रमित करण्यासाठी झाडे नाहीत! कृपया झाडे जोडा", //manjur
             CheckLocalList: "लोकल झाडांची यादी पहा स्थिती तपासण्यासाठी.",
             ContactExpert: "कृपया एक तज्ञाशी संपर्क साधा.",
             //tree form
@@ -282,7 +288,9 @@ export class Strings {
             SelectPlot: "कृपया एक प्लॉट निवडा",
             NoPlotSelected: "कोणताही भूखंड निवडलेला नाही",
             FinishShift: "तुम्हाला शिफ्ट पूर्ण करायची आहे का ?", //manjur
-            Synched: "समक्रमित" //manjur
+            Synched: "समक्रमित", //manjur
+            FailedUpdateSapling: "रोपे अपडेट करण्यात अयशस्वी", //manjur
+            UnaableToFetchData : "", //manjur
         }
     })
     static buttonLabels = new LocalizedStrings({

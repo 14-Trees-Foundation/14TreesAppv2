@@ -71,7 +71,8 @@ const LoginScreen = ({ navigation }) => {
             [
               {
                 onPress: () => {
-                  Utils.reloadApp();
+                  setPhoneNumber('');
+                  setPinNumber('');
                 },
               },
             ]);
@@ -80,7 +81,8 @@ const LoginScreen = ({ navigation }) => {
             [
               {
                 onPress: () => {
-                  Utils.reloadApp();
+                  setPhoneNumber('');
+                  setPinNumber('');
                 },
               },
             ]);

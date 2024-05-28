@@ -21,7 +21,7 @@ import { Text, View } from 'react-native';
 import { EditLocalTree } from './screens/EditLocalTree';
 import TreesInShift from './screens/TreesInShift';
 import SyncDisplay from './screens/SyncDisplay';
-import StartScreen from './screens/StartScreen';
+import SplashScreen from './screens/SplashScreen';
 import ScreenHeaderContent from './components/ScreenHeaderContent';
 
 //enableLatestRenderer();
@@ -62,7 +62,6 @@ async function requestPermissions() {
 
 const Stack = createStackNavigator();
 
-
 export const stackNavRef = createNavigationContainerRef();
 
 const App = () => {
@@ -76,7 +75,7 @@ const App = () => {
   const checkSignInStatus = async () => {
     console.log('app roottag app.js1: ')
     try {
-
+      
       let phoneNumber;
 
       try {
@@ -94,7 +93,6 @@ const App = () => {
       }
 
 
-
       const userDataPayload = {
         phone: phoneNumber,
       }
@@ -106,15 +104,16 @@ const App = () => {
       }
 
       const isSignedIn = await DataService.loginUser(userDataPayload);
+
       if (!isSignedIn) {
         stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
         return false;
       }
+
       const response = isSignedIn.data;
       console.log("response data inside app.js: ", response);
 
-      if (response.success === false) {
-        // User is not signed in, navigate to LoginScreen
+      if (response.success === false) {  // User is not signed in, navigate to LoginScreen
         stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
         return false;
       }
@@ -129,6 +128,7 @@ const App = () => {
       }
 
       try {
+
         await AsyncStorage.setItem(Constants.userIdKey, response.user._id);
         console.log('userId stored: ', response.user._id);
         response.data = { ...response.user, image: '' };
@@ -184,23 +184,11 @@ const App = () => {
       Strings.setLanguage(storedlang);
     }
 
-    //let storedTheme = await AsyncStorage.getItem(Constants.selectedTheme);
-    // if (storedTheme === null) {
-    //   await AsyncStorage.setItem(Constants.selectedTheme, 'DARK');
-    //   setLightTheme(false);
-    // } else {
-    //   await AsyncStorage.setItem(Constants.selectedTheme, storedTheme);
-    //   if (storedTheme === 'DARK') {
-    //     setLightTheme(false);
-    //   } else {
-    //     setLightTheme(true);
-    //   }
 
-    // }
 
     console.log('stored lang: ', storedlang);
 
-    await Utils.setDBConnection();//ensures ldb setup in Utils
+    await Utils.setDBConnection(); //ensures localdb setup in Utils
     await Utils.createLocalTablesIfNeeded();
 
     const loggedIn = await checkSignInStatus();
@@ -213,15 +201,13 @@ const App = () => {
     }
   }
 
+  const initializeApp = async () => {
+    await requestPermissions();
+    await initTasks();
+  };
 
   useEffect(() => {
     console.log('app roottag app.js2: ')
-    const initializeApp = async () => {
-      await requestPermissions();
-      await initTasks();
-
-    };
-
     initializeApp();
 
   }, []);
@@ -233,7 +219,7 @@ const App = () => {
       <Stack.Navigator>
         <Stack.Screen
           name={Strings.screenNames.getString('startScreen', Strings.english)}
-          component={StartScreen}
+          component={SplashScreen}
           options={{ headerShown: false }} />
         <Stack.Screen
           name={Strings.screenNames.getString('LoadingScreen', Strings.english)}
@@ -244,30 +230,6 @@ const App = () => {
           component={Shift}
           options={{
             headerLeft: () => null,
-            // headerLeft: () => (
-            //   <View style={{ marginLeft: 10 }}>
-            //     <TouchableOpacity onPress={() => {
-            //       Alert.alert(
-            //         Strings.alertMessages.FinishShift,
-            //         "",
-            //         [
-            //           {
-            //             text: "No",
-            //             onPress: () => null,
-            //             style: "cancel"
-            //           },
-            //           {
-            //             text: "Yes",
-            //             onPress: () => stackNavRef.current.goBack() // Go back when the button is pressed }
-            //           }
-            //         ]
-            //       );
-
-            //     }}>
-            //       <Icon name="arrow-back" size={24} color="black" />
-            //     </TouchableOpacity>
-            //   </View>
-            // ),
             headerRight: () => (
               <View style={{
                 marginRight: 35,
@@ -295,7 +257,6 @@ const App = () => {
             headerLeft: () => (
               <View style={{ marginLeft: 10 }}>
                 <TouchableOpacity onPress={() => {
-                  console.log('Custom headerLeft button pressed');
                   stackNavRef.current.goBack() // Go back when the button is pressed
                 }}>
                   <Icon name="arrow-back" size={24} color="black" />
@@ -312,7 +273,6 @@ const App = () => {
           name={Strings.screenNames.getString('TreesInShift', Strings.english)}
           component={TreesInShift}
           options={{
-            //headerLeft: () => null,
             headerRight: () => (
               <View style={{
                 marginRight: 35,
@@ -357,11 +317,8 @@ const App = () => {
           name={Strings.screenNames.getString('EditLocalTree', Strings.english)}
           component={EditLocalTree}
           options={{
-            //headerLeft: () => null,
             headerRight: () => (
               <View style={{
-                //backgroundColor: 'lightgrey',
-                //borderRadius: 70,
                 marginRight: 70,
               }}>
                 <Text style={{

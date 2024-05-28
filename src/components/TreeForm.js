@@ -1,8 +1,8 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { Alert, Button, FlatList, ScrollView, Text, TextInput, Image, View, ToastAndroid, Modal, TouchableOpacity } from 'react-native';
+import { Alert, Button, ScrollView, Text, TextInput, Image, View, ToastAndroid, Modal, TouchableOpacity } from 'react-native';
 import { Strings } from "../services/Strings";
 import { Utils } from "../services/Utils";
-import { CustomButton, ImageWithEditableRemark, ImageWithUneditableRemark } from "./Components";
+import { CustomButton } from "./Components";
 import { CoordinateSetter } from "./CoordinateSetter";
 import { CustomDropdown } from "./CustomDropdown";
 import { commonStyles } from "../services/Styles";
@@ -20,51 +20,49 @@ export const treeFormModes = {
 
 export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage, onDeleteImage }) => {
 
-    const { inSaplingId, inLng, inLat, inImages, inTreeType, inPlot, inUserId, inShiftId, inSequenceNo } = treeData;
+    const { inSaplingId, inLng, inLat, inImages, inTreeType, inPlot, inUserId} = treeData;
+
     
-    //console.log("inTreeTpe: ", inTreeType, "inPlot: ", inPlot);
     const [saplingid, setSaplingId] = useState(inSaplingId);
-    // console.log('saplingid: ',inSaplingId);
     const [lat, setlat] = useState(inLat);
     const [lng, setlng] = useState(inLng);
+
     // array of images
     const [images, setImages] = useState(inImages);
-    //const [exisitingImages, setExistingImages] = useState(inImages)
     const [showImage, setShowImage] = useState(false);
 
     const [localSaplingIds, setLocalSaplingIds] = useState([])
     const [liveSaplingIds, setLiveSaplingIds] = useState([])
     const [treeItems, setTreeItems] = useState([]);
     const [plotItems, setPlotItems] = useState([]);
-    //const [mainScrollEnabled, setMainScrollEnabled] = useState(true);
+
     const [selectedTreeType, setSelectedTreeType] = useState(inTreeType);
     const [selectedPlot, setSelectedPlot] = useState(inPlot);
-    const [userId, setUserId] = useState(inUserId);
+
     const [modalVisible, setModalVisible] = useState(false);
     const [disableButton, setDisableButton] = useState(true);
-    const [changeCordinate, setChangeCordinate] = useState(false);
 
     const { lightTheme } = useContext(GlobalContext);
 
-    // console.log("shiftID treeform inshift---", inShiftId)
+   
 
     useEffect(() => {
-       // console.log("shiftID treeform inshift---", inShiftId)
-        //console.log(treeData.inSaplingId)
+       
         if (mode === treeFormModes.localEdit) {
-            console.log("-- now mode is local edit---");
-            setShowImage(true);
+            if (treeData.inImages.length > 0) {
+                setShowImage(true);
+            }
         }
 
         if (mode === treeFormModes.remoteEdit) {
             console.log("-- now mode is remote edit---");
             console.log("treeData.image.length-- ", treeData.inImages.length);
             //setImages(treeData.inImages);
-            
+
             if (treeData.inImages.length === 0) {
                 setDisableButton(false);
             } else {
-                setShowImage(true); 
+                setShowImage(true);
                 setDisableButton(true);
             }
         }
@@ -72,21 +70,19 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
 
     //Namrata
     const loadDataCallback = useCallback(async () => {
-        console.log('fetching data')
+
         try {
-            if (mode === treeFormModes.addTree) {
-                let userId = await Utils.getUserId();
-                setUserId(userId);
-            }
+            console.log('fetching data from local db')
+
             let { treeTypes, plots } = await Utils.getLocalTreeTypesAndPlots();
             let saplingDocsInLiveDB = await Utils.fetchSaplingIdsFromLiveDB();
             let saplingsInLiveDB = saplingDocsInLiveDB.map((doc) => doc.sapling_id)
-            //console.log("saplings in Live DB ",saplingsInLiveDB)
+           
             setLiveSaplingIds(saplingsInLiveDB)
             setTreeItems(treeTypes);
             setPlotItems(plots);
             let saplingIds = await Utils.fetchSaplingIdsFromLocalDB();
-            saplingIds = saplingIds.map((saplingid) => saplingid.name)
+            saplingIds = saplingIds.map((saplingid) => saplingid.name);
             saplingIds = saplingIds.filter((id) => (id !== inSaplingId));
             setLocalSaplingIds(saplingIds);
 
@@ -118,20 +114,20 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             setDisableButton(false);
         }
 
+        if (onDeleteImage) {
+            console.log("----new set images-----", newImages, "-----onDeleteImage-----", onDeleteImage, "------exisitingImages-----", exisitingImages)
+            await onDeleteImage(name);
+        }
     };
 
 
     const handleAddImage = async (image) => {
-        //console.log("image: ", image);
-
         if (onNewImage) {
             await onNewImage(image);
         }
-        //setImages([...images, image]);
-
-        console.log("handling setting image----");
-        //setExistingImages([]);
         setImages([image]);
+        
+        //setImages([...images, image]);
     }
 
     const pickImage = async (selectionId) => {
@@ -160,7 +156,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
             return;
         }
-        else if (images.length === 0) { //existingImages.length
+        else if (images.length === 0) {
             Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.NoImage);
             return;
         } else if (lat === 0 || lng === 0 || lat === null || lng === null) {
@@ -175,15 +171,13 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     lat: lat,
                     lng: lng,
                     plotid: selectedPlot.value,
-                    user_id: userId,
-                    shiftID: inShiftId,
-                    sequenceNo: inSequenceNo,
+                    user_id: inUserId,
                     timestamp: new Date().toISOString()
                 };
                 console.log("final tree data----", tree);
                 setSaplingId(null);
                 setSelectedTreeType(null);
-                setChangeCordinate(!changeCordinate)
+
                 //setSelectedPlot({}); //to default the plot
                 setShowImage(false)
                 setImages([]);
@@ -206,7 +200,11 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     }
 
     return (
-        <View style={{
+
+        <ScrollView 
+           keyboardShouldPersistTaps='handled'
+           scrollEnabled={true}
+           style={{
             backgroundColor: 'white',
             padding: 2, margin: 4,
             borderRadius: 10, borderColor: '#ccc', borderWidth: 3,
@@ -214,27 +212,25 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             <View style={{ margin: 4, borderRadius: 10 }}>
 
 
-                <View>
-                    {selectedPlot && mode === treeFormModes.localEdit && <Text style={{
-                        ...commonStyles.text4, color: '#113160',
-                        fontFamily: 'Inter-Regular', fontSize: 20, textAlign: 'center', marginTop: 25, fontWeight: '300'
-                    }}>
-                        {selectedPlot.name}
-                    </Text>}
-                </View>
 
-                {
-                    mode === treeFormModes.remoteEdit && <Text style={{
-                        ...commonStyles.text4, color: '#113160',
-                        fontFamily: 'Inter-Regular', fontSize: 20, textAlign: 'center', marginTop: 25, fontWeight: '300'
-                    }}>
-                        {saplingid}
-                    </Text>
+                {(mode === treeFormModes.localEdit && selectedPlot) && <Text style={{
+                    ...commonStyles.text4, color: '#113160',
+                    fontFamily: 'Inter-Regular', fontSize: 20, textAlign: 'center', marginTop: 25, fontWeight: '300'
+                }}>
+                    {selectedPlot.name}
+                </Text>
                 }
 
-                {
-                    mode !== treeFormModes.remoteEdit && (
-                        <View style={{ marginTop: mode !== treeFormModes.addTree ? 1 : 15 }}>
+                {mode === treeFormModes.remoteEdit && <Text style={{
+                    ...commonStyles.text4, color: '#113160',
+                    fontFamily: 'Inter-Regular', fontSize: 20, textAlign: 'center', marginTop: 25, fontWeight: '300'
+                }}>
+                    {saplingid}
+                </Text>
+                }
+
+                {mode === treeFormModes.localEdit && (
+                        <View style={{ marginTop: 15 }}>
                             <TextInput
                                 defaultValue={saplingid}
                                 style={{
@@ -308,8 +304,8 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                                 }
                             }}
                         >
-                    
-                            {!showImage  ? <Image
+
+                            {!showImage ? <Image
                                 source={require('../../assets/camera.png')}
                                 style={{
                                     width: '100%',
@@ -346,13 +342,10 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     {/* Second View */}
                     <View style={{ width: '100%', marginTop: 0 }}>
                         <CoordinateSetter
-                            //setInitLocation={mode === treeFormModes.addTree}
-                            inLat={inLat}
-                            inLng={inLng}
+                            inLat={lat}
+                            inLng={lng}
                             onSetLat={(item) => setlat(item)}
                             onSetLng={(item) => setlng(item)}
-                            changeCordinate={changeCordinate}
-                            onChangeCordinate={() => setChangeCordinate(false)}
                         />
                     </View>
                 </View>
@@ -396,6 +389,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     />
                 </View>
             </View>
-        </View>
+        </ScrollView>
     )
 }

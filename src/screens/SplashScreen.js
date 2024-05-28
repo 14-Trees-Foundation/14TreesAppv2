@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 
-const StartScreen = () => {
+const SplashScreen = () => {
     return (
         <View style={styles.container}>
             <Animatable.Image
@@ -30,4 +30,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default StartScreen;
+export default SplashScreen;

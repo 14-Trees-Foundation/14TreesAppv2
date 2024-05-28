@@ -13,7 +13,6 @@ import { treeFormModes } from "../components/TreeForm";
 
 const Shifts = ({ navigation }) => {
 
-    const [shifts, setShifts] = useState(0);
     const [finalList, setFinalList] = useState(null);
     const { lightTheme } = useContext(GlobalContext);
 
@@ -21,16 +20,53 @@ const Shifts = ({ navigation }) => {
     const [mode, setMode] = useState(null);
 
     const fetchShiftsFromLocalDB = async () => {
-        const shiftsIDDB = await Utils.getShiftsIDLocalDB();
-        //console.log("all shifts------", shiftsIDDB, shiftsIDDB.length);
-        setShifts(shiftsIDDB.length);
-        setFinalList(shiftsIDDB);
-    }
+        const shiftsIDLocalDB = await Utils.getShiftsIDLocalDB();
+        //console.log('---local shift------', shiftsIDLocalDB[0]);
+        return shiftsIDLocalDB
+    };
+
+    const fetchLiveShiftsAndSaplings = async () => {
+        const syncedShiftsFromLiveDB = await Utils.getShiftsLive();
+        //const saplingsInShifts = await Utils.getSaplingsInShift();
+        //console.log('syncedShiftsFromLiveDB------', syncedShiftsFromLiveDB[0]);
+        return syncedShiftsFromLiveDB
+    };
+
+    const getCombinedShiftList = async (shiftsIDLocalDB, syncedShiftsFromLiveDB) => {
+
+        let combinedList = [];
+
+        combinedList = [
+            ...syncedShiftsFromLiveDB,
+            ...shiftsIDLocalDB
+        ];
+
+        // if (shiftsIDLocalDB.length > 0) {
+        //   combinedList = [
+        //     ...syncedShiftsFromLiveDB,
+        //     ...shiftsIDLocalDB.map(item => ({ ...item, isSynced: 0 })),
+        //   ];
+        // } else {
+        //   combinedList = [
+        //     ...syncedShiftsFromLiveDB
+        //   ];
+        // }
+
+        setFinalList(combinedList);
+        console.log("-------combinedList---------", combinedList)
+    };
+
+    const fetchData = async () => {
+        const shiftsIDLocalDB = await fetchShiftsFromLocalDB();
+        const syncedShiftsFromLiveDB = await fetchLiveShiftsAndSaplings();
+        //const syncedShiftsFromLiveDB = [];
+        await getCombinedShiftList(shiftsIDLocalDB, syncedShiftsFromLiveDB);
+    };
+
 
     useFocusEffect(
         React.useCallback(() => {
-            fetchShiftsFromLocalDB();
-            //loadDataCallback();
+            fetchData();
         }, []),
     );
 
@@ -38,7 +74,7 @@ const Shifts = ({ navigation }) => {
 
     useEffect(() => {
         const backAction = () => {
-            console.log('closing modal in shifts----');
+            //console.log('closing modal in shifts----');
             navigation.goBack();
             return true; // Prevent default behavior (exit app)
         };
@@ -52,7 +88,7 @@ const Shifts = ({ navigation }) => {
 
 
     const renderData = useCallback((item) => {
-        //console.log("yd render render shiftss----");
+        //console.log("item---");
         return (
             <TouchableOpacity style={{ ...commonStyles.borderedDisplay, flex: 1, flexDirection: 'row', justifyContent: 'space-around', backgroundColor: 'white', opacity: 0.8, borderRadius: 6 }}
                 onPress={() => {
@@ -62,7 +98,7 @@ const Shifts = ({ navigation }) => {
                             Strings.english,
                         ),
                         {
-                            shiftID: item.shiftID,
+                            shiftID: item.id, //local treat if live item.shift_id
                             plotselected: item.plotselected,
                             starttime: item.starttime,
                             endtime: item.endtime,
@@ -77,7 +113,10 @@ const Shifts = ({ navigation }) => {
                     <Text style={{
                         ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
                         fontSize: 18, textAlign: 'center'
-                    }}>
+                    }}
+                        numberOfLines={1} // Limit to a single line
+                        ellipsizeMode="tail" // Truncate at the end with ellipsis
+                    >
                         {item.plotselected}
                     </Text>
 
@@ -151,7 +190,6 @@ const Shifts = ({ navigation }) => {
                 modalVisible={modalVisible}
                 setModalVisible={setModalVisible}
                 mode={mode}
-                shift_ID={Utils.getShiftID(shifts)}
             />
 
 
@@ -178,14 +216,7 @@ const Shifts = ({ navigation }) => {
 
             {
                 !modalVisible && <View style={{ backgroundColor: 'white', height: '100%', marginTop: 20 }}>
-                    {shifts === 0 ? (
-                        <View style={{ ...commonStyles.borderedDisplay }}>
-                            <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black' }}>
-                                {Strings.messages.NoShiftsFound}
-                            </Text>
-                        </View>
-                    ) : (
-
+                    {finalList && finalList.length !== 0 ? (
                         <FlatList
                             style={{ backgroundColor: 'white' }}
                             ListHeaderComponent={() => (
@@ -195,12 +226,20 @@ const Shifts = ({ navigation }) => {
                                     </Text>
                                 </View>
                             )}
+                            keyExtractor={(item) => item.id ? item.id.toString() : item.shift_id.toString()}
                             data={finalList}
                             scrollEnabled={false}
                             renderItem={({ item }) => {
                                 return renderData(item);
                             }}
                         />
+
+                    ) : (
+                        <View style={{ ...commonStyles.borderedDisplay }}>
+                            <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black' }}>
+                                {Strings.messages.NoShiftsFound}
+                            </Text>
+                        </View>
                     )}
                 </View>
             }

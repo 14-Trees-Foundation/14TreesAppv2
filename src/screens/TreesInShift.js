@@ -27,27 +27,74 @@ const TreesInShift = ({ navigation, route }) => {
         return () => backHandler.remove();
     }, []);
 
-    const fetchTreesFromLocalDB = () => {
-        Utils.fetchTreesFromLocalDB().then(trees => {
-            let finalListForShift = trees.filter(tree => tree.shiftID === shiftID);
-            finalListForShift.sort((a, b) => {
-                if (a.uploaded && !b.uploaded) {
-                    return 1; // Move uploaded trees to the end
-                }
-                if (!a.uploaded && b.uploaded) {
-                    return -1; // Keep non-uploaded trees before uploaded trees
-                }
-                return 0; // Maintain the original order
-            });
+    const fetchTreesFromLocalDB = async () => { //shiftId -> normal id AUTOINCREMENTED(1,2,3,4)
+        const treesinLocalDB = await Utils.fetchSaplingsFromLocalShiftsDB();
+        let treesInLocalShifts = treesinLocalDB.filter(tree => tree.shiftID === shiftID);
 
-            setFinalList(finalListForShift);
-            console.log('setting both lists to: ', finalListForShift);
+        
+
+        treesInLocalShifts.sort((a, b) => {
+            if (a.uploaded && !b.uploaded) {
+                return 1; // Move uploaded trees to the end
+            }
+            if (!a.uploaded && b.uploaded) {
+                return -1; // Keep non-uploaded trees before uploaded trees
+            }
+            return 0; // Maintain the original order
         });
+
+        //setFinalList(modifiedTrees);
+        console.log("treesInLocalShifts---" , treesInLocalShifts);
+        return treesInLocalShifts;
+
+    };
+
+    const fetchTreesFromLiveShifts = async () => { //shiftId -> UUID
+        const treesInLiveShifts = await Utils.getSaplingsInLiveShift();
+        
+        const trees = treesInLiveShifts.filter(tree => tree.shiftID === shiftID);
+        const trees1 = trees.map(tree => {
+            if (tree.uploaded === 1) {
+                return { ...tree, uploaded: true };
+            }
+            return tree;
+        });
+
+        console.log("---------------trees------------", trees1)
+        return trees1;
+    };
+
+    const getCombinedList = async (treesInLiveShifts, treesInLocalShifts) => {
+
+        
+        let combinedList = [];
+        combinedList = [
+            ...treesInLocalShifts,
+            ...treesInLiveShifts
+        ];
+
+        // if (treesInLocalShifts?.length > 0) {
+        //     //console.log("---------local shifts > 0-----------")
+           
+        // } else {
+        //     console.log('-----------local shifts ==0---------');
+        //     combinedList = [...treesInLiveShifts]
+        // }
+        //console.log('------------combinedList-------------', combinedList);
+        //console.log('--------------treesInLocalShifts----------', treesInLocalShifts);
+        setFinalList(combinedList);
+    }
+
+    const fetchData = async () => {
+        const treesInLiveShifts = await fetchTreesFromLiveShifts();
+        //const treesInLiveShifts = [];
+        const treesInLocalShifts = await fetchTreesFromLocalDB();
+        await getCombinedList(treesInLiveShifts, treesInLocalShifts)
     };
 
     useFocusEffect(
         React.useCallback(() => {
-            fetchTreesFromLocalDB();
+            fetchData();
             console.log('focus');
         }, []),
     );
@@ -64,7 +111,11 @@ const TreesInShift = ({ navigation, route }) => {
                                 ToastAndroid.show(Strings.alertMessages.Synched, ToastAndroid.SHORT);
                             }}
                         >
-                            <Text style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}>
+                            <Text
+                                style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}
+                                numberOfLines={1} // Limit to a single line
+                                ellipsizeMode="tail" // Truncate at the end with ellipsis
+                            >
                                 {tree1.sapling_id}
                             </Text>
                         </TouchableOpacity>
@@ -80,7 +131,11 @@ const TreesInShift = ({ navigation, route }) => {
                                 { sapling_id: tree1.sapling_id },
                             );
                         }}>
-                            <Text style={{ ...commonStyles.text, color: 'black', textAlign: 'center' }}>
+                            <Text
+                                style={{ ...commonStyles.text, color: 'black', textAlign: 'center' }}
+                                numberOfLines={1} // Limit to a single line
+                                ellipsizeMode="tail" // Truncate at the end with ellipsis
+                            >
                                 {tree1.sapling_id}
                             </Text>
                         </TouchableOpacity>
@@ -96,7 +151,11 @@ const TreesInShift = ({ navigation, route }) => {
                                 ToastAndroid.show(Strings.alertMessages.Synched, ToastAndroid.SHORT);
                             }}
                         >
-                            <Text style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}>
+                            <Text
+                                style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}
+                                numberOfLines={1} // Limit to a single line
+                                ellipsizeMode="tail" // Truncate at the end with ellipsis
+                            >
                                 {tree2.sapling_id}
                             </Text>
                         </TouchableOpacity>
@@ -112,7 +171,11 @@ const TreesInShift = ({ navigation, route }) => {
                                 { sapling_id: tree2.sapling_id },
                             );
                         }}>
-                            <Text style={{ ...commonStyles.text, color: 'black', textAlign: 'center' }}>
+                            <Text
+                                style={{ ...commonStyles.text, color: 'black', textAlign: 'center' }}
+                                numberOfLines={1} // Limit to a single line
+                                ellipsizeMode="tail" // Truncate at the end with ellipsis
+                            >
                                 {tree2.sapling_id}
                             </Text>
                         </TouchableOpacity>
@@ -128,7 +191,11 @@ const TreesInShift = ({ navigation, route }) => {
                                 ToastAndroid.show(Strings.alertMessages.Synched, ToastAndroid.SHORT);
                             }}
                         >
-                            <Text style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}>
+                            <Text
+                                style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}
+                                numberOfLines={1} // Limit to a single line
+                                ellipsizeMode="tail" // Truncate at the end with ellipsis
+                            >
                                 {tree3.sapling_id}
                             </Text>
                         </TouchableOpacity>
@@ -143,7 +210,11 @@ const TreesInShift = ({ navigation, route }) => {
                             { sapling_id: tree3.sapling_id },
                         );
                     }}>
-                        <Text style={{ ...commonStyles.text, color: 'black', textAlign: 'center' }}>
+                        <Text
+                            style={{ ...commonStyles.text, color: 'black', textAlign: 'center' }}
+                            numberOfLines={1} // Limit to a single line
+                            ellipsizeMode="tail" // Truncate at the end with ellipsis
+                        >
                             {tree3.sapling_id}
                         </Text>
                     </TouchableOpacity>
@@ -160,7 +231,11 @@ const TreesInShift = ({ navigation, route }) => {
                                 ToastAndroid.show(Strings.alertMessages.Synched, ToastAndroid.SHORT);
                             }}
                         >
-                            <Text style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}>
+                            <Text
+                                style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}
+                                numberOfLines={1} // Limit to a single line
+                                ellipsizeMode="tail" // Truncate at the end with ellipsis
+                            >
                                 {tree4.sapling_id}
                             </Text>
                         </TouchableOpacity>
@@ -176,7 +251,11 @@ const TreesInShift = ({ navigation, route }) => {
                                 { sapling_id: tree4.sapling_id },
                             );
                         }}>
-                            <Text style={{ ...commonStyles.text, color: 'black', textAlign: 'center' }}>
+                            <Text
+                                style={{ ...commonStyles.text, color: 'black', textAlign: 'center' }}
+                                numberOfLines={1} // Limit to a single line
+                                ellipsizeMode="tail" // Truncate at the end with ellipsis
+                            >
                                 {tree4.sapling_id}
                             </Text>
                         </TouchableOpacity>
@@ -196,7 +275,10 @@ const TreesInShift = ({ navigation, route }) => {
                     <Text style={{
                         ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
                         fontSize: 18, textAlign: 'center'
-                    }}>
+                    }}
+                        numberOfLines={1} // Limit to a single line
+                        ellipsizeMode="tail" // Truncate at the end with ellipsis
+                    >
                         {plotselected}
                     </Text>
 

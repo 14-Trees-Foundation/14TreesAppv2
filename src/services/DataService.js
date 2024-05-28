@@ -50,7 +50,7 @@ export class DataService {
   static productionHostName = 'https://api.14trees.org';
   static hostName = 'http://10.0.2.2:7000';
   static phoneHostName = "http://192.168.31.11:7000";
-  static serverBase = `${this.productionHostName}/api/appv2`;
+  static serverBase = `${this.hostName}/api/appv2`;
 
   static async loginUser(userDataPayload) {
     const url = `${DataService.serverBase}/login`;
@@ -73,6 +73,14 @@ export class DataService {
 
   }
 
+  static async fetchShifts(user_id) {
+    const url = `${DataService.serverBase}/fetchShifts`;
+    return await axios.post(url, {
+      userId: user_id,
+    });
+
+  }
+  
   static async fetchPlotSaplings(user_id, lasthash) {
     const url = `${DataService.serverBase}/fetchPlotSaplings`;
     return await axios.post(url, {
@@ -108,13 +116,19 @@ export class DataService {
   static async uploadLogs(logs) {
     const url = `${DataService.serverBase}/uploadLogs`;
     const response = await axios.post(url, logs);
-    return response.data;
+    if (response) {
+      return response.data;
+    }
+    return;
   }
 
   static async uploadShifts(shifts) {
     const url = `${DataService.serverBase}/uploadShifts`;
     const response = await axios.post(url, shifts);
-    return response.data;
+    if (response) {
+      return response.data;
+    }
+    return;
   }
 
   static async uploadTrees(treeList) {

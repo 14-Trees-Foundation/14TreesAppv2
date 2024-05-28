@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Button, StyleSheet, Text, TextInput, ToastAndroid, View, BackHandler, TouchableOpacity } from 'react-native';
+import { Button, Text, TextInput, ToastAndroid, View, BackHandler, TouchableOpacity } from 'react-native';
 import { DataService } from '../services/DataService';
 import { Strings } from '../services/Strings';
 import { TreeForm, treeFormModes } from '../components/TreeForm';
@@ -45,7 +45,7 @@ const EditTreeScreen = ({ navigation }) => {
             plot_id: "",//plot id
         };
         const adminID = await Utils.getAdminId();
-        console.log("adminID inside edit tree screen----", adminID);
+    
         saplingData.location.coordinates = [
             tree.lat, tree.lng
         ];
@@ -74,9 +74,14 @@ const EditTreeScreen = ({ navigation }) => {
         
         console.log("new last images: ", newImages[newImages.length - 1]);
         const response = await DataService.updateSapling(adminID, requestData);
+        
         if (!response) {
+            //show toast cannot update the sapling id
+            let toastmsg = Strings.alertMessages.FailedUpdateSapling + saplingid + Strings.alertMessages.ContactExpert;
+            ToastAndroid.show(toastmsg, ToastAndroid.LONG);
             return;
         }
+
         let toastmsg = Strings.alertMessages.TreeUpdatedfirsthalf + response.data.sapling_id + Strings.alertMessages.TreeUpdatedsecondhalf;
         ToastAndroid.show(toastmsg, ToastAndroid.LONG);
         setDetails(null);
@@ -98,6 +103,7 @@ const EditTreeScreen = ({ navigation }) => {
 
         const treeDetails = await DataService.fetchTreeDetails(saplingid, adminID);
         if (!treeDetails) { return; }
+        
         const detailsForTreeForm = { ...Constants.treeFormTemplateData };
         const treeType = await Utils.treeTypeFromID(treeDetails.tree_id);
         const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
@@ -118,6 +124,7 @@ const EditTreeScreen = ({ navigation }) => {
         */
         //   console.log(detailsForTreeForm);
         //   detailsForTreeForm.inImages = [];
+
         detailsForTreeForm.inLat = 0;
         detailsForTreeForm.inLng = 0;
         if (treeDetails.location) {
@@ -130,7 +137,7 @@ const EditTreeScreen = ({ navigation }) => {
         detailsForTreeForm.inUserId = treeDetails.user_id;
         // detailsForTreeForm.inShiftId = treeDetails.shiftID;
         // detailsForTreeForm.inSequenceNo = treeDetails.sequenceNo
-         console.log(detailsForTreeForm.inShiftId, detailsForTreeForm.inSequenceNo);
+        //console.log("han bhai---",detailsForTreeForm.inShiftId, detailsForTreeForm.inSequenceNo, detailsForTreeForm.inLat, detailsForTreeForm.inLng);
         setDetails(detailsForTreeForm);
     }
 
@@ -139,8 +146,8 @@ const EditTreeScreen = ({ navigation }) => {
             mode={treeFormModes.remoteEdit}
             treeData={details}
             onCancel={() => setDetails(null)}
-            updateUserId={false}
-            updateLocation={false}
+            // updateUserId={false}
+            // updateLocation={false}
             onVerifiedSave={updateDetails}
             onNewImage={(image) => { setNewImages([...newImages, image]); }}
             onDeleteImage={(name) => { setDeletedImages([...deletedImages, name]); }}

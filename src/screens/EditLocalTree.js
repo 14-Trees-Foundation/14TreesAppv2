@@ -4,7 +4,6 @@ import { DataService } from '../services/DataService';
 import { Strings } from '../services/Strings';
 import { TreeForm, treeFormModes } from '../components/TreeForm';
 import { Constants, Utils } from '../services/Utils';
-import { MyIconButton } from '../components/Components';
 import LoadingScreen from './LoadingScreen';
 
 const fetchTreeDetails = async (saplingId, setDetails) => {
@@ -24,9 +23,9 @@ const fetchTreeDetails = async (saplingId, setDetails) => {
     detailsForTreeForm.inTreeType = treeType;
     detailsForTreeForm.inPlot = plot;
     detailsForTreeForm.inUserId = treeDetails.user_id;
-    detailsForTreeForm.inShiftId = treeDetails.shiftID;
-    detailsForTreeForm.inSequenceNo = treeDetails.sequenceNo
-    // console.log('details:',detailsForTreeForm);
+    // detailsForTreeForm.inShiftId = treeDetails.shiftID;
+    // detailsForTreeForm.inSequenceNo = treeDetails.sequenceNo
+    //console.log('details before editing:',detailsForTreeForm);
     setDetails(detailsForTreeForm);
 }
 
@@ -60,6 +59,7 @@ export const EditLocalTree = ({ navigation, route }) => {
     const updateDetails = async (tree, images) => {
         //console.log("tree received----- ",tree);
         //console.log("images received----- ",images);
+        console.log("updating the tree inside local edit tree----");
         navigation.goBack();
 
         let toastmsg = Strings.alertMessages.TreeUpdatedfirsthalf + saplingid + Strings.alertMessages.TreeUpdatedsecondhalf;
@@ -81,10 +81,7 @@ export const EditLocalTree = ({ navigation, route }) => {
                     mode={treeFormModes.localEdit}
                     treeData={details}
                     onCancel={() => navigation.goBack()}
-                    updateUserId={false}
-                    updateLocation={false}
                     onVerifiedSave={updateDetails}
-                    selectedPlotUser={details.inPlot}
                 />
             </ScrollView>
         )

@@ -15,25 +15,52 @@ import { stackNavRef } from '../App';
 
 
 
-const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplingID, shift_ID }) => {
+const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplingID, finalShiftData }) => {
     const { setPlaySound, setShiftDone, setTreesPlanted, treesPlanted, plotSelected, setPlotSelected, shiftID, setShiftID, lightTheme } = useContext(GlobalContext);
-
-    //console.log("mode in modal is---", mode, saplingID, shift_ID, shiftID);
 
 
     const [details, setDetails] = useState(null);
     const [plotItems, setPlotItems] = useState([]); //for plots
 
-    const [renderModal, setRenderModal] = useState(true);
+    const saveShiftsAndTreesToDB = async (saplingId) => {
+
+        const endtime = Utils.getCurrentTime12Hr();
+        const timetaken = Utils.formatTime(finalShiftData.current.seconds);
+        const user_id = await Utils.getUserId();
+
+        const shiftData = {
+            id: shiftID,
+            user_id: user_id,
+            plotselected: finalShiftData.current.plotselected,
+            starttime: finalShiftData.current.shiftTime,
+            endtime: endtime,
+            shiftended: 0,
+            shiftuploadcomplete: 0,
+            timetaken: timetaken,
+            treesplanted: finalShiftData.current.treesPlanted
+        }
+
+        const treeData = {
+            shiftID : shiftID,
+            sapling_id : saplingId,
+            sequence_no: (treesPlanted + 1),
+            uploaded : false,
+        }
+
+        //console.log("final shift data add tree----", shiftData);
+        //console.log("final local shift data----", treeData);
+        await Utils.saveShiftsToLocalDB(shiftData);
+        await Utils.saveSaplingsToLocalShiftDB(treeData);
+    }
 
     async function onVerifiedSave(tree, images) {
 
         if (mode === treeFormModes.addTree) {
-            await Utils.saveTreeAndImagesToLocalDB(tree, images);
-            ToastAndroid.show(Strings.alertMessages.TreeSaved, ToastAndroid.SHORT);
             setTreesPlanted(treesPlanted + 1);
+            await Utils.saveTreeAndImagesToLocalDB(tree, images);
             setPlaySound(true);
-            setRenderModal(!renderModal);
+            ToastAndroid.show(Strings.alertMessages.TreeSaved, ToastAndroid.SHORT);
+            await saveShiftsAndTreesToDB(tree.saplingid);
 
         } else if (mode === treeFormModes.localEdit) {
 
@@ -55,7 +82,7 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
         const treeDetails = await Utils.fetchLocalTree(saplingId);
         //console.log("treeDetails: ", treeDetails);
         if (!treeDetails) { return }
-    
+
         const detailsForTreeForm = { ...Constants.treeFormTemplateData };
         const treeType = await Utils.treeTypeFromID(treeDetails.type_id);
         const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
@@ -68,9 +95,6 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
         detailsForTreeForm.inTreeType = treeType;
         detailsForTreeForm.inPlot = plot;
         detailsForTreeForm.inUserId = treeDetails.user_id;
-        detailsForTreeForm.inShiftId = treeDetails.shiftID;
-        detailsForTreeForm.inSequenceNo = treeDetails.sequenceNo
-        //console.log("treeDetails: ", detailsForTreeForm);
         setDetails(detailsForTreeForm);
     }
 
@@ -84,8 +108,8 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
         } else if (mode === treeFormModes.addTree && !saplingID) {
             console.log('fetching the tree details in CustomModal--- add tree');
             const inputTreeData = { ...Constants.treeFormTemplateData };
-            inputTreeData.inShiftId = shiftID;
             inputTreeData.inPlot = plotSelected;
+            console.log("inputtree data---", inputTreeData);
             setDetails(inputTreeData);
         } else if (mode === treeFormModes.plotSelect || mode === treeFormModes.startShift) {
             console.log('selecting plot---');
@@ -102,9 +126,8 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
 
     }, [modalVisible]);
 
-    //mode, saplingID, shiftID, plotSelected
 
-    const hanldePlotChanges = (cancel) => {
+    async function hanldePlotChanges(cancel) {
 
         if (mode === treeFormModes.startShift) {
             if (cancel === 0) {
@@ -116,8 +139,22 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
                     Alert.alert(Strings.alertMessages.NoPlotSelected, Strings.alertMessages.SelectPlot);
                     return;
                 }
-                setShiftID(shift_ID);
+                
                 setShiftDone(false);
+                const shiftData = {
+                    user_id: await Utils.getUserId(),
+                    plotselected: plotSelected.name,
+                    shiftended: 0,
+                    shiftuploadcomplete: 0,
+                    starttime: Utils.getCurrentTime12Hr(),
+                    endtime: Utils.getCurrentTime12Hr(),
+                    timetaken: 0,
+                    treesplanted: 0
+                }
+                console.log("starting shift and inserting into shift table--", shiftData);
+                const autoGeneratedShiftId = await Utils.saveShiftsToLocalDB(shiftData);
+                setShiftID(autoGeneratedShiftId);
+
                 stackNavRef.current?.navigate(
                     Strings.screenNames.getString('Shift', Strings.english),
                 );
@@ -125,7 +162,7 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
             }
 
         } else {
-
+            await Utils.updateTreesWithChangedPlot(plotSelected.value,shiftID)
             if (plotSelected == null) {
                 Alert.alert(Strings.alertMessages.NoPlotSelected, Strings.alertMessages.SelectPlot);
                 return;
@@ -137,7 +174,6 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
     const handleDetailsChanges = () => {
         setModalVisible(false);
         const inputTreeData = { ...Constants.treeFormTemplateData };
-        inputTreeData.inShiftId = shiftID;
         inputTreeData.inPlot = plotSelected;
         setDetails(inputTreeData);
         onFetchData();
@@ -213,7 +249,6 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
                             onVerifiedSave={onVerifiedSave}
                             mode={mode}
                             onCancel={handleDetailsChanges}
-                            renderModal={renderModal}
                         />
                     </View>
                 </ScrollView>

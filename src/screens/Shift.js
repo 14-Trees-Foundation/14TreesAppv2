@@ -12,9 +12,8 @@ import { treeFormModes } from '../components/TreeForm';
 import LoadingScreen from './LoadingScreen';
 
 
-const Shift = ({ navigation, route }) => {
+const Shift = ({ navigation }) => {
     const { plotSelected, treesPlanted, setTreesPlanted, setShiftDone, setPlotSelected, shiftTime, shiftID, setShiftID, lightTheme } = useContext(GlobalContext);
-    //const { shiftID } = route.params;
 
     const [finalList, setFinalList] = useState(null);
 
@@ -24,48 +23,47 @@ const Shift = ({ navigation, route }) => {
     const [saplingID, setSaplingID] = useState(null);
     //const [getTimer, setGetTimer] = useState(false);
 
-    const finalRef = useRef({ shiftID: null, shiftTime: null, seconds: null, treesPlanted: 0, plotselected: null });
+    const finalRef = useRef({ shiftTime: null, seconds: null, treesPlanted: 0, plotselected: null });
     finalRef.current.shiftTime = shiftTime;
-    //finalRef.current.seconds = seconds;
     finalRef.current.treesPlanted = treesPlanted;
     finalRef.current.plotselected = plotSelected ? plotSelected.name : null;
-    finalRef.current.shiftID = shiftID,
 
-        useEffect(() => {
-            const backAction = () => {
-                Alert.alert(
-                    Strings.alertMessages.FinishShift,
-                    "",
-                    [
-                        {
-                            text: "No",
-                            onPress: () => null,
-                            style: "cancel"
-                        },
-                        {
-                            text: "Yes",
-                            onPress: () => { handleChanges() }
-                        }
-                    ]
-                );
-
-
-                return true;
-            };
-
-            const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-
-            return () => backHandler.remove(); // Remove event listener on cleanup
+    useEffect(() => {
+        const backAction = () => {
+            Alert.alert(
+                Strings.alertMessages.FinishShift,
+                "",
+                [
+                    {
+                        text: "No",
+                        onPress: () => null,
+                        style: "cancel"
+                    },
+                    {
+                        text: "Yes",
+                        onPress: () => { saveShiftToDB() }
+                    }
+                ]
+            );
 
 
-        }, []);
+            return true;
+        };
+
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+        return () => backHandler.remove(); // Remove event listener on cleanup
+
+
+    }, []);
 
     useEffect(() => {
         console.log("shiftID inside shift------", shiftID);
     }, [shiftID])
 
-    const fetchTreesFromLocalDB = () => {
-        Utils.fetchTreesFromLocalDB().then(trees => {
+    const fetchSaplingsFromLocalShiftsDB = () => {
+        Utils.fetchSaplingsFromLocalShiftsDB().then(trees => {
+
             let finalListForShift = trees.filter(tree => tree.shiftID === shiftID);
 
             finalListForShift.sort((a, b) => {
@@ -79,7 +77,7 @@ const Shift = ({ navigation, route }) => {
             });
 
             setFinalList(finalListForShift);
-            console.log('setting both lists to: ', finalListForShift, finalListForShift.length);
+            //console.log('setting both lists to: ', finalListForShift, finalListForShift.length);
         });
     };
 
@@ -87,29 +85,34 @@ const Shift = ({ navigation, route }) => {
     useFocusEffect(
         useCallback(() => {
             console.log('focus');
-            fetchTreesFromLocalDB();
+            fetchSaplingsFromLocalShiftsDB();
         }, []),
     );
 
 
-    const handleChanges = async () => {
+    const saveShiftToDB = async () => {
 
         const endtime = Utils.getCurrentTime12Hr();
         const timetaken = Utils.formatTime(finalRef.current.seconds);
         const user_id = await Utils.getUserId();
+        let uploadedShift = true;
 
-        // console.log("shifttime----, ", finalRef.current.shiftTime);
-        // console.log("timetaken----", finalRef.current.seconds);
-        // console.log("treesplanted----", finalRef.current.treesPlanted);
-        // console.log("plotselected----", finalRef.current.plotselected);
-        // console.log("shiftid----", finalRef.current.shiftID);
+        for (let index = 0; index < finalList.length; index++) {
+            let tree = finalList[index];
+            if (tree.uploaded === false) {
+                uploadedShift = false;
+                break;
+            }
+        }
 
         const shiftData = {
-            shiftID: finalRef.current.shiftID,
+            id: shiftID,
             user_id: user_id,
             plotselected: finalRef.current.plotselected,
             starttime: finalRef.current.shiftTime,
             endtime: endtime,
+            shiftended: 1, //made it 1
+            shiftuploadcomplete: uploadedShift ? 1 : 0,
             timetaken: timetaken,
             treesplanted: finalRef.current.treesPlanted
         }
@@ -154,8 +157,8 @@ const Shift = ({ navigation, route }) => {
                                 // setMode(treeFormModes.showSync);
 
                                 navigation.navigate(
-                                    Strings.screenNames.getString('SyncDisplay', Strings.english),
-                                    { data: finalRef }
+                                    Strings.screenNames.getString('SyncDisplay', Strings.english)
+                                    // { data: finalRef }
                                 )
                             }}
                         />
@@ -166,7 +169,7 @@ const Shift = ({ navigation, route }) => {
                             name={'check'}
                             size={29}
                             text={Strings.buttonLabels.Done}
-                            onPress={handleChanges}
+                            onPress={saveShiftToDB}
                         />
                     </View>
                 </View>
@@ -190,7 +193,11 @@ const Shift = ({ navigation, route }) => {
                                 ToastAndroid.show(Strings.alertMessages.Synched, ToastAndroid.SHORT);
                             }}
                         >
-                            <Text style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}>
+                            <Text
+                                style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}
+                                numberOfLines={1} // Limit to a single line
+                                ellipsizeMode="tail" // Truncate at the end with ellipsis
+                            >
                                 {tree1.sapling_id}
                             </Text>
                         </TouchableOpacity>
@@ -202,7 +209,11 @@ const Shift = ({ navigation, route }) => {
                             setSaplingID(tree1.sapling_id);
                             setModalVisible(true);
                         }}>
-                            <Text style={{ ...commonStyles.text, color: lightTheme ? '#52525C' : 'black', textAlign: 'center' }}>
+                            <Text
+                                style={{ ...commonStyles.text, color: lightTheme ? '#52525C' : 'black', textAlign: 'center' }}
+                                numberOfLines={1} // Limit to a single line
+                                ellipsizeMode="tail" // Truncate at the end with ellipsis
+                            >
                                 {tree1.sapling_id}
                             </Text>
                         </TouchableOpacity>
@@ -218,7 +229,11 @@ const Shift = ({ navigation, route }) => {
                                 ToastAndroid.show(Strings.alertMessages.Synched, ToastAndroid.SHORT);
                             }}
                         >
-                            <Text style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}>
+                            <Text
+                                style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}
+                                numberOfLines={1} // Limit to a single line
+                                ellipsizeMode="tail" // Truncate at the end with ellipsis
+                            >
                                 {tree2.sapling_id}
                             </Text>
                         </TouchableOpacity>
@@ -229,7 +244,11 @@ const Shift = ({ navigation, route }) => {
                         setSaplingID(tree2.sapling_id);
                         setModalVisible(true);
                     }}>
-                        <Text style={{ ...commonStyles.text, color: lightTheme ? '#52525C' : 'black', textAlign: 'center' }}>
+                        <Text
+                            style={{ ...commonStyles.text, color: lightTheme ? '#52525C' : 'black', textAlign: 'center' }}
+                            numberOfLines={1} // Limit to a single line
+                            ellipsizeMode="tail" // Truncate at the end with ellipsis
+                        >
                             {tree2.sapling_id}
                         </Text>
                     </TouchableOpacity>
@@ -245,7 +264,11 @@ const Shift = ({ navigation, route }) => {
                                 ToastAndroid.show(Strings.alertMessages.Synched, ToastAndroid.SHORT);
                             }}
                         >
-                            <Text style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}>
+                            <Text
+                                style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}
+                                numberOfLines={1} // Limit to a single line
+                                ellipsizeMode="tail" // Truncate at the end with ellipsis
+                            >
                                 {tree3.sapling_id}
                             </Text>
                         </TouchableOpacity>
@@ -256,7 +279,11 @@ const Shift = ({ navigation, route }) => {
                         setSaplingID(tree3.sapling_id);
                         setModalVisible(true);
                     }}>
-                        <Text style={{ ...commonStyles.text, color: lightTheme ? '#52525C' : 'black', textAlign: 'center' }}>
+                        <Text
+                            style={{ ...commonStyles.text, color: lightTheme ? '#52525C' : 'black', textAlign: 'center' }}
+                            numberOfLines={1} // Limit to a single line
+                            ellipsizeMode="tail" // Truncate at the end with ellipsis
+                        >
                             {tree3.sapling_id}
                         </Text>
                     </TouchableOpacity>
@@ -273,7 +300,11 @@ const Shift = ({ navigation, route }) => {
                                 ToastAndroid.show(Strings.alertMessages.Synched, ToastAndroid.SHORT);
                             }}
                         >
-                            <Text style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}>
+                            <Text
+                                style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}
+                                numberOfLines={1} // Limit to a single line
+                                ellipsizeMode="tail" // Truncate at the end with ellipsis
+                            >
                                 {tree4.sapling_id}
                             </Text>
                         </TouchableOpacity>
@@ -284,7 +315,11 @@ const Shift = ({ navigation, route }) => {
                         setSaplingID(tree4.sapling_id);
                         setModalVisible(true);
                     }}>
-                        <Text style={{ ...commonStyles.text, color: lightTheme ? '#52525C' : 'black', textAlign: 'center' }}>
+                        <Text
+                            style={{ ...commonStyles.text, color: lightTheme ? '#52525C' : 'black', textAlign: 'center' }}
+                            numberOfLines={1} // Limit to a single line
+                            ellipsizeMode="tail" // Truncate at the end with ellipsis
+                        >
                             {tree4.sapling_id}
                         </Text>
                     </TouchableOpacity>
@@ -310,9 +345,8 @@ const Shift = ({ navigation, route }) => {
             <ScrollView keyboardShouldPersistTaps='handled' style={{ backgroundColor: 'white', height: '100%', marginTop: 0 }}>
 
                 <View style={{ flex: 1, marginTop: 10 }}>
-                    <ShiftHeader navigation={navigation}
+                    <ShiftHeader
                         onSetTime={(seconds) => {
-                            //console.log('secondsfrom timer----', seconds);
                             finalRef.current.seconds = seconds;
                         }}
                         handleModalChanges={handleModalChanges}
@@ -324,8 +358,9 @@ const Shift = ({ navigation, route }) => {
                         modalVisible={modalVisible}
                         setModalVisible={setModalVisible}
                         mode={mode}
-                        onFetchData={fetchTreesFromLocalDB}
+                        onFetchData={fetchSaplingsFromLocalShiftsDB}
                         saplingID={saplingID}
+                        finalShiftData={finalRef}
                     />
                 </View>
 

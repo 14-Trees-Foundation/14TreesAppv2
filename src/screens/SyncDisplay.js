@@ -1,16 +1,14 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState, useCallback, useContext, useRef } from 'react';
-import { Button, StyleSheet, Text, View, TouchableOpacity, FlatList, BackHandler } from 'react-native';
+import { Button, Text, View, TouchableOpacity, FlatList, BackHandler, ToastAndroid } from 'react-native';
 import { Constants, Utils } from '../services/Utils';
-import { CustomButton, MyIconButton, MyIconStack } from '../components/Components';
-import LanguageModal from '../components/Languagemodal';
+import { MyIconButton } from '../components/Components';
 import { Strings } from '../services/Strings';
 import * as Progress from 'react-native-progress';
 import { useFocusEffect } from '@react-navigation/native';
 import { commonStyles } from "../services/Styles";
 import GlobalContext from '../context/GlobalContext ';
 
-const updateSyncStatus = async (setSyncDate, setCounts) => {
+const updateSyncStatus = async (setSyncDate, setCounts, setShiftsCount) => {
   const lsdate = await Utils.getLastSyncDate();
   if (lsdate) {
     setSyncDate(Utils.getReadableDate(lsdate));
@@ -18,32 +16,31 @@ const updateSyncStatus = async (setSyncDate, setCounts) => {
   else {
     setSyncDate(Strings.messages.Never);
   }
-  const counts = await Utils.getSyncCounts();
-  console.log('setting counts: ', counts);
+  const counts = await Utils.getTreesCounts();
   setCounts(counts);
+  const shiftsCount = await Utils.getShiftsCounts();
+  setShiftsCount(shiftsCount);
+  console.log('setting counts: ', counts, "setting shifts count: ", shiftsCount);
 }
 
 const getReadableProgress = (progress) => {
   return Math.round(progress * 100).toString() + '%';
 }
 
-const SyncDisplay = ({ navigation, onSyncComplete, route }) => {
+const SyncDisplay = ({ navigation, onSyncComplete }) => {
   const [syncDate, setSyncDate] = useState('');
   const [treeCounts, setTreeCounts] = useState(null);
   const [progress, setProgress] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
   const [failedTrees, setFailedTrees] = useState([]);
+  const [failedShifts, setFailedShifts] = useState([]);
+  const [shiftsCount, setShiftsCount] = useState(null);
+  const { lightTheme } = useContext(GlobalContext);
 
-  const { shiftDone, lightTheme } = useContext(GlobalContext);
 
-  const {data} =route.params
-  
-
-  console.log("final ref sync display ---", data, 'shiftDone----', shiftDone);
 
   useEffect(() => {
     const backAction = () => {
-      console.log('here----');
       navigation.goBack()
       return true; // Prevent default behavior (exit app)
     };
@@ -55,77 +52,91 @@ const SyncDisplay = ({ navigation, onSyncComplete, route }) => {
 
 
   useFocusEffect(useCallback(() => {
-    updateSyncStatus(setSyncDate, setTreeCounts);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
     console.log('sync date updated')
   }, []))
 
   const syncLogs = async () => {
     const response = await Utils.syncLogs();
-    //console.log("response logs from server: ", response);
 
-    if (response.success) {
+    if (response?.success) {
       await Utils.deleteLogsFromLocalDB();
     }
 
-    // const logsArray = await Utils.getLogsFromLocalDB();
-
-    // console.log("logs array length from local db after sync: ", logsArray.length);
-
   }
 
-  const syncShifts = async () => {
-    const response = await Utils.syncShifts();
-    console.log("response logs from server: ", response);
-
-    // if (response.success) {
-    //   await Utils.deleteShiftsFromLocalDB();
-    // }
-  }
-
-  const addShiftsLocalDB = async () => {
-    console.log("currentd data---", data);
-    const endtime = Utils.getCurrentTime12Hr();
-    const timetaken = Utils.formatTime(data.current.seconds); //this is null
-    const user_id = await Utils.getUserId();
-
-    const shiftData = {
-      shiftID: data.current.shiftID,
-      user_id: user_id,
-      plotselected: data.current.plotselected,
-      starttime: data.current.shiftTime,
-      endtime: endtime,
-      timetaken: timetaken,
-      treesplanted: data.current.treesPlanted
-    }
-
-    console.log("final shift data sync display---", shiftData);
-
-    await Utils.saveShiftsToLocalDB(shiftData);
-
-  }
 
   const commenceUpload = async () => {
-    console.log("shiftdone----", shiftDone);
 
-    if (!shiftDone) {
-      addShiftsLocalDB();
+    if (treeCounts && treeCounts.pending == 0 && shiftsCount && shiftsCount.pending == 0) {
+      ToastAndroid.show(Strings.alertMessages.NothingToSync,ToastAndroid.LONG);
+      return;
     }
 
     setShowProgress(true);
-    await syncLogs();
-    await syncShifts();
 
-    Utils.upload(setProgress).then(async (failures) => {
-      setFailedTrees(failures);
+    try {
+      await syncLogs();
+    } catch (error) {
+      console.log("unable to sync logs---", error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: "happened while trying to sync logs(inside sync display)",
+        error: JSON.stringify(error),
+        stackTrace: stackTrace
+      }
+      await Utils.logException(JSON.stringify(errorLog));
+    }
+
+    try {
+      // if (shiftsCount && shiftsCount.pending == 0) {
+      //   return;
+      // }
+      const failures = await Utils.syncShifts();
+      setFailedShifts(failures);
       setProgress(1);
-      updateSyncStatus(setSyncDate, setTreeCounts);
+      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
       setTimeout(() => {
         setShowProgress(false);
       }, 2000);
-      if (onSyncComplete) {
-        onSyncComplete();
+
+    } catch (error) {
+      console.log("unable to sync shifts---", error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: "happened while trying to sync shifts(inside sync display)",
+        error: JSON.stringify(error),
+        stackTrace: stackTrace
       }
-    });
+      await Utils.logException(JSON.stringify(errorLog));
+    }
+
+
+    try {
+      if (treeCounts && treeCounts.pending == 0) {
+        return;
+      }
+      const failures = await Utils.upload(setProgress);
+
+      setFailedTrees(failures);
+      setProgress(1);
+      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+      setTimeout(() => {
+        setShowProgress(false);
+      }, 2000);
+
+
+
+    } catch (error) {
+      console.log("unable to sync trees---", error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: "happened while trying to sync trees(inside sync display)",
+        error: JSON.stringify(error),
+        stackTrace: stackTrace
+      }
+      await this.logExceptionLocalDB(JSON.stringify(errorLog));
+    }
 
   }
 
@@ -191,8 +202,19 @@ const SyncDisplay = ({ navigation, onSyncComplete, route }) => {
           <FlatList
             ListHeaderComponent={() => <Text style={commonStyles.text5}>{Strings.messages.failedToUpload} {failedTrees.length} {Strings.messages.trees}: </Text>}
             data={failedTrees}
+            keyExtractor={(item) => item.sapling_id}
             renderItem={({ item, index }) => {
-              return <Text style={commonStyles.text5}>{index + 1}. {Strings.messages.SaplingNo} : {item.sapling_id}</Text>
+              return <Text style={commonStyles.text5}>{index + 1}. {Strings.messages.SaplingNo} : : {item.sapling_id}</Text>
+            }}
+          />
+        }
+        {
+          (failedShifts.length > 0) &&
+          <FlatList
+            ListHeaderComponent={() => <Text style={commonStyles.text5}>{Strings.messages.failedToUpload} {failedTrees.length} {`${Strings.messages.Shift}s`}: </Text>}
+            data={failedShifts}
+            renderItem={({ item, index }) => {
+              return <Text style={commonStyles.text5}>{index + 1}. {Strings.messages.SaplingNo} : {item.id}</Text>
             }}
           />
         }

@@ -306,7 +306,6 @@ export const commonStyles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 30,
     marginBottom: 30,
-    fontFamily: 'cochin',
     fontWeight: 'bold',
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 1, height: 1 },

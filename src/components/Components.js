@@ -7,7 +7,7 @@ import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Strings } from '../services/Strings';
 import { commonStyles } from "../services/Styles";
 
-
+//replace it by react-native UI
 export const CustomButton = ({ text, opacityStyle, textStyle, onPress }) => {
   let finalOpacityStyle = commonStyles.defaultButtonStyle;
   if (opacityStyle) {
@@ -28,6 +28,7 @@ export const CustomButton = ({ text, opacityStyle, textStyle, onPress }) => {
   );
 }
 
+//replace it by react-native UI
 export function MyIconStack({ names, sizes, size = 30, color = 'green', styles }) {
   if (styles && names.length !== styles.length) {
     throw "Names and styles lengths must match in MyIconStack"
@@ -74,7 +75,8 @@ export function MyIcon({ name, size = 30, color = 'green' }) {
   }
   return <Text>??</Text>;
 }
-//Namrata
+
+//replace it by react-native UI
 export function MyIconButton({
   name,
   names,
@@ -91,7 +93,8 @@ export function MyIconButton({
     return (
       <TouchableOpacity
         style={{ ...styles, ...commonStyles.iconBtn, backgroundColor: color, ...lngStyle }}
-        onPress={onPress}>
+        onPress={onPress}
+        >
         <MyIcon name={name} size={size} color={iconColor}></MyIcon>
         {text && (
           <Text style={{ fontFamily: 'Inter-Regular', fontWeight: '700', color: iconColor, fontSize: size * 0.8 }}> {text}</Text>
@@ -113,6 +116,7 @@ export function MyIconButton({
           sizes={sizes}
           size={size}
           color={iconColor}
+          
         />
         {text && (
           <Text style={{ fontFamily: 'Inter-Regular', fontWeight: '700', color: iconColor, fontSize: size * 0.8 }}> {text}</Text>

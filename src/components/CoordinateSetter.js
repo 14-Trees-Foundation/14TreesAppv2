@@ -70,20 +70,17 @@ const requestLocation = async (onSetLat, onSetLng, setLat, setLng) => {
 };
 
 
-export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng, changeCordinate, onChangeCordinate }) => {
+export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng }) => {
     const [lat, setLat] = useState(inLat);
     const [lng, setLng] = useState(inLng);
     const { lightTheme } = useContext(GlobalContext);
 
-    //console.log("incoming lat and lng---", inLat, inLng, lat , lng);
+    //console.log("incoming lat and lng---", inLat, inLng, lat, lng);
+
     useEffect(() => {
-        //console.log("changes in cordinate setter", inLat, inLng);
-        if (changeCordinate) {
-            setLat(0);
-            setLng(0);
-            onChangeCordinate();
-        }
-    }, [changeCordinate])
+        setLat(inLat);
+        setLng(inLng);
+    }, [inLat, inLng])
 
     useFocusEffect(useCallback(() => {
         isLocationAllowed().then((locationOn) => {

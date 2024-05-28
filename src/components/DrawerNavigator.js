@@ -106,7 +106,7 @@ const DrawerContent = (props) => {
     );
 };
 
-export const DrawerNavigator = ({ navigation, route }) => {
+export const DrawerNavigator = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const navigationRef = stackNavRef;
     const [userDetails, setUserDetails] = useState(null);

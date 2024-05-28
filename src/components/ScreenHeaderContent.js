@@ -6,7 +6,7 @@ import GlobalContext from "../context/GlobalContext ";
 const ScreenHeaderContent = () => {
 
     const [langModalVisible, setLangModalVisible] = useState(false);
-    const [toggleMode, setToggleMode] = useState(false);
+    const [toggleMode, setToggleMode] = useState(false); //dark by default
     const { lightTheme, setLightTheme } = useContext(GlobalContext);
 
     return (
@@ -17,7 +17,7 @@ const ScreenHeaderContent = () => {
             <TouchableOpacity
                 style={{ marginRight: 15 }}
                 onPress={() => {
-                    console.log('changing the theme', lightTheme);
+                    //console.log('changing the theme', lightTheme);
                     setToggleMode(!toggleMode);
                     setLightTheme(!lightTheme);
                 }}

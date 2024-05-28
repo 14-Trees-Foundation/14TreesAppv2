@@ -12,6 +12,7 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     console.log("fetching from homescreen----");
     Utils.fetchAndStoreHelperData();
+    Utils.fetchAndStoreShifts();
   }, []);
 
   useEffect(() => {

@@ -5,11 +5,9 @@ import Sound from 'react-native-sound';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { ScrollView, Text, TouchableOpacity, View, } from 'react-native';
-import { MyIconButton } from '../components/Components';
-import { Strings } from '../services/Strings';
 import { Utils } from '../services/Utils';
 
-const ShiftHeader = ({ navigation, onSetTime, handleModalChanges }) => {
+const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
 
     const { treesPlanted, shiftTime, setShiftTime, plotSelected, lightTheme, playSound, setPlaySound } = useContext(GlobalContext);
 
@@ -81,16 +79,11 @@ const ShiftHeader = ({ navigation, onSetTime, handleModalChanges }) => {
             <View style={{ margin: 4, borderRadius: 10, marginBottom: 0 }}>
 
                 {
-                    plotSelected && <TouchableOpacity style={{ marginTop: 3 }} onPress={() => {
-                        handleModalChanges();
-                        // navigation.navigate(
-                        //     Strings.screenNames.getString('PlotSelect', Strings.english),
-                        //     {
-                        //         //shiftID: shiftID,
-                        //         mode: mode,
-                        //     }
-                        // )
-                    }}>
+                    plotSelected && <TouchableOpacity
+                        style={{ marginTop: 3 }}
+                        onPress={() => { handleModalChanges(); }
+                        }>
+
                         <Text
                             style={{
                                 fontFamily: 'Inter-Regular',
@@ -110,6 +103,7 @@ const ShiftHeader = ({ navigation, onSetTime, handleModalChanges }) => {
                         >
                             {plotSelected.name}
                         </Text>
+                        
                     </TouchableOpacity>
                 }
 
