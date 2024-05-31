@@ -28,59 +28,44 @@ const TreesInShift = ({ navigation, route }) => {
     }, []);
 
     const fetchTreesFromLocalDB = async () => { //shiftId -> normal id AUTOINCREMENTED(1,2,3,4)
-        const treesinLocalDB = await Utils.fetchSaplingsFromLocalShiftsDB();
-        let treesInLocalShifts = treesinLocalDB.filter(tree => tree.shiftID ===  shiftIDs.localShiftId);
+        if (shiftIDs.localShiftId) {
+            let treesInLocalShifts = await Utils.fetchSaplingsFromLocalShiftDB(shiftIDs.localShiftId);
 
-        
-        treesInLocalShifts.sort((a, b) => {
-            if (a.uploaded && !b.uploaded) {
-                return 1; // Move uploaded trees to the end
-            }
-            if (!a.uploaded && b.uploaded) {
-                return -1; // Keep non-uploaded trees before uploaded trees
-            }
-            return 0; // Maintain the original order
-        });
+            treesInLocalShifts.sort((a, b) => {
+                if (a.uploaded && !b.uploaded) {
+                    return 1; // Move uploaded trees to the end
+                }
+                if (!a.uploaded && b.uploaded) {
+                    return -1; // Keep non-uploaded trees before uploaded trees
+                }
+                return 0; // Maintain the original order
+            });
 
-        //setFinalList(modifiedTrees);
-        console.log("--------treesInLocalShifts---" ,  treesinLocalDB);
-        return treesInLocalShifts;
-
+            //setFinalList(modifiedTrees);
+            //console.log("--------treesInLocalShifts---", treesInLocalShifts);
+            return treesInLocalShifts;
+        }
+        return [];
     };
 
     const fetchTreesFromLiveShifts = async () => { //shiftId -> UUID
-        const treesInLiveShifts = await Utils.getSaplingsInLiveShift();
-
-        const trees = treesInLiveShifts.filter(tree => tree.shiftID ===  shiftIDs.liveShiftId);
-        // const trees1 = trees.map(tree => {
-        //     if (tree.uploaded === 1) {
-        //         return { ...tree, uploaded: true };
-        //     }
-        //     return tree;
-        // });
-
-        console.log("---------------treesInLiveShifts------------", trees)
-        return trees;
+        if (shiftIDs.liveShiftId) {
+            const treesInLiveShifts = await Utils.fetchSaplingsFromLiveShiftDB(shiftIDs.liveShiftId);
+            return treesInLiveShifts;
+        }
+        return [];
     };
 
     const getCombinedList = async (treesInLiveShifts, treesInLocalShifts) => {
 
-        
+
         let combinedList = [];
         combinedList = [
             ...treesInLocalShifts,
             ...treesInLiveShifts
         ];
 
-        // if (treesInLocalShifts?.length > 0) {
-        //     //console.log("---------local shifts > 0-----------")
-           
-        // } else {
-        //     console.log('-----------local shifts ==0---------');
-        //     combinedList = [...treesInLiveShifts]
-        // }
-        //console.log('------------combinedList-------------', combinedList);
-        //console.log('--------------treesInLocalShifts----------', treesInLocalShifts);
+
         setFinalList(combinedList);
     }
 
@@ -127,7 +112,10 @@ const TreesInShift = ({ navigation, route }) => {
                                     'EditLocalTree',
                                     Strings.english,
                                 ),
-                                { sapling_id: tree1.sapling_id },
+                                {
+                                    sapling_id: tree1.sapling_id,
+                                    shiftID: shiftIDs.localShiftId
+                                },
                             );
                         }}>
                             <Text
@@ -167,7 +155,10 @@ const TreesInShift = ({ navigation, route }) => {
                                     'EditLocalTree',
                                     Strings.english,
                                 ),
-                                { sapling_id: tree2.sapling_id },
+                                {
+                                    sapling_id: tree2.sapling_id,
+                                    shiftID: shiftIDs.localShiftId
+                                },
                             );
                         }}>
                             <Text
@@ -206,7 +197,10 @@ const TreesInShift = ({ navigation, route }) => {
                                 'EditLocalTree',
                                 Strings.english,
                             ),
-                            { sapling_id: tree3.sapling_id },
+                            {
+                                sapling_id: tree3.sapling_id,
+                                shiftID: shiftIDs.localShiftId
+                            },
                         );
                     }}>
                         <Text
@@ -247,7 +241,10 @@ const TreesInShift = ({ navigation, route }) => {
                                     'EditLocalTree',
                                     Strings.english,
                                 ),
-                                { sapling_id: tree4.sapling_id },
+                                {
+                                    sapling_id: tree4.sapling_id,
+                                    shiftID: shiftIDs.localShiftId
+                                },
                             );
                         }}>
                             <Text

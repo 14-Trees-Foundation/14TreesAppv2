@@ -61,7 +61,7 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
 
             const currentTime12Hr = Utils.getCurrentTime12Hr();
             setShiftTime(currentTime12Hr);
-            console.log("currentTime12Hr: ", currentTime12Hr);
+            //console.log("currentTime12Hr: ", currentTime12Hr);
         }
 
         startTask();

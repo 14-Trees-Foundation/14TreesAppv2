@@ -28,6 +28,12 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
         const timetaken = Utils.formatTime(finalShiftData.current.seconds);
         const user_id = await Utils.getUserId();
 
+        const sapling = {
+            sapling_id : saplingId,
+            sequence_no: (treesPlanted + 1),
+            uploaded : 0,
+        }
+
         const shiftData = {
             id: shiftID,
             user_id: user_id,
@@ -37,20 +43,14 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
             shiftended: 0,
             shiftuploadcomplete: 0,
             timetaken: timetaken,
-            treesplanted: finalShiftData.current.treesPlanted
+            treesplanted: finalShiftData.current.treesPlanted,
+            sapling : sapling
         }
 
-        const treeData = {
-            shiftID : shiftID,
-            sapling_id : saplingId,
-            sequence_no: (treesPlanted + 1),
-            uploaded : 0,
-        }
 
         console.log("final shift data add tree----", shiftData);
-        console.log("final local shift data----", treeData);
         await Utils.saveShiftsToLocalDB(shiftData);
-        await Utils.saveSaplingsToLocalShiftDB(treeData);
+        
     }
 
     async function onVerifiedSave(tree, images) {
@@ -64,16 +64,18 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
 
         } else if (mode === treeFormModes.localEdit) {
 
-            setModalVisible(false);
             if (tree.saplingid !== details.inSaplingId) {
                 await Utils.deleteTreeAndImages(details.inSaplingId); //delete tree by sapling ID
+                //change sapling id in shift table also...
+                await Utils.updateSaplingInShiftDB(tree.saplingid, details.inSaplingId, shiftID);
             }
+
             await Utils.deleteTreeImages(tree.saplingid);
             await Utils.saveTreeAndImagesToLocalDB(tree, images);
             onFetchData();
             let toastmsg = Strings.alertMessages.TreeUpdatedfirsthalf + saplingID + Strings.alertMessages.TreeUpdatedsecondhalf;
             ToastAndroid.show(toastmsg, ToastAndroid.LONG);
-            //setDetails(null); 
+            setModalVisible(false);
         }
     }
 

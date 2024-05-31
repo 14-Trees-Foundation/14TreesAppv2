@@ -7,7 +7,6 @@ import RNRestart from 'react-native-restart';
 import { Strings } from "./Strings";
 import ImageResizer from "react-native-image-resizer";
 import RNFS from 'react-native-fs';
-import React, { useState } from 'react';
 
 const MIN_BATCH_SIZE = 5
 
@@ -31,7 +30,6 @@ export class Utils {
     }
 
     static async getShiftsIDLocalDB(upload) {
-
         if (upload != undefined) {
             return await this.localdb.getShiftsLocalDB(upload);
         }
@@ -45,9 +43,9 @@ export class Utils {
         return shifts
     }
 
-    static async getSaplingsInLiveShift() {
-        let res = await this.localdb.getAllSaplingsInShifts();
-        //console.log("---------saplings in shifts-------",saplings)
+    static async fetchSaplingsFromLiveShiftDB(id) {
+        let res = await this.localdb.getSaplingsInLiveShifts(id);
+
         var final = [];
         for (let index = 0; index < res.length; index++) {
             let element = res[index];
@@ -57,14 +55,8 @@ export class Utils {
             }
             final.push(treedata);
         }
-        //console.log("final sapling from live shifts---",  res);
+        console.log("final sapling from live shifts---",  res);
         return final;
-    }
-
-    static async getSaplingsInShift() {
-        const saplings = await this.localdb.getAllSaplingsInShifts();
-        //console.log("---------saplings in shifts-------",saplings)
-        return saplings
     }
 
     static async deleteLogsFromLocalDB() {
@@ -95,12 +87,21 @@ export class Utils {
         return;
     }
 
+    static async deleteSaplingShiftLocalDB(saplingId, shiftID){
+        await this.localdb.deleteSaplingShiftDB(saplingId, shiftID);
+    }
+
     static async fetchLocalTree(saplingId) {
         const results = await this.localdb.getTreeBySaplingID(saplingId);
+        //console.log("result---" , results);
         if (results.length > 0) {
             return await this.formatLocalTreeToJSON(results[0]);
         }
         return null;
+    }
+
+    static async updateSaplingInShiftDB(newSaplingId, inSaplingId, shiftID){
+        await this.localdb.updateSaplingLocalShiftDb(newSaplingId, inSaplingId, shiftID);
     }
 
     static async saveShiftsToLocalDB(shiftData) {
@@ -113,13 +114,10 @@ export class Utils {
         await this.localdb.deleteShiftLocalDB(id);
     }
 
-    static async saveSaplingsToLocalShiftDB(treeData) {
-        await this.localdb.saveSaplingsLocalShiftDB(treeData);
-    }
-
     static async saveTreeAndImagesToLocalDB(tree, images) {
-        console.log("--------------updating image------------------")
+        console.log("--------------updating image------------------" ,  tree)
         await this.localdb.saveTree(tree, 0);
+
         for (let index = 0; index < images.length; index++) {
             //console.log("image while adding tree: ", images[index].data)
             const element = {
@@ -302,14 +300,14 @@ export class Utils {
     static async checkShiftsComplete() {
         try {
             const shifts = await Utils.getShiftsIDLocalDB();
-            for (const shift of shifts) {
-                const saplings = await Utils.fetchSaplingsFromLocalShiftsDB();
-                const saplingForShift = saplings.filter((sapling) => sapling.shiftID === shift.id);
 
-                console.log("checkShiftsComplte----", saplingForShift);
+            for (const shift of shifts) {
+                const saplings = JSON.parse(shift.saplings);
+                
+                //console.log("checkShiftsComplte----", saplings);
 
                 if (shift.shiftended == 0) {
-                    if (saplingForShift.length === 0) {
+                    if (saplings.length === 0) {
                         //delete the shift for this id
                         await this.localdb.deleteShiftLocalDB(shift.id);
                         return;
@@ -317,9 +315,8 @@ export class Utils {
 
                     //check if saplings are uploaded make the shiftended = 1 and shiftupdloadcomplete = 1
                     let uploadedShift = true;
-                    for (const sapling of saplingForShift) {
-                        if (!sapling.uploaded) {
-
+                    for (const sapling of saplings) {
+                        if (sapling.uploaded == 0) {
                             uploadedShift = false;
                             break;
                         }
@@ -329,12 +326,13 @@ export class Utils {
                         id: shift.id,
                         user_id: shift.user_id,
                         plotselected: shift.plotselected,
-                        starttime: shift.shifttime,
+                        starttime: shift.starttime,
                         endtime: shift.endtime,
                         shiftended: 1, //made it 1
                         shiftuploadcomplete: uploadedShift ? 1 : 0,
                         timetaken: shift.timetaken,
-                        treesplanted: shift.treesplanted
+                        treesplanted: shift.treesplanted,
+                        saplings : saplings
                     }
 
                     console.log("final shift data from home screen---", shiftData);
@@ -589,7 +587,6 @@ export class Utils {
             const id = statuses[shift.id];
             if (id && id.shiftUploaded) {
                 await this.localdb.updateShiftUpload(shift.id, id.shiftID);
-                await this.localdb.updateTreeUpload(shift.id, id.shiftID);
             }
             else {
                 failures.push(shift.id);
@@ -682,9 +679,8 @@ export class Utils {
 
     }
 
-    static async fetchSaplingsFromLocalShiftsDB() {
-        let res = await this.localdb.getAllSaplingsLocalShiftDB();
-
+    static async fetchSaplingsFromLocalShiftDB(id){
+        let res = await this.localdb.getSaplingsLocalShiftDB(id);
         var final = [];
         for (let index = 0; index < res.length; index++) {
             let element = res[index];
@@ -694,10 +690,11 @@ export class Utils {
             }
             final.push(treedata);
         }
-        console.log("final sapling from local shifts---", res,);
+        console.log("final sapling from local shifts11---", res,);
         return final;
     }
 
+    
     static async fetchTreesFromLocalDB(uploaded = undefined) {
         let res;
         if (uploaded !== undefined) {

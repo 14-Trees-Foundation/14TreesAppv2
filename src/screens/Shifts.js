@@ -27,8 +27,7 @@ const Shifts = ({ navigation }) => {
 
     const fetchLiveShiftsAndSaplings = async () => {
         const syncedShiftsFromLiveDB = await Utils.getShiftsLive();
-        //const saplingsInShifts = await Utils.getSaplingsInShift();
-        //console.log('syncedShiftsFromLiveDB------', syncedShiftsFromLiveDB);
+        
         return syncedShiftsFromLiveDB
     };
 
@@ -51,14 +50,13 @@ const Shifts = ({ navigation }) => {
             return 0; // Maintain the original order
         });
 
-        console.log("-------combinedList---------", combinedList)
+        //console.log("-------combinedList---------", combinedList)
         setFinalList(combinedList);
     };
 
     const fetchData = async () => {
         const shiftsIDLocalDB = await fetchShiftsFromLocalDB();
         const syncedShiftsFromLiveDB = await fetchLiveShiftsAndSaplings();
-        //const syncedShiftsFromLiveDB = [];
         await getCombinedShiftList(shiftsIDLocalDB, syncedShiftsFromLiveDB);
     };
 

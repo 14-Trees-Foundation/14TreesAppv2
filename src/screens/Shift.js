@@ -61,31 +61,28 @@ const Shift = ({ navigation }) => {
         console.log("shiftID inside shift------", shiftID);
     }, [shiftID])
 
-    const fetchSaplingsFromLocalShiftsDB = () => {
-        Utils.fetchSaplingsFromLocalShiftsDB().then(trees => {
-
-            let finalListForShift = trees.filter(tree => tree.shiftID === shiftID);
-
-            finalListForShift.sort((a, b) => {
-                if (a.uploaded && !b.uploaded) {
-                    return 1; // Move uploaded trees to the end
-                }
-                if (!a.uploaded && b.uploaded) {
-                    return -1; // Keep non-uploaded trees before uploaded trees
-                }
-                return 0; // Maintain the original order
-            });
-
-            setFinalList(finalListForShift);
-            //console.log('setting both lists to: ', finalListForShift, finalListForShift.length);
+    const fetchSaplingsForShift = async () => {
+        const saplingsForShift = await Utils.fetchSaplingsFromLocalShiftDB(shiftID);
+        
+        saplingsForShift.sort((a, b) => {
+            if (a.uploaded && !b.uploaded) {
+                return 1; // Move uploaded trees to the end
+            }
+            if (!a.uploaded && b.uploaded) {
+                return -1; // Keep non-uploaded trees before uploaded trees
+            }
+            return 0; // Maintain the original order
         });
+
+        setFinalList(saplingsForShift);
+        console.log('setting both lists to: ', saplingsForShift, saplingsForShift.length);
     };
 
     //useEffect(() =>)
     useFocusEffect(
         useCallback(() => {
             console.log('focus');
-            fetchSaplingsFromLocalShiftsDB();
+            fetchSaplingsForShift();
         }, []),
     );
 
@@ -96,7 +93,7 @@ const Shift = ({ navigation }) => {
             const timetaken = Utils.formatTime(finalRef.current.seconds);
             const user_id = await Utils.getUserId();
             let uploadedShift = true;
-    
+
             for (let index = 0; index < finalList.length; index++) {
                 let tree = finalList[index];
                 if (tree.uploaded === false) {
@@ -104,7 +101,7 @@ const Shift = ({ navigation }) => {
                     break;
                 }
             }
-    
+
             const shiftData = {
                 id: shiftID,
                 user_id: user_id,
@@ -114,19 +111,19 @@ const Shift = ({ navigation }) => {
                 shiftended: 1, //made it 1
                 shiftuploadcomplete: uploadedShift ? 1 : 0,
                 timetaken: timetaken,
-                treesplanted: finalRef.current.treesPlanted
+                treesplanted: finalRef.current.treesPlanted,
             }
-    
+
             console.log("final shift data---", shiftData);
-    
+
             await Utils.saveShiftsToLocalDB(shiftData);
-        }else{
+        } else {
             //delete the shift from db.
-            console.log("final list----" , finalList);
+            console.log("final list----", finalList);
             await Utils.deleteShiftLocalDB(shiftID);
         }
 
-       
+
 
         navigation.navigate(
             Strings.screenNames.getString('Shifts', Strings.english)
@@ -365,7 +362,7 @@ const Shift = ({ navigation }) => {
                         modalVisible={modalVisible}
                         setModalVisible={setModalVisible}
                         mode={mode}
-                        onFetchData={fetchSaplingsFromLocalShiftsDB}
+                        onFetchData={fetchSaplingsForShift}
                         saplingID={saplingID}
                         finalShiftData={finalRef}
                     />

@@ -40,10 +40,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
             }
         }
 
-        if (mode === treeFormModes.addTree) {
-            setSelectedPlot(inPlot);
-        }
-
+        setSelectedPlot(inPlot);
     }, [treeData])
 
 
@@ -118,6 +115,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
             return;
         }
         else if (saplingid === null || selectedTreeType === null || selectedPlot === null || (selectedTreeType && Object.keys(selectedTreeType).length === 0) || (selectedPlot && Object.keys(selectedPlot).length === 0)) {
+            console.log("sd---" , saplingid, selectedTreeType, selectedPlot );
             Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
             return;
         }
