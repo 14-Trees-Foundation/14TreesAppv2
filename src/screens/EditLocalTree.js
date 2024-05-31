@@ -6,11 +6,20 @@ import { TreeForm, treeFormModes } from '../components/TreeForm';
 import { Constants, Utils } from '../services/Utils';
 import LoadingScreen from './LoadingScreen';
 
-const fetchTreeDetails = async (saplingId, setDetails) => {
+const fetchTreeDetails = async (saplingId, setDetails, navigation) => {
     // console.log('fetching tree details');    
     const treeDetails = await Utils.fetchLocalTree(saplingId);
     //console.log("treeDetails: ", treeDetails);
     if (!treeDetails) { return; }
+
+    if (treeDetails.type_id || treeDetails.plot_id || treeDetails.images || treeDetails.coordinates[0] || treeDetails.coordinates[1] || treeDetails.user_id) {
+        //delete the tree and show toast message to user
+        navigation.goBack();
+        await Utils.deleteTreeAndImages(saplingId);
+        ToastAndroid.show(Strings.alertMessages.alreadyExists ,ToastAndroid.LONG);
+        return;
+    }
+
     const detailsForTreeForm = { ...Constants.treeFormTemplateData };
     const treeType = await Utils.treeTypeFromID(treeDetails.type_id);
     const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
@@ -23,9 +32,7 @@ const fetchTreeDetails = async (saplingId, setDetails) => {
     detailsForTreeForm.inTreeType = treeType;
     detailsForTreeForm.inPlot = plot;
     detailsForTreeForm.inUserId = treeDetails.user_id;
-    // detailsForTreeForm.inShiftId = treeDetails.shiftID;
-    // detailsForTreeForm.inSequenceNo = treeDetails.sequenceNo
-    //console.log('details before editing:',detailsForTreeForm);
+    
     setDetails(detailsForTreeForm);
 }
 
@@ -53,7 +60,7 @@ export const EditLocalTree = ({ navigation, route }) => {
     }, [sapling_id]);
     useEffect(() => {
         setDetails(null);
-        fetchTreeDetails(saplingid, setDetails);
+        fetchTreeDetails(saplingid, setDetails , navigation);
     }, [saplingid])
 
     const updateDetails = async (tree, images) => {

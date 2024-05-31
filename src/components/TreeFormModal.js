@@ -99,7 +99,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
     const pickImage = async (selectionId) => {
 
         let newImage = await Utils.getImage(true, selectionId);
-        if (newImage == undefined) return;
+        if (newImage === undefined) return;
         newImage = await Utils.formatImageForSapling(newImage, saplingid);
         await handleAddImage(newImage);
         setShowImage(true);

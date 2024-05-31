@@ -4,7 +4,7 @@ import { MyIconButton } from '../components/Components';
 import React, { useContext, useEffect, useState, useCallback } from "react";
 import { commonStyles } from "../services/Styles";
 import GlobalContext from "../context/GlobalContext ";
-import { CustomDropdown } from "../components/CustomDropdown";
+import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Utils } from "../services/Utils";
 import { useFocusEffect } from "@react-navigation/native";
 import Icon from 'react-native-vector-icons/FontAwesome5';
@@ -28,7 +28,7 @@ const Shifts = ({ navigation }) => {
     const fetchLiveShiftsAndSaplings = async () => {
         const syncedShiftsFromLiveDB = await Utils.getShiftsLive();
         //const saplingsInShifts = await Utils.getSaplingsInShift();
-        //console.log('syncedShiftsFromLiveDB------', syncedShiftsFromLiveDB[0]);
+        //console.log('syncedShiftsFromLiveDB------', syncedShiftsFromLiveDB);
         return syncedShiftsFromLiveDB
     };
 
@@ -41,19 +41,18 @@ const Shifts = ({ navigation }) => {
             ...shiftsIDLocalDB
         ];
 
-        // if (shiftsIDLocalDB.length > 0) {
-        //   combinedList = [
-        //     ...syncedShiftsFromLiveDB,
-        //     ...shiftsIDLocalDB.map(item => ({ ...item, isSynced: 0 })),
-        //   ];
-        // } else {
-        //   combinedList = [
-        //     ...syncedShiftsFromLiveDB
-        //   ];
-        // }
+        combinedList.sort((a, b) => {
+            if ((a.shiftuploadcomplete == 1) && (b.shiftuploadcomplete == 0)) {
+                return 1; // Move uploaded trees to the end
+            }
+            if ((a.shiftuploadcomplete == 0) && (b.shiftuploadcomplete == 1)) {
+                return -1; // Keep non-uploaded trees before uploaded trees
+            }
+            return 0; // Maintain the original order
+        });
 
-        setFinalList(combinedList);
         console.log("-------combinedList---------", combinedList)
+        setFinalList(combinedList);
     };
 
     const fetchData = async () => {
@@ -88,7 +87,8 @@ const Shifts = ({ navigation }) => {
 
 
     const renderData = useCallback((item) => {
-        //console.log("item---");
+        const syncUploadComplete = (item.shiftuploadcomplete == 1);
+
         return (
             <TouchableOpacity style={{ ...commonStyles.borderedDisplay, flex: 1, flexDirection: 'row', justifyContent: 'space-around', backgroundColor: 'white', opacity: 0.8, borderRadius: 6 }}
                 onPress={() => {
@@ -98,7 +98,7 @@ const Shifts = ({ navigation }) => {
                             Strings.english,
                         ),
                         {
-                            shiftID: item.id, //local treat if live item.shift_id
+                            shiftIDs: { liveShiftId: item.shift_id, localShiftId: item.id },
                             plotselected: item.plotselected,
                             starttime: item.starttime,
                             endtime: item.endtime,
@@ -110,15 +110,25 @@ const Shifts = ({ navigation }) => {
                 }}
             >
                 <View style={{ flex: 1, flexDirection: 'column', paddingVertical: 8 }}>
-                    <Text style={{
-                        ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
-                        fontSize: 18, textAlign: 'center'
-                    }}
-                        numberOfLines={1} // Limit to a single line
-                        ellipsizeMode="tail" // Truncate at the end with ellipsis
-                    >
-                        {item.plotselected}
-                    </Text>
+                    <View style={{ flex: 1, flexDirection: 'row', }}>
+
+                        <View style={{ width: syncUploadComplete ? '85%' : '100%' }}>
+                            <Text style={{
+                                ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
+                                fontSize: 18, textAlign: 'center', marginLeft: 8
+                            }}
+                                numberOfLines={1} // Limit to a single line
+                                ellipsizeMode="tail" // Truncate at the end with ellipsis
+                            >
+                                {item.plotselected}
+                            </Text>
+                        </View>
+
+                        {syncUploadComplete && <View style={{ width: '15%', marginLeft: 5 }}>
+                                 <MCIcon name={"wifi-sync"} size={20} color={"green"} />
+                            </View>
+                        }
+                    </View>
 
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: '100%', padding: 4 }}>
                         {/* First View */}

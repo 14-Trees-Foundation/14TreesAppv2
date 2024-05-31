@@ -77,6 +77,7 @@ export class Strings {
             Filters: "Filters",
             LoadingTrees: "Loading Trees...",
             SaplingNo: "Sapling ID",
+            ShiftNo : "Shift ID",
             Type: "Type",
             Plot: "Plot",
             Synced: "Synced",
@@ -123,6 +124,7 @@ export class Strings {
             Filters: "फिल्टर",
             LoadingTrees: "झाडे लोड होत आहेत...",
             SaplingNo: "रोप क्र",
+            ShiftNo : "शिफ्ट आयडी", //manjur
             Type: "प्रकार",
             Plot: "प्लॉट",
             Synced: "सिंक केले गेले",
@@ -215,6 +217,7 @@ export class Strings {
             Synched: "Synched",
             FailedUpdateSapling : "Failed to update sapling: ",
             UnaableToFetchData: "Unable to fetch helper data",
+            DeleteTreeData : "Unable to fetch complete data... Please add tree details again !!"
         },
         "mr": {
             GPSUnavailable: "त्रुटी: विनंतीची वेळ संपली. GPS सध्या उपलब्ध नाही.",
@@ -290,7 +293,8 @@ export class Strings {
             FinishShift: "तुम्हाला शिफ्ट पूर्ण करायची आहे का ?", //manjur
             Synched: "समक्रमित", //manjur
             FailedUpdateSapling: "रोपे अपडेट करण्यात अयशस्वी", //manjur
-            UnaableToFetchData : "", //manjur
+            UnaableToFetchData : "मदतनीस डेटा आणण्यात अक्षम", //manjur
+            DeleteTreeData : "संपूर्ण डेटा आणण्यात अक्षम... कृपया वृक्ष तपशील पुन्हा जोडा!!"
         }
     })
     static buttonLabels = new LocalizedStrings({

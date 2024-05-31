@@ -36,7 +36,7 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
     }, []);
 
     useEffect(() => {
-        console.log("play the sound----", playSound);
+        //console.log("play the sound----", playSound);
         if (playSound) {
             handleSoundFunctionality();
             setPlaySound(false);

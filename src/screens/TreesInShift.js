@@ -8,9 +8,9 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import GlobalContext from "../context/GlobalContext ";
 
 const TreesInShift = ({ navigation, route }) => {
-    const { shiftID, plotselected, starttime, endtime, timetaken, treesplanted, timestamp } = route.params;
+    const { shiftIDs, plotselected, starttime, endtime, timetaken, treesplanted, timestamp } = route.params;
     const { lightTheme } = useContext(GlobalContext);
-    console.log("shiftID TreesInShift---", shiftID, plotselected, starttime, endtime, timetaken, treesplanted);
+    console.log("shiftID TreesInShift---", shiftIDs, plotselected, starttime, endtime, timetaken, treesplanted);
 
     const [finalList, setFinalList] = useState(null);
 
@@ -29,10 +29,9 @@ const TreesInShift = ({ navigation, route }) => {
 
     const fetchTreesFromLocalDB = async () => { //shiftId -> normal id AUTOINCREMENTED(1,2,3,4)
         const treesinLocalDB = await Utils.fetchSaplingsFromLocalShiftsDB();
-        let treesInLocalShifts = treesinLocalDB.filter(tree => tree.shiftID === shiftID);
+        let treesInLocalShifts = treesinLocalDB.filter(tree => tree.shiftID ===  shiftIDs.localShiftId);
 
         
-
         treesInLocalShifts.sort((a, b) => {
             if (a.uploaded && !b.uploaded) {
                 return 1; // Move uploaded trees to the end
@@ -44,24 +43,24 @@ const TreesInShift = ({ navigation, route }) => {
         });
 
         //setFinalList(modifiedTrees);
-        console.log("treesInLocalShifts---" , treesInLocalShifts);
+        console.log("--------treesInLocalShifts---" ,  treesinLocalDB);
         return treesInLocalShifts;
 
     };
 
     const fetchTreesFromLiveShifts = async () => { //shiftId -> UUID
         const treesInLiveShifts = await Utils.getSaplingsInLiveShift();
-        
-        const trees = treesInLiveShifts.filter(tree => tree.shiftID === shiftID);
-        const trees1 = trees.map(tree => {
-            if (tree.uploaded === 1) {
-                return { ...tree, uploaded: true };
-            }
-            return tree;
-        });
 
-        console.log("---------------trees------------", trees1)
-        return trees1;
+        const trees = treesInLiveShifts.filter(tree => tree.shiftID ===  shiftIDs.liveShiftId);
+        // const trees1 = trees.map(tree => {
+        //     if (tree.uploaded === 1) {
+        //         return { ...tree, uploaded: true };
+        //     }
+        //     return tree;
+        // });
+
+        console.log("---------------treesInLiveShifts------------", trees)
+        return trees;
     };
 
     const getCombinedList = async (treesInLiveShifts, treesInLocalShifts) => {

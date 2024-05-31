@@ -91,35 +91,42 @@ const Shift = ({ navigation }) => {
 
 
     const saveShiftToDB = async () => {
-
-        const endtime = Utils.getCurrentTime12Hr();
-        const timetaken = Utils.formatTime(finalRef.current.seconds);
-        const user_id = await Utils.getUserId();
-        let uploadedShift = true;
-
-        for (let index = 0; index < finalList.length; index++) {
-            let tree = finalList[index];
-            if (tree.uploaded === false) {
-                uploadedShift = false;
-                break;
+        if (finalList && finalList.length > 0) {
+            const endtime = Utils.getCurrentTime12Hr();
+            const timetaken = Utils.formatTime(finalRef.current.seconds);
+            const user_id = await Utils.getUserId();
+            let uploadedShift = true;
+    
+            for (let index = 0; index < finalList.length; index++) {
+                let tree = finalList[index];
+                if (tree.uploaded === false) {
+                    uploadedShift = false;
+                    break;
+                }
             }
+    
+            const shiftData = {
+                id: shiftID,
+                user_id: user_id,
+                plotselected: finalRef.current.plotselected,
+                starttime: finalRef.current.shiftTime,
+                endtime: endtime,
+                shiftended: 1, //made it 1
+                shiftuploadcomplete: uploadedShift ? 1 : 0,
+                timetaken: timetaken,
+                treesplanted: finalRef.current.treesPlanted
+            }
+    
+            console.log("final shift data---", shiftData);
+    
+            await Utils.saveShiftsToLocalDB(shiftData);
+        }else{
+            //delete the shift from db.
+            console.log("final list----" , finalList);
+            await Utils.deleteShiftLocalDB(shiftID);
         }
 
-        const shiftData = {
-            id: shiftID,
-            user_id: user_id,
-            plotselected: finalRef.current.plotselected,
-            starttime: finalRef.current.shiftTime,
-            endtime: endtime,
-            shiftended: 1, //made it 1
-            shiftuploadcomplete: uploadedShift ? 1 : 0,
-            timetaken: timetaken,
-            treesplanted: finalRef.current.treesPlanted
-        }
-
-        console.log("final shift data---", shiftData);
-
-        await Utils.saveShiftsToLocalDB(shiftData);
+       
 
         navigation.navigate(
             Strings.screenNames.getString('Shifts', Strings.english)

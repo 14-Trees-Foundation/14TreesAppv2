@@ -68,8 +68,8 @@ const SyncDisplay = ({ navigation, onSyncComplete }) => {
 
   const commenceUpload = async () => {
 
-    if (treeCounts && treeCounts.pending == 0 && shiftsCount && shiftsCount.pending == 0) {
-      ToastAndroid.show(Strings.alertMessages.NothingToSync,ToastAndroid.LONG);
+    if (treeCounts && treeCounts.pending === 0 && shiftsCount && shiftsCount.pending === 0) {
+      ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
       return;
     }
 
@@ -89,9 +89,10 @@ const SyncDisplay = ({ navigation, onSyncComplete }) => {
     }
 
     try {
-      // if (shiftsCount && shiftsCount.pending == 0) {
-      //   return;
-      // }
+      if (shiftsCount && shiftsCount.pending == 0) {
+        ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
+        return;
+      }
       const failures = await Utils.syncShifts();
       setFailedShifts(failures);
       setProgress(1);
@@ -113,7 +114,8 @@ const SyncDisplay = ({ navigation, onSyncComplete }) => {
 
 
     try {
-      if (treeCounts && treeCounts.pending == 0) {
+      if (treeCounts && treeCounts.pending === 0) {
+        ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
         return;
       }
       const failures = await Utils.upload(setProgress);
@@ -214,7 +216,7 @@ const SyncDisplay = ({ navigation, onSyncComplete }) => {
             ListHeaderComponent={() => <Text style={commonStyles.text5}>{Strings.messages.failedToUpload} {failedTrees.length} {`${Strings.messages.Shift}s`}: </Text>}
             data={failedShifts}
             renderItem={({ item, index }) => {
-              return <Text style={commonStyles.text5}>{index + 1}. {Strings.messages.SaplingNo} : {item.id}</Text>
+              return <Text style={commonStyles.text5}>{index + 1}. {Strings.messages.ShiftNo} : {item}</Text>
             }}
           />
         }

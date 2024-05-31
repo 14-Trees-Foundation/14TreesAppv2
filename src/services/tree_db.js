@@ -77,7 +77,8 @@ export class LocalDatabase {
                 endtime TEXT NOT NULL,
                 timetaken TEXT NOT NULL,
                 treesplanted TEXT NOT NULL,
-                timestamp TEXT NOT NULL
+                timestamp TEXT NOT NULL,
+                saplings TEXT NOT NULL
             )`
 
             await this.db.executeSql(query);
@@ -113,15 +114,15 @@ export class LocalDatabase {
         shiftID TEXT NOT NULL,
         sapling_id TEXT PRIMARY KEY, 
         sequence_no TEXT,
-        uploaded BOOLEAN,
+        uploaded INTEGER,
         FOREIGN KEY (shiftID) REFERENCES ${previousShiftTableName} (shift_id)
     );`
 
             const saplingsInLocalShiftTable = `CREATE TABLE IF NOT EXISTS ${saplingsInLocalShifts} (
-        shiftID TEXT ,
+        shiftID INTEGER,
         sapling_id TEXT PRIMARY KEY,
         sequence_no TEXT,
-        uploaded BOOLEAN,
+        uploaded INTEGER,
         FOREIGN KEY (shiftID) REFERENCES ${localShiftTable} (id)
     );`
 
@@ -477,6 +478,25 @@ export class LocalDatabase {
         }
     };
 
+    deleteShiftLocalDB = async (id) => {
+        try {
+            if (id) {
+                const query = `DELETE FROM ${localShiftTable} WHERE id = ?`;
+                await this.db.executeSql(query, [id]);
+                console.log("delete the shift with id:--" , id);
+            }
+        } catch (error) {
+            console.error(error);
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: "happened while trying to delete shift from LocalDB(inside tree_tb(deleteShiftLocalDB))",
+                error: JSON.stringify(error),
+                stackTrace: stackTrace
+            }
+            await this.logExceptionLocalDB(JSON.stringify(errorLog));
+        }
+    }
+
     saveShifts = async (shiftData) => { //local shifts table
         try {
             console.log('inserting into shift table---', shiftData.id);
@@ -634,9 +654,9 @@ export class LocalDatabase {
             }
 
 
-            // const get = `SELECT * from ${localShiftTable} WHERE id = ?`;
-            // const [result1] = await this.db.executeSql(get, [id])
-            // console.log("Shift updated successfully---", result1.rows.item(0));
+            const get = `SELECT * from ${localShiftTable} WHERE id = ?`;
+            const [result1] = await this.db.executeSql(get, [id])
+            console.log("Shift updated successfully---", result1.rows.item(0));
         } catch (error) {
 
             console.error("Error updating shift:", error);
@@ -655,8 +675,9 @@ export class LocalDatabase {
 
             const updateQuery =
                 `UPDATE ${saplingsInLocalShifts} 
-             SET uploaded = true WHERE shiftID = ?`
+             SET uploaded = 1 WHERE shiftID = ?`
             await this.db.executeSql(updateQuery, [id]);
+
             const get = `SELECT * from ${saplingsInLocalShifts} WHERE shiftID = ?`;
             const [result1] = await this.db.executeSql(get, [id])
             console.log("saplingsInLocalShifts updated successfully---", result1.rows.item(0));
@@ -901,15 +922,18 @@ export class LocalDatabase {
         }
     };
 
+    deleteShiftTblLive = async () => {
+        console.log("----------Deleting old data and inserting latest in shifts tablet--------- ")
+        await this.db.executeSql(`DELETE FROM ${previousShiftTableName}`);
+        console.log("----------Deleting old data and inserting latest shifts in shifts sapling tablet--------- ")
+        await this.db.executeSql(`DELETE FROM ${saplingsInLiveShifts}`);
 
+    }
 
     updateShiftTblLive = async (shift) => {
-        //console.log("---------------shift----------", shift);
+        //console.log("---------------shift add----------", shift);
 
         try {
-            console.log("----------Deleting old data and inserting lates in shifts tablet--------- ")
-            await this.db.executeSql(`DELETE FROM ${previousShiftTableName}`);
-
             const insertShiftsQuery = `
             INSERT OR REPLACE INTO ${previousShiftTableName} (
                 endtime, shift_id, shifttype, plotselected, starttime, timestamp, timetaken, treesplanted, user_id, shiftended, shiftuploadcomplete 
@@ -930,9 +954,6 @@ export class LocalDatabase {
             ]);
 
             const saplings = shift.saplings;
-
-            console.log("----------Deleting old data and inserting lates in shifts tablet--------- ")
-            await this.db.executeSql(`DELETE FROM ${saplingsInLiveShifts}`);
 
             for (const sapling of saplings) {
                 //console.log("------------saplings----------", shift.shift_id)

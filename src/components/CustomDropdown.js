@@ -22,7 +22,7 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
             setSelectedItem({ name: '', value: -1 });
         }
 
-        if (initItem == null) {
+        if (initItem === null) {
             setClearButton(false);
         }
 

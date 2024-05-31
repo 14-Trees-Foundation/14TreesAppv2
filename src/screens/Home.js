@@ -9,10 +9,17 @@ const HomeScreen = ({ navigation }) => {
 
   const { langChanged, lightTheme } = useContext(GlobalContext);
 
+  const initTasks = async () => {
+    await Promise.all([
+        Utils.fetchAndStoreHelperData(),
+        Utils.fetchAndStoreShifts(),
+        Utils.checkShiftsComplete()
+    ]);
+}
+
   useEffect(() => {
     console.log("fetching from homescreen----");
-    Utils.fetchAndStoreHelperData();
-    Utils.fetchAndStoreShifts();
+    initTasks();
   }, []);
 
   useEffect(() => {

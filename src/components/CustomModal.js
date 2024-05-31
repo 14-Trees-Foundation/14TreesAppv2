@@ -44,11 +44,11 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
             shiftID : shiftID,
             sapling_id : saplingId,
             sequence_no: (treesPlanted + 1),
-            uploaded : false,
+            uploaded : 0,
         }
 
-        //console.log("final shift data add tree----", shiftData);
-        //console.log("final local shift data----", treeData);
+        console.log("final shift data add tree----", shiftData);
+        console.log("final local shift data----", treeData);
         await Utils.saveShiftsToLocalDB(shiftData);
         await Utils.saveSaplingsToLocalShiftDB(treeData);
     }
@@ -99,7 +99,7 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
     }
 
     const fetchDetails = async () => {
-        console.log('useEffect is called');
+        //console.log('useEffect is called');
 
         if (mode === treeFormModes.localEdit && saplingID) {
             console.log('fetching the tree details in CustomModal--- local edit');
@@ -109,7 +109,6 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
             console.log('fetching the tree details in CustomModal--- add tree');
             const inputTreeData = { ...Constants.treeFormTemplateData };
             inputTreeData.inPlot = plotSelected;
-            console.log("inputtree data---", inputTreeData);
             setDetails(inputTreeData);
         } else if (mode === treeFormModes.plotSelect || mode === treeFormModes.startShift) {
             console.log('selecting plot---');
@@ -135,7 +134,7 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
                 setModalVisible(false);
                 return;
             } else {
-                if (plotSelected == null) {
+                if (plotSelected === null) {
                     Alert.alert(Strings.alertMessages.NoPlotSelected, Strings.alertMessages.SelectPlot);
                     return;
                 }
@@ -163,7 +162,7 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
 
         } else {
             await Utils.updateTreesWithChangedPlot(plotSelected.value,shiftID)
-            if (plotSelected == null) {
+            if (plotSelected === null) {
                 Alert.alert(Strings.alertMessages.NoPlotSelected, Strings.alertMessages.SelectPlot);
                 return;
             }

@@ -80,7 +80,7 @@ const LanguageModal = ({ langModalVisible, setLangModalVisible }) => {
                     onPress={() => {
                       onSelect(index);
                     }}>
-                    {item.selected == true ? (
+                    {item.selected === true ? (
                       <Image
                         source={require('../../assets/selected.png')}
                         style={[styles.icon, { tintColor: 'blue' }]}
@@ -96,7 +96,7 @@ const LanguageModal = ({ langModalVisible, setLangModalVisible }) => {
                       style={{
                         marginLeft: 20,
                         fontSize: 18,
-                        color: item.selected == true ? 'blue' : 'black',
+                        color: item.selected === true ? 'blue' : 'black',
                       }}>
                       {item.name}
                     </Text>
