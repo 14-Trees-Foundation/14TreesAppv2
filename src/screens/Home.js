@@ -1,5 +1,5 @@
-import React, { useEffect, useContext, useCallback } from 'react';
-import { View, BackHandler, Alert, TouchableOpacity, Image, Text, Dimensions, ScrollView } from 'react-native';
+import React, { useEffect, useContext, useCallback, useState } from 'react';
+import { View, BackHandler, ToastAndroid, TouchableOpacity, Image, Text, Dimensions, ScrollView } from 'react-native';
 import { Strings } from '../services/Strings';
 import { Utils } from '../services/Utils';
 import GlobalContext from '../context/GlobalContext ';
@@ -8,18 +8,32 @@ import { useFocusEffect } from '@react-navigation/native';
 const HomeScreen = ({ navigation }) => {
 
   const { langChanged, lightTheme } = useContext(GlobalContext);
+  const [dataUptoDate, setDataUptoDate] = useState(false);
 
-  const initTasks = async () => {
-    await Promise.all([
-        Utils.fetchAndStoreHelperData(),
-        Utils.fetchAndStoreShifts(),
-        Utils.checkShiftsComplete()
-    ]);
-}
+  const fetchHelperDataAndShifts = async () => {
+    if (!dataUptoDate) {
+      ToastAndroid.show(Strings.alertMessages.DataGettingFetched, ToastAndroid.LONG)
+    }
+
+    const helperDataStatus = await Utils.fetchAndStoreHelperData()
+
+    if (helperDataStatus.helperDataUptoDate) {
+      setDataUptoDate(true)
+      ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
+    } else {
+      ToastAndroid.show(Strings.alertMessages.DataGettingFetched, ToastAndroid.LONG)
+    }
+  }
+
+  const initTask = async () => {
+    await fetchHelperDataAndShifts();
+    await Utils.fetchAndStoreShifts()
+    await Utils.checkShiftsComplete();
+  }
 
   useEffect(() => {
     console.log("fetching from homescreen----");
-    initTasks();
+    initTask();
   }, []);
 
   useEffect(() => {
@@ -49,7 +63,8 @@ const HomeScreen = ({ navigation }) => {
             width: 'auto',
             marginBottom: 2,
             marginTop: 22,
-            backgroundColor: lightTheme ? '#e5e7ea' : 'lightgrey',
+            //backgroundColor: lightTheme ? '#e5e7ea' : 'lightgrey',
+            backgroundColor: lightTheme ? (dataUptoDate ? '#e5e7ea' : '#cccccc') : (dataUptoDate ? 'lightgrey' : '#999999'),
             justifyContent: 'center',
             alignItems: 'center',
             marginHorizontal: 82,
@@ -71,16 +86,20 @@ const HomeScreen = ({ navigation }) => {
               Strings.screenNames.getString('Shifts', Strings.english),
             )
           }
+          disabled={!dataUptoDate}
         >
           <View
             style={{ padding: 20, alignItems: 'center', }}
           >
             <Image source={require('../../assets/icon-add-new-tree.png')}
-              style={{ width: 100, height: 100, }} />
+              //style={{ width: 100, height: 100, }} 
+              style={{ width: 100, height: 100, opacity: dataUptoDate ? 1 : 0.5 }}
+            />
             <Text
               style={{
                 fontFamily: 'Inter-Regular', fontSize: 20, fontWeight: '700',
-                color: lightTheme ? '#113160' : 'black', textAlign: 'center'
+                color: lightTheme ? (dataUptoDate ? '#113160' : '#666666') : (dataUptoDate ? 'black' : '#333333'),
+                //color: lightTheme ? '#113160' : 'black', textAlign: 'center'
               }}
             >{Strings.buttonLabels.Shifts}</Text>
           </View>
@@ -107,7 +126,7 @@ const HomeScreen = ({ navigation }) => {
             shadowRadius: 1,
             elevation: 3,
           }}
-          onPress={Utils.fetchAndStoreHelperData}
+          onPress={fetchHelperDataAndShifts}
         >
           <View
             style={{ padding: 20, alignItems: 'center', }}
@@ -175,3 +194,4 @@ const HomeScreen = ({ navigation }) => {
 };
 
 export default HomeScreen;
+

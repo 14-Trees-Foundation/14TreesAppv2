@@ -22,8 +22,6 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
     const [images, setImages] = useState(inImages);
     const [showImage, setShowImage] = useState(false);
 
-    const [localSaplingIds, setLocalSaplingIds] = useState([]);
-    const [liveSaplingIds, setLiveSaplingIds] = useState([]);
     const [treeItems, setTreeItems] = useState([]);
     const [selectedTreeType, setSelectedTreeType] = useState(inTreeType);
     const [selectedPlot, setSelectedPlot] = useState(null);
@@ -44,36 +42,27 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
     }, [treeData])
 
 
-    const loadDataCallback = async () => {
-        console.log('fetching data from local db')
+    const loadDataCallback = useCallback(async () => {
+        
         try {
             if (mode === treeFormModes.addTree) {
                 let userId = await Utils.getUserId();
                 setUserId(userId);
             }
             let { treeTypes } = await Utils.getLocalTreeTypesAndPlots();
-            let saplingDocsInLiveDB = await Utils.fetchSaplingIdsFromLiveDB();
-            let saplingsInLiveDB = saplingDocsInLiveDB.map((doc) => doc.sapling_id)
-            //console.log("saplings in Live DB ",saplingsInLiveDB)
-            setLiveSaplingIds(saplingsInLiveDB)
             setTreeItems(treeTypes);
-            let saplingIds = await Utils.fetchSaplingIdsFromLocalDB();
-            saplingIds = saplingIds.map((saplingid) => saplingid.name)
-            saplingIds = saplingIds.filter((id) => (id !== inSaplingId));
-            setLocalSaplingIds(saplingIds);
-
         } catch (error) {
             console.error(error);
             const stackTrace = error.stack;
             const errorLog = {
-                msg: "happened while trying to fetch tree details from local db(loadDataCallback())",
+                msg: 'happened while trying to fetch tree details from local db(loadDataCallback())',
                 error: JSON.stringify(error),
-                stackTrace: stackTrace
-            }
+                stackTrace: stackTrace,
+            };
             //console.log("error phone: ", errorLog);
             await Utils.logException(JSON.stringify(errorLog));
         }
-    }
+    }, []);
 
     useEffect(() => {
         loadDataCallback();
@@ -105,17 +94,42 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
 
     const onSave = async () => {
         //console.log("Sapling id value : ", saplingid)
+        if (mode === treeFormModes.addTree || (mode === treeFormModes.localEdit && inSaplingId !== saplingid)) {
+            let existsLocally = await Utils.checkIfSaplingExistsLocally(saplingid);
 
-        if (localSaplingIds.includes(saplingid)) {
-            Alert.alert(Strings.alertMessages.invalidSaplingId, Strings.labels.SaplingId + ' ' + saplingid + ' ' + Strings.alertMessages.alreadyExists);
-            return;
+            if (existsLocally) {
+                Alert.alert(
+                    Strings.alertMessages.invalidSaplingId,
+                    Strings.labels.SaplingId +
+                    ' ' +
+                    saplingid +
+                    ' ' +
+                    Strings.alertMessages.alreadyExists,
+                );
+                return;
+            } else {
+                let existsInLiveDB = await Utils.checkIfSaplingExistsInLiveDB(
+                    saplingid,
+                );
+                console.log(
+                    '---------------does sapling exist in live---------',
+                    existsInLiveDB,
+                );
+                if (existsInLiveDB) {
+                    Alert.alert(
+                        Strings.alertMessages.invalidSaplingId,
+                        Strings.labels.SaplingId +
+                        ' ' +
+                        saplingid +
+                        ' ' +
+                        Strings.alertMessages.alreadyExistsInDB,
+                    );
+                    return;
+                }
+            }
         }
-        else if (liveSaplingIds.includes(saplingid)) {
-            Alert.alert(Strings.alertMessages.invalidSaplingId, Strings.labels.SaplingId + ' ' + saplingid + ' ' + Strings.alertMessages.alreadyExistsInDB);
-            return;
-        }
-        else if (saplingid === null || selectedTreeType === null || selectedPlot === null || (selectedTreeType && Object.keys(selectedTreeType).length === 0) || (selectedPlot && Object.keys(selectedPlot).length === 0)) {
-            console.log("sd---" , saplingid, selectedTreeType, selectedPlot );
+        if (saplingid === null || selectedTreeType === null || selectedPlot === null || (selectedTreeType && Object.keys(selectedTreeType).length === 0) || (selectedPlot && Object.keys(selectedPlot).length === 0)) {
+            console.log("sd---", saplingid, selectedTreeType, selectedPlot);
             Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
             return;
         }
@@ -145,7 +159,6 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                 setlat(0);
                 setlng(0);
                 await onVerifiedSave(tree, images);
-                setLocalSaplingIds([...localSaplingIds, saplingid]);
 
             } catch (error) {
                 console.error(error);
@@ -182,19 +195,6 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                 placeholderTextColor={'black'}
                 onChangeText={(text) => { setSaplingId(text) }}
             />
-            {
-                liveSaplingIds.includes(saplingid) ? (
-                    <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: '500', padding: 5 }}>
-                        {saplingid} {Strings.alertMessages.alreadyExistsInDB}
-                    </Text>
-                ) : (
-                    localSaplingIds.includes(saplingid) && (
-                        <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>
-                            {saplingid} {Strings.alertMessages.alreadyExists}
-                        </Text>
-                    )
-                )
-            }
 
             <CustomDropdown
                 initItem={selectedTreeType}

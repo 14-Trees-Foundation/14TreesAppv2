@@ -20,9 +20,9 @@ export const treeFormModes = {
 
 export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage, onDeleteImage }) => {
 
-    const { inSaplingId, inLng, inLat, inImages, inTreeType, inPlot, inUserId} = treeData;
+    const { inSaplingId, inLng, inLat, inImages, inTreeType, inPlot, inUserId } = treeData;
 
-    
+
     const [saplingid, setSaplingId] = useState(inSaplingId);
     const [lat, setlat] = useState(inLat);
     const [lng, setlng] = useState(inLng);
@@ -31,8 +31,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     const [images, setImages] = useState(inImages);
     const [showImage, setShowImage] = useState(false);
 
-    const [localSaplingIds, setLocalSaplingIds] = useState([])
-    const [liveSaplingIds, setLiveSaplingIds] = useState([])
     const [treeItems, setTreeItems] = useState([]);
     const [plotItems, setPlotItems] = useState([]);
 
@@ -44,10 +42,10 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
 
     const { lightTheme } = useContext(GlobalContext);
 
-   
+
 
     useEffect(() => {
-       
+
         if (mode === treeFormModes.localEdit) {
             if (treeData.inImages.length > 0) {
                 setShowImage(true);
@@ -68,33 +66,21 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         }
     }, [treeData])
 
-    //Namrata
     const loadDataCallback = useCallback(async () => {
-
+        console.log('fetching data');
         try {
-            console.log('fetching data from local db')
-
             let { treeTypes, plots } = await Utils.getLocalTreeTypesAndPlots();
-            let saplingDocsInLiveDB = await Utils.fetchSaplingIdsFromLiveDB();
-            let saplingsInLiveDB = saplingDocsInLiveDB.map((doc) => doc.sapling_id)
-           
-            setLiveSaplingIds(saplingsInLiveDB)
             setTreeItems(treeTypes);
             setPlotItems(plots);
-            let saplingIds = await Utils.fetchSaplingIdsFromLocalDB();
-            saplingIds = saplingIds.map((saplingid) => saplingid.name);
-            saplingIds = saplingIds.filter((id) => (id !== inSaplingId));
-            setLocalSaplingIds(saplingIds);
-
         } catch (error) {
             console.error(error);
             const stackTrace = error.stack;
             const errorLog = {
-                msg: "happened while trying to fetch tree details from local db(loadDataCallback())",
+                msg: 'happened while trying to fetch tree details from local db(loadDataCallback())',
                 error: JSON.stringify(error),
-                stackTrace: stackTrace
-            }
-            //console.log("error phone: ", errorLog);
+                stackTrace: stackTrace,
+            };
+
             await Utils.logException(JSON.stringify(errorLog));
         }
     }, []);
@@ -126,7 +112,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             await onNewImage(image);
         }
         setImages([image]);
-        
+
         //setImages([...images, image]);
     }
 
@@ -143,15 +129,26 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     const onSave = async () => {
         console.log("Sapling id value : ", saplingid)
 
-        if (localSaplingIds.includes(saplingid)) {
-            Alert.alert(Strings.alertMessages.invalidSaplingId, Strings.labels.SaplingId + ' ' + saplingid + ' ' + Strings.alertMessages.alreadyExists);
-            return;
+        if (mode === treeFormModes.localEdit && inSaplingId !== saplingid) {
+            console.log("-------------localEdit in TreeForm------------")
+            let existsLocally = await Utils.checkIfSaplingExistsLocally(saplingid);
+
+            if (existsLocally) {
+                Alert.alert(Strings.alertMessages.invalidSaplingId, Strings.labels.SaplingId +
+                    ' ' + saplingid + ' ' + Strings.alertMessages.alreadyExists,);
+                return;
+            }
+            else {
+                let existsInLiveDB = await Utils.checkIfSaplingExistsInLiveDB(saplingid);
+                if (existsInLiveDB) {
+                    Alert.alert(Strings.alertMessages.invalidSaplingId,
+                        Strings.labels.SaplingId + ' ' + saplingid + ' ' + Strings.alertMessages.alreadyExistsInDB,
+                    );
+                    return;
+                }
+            }
         }
-        else if (liveSaplingIds.includes(saplingid) && mode !== treeFormModes.remoteEdit) {
-            Alert.alert(Strings.alertMessages.invalidSaplingId, Strings.labels.SaplingId + ' ' + saplingid + ' ' + Strings.alertMessages.alreadyExistsInDB);
-            return;
-        }
-        else if (saplingid === null || selectedTreeType === null || selectedPlot === null || selectedTreeType && Object.keys(selectedTreeType).length === 0 || (selectedPlot && Object.keys(selectedPlot).length === 0)) {
+        if (saplingid === null || selectedTreeType === null || selectedPlot === null || selectedTreeType && Object.keys(selectedTreeType).length === 0 || (selectedPlot && Object.keys(selectedPlot).length === 0)) {
             console.log(selectedTreeType, selectedPlot);
             Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
             return;
@@ -201,14 +198,14 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
 
     return (
 
-        <ScrollView 
-           keyboardShouldPersistTaps='handled'
-           scrollEnabled={true}
-           style={{
-            backgroundColor: 'white',
-            padding: 2, margin: 4,
-            borderRadius: 10, borderColor: '#ccc', borderWidth: 3,
-        }} >
+        <ScrollView
+            keyboardShouldPersistTaps='handled'
+            scrollEnabled={true}
+            style={{
+                backgroundColor: 'white',
+                padding: 2, margin: 4,
+                borderRadius: 10, borderColor: '#ccc', borderWidth: 3,
+            }} >
             <View style={{ margin: 4, borderRadius: 10 }}>
 
 
@@ -230,35 +227,23 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                 }
 
                 {mode === treeFormModes.localEdit && (
-                        <View style={{ marginTop: 15 }}>
-                            <TextInput
-                                defaultValue={saplingid}
-                                style={{
-                                    ...commonStyles.txtInput,
-                                    color: lightTheme ? '#52525C' : 'black',
-                                    fontSize: 15, borderRadius: 13,
-                                    fontWeight: saplingid ? '800' : 'normal'
-                                }}
-                                placeholder={Strings.labels.SaplingId}
-                                placeholderTextColor={'black'}
-                                onChangeText={(text) => { setSaplingId(text) }}
-                            />
-                            {
-                                liveSaplingIds.includes(saplingid) ? (
-                                    <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: '500', padding: 5 }}>
-                                        {saplingid} {Strings.alertMessages.alreadyExistsInDB}
-                                    </Text>
-                                ) : (
-                                    localSaplingIds.includes(saplingid) && (
-                                        <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>
-                                            {saplingid} {Strings.alertMessages.alreadyExists}
-                                        </Text>
-                                    )
-                                )
-                            }
+                    <View style={{ marginTop: 15 }}>
+                        <TextInput
+                            defaultValue={saplingid}
+                            style={{
+                                ...commonStyles.txtInput,
+                                color: lightTheme ? '#52525C' : 'black',
+                                fontSize: 15, borderRadius: 13,
+                                fontWeight: saplingid ? '800' : 'normal'
+                            }}
+                            placeholder={Strings.labels.SaplingId}
+                            placeholderTextColor={'black'}
+                            onChangeText={(text) => { setSaplingId(text) }}
+                        />
 
-                        </View>
-                    )
+
+                    </View>
+                )
                 }
 
 
@@ -297,8 +282,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                             onPress={() => {
                                 if (mode === treeFormModes.remoteEdit && disableButton) {
                                     ToastAndroid.show(Strings.alertMessages.deleteImageEdit, ToastAndroid.SHORT);
-                                } else if (mode === treeFormModes.addTree) {
-                                    pickImage(0) //open camera
                                 } else {
                                     setModalVisible(true);
                                 }

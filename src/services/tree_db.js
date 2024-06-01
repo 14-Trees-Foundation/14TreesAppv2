@@ -325,7 +325,7 @@ export class LocalDatabase {
                     trees.push(result.rows.item(index));
                 }
             });
-            console.log("trre--" , trees);
+            console.log("trre--", trees);
             return trees;
 
         } catch (error) {
@@ -368,7 +368,7 @@ export class LocalDatabase {
 
     deleteSyncedTrees = async () => {
         const query = `DELETE FROM ${treeTableName} where uploaded = ?`;
-        console.log(query);
+        //console.log(query);
         await this.db.executeSql(query, [1]);
         return await this.getAllTrees();
     }
@@ -568,7 +568,6 @@ export class LocalDatabase {
             const query = `SELECT saplings FROM ${localShiftTable} WHERE id = ?`;
             const result = await this.db.executeSql(query, [id]);
             let saplings = result[0].rows.item(0).saplings;
-
 
             saplings = JSON.parse(saplings);
 
@@ -1151,11 +1150,102 @@ export class LocalDatabase {
 
     }
 
+    //namrata
+    deleteSyncedShifts = async (shift_ids, uploadedSaplings) => {
+        console.log('-------------deleting shifts------------', shift_ids, uploadedSaplings);
+        try {
+            for (let i = 0; i < shift_ids.length; i++) {
+                //console.log('------------shift_id[i]---------', typeof shift_ids[i]);
+                const results = await this.db.executeSql(
+                    `SELECT saplings FROM ${localShiftTable} WHERE shift_id = ?`, [shift_ids[i]]
+                );
+
+                const result = results[0].rows.item(0);
+                let saplingArray = JSON.parse(result?.saplings || '[]');
+                console.log("sapling for live shift---", saplingArray);
+
+                //if all saplings uploaded delete the entire shift else keep the tree.
+                let uploadedShift = true;
+                for (const sapling of saplingArray) {
+                    if (sapling.uploaded == 0) {
+                        uploadedShift = false;
+                        break;
+                    }
+                }
+
+                if (uploadedShift) {
+                    console.log("--------deleteing older shift data and fetching new ones-----");
+                    const query = `DELETE FROM ${localShiftTable} where shift_id = '${shift_ids[i]}'`;
+                    await this.db.executeSql(query);
+                }
+
+                //should i implement the else part to delete only the uploaded trees.
+            }
+        } catch (error) {
+            console.error(error);
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: 'Error occurred while trying to delete synced shifts from local db (inside tree_db(deleteSyncedShifts))',
+                error: JSON.stringify(error),
+                stackTrace: stackTrace,
+            };
+            await this.logExceptionLocalDB(JSON.stringify(errorLog));
+        }
+
+
+    };
+
+    // //modify this as i don't have saplingsInLocalShifts table
+    // deleteSyncedSaplingsInLocalShifts =async saplings =>{
+    //     const query = `DELETE FROM ${saplingsInLocalShifts} where sapling_id IN ('${saplings}')`;
+    //     console.log('------------deleting sapling---------', saplings);
+    //     await this.db.executeSql(query);
+    // }
 
     deletePlotSaplings = async () => {
         const query = `DELETE FROM sapling_plot`;
         return this.db.executeSql(query);
     }
+
+    checkIfSaplingExistsLocally = async sapling => {
+        try {
+            let res1 = await this.db.executeSql(
+                `SELECT * FROM ${treeTableName} WHERE saplingid='${sapling}'`,
+            );
+            const rowCount = res1[0].rows.length;
+            // Check if the sapling exists
+            return rowCount > 0;
+        } catch (error) {
+            console.error(error);
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: 'Error occurred while trying to check if sapling exists locally (inside tree_db(checkIfSaplingExistsLocally))',
+                error: JSON.stringify(error),
+                stackTrace: stackTrace,
+            };
+            await this.logExceptionLocalDB(JSON.stringify(errorLog));
+        }
+    };
+
+    checkIfSaplingExistsInLiveDB = async sapling => {
+        try {
+            let res1 = await this.db.executeSql(
+                `SELECT * FROM ${saplingsTableName} WHERE sapling_id='${sapling}'`,
+            );
+            const rowCount = res1[0].rows.length;
+            // Check if the sapling exists
+            return rowCount > 0;
+        } catch (error) {
+            console.error(error);
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: 'Error occurred while trying to check if sapling exists in liveDB(inside tree_db(checkIfSaplingExistsLocally))',
+                error: JSON.stringify(error),
+                stackTrace: stackTrace,
+            };
+            await this.logExceptionLocalDB(JSON.stringify(errorLog));
+        }
+    };
 
     getSaplingsforPlot = async (plotId) => {
         // console.log('plot id: ', plot_id)

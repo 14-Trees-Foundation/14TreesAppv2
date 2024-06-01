@@ -102,7 +102,10 @@ const EditTreeScreen = ({ navigation }) => {
         setDeletedImages([]);
 
         const treeDetails = await DataService.fetchTreeDetails(saplingid, adminID);
-        if (!treeDetails) { return; }
+        if (!treeDetails) { 
+            ToastAndroid.show(`${Strings.alertMessages.UnableToFetch} ${saplingid} `, ToastAndroid.LONG);
+            return; 
+        }
         
         const detailsForTreeForm = { ...Constants.treeFormTemplateData };
         const treeType = await Utils.treeTypeFromID(treeDetails.tree_id);

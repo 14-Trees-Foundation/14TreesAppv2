@@ -29,9 +29,9 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
         const user_id = await Utils.getUserId();
 
         const sapling = {
-            sapling_id : saplingId,
+            sapling_id: saplingId,
             sequence_no: (treesPlanted + 1),
-            uploaded : 0,
+            uploaded: 0,
         }
 
         const shiftData = {
@@ -44,13 +44,13 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
             shiftuploadcomplete: 0,
             timetaken: timetaken,
             treesplanted: finalShiftData.current.treesPlanted,
-            sapling : sapling
+            sapling: sapling
         }
 
 
         console.log("final shift data add tree----", shiftData);
         await Utils.saveShiftsToLocalDB(shiftData);
-        
+
     }
 
     async function onVerifiedSave(tree, images) {
@@ -81,23 +81,43 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
 
     const fetchTreeDetails = async (saplingId) => {
         // console.log('fetching tree details');    
+        if (saplingId === null || saplingId === undefined) {
+            ToastAndroid.show(`${Strings.alertMessages.UnableToFetch} ${saplingId} `, ToastAndroid.LONG);
+            setModalVisible(false)
+            return
+        }
         const treeDetails = await Utils.fetchLocalTree(saplingId);
         //console.log("treeDetails: ", treeDetails);
-        if (!treeDetails) { return }
+        if (!treeDetails) {
+            ToastAndroid.show(`${Strings.alertMessages.UnableToFetch} ${saplingId} `, ToastAndroid.LONG);
+            setModalVisible(false);
+            return;
+        }
 
-        const detailsForTreeForm = { ...Constants.treeFormTemplateData };
-        const treeType = await Utils.treeTypeFromID(treeDetails.type_id);
-        const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
-        detailsForTreeForm.inImages = treeDetails.images;
-        // detailsForTreeForm.inLat = 0;
-        // detailsForTreeForm.inLng = 0;
-        detailsForTreeForm.inLat = Number.parseFloat(treeDetails.coordinates[0]);
-        detailsForTreeForm.inLng = Number.parseFloat(treeDetails.coordinates[1]);
-        detailsForTreeForm.inSaplingId = treeDetails.sapling_id;
-        detailsForTreeForm.inTreeType = treeType;
-        detailsForTreeForm.inPlot = plot;
-        detailsForTreeForm.inUserId = treeDetails.user_id;
-        setDetails(detailsForTreeForm);
+        if (treeDetails.type_id && treeDetails.plot_id && treeDetails.images && treeDetails.coordinates[0] && treeDetails.coordinates[1] && treeDetails.user_id) {
+            const detailsForTreeForm = { ...Constants.treeFormTemplateData };
+            const treeType = await Utils.treeTypeFromID(treeDetails.type_id);
+            const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
+            detailsForTreeForm.inImages = treeDetails.images;
+            detailsForTreeForm.inLat = 0;
+            detailsForTreeForm.inLng = 0;
+            detailsForTreeForm.inLat = Number.parseFloat(treeDetails.coordinates[0]);
+            detailsForTreeForm.inLng = Number.parseFloat(treeDetails.coordinates[1]);
+            detailsForTreeForm.inSaplingId = treeDetails.sapling_id;
+            detailsForTreeForm.inTreeType = treeType;
+            detailsForTreeForm.inPlot = plot;
+            detailsForTreeForm.inUserId = treeDetails.user_id;
+
+            setDetails(detailsForTreeForm);
+        } else {
+            //delete the tree and show toast message to user
+            navigation.goBack();
+            ToastAndroid.show(`${Strings.alertMessages.CorruptedData} `, ToastAndroid.LONG);
+            await Utils.deleteTreeAndImages(saplingId);
+            //delete from the local shift table also
+            await Utils.deleteSaplingShiftLocalDB(saplingId, shiftID);
+            return;
+        }
     }
 
     const fetchDetails = async () => {
@@ -140,7 +160,7 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
                     Alert.alert(Strings.alertMessages.NoPlotSelected, Strings.alertMessages.SelectPlot);
                     return;
                 }
-                
+
                 setShiftDone(false);
                 const shiftData = {
                     user_id: await Utils.getUserId(),
@@ -163,7 +183,7 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
             }
 
         } else {
-            await Utils.updateTreesWithChangedPlot(plotSelected.value,shiftID)
+            await Utils.updateTreesWithChangedPlot(plotSelected.value, shiftID)
             if (plotSelected === null) {
                 Alert.alert(Strings.alertMessages.NoPlotSelected, Strings.alertMessages.SelectPlot);
                 return;

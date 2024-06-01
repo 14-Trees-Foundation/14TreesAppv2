@@ -161,6 +161,7 @@ export class Strings {
             Settings: "Please go to Settings and grant permissions",
             //utils
             DataUptodate: "Tree types and plot up to date.",
+            DataGettingFetched : "Please wait while helper data is being fetched.",
             ShiftDataUptodate: "Shift data up to date",
             plotSaplingsDataUpToDate: "Plot sapling data up-to-date",
             FailureSavingTrees: "Failed to save some tree types. See logs.",
@@ -216,8 +217,11 @@ export class Strings {
             FinishShift: "Do you want to finish the Shift ?", //manjur,
             Synched: "Synched",
             FailedUpdateSapling : "Failed to update sapling: ",
-            UnaableToFetchData: "Unable to fetch helper data",
-            DeleteTreeData : "Unable to fetch complete data... Please add tree details again !!"
+            //editlocaltree
+            UnableToFetch : "Unable to fetch data for",
+            CorruptedData: "The data for selected sapling seems to be corrupted. Please add it again",
+            DeleteTreeData : "Unable to fetch complete data... Please add tree details again !!",
+            UnableToFetchHelperData : "Unable to fetch helper data. Please check internet connection..."
         },
         "mr": {
             GPSUnavailable: "त्रुटी: विनंतीची वेळ संपली. GPS सध्या उपलब्ध नाही.",
@@ -237,6 +241,7 @@ export class Strings {
             Settings: "कृपया सेटिंग्ज वर जाऊन परवानगी द्या",
             //utils
             DataUptodate: "झाडाचे प्रकार आणि प्लॉट अद्याप अपडेट आहेत.",
+            DataGettingFetched : "कृपया मदतनीस डेटा प्राप्त होत असताना प्रतीक्षा करा.",
             ShiftDataUptodate: "डेटा अद्ययावत शिफ्ट करा", //manjur
             plotSaplingsDataUpToDate: "प्लॉट रोपटी डेटा अद्ययावत.",
             FailureSavingTrees: "काही झाडाचे प्रकार सेव करण्यात असफल. लॉग पहा.",
@@ -293,8 +298,11 @@ export class Strings {
             FinishShift: "तुम्हाला शिफ्ट पूर्ण करायची आहे का ?", //manjur
             Synched: "समक्रमित", //manjur
             FailedUpdateSapling: "रोपे अपडेट करण्यात अयशस्वी", //manjur
-            UnaableToFetchData : "मदतनीस डेटा आणण्यात अक्षम", //manjur
-            DeleteTreeData : "संपूर्ण डेटा आणण्यात अक्षम... कृपया वृक्ष तपशील पुन्हा जोडा!!"
+            //editlocaltree
+            UnableToFetch : "डेटा आणण्यात अयशस्वी",
+            CorruptedData : "निवडलेल्या रोपट्याचा डेटा करप्ट झाला आहे. कृपया ते पुन्हा जोडा",
+            DeleteTreeData : "संपूर्ण डेटा आणण्यात अक्षम... कृपया वृक्ष तपशील पुन्हा जोडा!!",
+            UnableToFetchHelperData: "मदतनीस डेटा आणण्यात अक्षम. कृपया इंटरनेट कनेक्शन तपासा..." //manjur
         }
     })
     static buttonLabels = new LocalizedStrings({

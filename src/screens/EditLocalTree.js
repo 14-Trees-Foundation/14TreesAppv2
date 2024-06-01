@@ -6,38 +6,43 @@ import { Constants, Utils } from '../services/Utils';
 import LoadingScreen from './LoadingScreen';
 
 const fetchTreeDetails = async (saplingId, setDetails, navigation, shiftID) => {
-    console.log('fetching tree details' );
+    console.log('fetching tree details');
+    if (saplingId === null || saplingId === undefined) {
+        ToastAndroid.show(`${Strings.alertMessages.UnableToFetch} ${saplingId} `, ToastAndroid.LONG);
+        setModalVisible(false)
+        return
+    }
+
     const treeDetails = await Utils.fetchLocalTree(saplingId);
     //console.log("treeDetails: ", treeDetails, typeof saplingId);
     if (!treeDetails) {
-        //navigation.goBack(); 
-        return 
+        navigation.goBack() //remains on the trees in shift screen
+        ToastAndroid.show(`${Strings.alertMessages.UnableToFetch} ${saplingId} `, ToastAndroid.LONG);
+        return;
     }
 
     if (treeDetails.type_id && treeDetails.plot_id && treeDetails.images && treeDetails.coordinates[0] && treeDetails.coordinates[1] && treeDetails.user_id) {
+        const detailsForTreeForm = { ...Constants.treeFormTemplateData };
+        const treeType = await Utils.treeTypeFromID(treeDetails.type_id);
+        const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
+        detailsForTreeForm.inImages = treeDetails.images;
+        detailsForTreeForm.inLat = 0;
+        detailsForTreeForm.inLng = 0;
+        detailsForTreeForm.inLat = Number.parseFloat(treeDetails.coordinates[0]);
+        detailsForTreeForm.inLng = Number.parseFloat(treeDetails.coordinates[1]);
+        detailsForTreeForm.inSaplingId = treeDetails.sapling_id;
+        detailsForTreeForm.inTreeType = treeType;
+        detailsForTreeForm.inPlot = plot;
+        detailsForTreeForm.inUserId = treeDetails.user_id;
 
-
-    const detailsForTreeForm = { ...Constants.treeFormTemplateData };
-    const treeType = await Utils.treeTypeFromID(treeDetails.type_id);
-    const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
-    detailsForTreeForm.inImages = treeDetails.images;
-    detailsForTreeForm.inLat = 0;
-    detailsForTreeForm.inLng = 0;
-    detailsForTreeForm.inLat = Number.parseFloat(treeDetails.coordinates[0]);
-    detailsForTreeForm.inLng = Number.parseFloat(treeDetails.coordinates[1]);
-    detailsForTreeForm.inSaplingId = treeDetails.sapling_id;
-    detailsForTreeForm.inTreeType = treeType;
-    detailsForTreeForm.inPlot = plot;
-    detailsForTreeForm.inUserId = treeDetails.user_id;
-
-    setDetails(detailsForTreeForm);
-    }else{
+        setDetails(detailsForTreeForm);
+    } else {
         //delete the tree and show toast message to user
         navigation.goBack();
+        ToastAndroid.show(`${Strings.alertMessages.CorruptedData} `, ToastAndroid.LONG);
         await Utils.deleteTreeAndImages(saplingId);
         //delete from the local shift table also
-         await Utils.deleteSaplingShiftLocalDB(saplingId, shiftID);
-        ToastAndroid.show(Strings.alertMessages.UnaableToFetchData, ToastAndroid.LONG);
+        await Utils.deleteSaplingShiftLocalDB(saplingId, shiftID);
         return;
     }
 }
@@ -47,7 +52,7 @@ export const EditLocalTree = ({ navigation, route }) => {
     const [saplingid, setSaplingid] = useState(sapling_id);
     const [details, setDetails] = useState(null);
 
-    console.log("sapling id and shiftID in edit local tree---", sapling_id , shiftID);
+    console.log("sapling id and shiftID in edit local tree---", sapling_id, shiftID);
 
     useEffect(() => {
 

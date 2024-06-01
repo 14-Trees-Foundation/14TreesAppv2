@@ -27,7 +27,7 @@ const getReadableProgress = (progress) => {
   return Math.round(progress * 100).toString() + '%';
 }
 
-const SyncDisplay = ({ navigation, onSyncComplete }) => {
+const SyncDisplay = ({ navigation }) => {
   const [syncDate, setSyncDate] = useState('');
   const [treeCounts, setTreeCounts] = useState(null);
   const [progress, setProgress] = useState(0);
@@ -65,6 +65,21 @@ const SyncDisplay = ({ navigation, onSyncComplete }) => {
 
   }
 
+  const deleteSyncedTreesAndShifts = async (response, uploadedSaplings) => {
+    
+    const uploadedShiftIDs = Object.values(response.shiftDetails)
+      .filter(shift => shift.shiftUploaded)
+      .map(shift => shift.shiftID);
+
+      //take care of uploadedSaplings
+    await Utils.deleteSyncedShiftsBasedOnSaplings(uploadedShiftIDs, uploadedSaplings);
+
+    //await Utils.deleteSyncedSaplingsInLocalShifts(uploadedSaplings);
+    
+    //same as my code
+    let remainingTrees = await Utils.deleteSyncedTreesInTreesTable()
+    //console.log("------------remainingTrees------------", remainingTrees)
+  };
 
   const commenceUpload = async () => {
 
@@ -88,13 +103,17 @@ const SyncDisplay = ({ navigation, onSyncComplete }) => {
       await Utils.logException(JSON.stringify(errorLog));
     }
 
+    let responseFromSyncShifts;
+
     try {
       if (shiftsCount && shiftsCount.pending == 0) {
         ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
         return;
       }
-      const failures = await Utils.syncShifts();
-      setFailedShifts(failures);
+      //const failures = await Utils.syncShifts();
+       responseFromSyncShifts = await Utils.syncShifts();
+
+      setFailedShifts(responseFromSyncShifts.failures);
       setProgress(1);
       updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
       setTimeout(() => {
@@ -118,7 +137,8 @@ const SyncDisplay = ({ navigation, onSyncComplete }) => {
         ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
         return;
       }
-      const failures = await Utils.upload(setProgress);
+      //const failures = await Utils.upload(setProgress);
+      let {failures, uploadedSaplings} = await Utils.upload(setProgress);
 
       setFailedTrees(failures);
       setProgress(1);
@@ -127,7 +147,9 @@ const SyncDisplay = ({ navigation, onSyncComplete }) => {
         setShowProgress(false);
       }, 2000);
 
-
+      await deleteSyncedTreesAndShifts(responseFromSyncShifts, uploadedSaplings);
+      await Utils.fetchAndStoreHelperData();
+      await Utils.fetchAndStoreShifts()
 
     } catch (error) {
       console.log("unable to sync trees---", error);

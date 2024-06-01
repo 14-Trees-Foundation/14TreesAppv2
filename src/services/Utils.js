@@ -55,7 +55,7 @@ export class Utils {
             }
             final.push(treedata);
         }
-        console.log("final sapling from live shifts---",  res);
+        console.log("final sapling from live shifts---", res);
         return final;
     }
 
@@ -87,7 +87,7 @@ export class Utils {
         return;
     }
 
-    static async deleteSaplingShiftLocalDB(saplingId, shiftID){
+    static async deleteSaplingShiftLocalDB(saplingId, shiftID) {
         await this.localdb.deleteSaplingShiftDB(saplingId, shiftID);
     }
 
@@ -100,7 +100,7 @@ export class Utils {
         return null;
     }
 
-    static async updateSaplingInShiftDB(newSaplingId, inSaplingId, shiftID){
+    static async updateSaplingInShiftDB(newSaplingId, inSaplingId, shiftID) {
         await this.localdb.updateSaplingLocalShiftDb(newSaplingId, inSaplingId, shiftID);
     }
 
@@ -115,7 +115,7 @@ export class Utils {
     }
 
     static async saveTreeAndImagesToLocalDB(tree, images) {
-        console.log("--------------updating image------------------" ,  tree)
+        console.log("--------------updating image------------------", tree)
         await this.localdb.saveTree(tree, 0);
 
         for (let index = 0; index < images.length; index++) {
@@ -228,25 +228,30 @@ export class Utils {
 
     static async fetchAndStoreHelperData() {
         console.log('fetching helper data in Utils');
+        // console.log('ldb: ', this.localdb)
         let lastHash = await AsyncStorage.getItem(Constants.lastHashKey);
         lastHash = String(lastHash);//take care of null values.
         let userId = await Utils.getUserId();
         console.log('requesting: ', userId, lastHash)
+        //setStatus(requesting)
 
         const helperData = await DataService.fetchHelperData(userId, lastHash);
 
         console.log("userId ", userId, "lastHash ", lastHash)
+    
         if (!helperData) {
-            ToastAndroid.show(Strings.alertMessages.UnaableToFetchData, ToastAndroid.LONG)
-            return;
+            ToastAndroid.show(Strings.alertMessages.UnableToFetchHelperData,ToastAndroid.LONG)
+            return ({helperDataUptoDate : true});
         }
+        
         const data = helperData.data['data'];
         const newHash = helperData.data['hash'];
         console.log("newHash ", newHash)
         if (newHash == lastHash) {
             console.log("---------------------------newHash == lastHash-------------")
-            ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
-            return;
+            // ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
+            // setStatus(Data updated)
+            return ({helperDataUptoDate : true});
         }
         if (data) {
             console.log("---------------------------New Data-------------")
@@ -256,9 +261,11 @@ export class Utils {
             console.log("data['saplings'] :", data['saplings'].length)
             await Utils.storeTrees(data['saplings'])
             await AsyncStorage.setItem(Constants.lastHashKey, newHash);
-            ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
-            return;
+            // ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
+            // setstatus(data updated)
+            return ({helperDataUptoDate : true});
         }
+        // setstatus(failed)
     }
 
     static async fetchAndStoreShifts() {
@@ -268,9 +275,10 @@ export class Utils {
         const shiftData = await DataService.fetchShifts(userId, lastHash);
 
         console.log("lastHash shift---", lastHash)
+
         if (!shiftData) {
-            ToastAndroid.show(Strings.alertMessages.UnaableToFetchData, ToastAndroid.LONG)
-            return;//error display, logging done by DataService.
+            ToastAndroid.show(Strings.alertMessages.UnableToFetchHelperData, ToastAndroid.LONG)
+            return;
         }
 
         const shiftsForCurrentUser = shiftData.data['data'];
@@ -293,8 +301,31 @@ export class Utils {
         console.log("--------------shiftsForCurrentUser---------", shiftsForCurrentUser.data)
     }
 
+    //namrata
+    static async deleteSyncedShiftsBasedOnSaplings(shifts , uploadedSaplings){
+        //console.log("-------------type of shifts-------------", typeof shifts)
+        await this.localdb.deleteSyncedShifts(shifts, uploadedSaplings)
+    }
+
+    //not needed for my code
+    // static async deleteSyncedSaplingsInLocalShifts(saplings) {
+    //     await this.localdb.deleteSyncedSaplingsInLocalShifts(saplings);
+    // }
+
     static async deletePlotSaplings() {
         await this.localdb.deletePlotSaplings();
+    }
+
+    static async checkIfSaplingExistsLocally(sapling){
+        console.log("----------in checkIfSaplingExistsLocally--------------")
+        let ifExists = await this.localdb.checkIfSaplingExistsLocally(sapling);
+        return ifExists
+    }
+
+    static async checkIfSaplingExistsInLiveDB(sapling){
+        console.log("----------in checkIfSaplingExistsInLiveDB--------------")
+        let ifExists = await this.localdb.checkIfSaplingExistsInLiveDB(sapling);
+        return ifExists
     }
 
     static async checkShiftsComplete() {
@@ -303,7 +334,7 @@ export class Utils {
 
             for (const shift of shifts) {
                 const saplings = JSON.parse(shift.saplings);
-                
+
                 //console.log("checkShiftsComplte----", saplings);
 
                 if (shift.shiftended == 0) {
@@ -332,7 +363,7 @@ export class Utils {
                         shiftuploadcomplete: uploadedShift ? 1 : 0,
                         timetaken: shift.timetaken,
                         treesplanted: shift.treesplanted,
-                        saplings : saplings
+                        saplings: saplings
                     }
 
                     console.log("final shift data from home screen---", shiftData);
@@ -526,7 +557,7 @@ export class Utils {
         }
     }
 
-    static async deleteSyncedTrees() {
+    static async deleteSyncedTreesInTreesTable() {
         let newTreesList = await this.localdb.deleteSyncedTrees();
         newTreesList = await Promise.all(newTreesList.map(async (tree) => {
             return await Utils.formatLocalTreeToJSON(tree);
@@ -572,14 +603,28 @@ export class Utils {
             const response = await DataService.uploadShifts(shifts);
             console.log("response from syncShifts---", response);
             let failures = await Utils.setShiftsSyncStatus(response, shifts);
-            return failures;
-
+            return { shiftDetails: response, failures: failures };
 
         } catch (error) {
             console.log("happended while sync shifts---", error);
         }
 
     }
+
+    //manjur
+    // static async syncShifts() {
+    //     try {
+    //         const shifts = await Utils.getShiftsIDLocalDB(0); //get not uploaded shifts
+    //         console.log("before upload shift data:---", shifts);
+    //         const response = await DataService.uploadShifts(shifts);
+    //         console.log("response from syncShifts---", response);
+    //         let failures = await Utils.setShiftsSyncStatus(response, shifts);
+    //         return failures;
+    //     } catch (error) {
+    //         console.log("happended while sync shifts---", error);
+    //     }
+
+    // }
 
     static async setShiftsSyncStatus(statuses, shifts) {
         const failures = [];
@@ -639,8 +684,6 @@ export class Utils {
 
     static async upload(onProgress = undefined) {
         const final = await Utils.fetchTreesFromLocalDB(0);//not uploaded.
-        console.log('Attempting upload with total trees = ', final.length);
-
         const failures = [];
         for (let i = 0; i < final.length; i += MIN_BATCH_SIZE) {
             const batchFailures = await Utils.batchUpload(final.slice(i, i + MIN_BATCH_SIZE));
@@ -657,8 +700,34 @@ export class Utils {
         else {
             Alert.alert(Strings.alertMessages.SyncFailure, Strings.alertMessages.ContactExpert);
         }
-        return failures;
+        const finalSaplingIds = final.map(item => item.sapling_id);
+        const uploadedSaplings = finalSaplingIds.filter(sapling_id => !failures.includes(sapling_id));
+        return { failures: failures, uploadedSaplings: uploadedSaplings };
     };
+
+    //manjur
+    // static async upload(onProgress = undefined) {
+    //     const final = await Utils.fetchTreesFromLocalDB(0);//not uploaded.
+    //     console.log('Attempting upload with total trees = ', final.length);
+
+    //     const failures = [];
+    //     for (let i = 0; i < final.length; i += MIN_BATCH_SIZE) {
+    //         const batchFailures = await Utils.batchUpload(final.slice(i, i + MIN_BATCH_SIZE));
+    //         failures.push(...batchFailures);
+    //         if (onProgress) {
+    //             onProgress(i / final.length);
+    //         }
+    //     }
+    //     await Utils.setLastSyncDateNow();
+    //     console.log("failed upload: ---", failures);
+    //     if (failures.length === 0) {
+    //         Alert.alert(Strings.alertMessages.SyncSuccess, Strings.alertMessages.CheckLocalList);
+    //     }
+    //     else {
+    //         Alert.alert(Strings.alertMessages.SyncFailure, Strings.alertMessages.ContactExpert);
+    //     }
+    //     return failures;
+    // };
 
     static userId;
     static adminId;
@@ -679,7 +748,7 @@ export class Utils {
 
     }
 
-    static async fetchSaplingsFromLocalShiftDB(id){
+    static async fetchSaplingsFromLocalShiftDB(id) {
         let res = await this.localdb.getSaplingsLocalShiftDB(id);
         var final = [];
         for (let index = 0; index < res.length; index++) {
@@ -694,7 +763,7 @@ export class Utils {
         return final;
     }
 
-    
+
     static async fetchTreesFromLocalDB(uploaded = undefined) {
         let res;
         if (uploaded !== undefined) {
