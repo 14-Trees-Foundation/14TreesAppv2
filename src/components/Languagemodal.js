@@ -1,9 +1,11 @@
 import { View, Text, Modal, StyleSheet, FlatList, TouchableOpacity, Dimensions, Image, } from 'react-native';
 import React, { useState, useContext } from 'react';
 import { Strings } from '../services/Strings';
-import { CancelButton, SaveButton } from './Components';
 const { height, width } = Dimensions.get('window');
 import GlobalContext from '../context/GlobalContext ';
+import { Button } from 'react-native-paper';
+import { CustomButtonStyles, Iconstyles, languageModalStyles } from '../services/Styles';
+import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const LanguageModal = ({ langModalVisible, setLangModalVisible }) => {
   const { langChanged, setLangChanged } = useContext(GlobalContext);
@@ -64,9 +66,9 @@ const LanguageModal = ({ langModalVisible, setLangModalVisible }) => {
         setLangModalVisible(!langModalVisible);
       }}>
 
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <Text style={styles.title}>Select Language</Text>
+      <View style={languageModalStyles.centeredView}>
+        <View style={languageModalStyles.modalView(width)}>
+          <Text style={languageModalStyles.title}>Select Language</Text>
           <View style={{ width: '100%' }}>
             <FlatList
               data={languages}
@@ -74,7 +76,7 @@ const LanguageModal = ({ langModalVisible, setLangModalVisible }) => {
                 return (
                   <TouchableOpacity
                     style={[
-                      styles.languageItem,
+                      languageModalStyles.languageItem,
                       { borderColor: item.selected == true ? 'blue' : 'black' },
                     ]}
                     onPress={() => {
@@ -83,12 +85,12 @@ const LanguageModal = ({ langModalVisible, setLangModalVisible }) => {
                     {item.selected === true ? (
                       <Image
                         source={require('../../assets/selected.png')}
-                        style={[styles.icon, { tintColor: 'blue' }]}
+                        style={[languageModalStyles.icon, { tintColor: 'blue' }]}
                       />
                     ) : (
                       <Image
                         source={require('../../assets/non_selected.png')}
-                        style={styles.icon}
+                        style={languageModalStyles.icon}
                       />
                     )}
 
@@ -105,13 +107,43 @@ const LanguageModal = ({ langModalVisible, setLangModalVisible }) => {
               }}
             />
           </View>
-          <View style={styles.btns}>
-            <CancelButton
-              onPress={handleCancelChanges}
-            />
-            <SaveButton
-              onPress={handleLanguageChanges}
-            />
+
+          <View style={languageModalStyles.btns}>
+            <View style={CustomButtonStyles.buttonRow}>
+              <View style={CustomButtonStyles.buttonContainer}>
+                <Button
+                  icon={() => (
+                    <View style={Iconstyles.buttonContent}>
+                      <MCIcon name="cancel" size={30} color="white" />
+                    </View>
+                  )}
+                  mode="contained"
+                  buttonColor='red'
+                  labelStyle={CustomButtonStyles.buttonLabel}
+                  style={CustomButtonStyles.button}
+                  onPress={handleCancelChanges}
+                >
+                  {Strings.buttonLabels.cancel}
+                </Button>
+
+              </View>
+              <View style={CustomButtonStyles.buttonContainer}>
+                <Button
+                  icon={() => (
+                    <View style={Iconstyles.buttonContent}>
+                      <MCIcon name="check" size={30} color="white" />
+                    </View>
+                  )}
+                  onPress={handleLanguageChanges}
+                  mode="contained"
+                  buttonColor='#059636'
+                  labelStyle={CustomButtonStyles.buttonLabel}
+                  style={CustomButtonStyles.button}
+                >
+                  {Strings.buttonLabels.Submit}
+                </Button>
+              </View>
+            </View>
           </View>
         </View>
       </View>
@@ -121,65 +153,3 @@ const LanguageModal = ({ langModalVisible, setLangModalVisible }) => {
 
 export default LanguageModal;
 
-const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    //marginTop: 192,
-    backgroundColor: 'rgba(0,0,0,.5)',
-  },
-  modalView: {
-    margin: 20,
-    width: width - 20,
-    // height: height / 2,
-
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  languageItem: {
-    width: '100%',
-    height: 50,
-    borderRadius: 10,
-    borderWidth: 0.5,
-    marginTop: 10,
-    paddingLeft: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  icon: {
-    width: 24,
-    height: 24,
-  },
-  btns: {
-    flexDirection: 'row',
-    width: '100%',
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 20,
-  },
-  btn2: {
-    width: '40%',
-    height: 50,
-    borderWidth: 0.5,
-    borderRadius: 10,
-    backgroundColor: '#4B68E9',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});

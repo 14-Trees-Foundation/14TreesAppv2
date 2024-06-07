@@ -1,4 +1,4 @@
-import { commonStyles } from '../services/Styles';
+import { commonStyles, shiftHeaderStyles } from '../services/Styles';
 import GlobalContext from '../context/GlobalContext ';
 import Timer from "../components/Timer";
 import Sound from 'react-native-sound';
@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { ScrollView, Text, TouchableOpacity, View, } from 'react-native';
 import { Utils } from '../services/Utils';
+import { Card } from 'react-native-paper';
 
 const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
 
@@ -69,14 +70,9 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
     }, []);
 
     return (
-        <View style={{
-            backgroundColor: 'white',
-            padding: 2, margin: 4, borderRadius: 10, borderColor: '#ccc', borderWidth: 3,
-            //flex: 1, 
-            //height: '100%'
-        }}>
 
-            <View style={{ margin: 4, borderRadius: 10, marginBottom: 0 }}>
+        <View style={shiftHeaderStyles.outerContainer}>
+            <View style={shiftHeaderStyles.innerContainer}>
 
                 {
                     plotSelected && <TouchableOpacity
@@ -85,55 +81,30 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
                         }>
 
                         <Text
-                            style={{
-                                fontFamily: 'Inter-Regular',
-                                fontWeight: 'bold',
-                                color: lightTheme ? '#52525C' : 'black',
-                                margin: 8,
-                                fontSize: 18,
-                                //opacity: 0.5,
-                                textAlign: 'center',
-                                marginTop: 1,
-                                maxWidth: '100%',
-                                overflow: 'hidden', // Ensure overflow is hidden
-                                textDecorationLine: 'underline', // Add underline to make it look like a hyperlink
-                            }}
+                            style={shiftHeaderStyles.plotName(lightTheme)}
                             numberOfLines={1} // Limit to a single line
                             ellipsizeMode="tail" // Truncate at the end with ellipsis
                         >
                             {plotSelected.name}
                         </Text>
-                        
+
                     </TouchableOpacity>
                 }
 
 
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: '100%', padding: 4 }}>
-                    {/* First View */}
-
-                    <View style={{
-                        //flex: 1, 
-                        flexDirection: 'column', flexWrap: 'wrap', width: '50%', marginBottom: 1, marginTop: 0
-                    }}>
-                        {/* Time View */}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 12, }}>
+                <View style={shiftHeaderStyles.shiftDetailsContainer}>
+                    <View style={shiftHeaderStyles.shiftDetailsView}>
+                        <View style={shiftHeaderStyles.innerView}>
                             <View style={{ margin: 3, marginTop: 0 }}>
                                 <Icon name="clock" size={15} color={lightTheme ? "#52525C" : 'black'} />
                             </View>
-                            <Text style={{
-                                fontSize: 18,
-                                color: lightTheme ? '#52525C' : 'black',
-                                fontFamily: 'Inter-Regular',
-                                fontWeight: '700',
-                                margin: 8,
-                                marginTop: 0
-                            }}>
+                            <Text style={shiftHeaderStyles.shiftTime(lightTheme)}>
                                 {shiftTime}
                             </Text>
                         </View>
 
                         {/* Stopwatch View */}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 12 }}>
+                        <View style={shiftHeaderStyles.innerView}>
                             <View style={{ margin: 3, marginTop: 0 }}>
                                 <Icon name="stopwatch" size={15} color={lightTheme ? "#52525C" : 'black'} />
                             </View>
@@ -147,21 +118,18 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
                     </View>
                     {/* Second View */}
 
-                    <View style={{ ...commonStyles.secondView, backgroundColor: showGradient ? 'lightgreen' : 'lightgrey', marginRight: 20, marginLeft: 22, width: '30%' }}>
+                    <View style={shiftHeaderStyles.treeDetailsContainer(showGradient)}>
                         {/* Icon */}
-                        <View style={{ margin: 6, flex: 1 }}>
-                            <View style={{ backgroundColor: 'green', borderRadius: 70, padding: 10, margin: 2 }}>
-                                <Icon name="tree" size={32} color="white" style={{ marginLeft: 5 }} />
+                        <View style={{ margin: 6, flex: 1, }}>
+                            <View style={shiftHeaderStyles.iconContainer}>
+                                <Icon name="tree" size={32} color="white" style={{ marginLeft: 7 }} />
                             </View>
                         </View>
 
                         {/* TreesPlanted */}
 
                         <View style={{ flex: 1 }}>
-                            <Text style={{
-                                color: lightTheme ? '#52525C' : 'black',
-                                fontSize: 18, fontWeight: 'bold', padding: 10, textAlign: 'center'
-                            }}>
+                            <Text style={shiftHeaderStyles.treeCount(lightTheme)}>
                                 {treesPlanted}
                             </Text>
                         </View>
@@ -170,9 +138,8 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
                 </View>
 
             </View>
-
-
         </View>
+
     )
 }
 

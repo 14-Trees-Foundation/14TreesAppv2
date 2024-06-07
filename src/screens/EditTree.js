@@ -4,7 +4,7 @@ import { DataService } from '../services/DataService';
 import { Strings } from '../services/Strings';
 import { TreeForm, treeFormModes } from '../components/TreeForm';
 import { Constants, Utils } from '../services/Utils';
-import { commonStyles } from "../services/Styles";
+import { commonStyles, editRemoteTreeStyles } from "../services/Styles";
 import GlobalContext from '../context/GlobalContext ';
 
 const EditTreeScreen = ({ navigation }) => {
@@ -45,7 +45,7 @@ const EditTreeScreen = ({ navigation }) => {
             plot_id: "",//plot id
         };
         const adminID = await Utils.getAdminId();
-    
+
         saplingData.location.coordinates = [
             tree.lat, tree.lng
         ];
@@ -71,10 +71,10 @@ const EditTreeScreen = ({ navigation }) => {
 
         console.log("new images: ", newImagesArr.length, "deleted images: ", deletedImages.length);
         console.log("tree details from edit----", requestData.data);
-        
+
         console.log("new last images: ", newImages[newImages.length - 1]);
         const response = await DataService.updateSapling(adminID, requestData);
-        
+
         if (!response) {
             //show toast cannot update the sapling id
             let toastmsg = Strings.alertMessages.FailedUpdateSapling + saplingid + Strings.alertMessages.ContactExpert;
@@ -102,16 +102,16 @@ const EditTreeScreen = ({ navigation }) => {
         setDeletedImages([]);
 
         const treeDetails = await DataService.fetchTreeDetails(saplingid, adminID);
-        if (!treeDetails) { 
+        if (!treeDetails) {
             ToastAndroid.show(`${Strings.alertMessages.UnableToFetch} ${saplingid} `, ToastAndroid.LONG);
-            return; 
+            return;
         }
-        
+
         const detailsForTreeForm = { ...Constants.treeFormTemplateData };
         const treeType = await Utils.treeTypeFromID(treeDetails.tree_id);
         const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
         detailsForTreeForm.inImages = treeDetails.image;//TODO: server should return:
-        
+
         for (let image of detailsForTreeForm.inImages) {
             image.data = await DataService.fileURLToBase64(image.name);
         }
@@ -145,24 +145,25 @@ const EditTreeScreen = ({ navigation }) => {
     }
 
     if (details) {
-        return <TreeForm
-            mode={treeFormModes.remoteEdit}
-            treeData={details}
-            onCancel={() => setDetails(null)}
-            // updateUserId={false}
-            // updateLocation={false}
-            onVerifiedSave={updateDetails}
-            onNewImage={(image) => { setNewImages([...newImages, image]); }}
-            onDeleteImage={(name) => { setDeletedImages([...deletedImages, name]); }}
-        />
+        return (
+            <TreeForm
+                mode={treeFormModes.remoteEdit}
+                treeData={details}
+                onCancel={() => setDetails(null)}
+                // updateUserId={false}
+                // updateLocation={false}
+                onVerifiedSave={updateDetails}
+                onNewImage={(image) => { setNewImages([...newImages, image]); }}
+                onDeleteImage={(name) => { setDeletedImages([...deletedImages, name]); }}
+            />)
     }
     else {
         return (
-            <View style={{ backgroundColor: 'white', height: '100%' }}>
-                <Text style={{ ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black', margin: 20, fontSize: 20 }}>{Strings.messages.EnterSaplingId}</Text>
+            <View style={editRemoteTreeStyles.outerView}>
+                <Text style={editRemoteTreeStyles.headingText(lightTheme)}>{Strings.messages.EnterSaplingId}</Text>
 
                 <TextInput
-                    style={{ ...commonStyles.txtInput, color: lightTheme ? '#52525C' : 'black', fontSize: 15, borderRadius: 13, width: '85%' }}
+                    style={editRemoteTreeStyles.textInput(lightTheme)}
                     placeholder={Strings.labels.SaplingId}
                     placeholderTextColor={'#52525C'}
                     onChangeText={(text) => setSaplingid(text)}
@@ -170,8 +171,8 @@ const EditTreeScreen = ({ navigation }) => {
                 />
 
                 <View style={{ margin: 20, marginHorizontal: 80 }}>
-                    <TouchableOpacity style={commonStyles.searchButton} onPress={() => fetchTreeDetails()}>
-                        <Text style={{ fontFamily: 'Inter-Regular', fontWeight: 'bold', color: 'white', fontSize: 20, marginTop: 3 }}>
+                    <TouchableOpacity style={commonStyles.searchButton} onPress={() => { if (!saplingid) { Alert.alert(Strings.alertMessages.EmptyField, Strings.alertMessages.EmptySaplingField); return } fetchTreeDetails() }}>
+                        <Text style={editRemoteTreeStyles.searchButton}>
                             {Strings.buttonLabels.Search}
                         </Text>
                     </TouchableOpacity>

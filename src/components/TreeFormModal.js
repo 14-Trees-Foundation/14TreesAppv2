@@ -1,14 +1,14 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { Alert, Button, ScrollView, Text, TextInput, Image, View, ToastAndroid, Modal, TouchableOpacity } from 'react-native';
+import { Alert, ScrollView, Text, TextInput, Image, View, ToastAndroid, Modal, TouchableOpacity } from 'react-native';
 import { Strings } from "../services/Strings";
 import { Utils } from "../services/Utils";
-import { CustomButton } from "./Components";
 import { CoordinateSetter } from "./CoordinateSetter";
 import { CustomDropdown } from "./CustomDropdown";
-import { commonStyles } from "../services/Styles";
+import { CustomButtonStyles, commonStyles, treeFormModalStyles } from "../services/Styles";
 import Icon from 'react-native-vector-icons/Ionicons';
 import GlobalContext from '../context/GlobalContext ';
 import { treeFormModes } from './TreeForm';
+import { Button } from 'react-native-paper';
 
 export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
 
@@ -43,7 +43,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
 
 
     const loadDataCallback = useCallback(async () => {
-        
+
         try {
             if (mode === treeFormModes.addTree) {
                 let userId = await Utils.getUserId();
@@ -175,25 +175,22 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
     }
 
     return (
-        <View style={{
-            backgroundColor: 'white',
-            padding: 2,
-            margin: 10,
-            borderRadius: 10, borderColor: '#ccc', borderWidth: 3,
-            width: '98%'
-        }} >
-
+        <ScrollView
+            keyboardShouldPersistTaps='handled'
+            scrollEnabled={true}
+            style={treeFormModalStyles.container}>
+                
             <TextInput
                 defaultValue={saplingid}
-                style={{
-                    ...commonStyles.txtInput,
-                    color: lightTheme ? '#52525C' : 'black',
-                    fontSize: 15, borderRadius: 13,
-                    fontWeight: saplingid ? '800' : 'normal'
-                }}
+                style={[
+                    commonStyles.txtInput,
+                    treeFormModalStyles.saplingIdInput(lightTheme, saplingid),
+                ]}
                 placeholder={Strings.labels.SaplingId}
                 placeholderTextColor={'black'}
-                onChangeText={(text) => { setSaplingId(text) }}
+                onChangeText={text => {
+                    setSaplingId(text);
+                }}
             />
 
             <CustomDropdown
@@ -204,85 +201,83 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
             />
 
 
-            {/* First View */}
-            <View style={{ width: '90%', height: 200, marginHorizontal: 2, marginLeft: 15 }}>
+            <View style={treeFormModalStyles.imageContainer}>
                 <TouchableOpacity
-                    style={{
-                        //flex: 1,
-                        backgroundColor: "#969393",
-                        padding: 0,
-                        borderColor: "#059636",
-                        borderRadius: 10,
-                        alignItems: "center",
-                        borderWidth: 1,
-                        marginTop: 0,
-                        marginHorizontal: 0,
-                        margin: 0,
-                        position: 'relative'
-                    }}
+                    style={treeFormModalStyles.imagePicker}
                     onPress={() => {
                         pickImage(0);
-                    }}
-                >
-                    {!showImage ? <Image
-                        source={require('../../assets/camera.png')}
-                        style={{
-                            width: '100%',
-                            height: 200,
-                            margin: 0,
-                            borderRadius: 10,
-                            //aspectRatio: 720 / 960, // Aspect ratio of your image (maxWidth / maxHeight)
-                            //resizeMode: 'contain', // Preserve aspect ratio and fit within the specified dimensions 
-                        }}
-                    /> : <Image
-                        source={{ uri: `data:image/jpeg;base64,${images[images.length - 1].data}` }}
-                        style={{
-                            width: '100%',
-                            height: 200,
-                            margin: 1,
-                            //borderRadius: 10,
-                            aspectRatio: 1220 / 920, // Aspect ratio of your image (maxWidth / maxHeight)
-                            //resizeMode: 'contain', // Preserve aspect ratio and fit within the specified dimensions 
-                        }}
-                    />
-                    }
-
-                    {showImage && <TouchableOpacity style={{ position: 'absolute', top: 8, right: 5 }} onPress={() => Utils.confirmAction(() => handleDeleteItem(images[images.length - 1].name), Strings.alertMessages.confirmDeleteImage)}>
+                    }}>
+                    {!showImage ? (
                         <Image
-                            source={require('../../assets/icondelete.png')} // Replace with your delete icon image
-                            style={{ width: 25, height: 25, marginLeft: 10 }} // Adjust the icon dimensions and margin
+                            source={require('../../assets/camera.png')}
+                            style={treeFormModalStyles.cameraIcon}
                         />
-                    </TouchableOpacity>
-                    }
+                    ) : (
+                        <Image
+                            source={{
+                                uri: `data:image/jpeg;base64,${images[images.length - 1].data}`,
+                            }}
+                            style={treeFormModalStyles.image}
+                        />
+                    )}
+
+                    {showImage && (
+                        <TouchableOpacity
+                            style={treeFormModalStyles.deleteButton}
+                            onPress={() =>
+                                Utils.confirmAction(
+                                    () => handleDeleteItem(images[images.length - 1].name),
+                                    Strings.alertMessages.confirmDeleteImage,
+                                )
+                            }>
+                            <Image
+                                source={require('../../assets/icondelete.png')} // Replace with your delete icon image
+                                style={treeFormModalStyles.deleteIcon} // Adjust the icon dimensions and margin
+                            />
+                        </TouchableOpacity>
+                    )}
                 </TouchableOpacity>
-
-
             </View>
 
-            {/* Second View */}
+
             <CoordinateSetter
                 inLat={lat}
                 inLng={lng}
-                onSetLat={(item) => setlat(item)}
-                onSetLng={(item) => setlng(item)}
+                onSetLat={item => setlat(item)}
+                onSetLng={item => setlng(item)}
             />
 
+            <View style={CustomButtonStyles.container}>
+                <View style={CustomButtonStyles.buttonRow}>
+                    <View style={CustomButtonStyles.buttonContainer}>
+                        <Button
+                            mode="contained"
+                            buttonColor='red'
+                            labelStyle={CustomButtonStyles.buttonLabel}
+                            style={CustomButtonStyles.button}
+                            onPress={() => {
+                                onCancel()
+                            }}
+                        >
+                            {Strings.buttonLabels.cancel}
+                        </Button>
 
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: 30, marginTop: 15, marginBottom: 5 }}>
-
-                <CustomButton
-                    text={Strings.buttonLabels.cancel}
-                    onPress={() => {
-                        onCancel()
-                    }}
-                    opacityStyle={{ backgroundColor: 'red' }} />
-
-                <CustomButton
-                    text={Strings.buttonLabels.Submit}
-                    onPress={onSave}
-                />
+                    </View>
+                    <View style={CustomButtonStyles.buttonContainer}>
+                        <Button
+                            onPress={onSave}
+                            mode="contained"
+                            buttonColor='#1D4ED8'
+                            labelStyle={CustomButtonStyles.buttonLabel}
+                            style={CustomButtonStyles.button}
+                        >
+                            {Strings.buttonLabels.Submit}
+                        </Button>
+                    </View>
+                </View>
             </View>
-        </View>
+
+
+        </ScrollView>
     )
 }

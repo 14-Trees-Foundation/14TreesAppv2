@@ -238,12 +238,12 @@ export class Utils {
         const helperData = await DataService.fetchHelperData(userId, lastHash);
 
         console.log("userId ", userId, "lastHash ", lastHash)
-    
+
         if (!helperData) {
-            ToastAndroid.show(Strings.alertMessages.UnableToFetchHelperData,ToastAndroid.LONG)
-            return ({helperDataUptoDate : true});
+            ToastAndroid.show(Strings.alertMessages.UnableToFetchHelperData, ToastAndroid.LONG)
+            return ({ helperDataUptoDate: true });
         }
-        
+
         const data = helperData.data['data'];
         const newHash = helperData.data['hash'];
         console.log("newHash ", newHash)
@@ -251,7 +251,7 @@ export class Utils {
             console.log("---------------------------newHash == lastHash-------------")
             // ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
             // setStatus(Data updated)
-            return ({helperDataUptoDate : true});
+            return ({ helperDataUptoDate: true });
         }
         if (data) {
             console.log("---------------------------New Data-------------")
@@ -263,7 +263,7 @@ export class Utils {
             await AsyncStorage.setItem(Constants.lastHashKey, newHash);
             // ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
             // setstatus(data updated)
-            return ({helperDataUptoDate : true});
+            return ({ helperDataUptoDate: true });
         }
         // setstatus(failed)
     }
@@ -302,7 +302,7 @@ export class Utils {
     }
 
     //namrata
-    static async deleteSyncedShiftsBasedOnSaplings(shifts , uploadedSaplings){
+    static async deleteSyncedShiftsBasedOnSaplings(shifts, uploadedSaplings) {
         //console.log("-------------type of shifts-------------", typeof shifts)
         await this.localdb.deleteSyncedShifts(shifts, uploadedSaplings)
     }
@@ -316,13 +316,13 @@ export class Utils {
         await this.localdb.deletePlotSaplings();
     }
 
-    static async checkIfSaplingExistsLocally(sapling){
+    static async checkIfSaplingExistsLocally(sapling) {
         console.log("----------in checkIfSaplingExistsLocally--------------")
         let ifExists = await this.localdb.checkIfSaplingExistsLocally(sapling);
         return ifExists
     }
 
-    static async checkIfSaplingExistsInLiveDB(sapling){
+    static async checkIfSaplingExistsInLiveDB(sapling) {
         console.log("----------in checkIfSaplingExistsInLiveDB--------------")
         let ifExists = await this.localdb.checkIfSaplingExistsInLiveDB(sapling);
         return ifExists
@@ -331,17 +331,16 @@ export class Utils {
     static async checkShiftsComplete() {
         try {
             const shifts = await Utils.getShiftsIDLocalDB();
-
+            //console.log("shift got---", shifts);
             for (const shift of shifts) {
-                const saplings = JSON.parse(shift.saplings);
-
+                const saplings = JSON.parse(shift?.saplings || '[]');
                 //console.log("checkShiftsComplte----", saplings);
 
                 if (shift.shiftended == 0) {
                     if (saplings.length === 0) {
                         //delete the shift for this id
                         await this.localdb.deleteShiftLocalDB(shift.id);
-                        return;
+                        continue;
                     }
 
                     //check if saplings are uploaded make the shiftended = 1 and shiftupdloadcomplete = 1
@@ -373,7 +372,7 @@ export class Utils {
 
             }
         } catch (error) {
-            console.log("happened while checking for shiftended(inside Utils)");
+            console.log("happened while checking for shiftended(inside Utils)", error);
             const stackTrace = error.stack;
             const errorLog = {
                 msg: "happened while checking for shiftended(inside Utils)",
@@ -596,12 +595,39 @@ export class Utils {
         return { pending, uploaded };
     }
 
-    static async syncShifts() {
+    // static async syncShifts() {
+    //     try {
+    //         const shifts = await Utils.getShiftsIDLocalDB(0); //get not uploaded shifts
+    //         console.log("before upload shift data:---", shifts);
+    //         const response = await DataService.uploadShifts(shifts);
+    //         console.log("response from syncShifts---", response);
+    //         let failures = await Utils.setShiftsSyncStatus(response, shifts);
+    //         return { shiftDetails: response, failures: failures };
+
+    //     } catch (error) {
+    //         console.log("happended while sync shifts---", error);
+    //     }
+
+    // }
+
+    static async syncShifts(uploadedSaplings) {
         try {
-            const shifts = await Utils.getShiftsIDLocalDB(0); //get not uploaded shifts
-            console.log("before upload shift data:---", shifts);
+            let shifts = await Utils.getShiftsIDLocalDB(0); //get not uploaded shifts
+            //console.log("---before upload shift data:-------", shifts);
+            shifts = shifts.map(shift => {
+                const filteredSaplings = shift.saplings.filter(sapling =>
+                    uploadedSaplings.includes(sapling.sapling_id)
+                );
+
+                // Return a new shift object with the filtered saplings
+                return {
+                    ...shift,
+                    saplings: filteredSaplings
+                };
+            });
+            console.log("-----saplings in shift---------", shifts[0].saplings)
             const response = await DataService.uploadShifts(shifts);
-            console.log("response from syncShifts---", response);
+            //console.log("response from syncShifts---", response);
             let failures = await Utils.setShiftsSyncStatus(response, shifts);
             return { shiftDetails: response, failures: failures };
 
@@ -611,27 +637,13 @@ export class Utils {
 
     }
 
-    //manjur
-    // static async syncShifts() {
-    //     try {
-    //         const shifts = await Utils.getShiftsIDLocalDB(0); //get not uploaded shifts
-    //         console.log("before upload shift data:---", shifts);
-    //         const response = await DataService.uploadShifts(shifts);
-    //         console.log("response from syncShifts---", response);
-    //         let failures = await Utils.setShiftsSyncStatus(response, shifts);
-    //         return failures;
-    //     } catch (error) {
-    //         console.log("happended while sync shifts---", error);
-    //     }
-
-    // }
-
     static async setShiftsSyncStatus(statuses, shifts) {
         const failures = [];
         for (let shift of shifts) {
+            let uploadedSaplings = shift.saplings
             const id = statuses[shift.id];
             if (id && id.shiftUploaded) {
-                await this.localdb.updateShiftUpload(shift.id, id.shiftID);
+                await this.localdb.updateShiftUpload(shift.id, id.shiftID, uploadedSaplings);
             }
             else {
                 failures.push(shift.id);
@@ -640,6 +652,7 @@ export class Utils {
 
         return failures;
     }
+
 
     static async updateTreesWithChangedPlot(plot_id, shiftID) {
         try {

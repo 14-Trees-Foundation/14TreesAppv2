@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { Text, Image, View, BackHandler } from 'react-native';
+import { Text, Image, View, BackHandler, StyleSheet } from 'react-native';
+import { aboutStyles } from '../services/Styles';
 
 const About = ({ navigation }) => {
 
@@ -16,26 +17,23 @@ const About = ({ navigation }) => {
 
     return (
         <View
-            style={{ backgroundColor: 'white', padding: 40, alignItems: 'center' }}>
+            style={aboutStyles.outerView}>
             <Text
-                style={{
-                    color: '#0F4334',
-                    fontSize: 22,
-                    fontWeight: 'bold',
-                    paddingBottom: 5,
-                }}>
+                style={aboutStyles.appName}>
                 Sapling Upload App
             </Text>
-            <Text style={{ color: '#0F4334', fontSize: 18, paddingBottom: 15 }}>Version 2.2</Text>
+            <Text style={aboutStyles.text}>Version 2.4</Text>
             <View>
                 <Image
                     source={require('../../assets/logo.png')}
                     style={{ width: 100, height: 100, }}
                 />
             </View>
-            <Text style={{ color: '#0F4334', fontSize: 18, padding: 15 }}>14 Trees Org.</Text>
+            <Text style={aboutStyles.text}>14 Trees Org.</Text>
         </View>
     );
 };
+
+
 
 export default About;

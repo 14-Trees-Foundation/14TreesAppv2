@@ -1,6 +1,6 @@
-import { View, Text, TouchableOpacity, FlatList, TextInput, Keyboard, Pressable, ScrollView } from 'react-native'
+import { View, Text, TouchableOpacity, FlatList, TextInput, StyleSheet,Keyboard, Pressable, ScrollView } from 'react-native'
 import { useState, useEffect, useContext } from 'react';
-import { commonStyles } from '../services/Styles';
+import { commonStyles,customDropdownStyles } from '../services/Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 import GlobalContext from '../context/GlobalContext ';
 
@@ -73,12 +73,10 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
 
         <View>
             <TextInput
-                style={{
-                    ...commonStyles.txtInput,
-                    color: lightTheme ? '#52525C' : 'black',
-                    fontSize: 15, borderRadius: 13,
-                    fontWeight: (initItem) ? 'bold' : 'normal'
-                }}
+                style={[
+                    commonStyles.txtInput,
+                    customDropdownStyles.textInput(lightTheme,initItem),
+                  ]}
                 defaultValue={selectedItem ? (selectedItem.value === -1 ? '' : selectedItem.name) : ''}
                 placeholder={label}
                 placeholderTextColor={'black'}
@@ -87,7 +85,7 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
             />
 
             {clearButton && selectedItem && selectedItem.value !== -1 && (
-                <TouchableOpacity style={{ position: 'absolute', top: 22, right: 29, zIndex: 1 }}
+                <TouchableOpacity style= {customDropdownStyles.clearButton}
                     onPress={clearSelection}  >
                     <Icon name="close-circle" size={25} color="red" />
                 </TouchableOpacity>
@@ -105,3 +103,4 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
 
     );
 }
+

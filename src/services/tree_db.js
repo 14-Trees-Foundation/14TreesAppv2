@@ -325,7 +325,7 @@ export class LocalDatabase {
                     trees.push(result.rows.item(index));
                 }
             });
-            console.log("trre--", trees);
+            //console.log("trre--", trees);
             return trees;
 
         } catch (error) {
@@ -684,7 +684,8 @@ export class LocalDatabase {
     };
 
     //update saplings upload to 1
-    updateShiftUpload = async (id, shift_id) => {
+    //update saplings upload to 1
+    updateShiftUpload = async (id, shift_id, uploadedSaplings) => {
         try {
 
             const query = `SELECT shiftended, saplings FROM ${localShiftTable} WHERE id = ?`;
@@ -696,14 +697,15 @@ export class LocalDatabase {
 
             saplings = JSON.parse(saplings);
             // Update each sapling's uploaded field to 1
+            
             saplings = saplings.map(sapling => ({
                 ...sapling,
-                uploaded: 1
+                uploaded: uploadedSaplings.includes(sapling) ? 1 : 0
             }));
 
             let updateQuery = null;
-
-            if (shiftended === 1) {
+            console.log("---------------uploadedSaplings.length------------------", uploadedSaplings.length, "-------------------saplings.length----------------", saplings.length)
+            if (shiftended === 1 && saplings.length === uploadedSaplings.length) {
                 updateQuery =
                     `UPDATE ${localShiftTable} 
                  SET shift_id = ?, shiftuploadcomplete = 1, saplings = ?
@@ -720,9 +722,9 @@ export class LocalDatabase {
             }
 
 
-            const get = `SELECT * from ${localShiftTable} WHERE id = ?`;
-            const [result1] = await this.db.executeSql(get, [id])
-            console.log("Shift updated successfully---", result1.rows.item(0));
+            // const get = `SELECT * from ${localShiftTable} WHERE id = ?`;
+            // const [result1] = await this.db.executeSql(get, [id])
+            // console.log("Shift updated successfully---", result1.rows.item(0));
         } catch (error) {
 
             console.error("Error updating shift:", error);

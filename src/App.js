@@ -3,7 +3,6 @@ import { NavigationContainer, createNavigationContainerRef } from '@react-naviga
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useContext, useEffect, useState } from 'react';
 import { Alert, Platform, RootTagContext, TouchableOpacity } from 'react-native';
-//import { enableLatestRenderer } from 'react-native-maps';
 import { PERMISSIONS, request } from 'react-native-permissions';
 import { DrawerNavigator } from './components/DrawerNavigator';
 import LoadingScreen from './screens/LoadingScreen';
@@ -23,8 +22,48 @@ import TreesInShift from './screens/TreesInShift';
 import SyncDisplay from './screens/SyncDisplay';
 import SplashScreen from './screens/SplashScreen';
 import ScreenHeaderContent from './components/ScreenHeaderContent';
+import { setJSExceptionHandler } from 'react-native-exception-handler';
+import RNRestart from 'react-native-restart';
 
-//enableLatestRenderer();
+
+const errorHandler = async (e, isFatal) => {
+  const stackTrace = e.stack;
+
+  const errorLog = {
+    msg: e.message ? e.message : e,
+    error: JSON.stringify(e.name),
+    stackTrace: stackTrace,
+  };
+
+
+  await Utils.logException(JSON.stringify(errorLog));
+
+  Alert.alert(
+    'Unexpected error occurred',
+    `Error: ${isFatal ? 'Fatal:' : ''} ${e}
+    \nWe have reported this to our team! Please close the app and start again!`,
+    [
+      {
+        text: 'Restart',
+        onPress: () => {
+          RNRestart.Restart();
+        },
+      },
+      {
+        text: 'Close',
+        onPress: () => {
+        },
+        style: 'cancel', // the button is styled for cancellation
+      },
+    ],
+    { cancelable: false } // user cannot dismiss the alert by tapping outside 
+  );
+};
+
+setJSExceptionHandler((error, isFatal) => {
+  console.log('--------setJSExceptionHandler----------');
+  errorHandler(error, isFatal);
+}, true);
 
 async function requestPermissions() {
   const androidVersion = Number.parseInt(Platform.constants['Release']);
@@ -75,7 +114,7 @@ const App = () => {
   const checkSignInStatus = async () => {
     console.log('app roottag app.js1: ')
     try {
-      
+
       let phoneNumber;
 
       try {

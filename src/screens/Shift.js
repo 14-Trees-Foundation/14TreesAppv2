@@ -1,16 +1,18 @@
 import React, { useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { FlatList, Text, TouchableOpacity, View, Alert, ScrollView, BackHandler, ToastAndroid } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { MyIconButton } from '../components/Components';
+import { StackedIcons } from '../components/Components';
 import { Strings } from '../services/Strings';
 import { Utils } from '../services/Utils';
-import { commonStyles } from '../services/Styles';
+import { Iconstyles, commonStyles, shiftStyles } from '../services/Styles';
 import GlobalContext from '../context/GlobalContext ';
 import ShiftHeader from '../components/ShiftHeader';
 import CustomModal from '../components/CustomModal';
-import { treeFormModes } from '../components/TreeForm';
+import { TreeForm, treeFormModes } from '../components/TreeForm';
 import LoadingScreen from './LoadingScreen';
-
+import { Button } from 'react-native-paper';
+import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { TreeRow } from '../components/TreeRow';
 
 const Shift = ({ navigation }) => {
     const { plotSelected, treesPlanted, setTreesPlanted, setShiftDone, setPlotSelected, shiftTime, shiftID, setShiftID, lightTheme } = useContext(GlobalContext);
@@ -21,7 +23,6 @@ const Shift = ({ navigation }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [mode, setMode] = useState(null);
     const [saplingID, setSaplingID] = useState(null);
-    //const [getTimer, setGetTimer] = useState(false);
 
     const finalRef = useRef({ shiftTime: null, seconds: null, treesPlanted: 0, plotselected: null });
     finalRef.current.shiftTime = shiftTime;
@@ -63,7 +64,7 @@ const Shift = ({ navigation }) => {
 
     const fetchSaplingsForShift = async () => {
         const saplingsForShift = await Utils.fetchSaplingsFromLocalShiftDB(shiftID);
-        
+
         saplingsForShift.sort((a, b) => {
             if (a.uploaded && !b.uploaded) {
                 return 1; // Move uploaded trees to the end
@@ -78,7 +79,7 @@ const Shift = ({ navigation }) => {
         console.log('setting both lists to: ', saplingsForShift, saplingsForShift.length);
     };
 
-    //useEffect(() =>)
+
     useFocusEffect(
         useCallback(() => {
             console.log('focus');
@@ -123,8 +124,6 @@ const Shift = ({ navigation }) => {
             await Utils.deleteShiftLocalDB(shiftID);
         }
 
-
-
         navigation.navigate(
             Strings.screenNames.getString('Shifts', Strings.english)
         )
@@ -137,202 +136,81 @@ const Shift = ({ navigation }) => {
     const RenderHeader2 = () => {
 
         return (
-            <View style={{ backgroundColor: "white", padding: 2, margin: 4, borderRadius: 10, borderColor: '#ccc', borderWidth: 3 }}>
-                <View style={{ margin: 2 }}>
-                    <MyIconButton
-                        names={['plus', 'tree']}
-                        styles={[{ opacity: 0.9 }, { opacity: 0.5 }]}
-                        text={Strings.buttonLabels.AddNewTree}
+            <View style={shiftStyles.buttonContainerOuter}>
+                <View style={shiftStyles.buttonContainerInner}>
+
+                    <Button
+                        icon={() => (
+                            <View style={Iconstyles.buttonPosition}>
+                                <StackedIcons
+                                    names={['plus', 'tree']}
+                                    styles={[{ opacity: 0.9, position: 'absolute' }, { opacity: 0.5, position: 'absolute' }]}
+                                />
+                            </View>
+                        )}
+                        mode="contained"
+                        buttonColor='#059636'
                         onPress={() => {
                             setMode(treeFormModes.addTree);
                             setModalVisible(true);
                             setSaplingID(null);
                         }}
-                    />
+                        contentStyle={Iconstyles.buttonContent}
+                        labelStyle={Iconstyles.buttonLabel}
+                    >
+                        {Strings.buttonLabels.AddNewTree}
+
+                    </Button>
                 </View>
 
-                <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%' }}>
-                    <View style={{ width: '53%' }}>
-                        <MyIconButton
-                            name={"wifi-sync"}
-                            text={Strings.buttonLabels.SyncData}
+                <View style={shiftStyles.buttonRow}>
+                    <View style={shiftStyles.buttonRowInner}>
+                        <Button
+                            icon={() => (
+                                <MCIcon name="wifi-sync" size={30} color="white" />
+                            )}
+                            mode="contained"
+                            buttonColor='#059636'
                             onPress={() => {
-                                // setModalVisible(true);
-                                // setMode(treeFormModes.showSync);
-
                                 navigation.navigate(
                                     Strings.screenNames.getString('SyncDisplay', Strings.english)
-                                    // { data: finalRef }
                                 )
                             }}
-                        />
+                            contentStyle={Iconstyles.buttonContent2}
+                            labelStyle={Iconstyles.buttonLabel}
+                        >
+                            {Strings.buttonLabels.SyncData}
+
+                        </Button>
                     </View>
 
-                    <View style={{ width: '47%' }}>
-                        <MyIconButton
-                            name={'check'}
-                            size={29}
-                            text={Strings.buttonLabels.Done}
+                    <View style={{ width: '40%' }}>
+                        <Button
+                            icon={() => (
+                                <MCIcon name="check" size={30} color="white" />
+                            )}
+                            mode="contained"
+                            buttonColor='#059636'
                             onPress={saveShiftToDB}
-                        />
+                            contentStyle={Iconstyles.buttonContent2}
+                            labelStyle={Iconstyles.buttonLabel}
+                        >
+                            {Strings.buttonLabels.Done}
+
+                        </Button>
                     </View>
                 </View>
-
 
             </View>
         );
     };
 
-    // console.log("rendered shift screen");
-
-    const renderTree = useCallback((tree1, tree2, tree3, tree4) => {
-        //console.log("upload:--", tree1.uploaded);
-        return (
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%', backgroundColor: 'white', margin: 2, borderRadius: 6 }}>
-                {/* First Tree */}
-                {tree1 ? tree1.uploaded ? (
-                    <View style={{ ...commonStyles.borderedDisplay2, backgroundColor: '#059636', flex: 1, justifyContent: 'space-around', width: '25%' }}>
-                        <TouchableOpacity
-                            onPress={() => {
-                                ToastAndroid.show(Strings.alertMessages.Synched, ToastAndroid.SHORT);
-                            }}
-                        >
-                            <Text
-                                style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}
-                                numberOfLines={1} // Limit to a single line
-                                ellipsizeMode="tail" // Truncate at the end with ellipsis
-                            >
-                                {tree1.sapling_id}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                ) :
-                    (<View style={{ ...commonStyles.borderedDisplay, flex: 1, justifyContent: 'space-around', width: '25%' }}>
-                        <TouchableOpacity onPress={() => {
-                            setMode(treeFormModes.localEdit);
-                            setSaplingID(tree1.sapling_id);
-                            setModalVisible(true);
-                        }}>
-                            <Text
-                                style={{ ...commonStyles.text, color: lightTheme ? '#52525C' : 'black', textAlign: 'center' }}
-                                numberOfLines={1} // Limit to a single line
-                                ellipsizeMode="tail" // Truncate at the end with ellipsis
-                            >
-                                {tree1.sapling_id}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                    ) : <View style={{ justifyContent: 'space-around', width: '25%' }}></View>
-                }
-
-                {/* Second Tree */}
-                {tree2 ? tree2.uploaded ? (
-                    <View style={{ ...commonStyles.borderedDisplay2, backgroundColor: '#059636', flex: 1, justifyContent: 'space-around', width: '25%' }}>
-                        <TouchableOpacity
-                            onPress={() => {
-                                ToastAndroid.show(Strings.alertMessages.Synched, ToastAndroid.SHORT);
-                            }}
-                        >
-                            <Text
-                                style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}
-                                numberOfLines={1} // Limit to a single line
-                                ellipsizeMode="tail" // Truncate at the end with ellipsis
-                            >
-                                {tree2.sapling_id}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : (<View style={{ ...commonStyles.borderedDisplay, flex: 1, justifyContent: 'space-around', width: '25%' }}>
-                    <TouchableOpacity onPress={() => {
-                        setMode(treeFormModes.localEdit);
-                        setSaplingID(tree2.sapling_id);
-                        setModalVisible(true);
-                    }}>
-                        <Text
-                            style={{ ...commonStyles.text, color: lightTheme ? '#52525C' : 'black', textAlign: 'center' }}
-                            numberOfLines={1} // Limit to a single line
-                            ellipsizeMode="tail" // Truncate at the end with ellipsis
-                        >
-                            {tree2.sapling_id}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-                ) : <View style={{ justifyContent: 'space-around', width: '25%' }}></View>
-                }
-
-                {/* Third Tree */}
-                {tree3 ? tree3.uploaded ? (
-                    <View style={{ ...commonStyles.borderedDisplay2, backgroundColor: '#059636', flex: 1, justifyContent: 'space-around', width: '25%' }}>
-                        <TouchableOpacity
-                            onPress={() => {
-                                ToastAndroid.show(Strings.alertMessages.Synched, ToastAndroid.SHORT);
-                            }}
-                        >
-                            <Text
-                                style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}
-                                numberOfLines={1} // Limit to a single line
-                                ellipsizeMode="tail" // Truncate at the end with ellipsis
-                            >
-                                {tree3.sapling_id}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : (<View style={{ ...commonStyles.borderedDisplay, flex: 1, justifyContent: 'space-around', width: '25%' }}>
-                    <TouchableOpacity onPress={() => {
-                        setMode(treeFormModes.localEdit);
-                        setSaplingID(tree3.sapling_id);
-                        setModalVisible(true);
-                    }}>
-                        <Text
-                            style={{ ...commonStyles.text, color: lightTheme ? '#52525C' : 'black', textAlign: 'center' }}
-                            numberOfLines={1} // Limit to a single line
-                            ellipsizeMode="tail" // Truncate at the end with ellipsis
-                        >
-                            {tree3.sapling_id}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-                ) : <View style={{ justifyContent: 'space-around', width: '25%' }}></View>
-                }
-
-                {/* Fourth Tree */}
-
-                {tree4 ? tree4.uploaded ? (
-                    <View style={{ ...commonStyles.borderedDisplay2, backgroundColor: '#059636', flex: 1, justifyContent: 'space-around', width: '25%' }}>
-                        <TouchableOpacity
-                            onPress={() => {
-                                ToastAndroid.show(Strings.alertMessages.Synched, ToastAndroid.SHORT);
-                            }}
-                        >
-                            <Text
-                                style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}
-                                numberOfLines={1} // Limit to a single line
-                                ellipsizeMode="tail" // Truncate at the end with ellipsis
-                            >
-                                {tree4.sapling_id}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : (<View style={{ ...commonStyles.borderedDisplay, flex: 1, justifyContent: 'space-around', width: '25%' }}>
-                    <TouchableOpacity onPress={() => {
-                        setMode(treeFormModes.localEdit);
-                        setSaplingID(tree4.sapling_id);
-                        setModalVisible(true);
-                    }}>
-                        <Text
-                            style={{ ...commonStyles.text, color: lightTheme ? '#52525C' : 'black', textAlign: 'center' }}
-                            numberOfLines={1} // Limit to a single line
-                            ellipsizeMode="tail" // Truncate at the end with ellipsis
-                        >
-                            {tree4.sapling_id}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-                ) : <View style={{ justifyContent: 'space-around', width: '25%' }}></View>
-                }
-            </View>
-        )
-    }, []);
+    const handleSaplingChanges = (saplingID) => {
+        console.log("handleSaplingChanges", saplingID);
+        setMode(treeFormModes.localEdit);
+        setSaplingID(saplingID);
+        setModalVisible(true);
+    }
 
     const handleModalChanges = () => {
         setMode(treeFormModes.plotSelect);
@@ -346,9 +224,9 @@ const Shift = ({ navigation }) => {
         )
     } else {
         return (
-            <ScrollView keyboardShouldPersistTaps='handled' style={{ backgroundColor: 'white', height: '100%', marginTop: 0 }}>
+            <ScrollView keyboardShouldPersistTaps='handled' style={shiftStyles.scrollView}>
 
-                <View style={{ flex: 1, marginTop: 10 }}>
+                <View style={shiftStyles.container}>
                     <ShiftHeader
                         onSetTime={(seconds) => {
                             finalRef.current.seconds = seconds;
@@ -370,9 +248,9 @@ const Shift = ({ navigation }) => {
 
 
                 {
-                    !modalVisible && <View style={{ margin: 2, borderColor: '#5DB075', borderRadius: 5, flexDirection: 'row', backgroundColor: 'white' }}>
+                    !modalVisible && <View style={shiftStyles.treeListContainer}>
                         <FlatList
-                            style={{ flex: 1, backgroundColor: 'white' }}
+                            style={shiftStyles.flatList}
                             scrollEnabled={false}
                             ListEmptyComponent={() => (
                                 <View style={commonStyles.borderedDisplay}>
@@ -385,18 +263,24 @@ const Shift = ({ navigation }) => {
 
                             renderItem={({ item, index }) => {
                                 if (index % 4 === 0) {
-
-                                    if (index + 3 < finalList.length) {
-                                        return renderTree(item, finalList[index + 1], finalList[index + 2], finalList[index + 3])
-                                    } else if (index + 2 < finalList.length) {
-                                        return renderTree(item, finalList[index + 1], finalList[index + 2], null);
-                                    } else if (index + 1 < finalList.length) {
-                                        return renderTree(item, finalList[index + 1], null, null);
-                                    } else {
-                                        return renderTree(item, null, null, null)
-                                    }
+                                    const trees = [
+                                        item,
+                                        finalList[index + 1] || null,
+                                        finalList[index + 2] || null,
+                                        finalList[index + 3] || null,
+                                    ];
+                                    return (<TreeRow
+                                        tree1={trees[0]}
+                                        tree2={trees[1]}
+                                        tree3={trees[2]}
+                                        tree4={trees[3]}
+                                        modalMode={true}
+                                        handleSaplingChanges={handleSaplingChanges}
+                                    />);
                                 }
+                                return null;
                             }}
+                            keyExtractor={(item, index) => `${item.sapling_id}-${index}`}
                         />
                     </View>
                 }

@@ -1,13 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState, useContext, useEffect } from 'react';
-import { Alert, Text, TouchableOpacity, View, TextInput } from 'react-native';
+import { Alert, Text, View, TextInput } from 'react-native';
 import { DataService } from '../services/DataService';
 import LanguageModal from '../components/Languagemodal';
 import { Strings } from '../services/Strings';
 import { Utils, Constants } from '../services/Utils';
-import { commonStyles } from "../services/Styles";
-import { CustomButton } from '../components/Components';
+import { CustomButtonStyles, commonStyles, loginStyles } from "../services/Styles";
 import GlobalContext from '../context/GlobalContext ';
+import { Button } from 'react-native-paper';
 
 const LoginScreen = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -154,49 +154,44 @@ const LoginScreen = ({ navigation }) => {
 
 
   return (
-    <View style={{ backgroundColor: 'white', height: '100%', marginTop: 40 }}>
-      <View style={{ padding: 2, margin: 4, borderRadius: 10, borderColor: '#ccc', borderWidth: 3, }}>
+    <View style={loginStyles.outerContainer}>
+      <View style={loginStyles.inputContainer}>
         <View style={{ marginVertical: 30 }}>
           <TextInput
-            style={{
-              ...commonStyles.txtInput,
-              color: lightTheme ? '#52525C' : 'black',
-              fontSize: 15, borderRadius: 13,
-              fontWeight: (phoneNumber) ? 'bold' : 'normal'
-            }}
+            style={loginStyles.textInput(lightTheme, phoneNumber)}
             placeholder="Enter your phone number"
             placeholderTextColor="grey"
-            onChangeText={(text) => setPhoneNumber(text)}
+            onChangeText={text => setPhoneNumber(text)}
             value={phoneNumber}
             keyboardType="number-pad"
             maxLength={10}
           />
           <TextInput
-            style={{
-              ...commonStyles.txtInput,
-              color: lightTheme ? '#52525C' : 'black',
-              fontSize: 15, borderRadius: 13,
-              fontWeight: (pinNumber) ? 'bold' : 'normal'
-            }}
+            style={loginStyles.textInput(lightTheme, phoneNumber)}
             placeholder="Enter your pin"
             placeholderTextColor="grey"
-            onChangeText={(text) => setPinNumber(text)}
+            onChangeText={text => setPinNumber(text)}
             value={pinNumber}
             keyboardType="number-pad"
             maxLength={4}
           />
 
-          <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: 30, marginTop: 25, marginBottom: 10 }}>
-            <CustomButton
-              text={Strings.buttonLabels.login}
+          <View style={loginStyles.loginView}>
+            <Button
               onPress={loginUser}
-            />
+              mode="contained"
+              buttonColor='#059636'
+              labelStyle={CustomButtonStyles.buttonLabel}
+              style={CustomButtonStyles.button}
+            >
+              {Strings.buttonLabels.login}
+            </Button>
           </View>
         </View>
       </View>
 
 
-    </View>
+    </View >
   );
 };
 

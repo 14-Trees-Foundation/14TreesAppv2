@@ -1,7 +1,8 @@
 import { useContext, useState } from "react";
-import { Image, TouchableOpacity, View } from "react-native";
+import { Image, TouchableOpacity, View,StyleSheet } from "react-native";
 import LanguageModal from "./Languagemodal";
 import GlobalContext from "../context/GlobalContext ";
+import { ScreenHeaderContentStyles } from "../services/Styles";
 
 const ScreenHeaderContent = () => {
 
@@ -11,9 +12,9 @@ const ScreenHeaderContent = () => {
 
     return (
         <View
-            style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}
+            style={ScreenHeaderContentStyles.container}
         >
-            {/* togglebutton */}
+            
             <TouchableOpacity
                 style={{ marginRight: 15 }}
                 onPress={() => {
@@ -24,14 +25,14 @@ const ScreenHeaderContent = () => {
             >
                 {toggleMode ? <Image
                     source={require('../../assets/icon-brightness-on.png')}
-                    style={{ width: 35, height: 35, borderRadius: 37.5 }}
+                    style={ScreenHeaderContentStyles.modeIcon}
                 /> : <Image
                     source={require('../../assets/icon-brightness.png')}
-                    style={{ width: 35, height: 35, borderRadius: 37.5 }}
+                    style={ScreenHeaderContentStyles.modeIcon}
                 />}
             </TouchableOpacity>
 
-            {/* language button */}
+            
             <TouchableOpacity
                 style={{ marginRight: 35 }}
                 onPress={() => {
@@ -53,5 +54,8 @@ const ScreenHeaderContent = () => {
         </View>
     )
 }
+
+
+
 
 export default ScreenHeaderContent;

@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Button, Text, ToastAndroid, View, BackHandler, FlatList } from 'react-native';
-import { CustomButton } from '../components/Components';
+import { Text, ToastAndroid, View, BackHandler, FlatList } from 'react-native';
 import { DataService } from '../services/DataService';
 import { Strings } from '../services/Strings';
 import { Utils } from '../services/Utils';
 import { commonStyles } from "../services/Styles";
 import GlobalContext from '../context/GlobalContext ';
+import { Button } from 'react-native-paper';
 
 const VerifyusersScreen = ({ navigation }) => {
 
@@ -74,10 +74,12 @@ const VerifyusersScreen = ({ navigation }) => {
 
                     <View style={{ margin: 8, marginBottom: 8, width: '50%', alignSelf: 'center' }}>
                         <Button
-                            title={Strings.buttonLabels.Verify}
+                           mode='contained'
                             onPress={() => verifyUser(item._id)}
-                            color={'#5DB075'}
-                        />
+                            buttonColor={'#5DB075'}
+                        >
+                            {Strings.buttonLabels.Verify}
+                        </Button>
                     </View>
                 </View>
             </View>
@@ -88,7 +90,14 @@ const VerifyusersScreen = ({ navigation }) => {
         <View style={{ backgroundColor: 'white', height: '100%' }}>
             <View style={{ marginTop: 5, flexDirection: 'row', justifyContent: 'space-around' }}>
                 <Text style={commonStyles.text2}> {Strings.messages.ListUnverifiedUsers} </Text>
-                <CustomButton text={Strings.buttonLabels.Refresh} onPress={() => fetchUsers(adminID)}></CustomButton>
+                <Button
+                 onPress={() => fetchUsers(adminID)}
+                 mode='contained'
+                 buttonColor='#1D4ED8'
+                >
+                    {Strings.buttonLabels.Refresh}
+                </Button>
+                {/* <CustomButton text={Strings.buttonLabels.Refresh} onPress={() => fetchUsers(adminID)}></CustomButton> */}
             </View>
             <View style={{ height: 500, margin: 5, borderWidth: 2, borderColor: '#5DB075', borderRadius: 5, flexDirection: 'column', }}>
                 <FlatList

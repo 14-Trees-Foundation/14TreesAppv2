@@ -1,17 +1,15 @@
-import { View, Text, Modal, StyleSheet, Dimensions, ScrollView, ToastAndroid, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, Modal, StyleSheet, Dimensions, ScrollView, ToastAndroid, Alert } from 'react-native';
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Utils, Constants } from '../services/Utils';
 import { Strings } from '../services/Strings';
-import { CustomButton } from './Components';
-const { height, width } = Dimensions.get('window');
 import GlobalContext from '../context/GlobalContext ';
 import { treeFormModes } from './TreeForm';
 import { TreeFormModal } from './TreeFormModal';
 import LoadingScreen from '../screens/LoadingScreen';
-import { commonStyles } from '../services/Styles';
+import { CustomButtonStyles, commonStyles, customModalStyles } from '../services/Styles';
 import { CustomDropdown } from './CustomDropdown';
 import { stackNavRef } from '../App';
-
+import { Button } from 'react-native-paper';
 
 
 
@@ -210,19 +208,10 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
                 }
                 onRequestClose={() => hanldePlotChanges(0)} // Add this line
             >
-                <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ ...styles.centeredViewPlot, marginTop: mode === treeFormModes.startShift ? 80 : 200 }}>
-                    <View style={styles.modalViewPlot}>
-                        <View style={{
-                            backgroundColor: 'white',
-                            padding: 2,
-                            margin: 10,
-                            borderRadius: 10, borderColor: '#ccc', borderWidth: 3,
-                            width: '98%'
-                        }}>
-                            <Text style={{
-                                ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black',
-                                margin: 20, fontSize: 20, marginBottom: 10
-                            }}>{Strings.messages.EnterPlotName}</Text>
+                <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ ...customModalStyles.plotSelectScrollView, marginTop: mode === treeFormModes.startShift ? 80 : 200 }}>
+                    <View style={customModalStyles.plotSelectOuterView}>
+                        <View style={customModalStyles.plotSelectView}>
+                            <Text style={customModalStyles.textView(lightTheme)}>{Strings.messages.EnterPlotName}</Text>
 
                             <View style={{ margin: 8, marginTop: 0 }}>
                                 <CustomDropdown
@@ -236,16 +225,34 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
                                 />
                             </View>
 
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: 30, marginTop: 15, marginBottom: 5 }}>
-
-                                <CustomButton text={Strings.buttonLabels.cancel}
-                                    onPress={() => hanldePlotChanges(0)} opacityStyle={{ backgroundColor: 'red' }} />
-
-                                <CustomButton text={Strings.buttonLabels.Submit}
-                                    onPress={() => hanldePlotChanges(1)} opacityStyle={{ backgroundColor: '#059636' }} />
+                            <View style={CustomButtonStyles.container}>
+                                <View style={CustomButtonStyles.buttonRow}>
+                                    <View style={CustomButtonStyles.buttonContainer}>
+                                        <Button
+                                            onPress={() => hanldePlotChanges(0)}
+                                            mode="contained"
+                                            buttonColor='red'
+                                            labelStyle={CustomButtonStyles.buttonLabel}
+                                            style={CustomButtonStyles.button}
+                                        >
+                                            {Strings.buttonLabels.cancel}
+                                        </Button>
+                                    </View>
+                                    <View style={CustomButtonStyles.buttonContainer}>
+                                        <Button
+                                            onPress={() => hanldePlotChanges(1)}
+                                            mode="contained"
+                                            buttonColor='#1D4ED8'
+                                            labelStyle={CustomButtonStyles.buttonLabel}
+                                            style={CustomButtonStyles.button}
+                                        >
+                                            {Strings.buttonLabels.Submit}
+                                        </Button>
+                                    </View>
+                                </View>
                             </View>
-                        </View>
 
+                        </View>
                     </View>
                 </ScrollView>
             </Modal>
@@ -262,8 +269,8 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
                 }
                 onRequestClose={handleDetailsChanges}
             >
-                <ScrollView keyboardShouldPersistTaps="handled" style={styles.centeredView}>
-                    <View style={styles.modalView}>
+                <ScrollView keyboardShouldPersistTaps="handled" style={customModalStyles.centeredView}>
+                    <View style={customModalStyles.modalView}>
 
                         <TreeFormModal
                             treeData={details}
@@ -286,7 +293,7 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
                 onRequestClose={handleDetailsChanges} // Add this line
             >
 
-                <View style={styles.centeredViewLoading}>
+                <View style={customModalStyles.loadingView}>
                     <LoadingScreen />
                 </View>
 
@@ -298,54 +305,3 @@ const CustomModal = ({ modalVisible, setModalVisible, mode, onFetchData, sapling
 
 export default CustomModal;
 
-const styles = StyleSheet.create({
-    centeredViewPlot: {
-        marginTop: 200,
-        backgroundColor: 'rgba(0,0,0,.5)',
-        margin: 2
-    },
-    centeredView: {
-        marginTop: 200,
-        //backgroundColor: 'rgba(0,0,0,1)',
-        // width: '100%',
-        // height: '100%'
-    },
-    centeredViewLoading: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 200,
-        backgroundColor: 'rgba(0,0,0,.2)',
-    },
-    modalView: {
-        height: '100%',
-        backgroundColor: 'white',
-        borderRadius: 0,
-        //padding: 35,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-    },
-    modalViewPlot: {
-
-        height: '100%',
-        backgroundColor: 'white',
-        //borderRadius: 0,
-        //padding: 35,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-    },
-});

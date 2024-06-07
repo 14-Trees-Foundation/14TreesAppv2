@@ -1,16 +1,15 @@
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useEffect, useContext, useState } from "react";
-import { Text, View, BackHandler, ScrollView, FlatList, TouchableOpacity, ToastAndroid } from "react-native";
+import { Text, View, BackHandler, ScrollView, FlatList, TouchableOpacity, ToastAndroid, StyleSheet } from "react-native";
 import { Utils } from "../services/Utils";
 import { Strings } from "../services/Strings";
-import { commonStyles } from "../services/Styles";
-import Icon from 'react-native-vector-icons/FontAwesome5';
-import GlobalContext from "../context/GlobalContext ";
+import { commonStyles, treesInShiftStyles } from "../services/Styles";
+import ShiftsCard from "../components/ShiftsCard";
+import { TreeRow } from "../components/TreeRow";
 
 const TreesInShift = ({ navigation, route }) => {
-    const { shiftIDs, plotselected, starttime, endtime, timetaken, treesplanted, timestamp } = route.params;
-    const { lightTheme } = useContext(GlobalContext);
-    console.log("shiftID TreesInShift---", shiftIDs, plotselected, starttime, endtime, timetaken, treesplanted);
+    const { shiftIDs, itemData } = route.params;
+    console.log("shiftID TreesInShift---", shiftIDs);
 
     const [finalList, setFinalList] = useState(null);
 
@@ -83,290 +82,46 @@ const TreesInShift = ({ navigation, route }) => {
         }, []),
     );
 
-    const renderTree = (tree1, tree2, tree3, tree4) => {
-        console.log("upload:--", tree1.uploaded);
-        return (
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%', backgroundColor: 'white', margin: 2, borderRadius: 6 }}>
-                {/* First Tree */}
-                {tree1 ? tree1.uploaded ? (
-                    <View style={{ ...commonStyles.borderedDisplay2, backgroundColor: '#059636', flex: 1, justifyContent: 'space-around', width: '25%' }}>
-                        <TouchableOpacity
-                            onPress={() => {
-                                ToastAndroid.show(Strings.alertMessages.Synched, ToastAndroid.SHORT);
-                            }}
-                        >
-                            <Text
-                                style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}
-                                numberOfLines={1} // Limit to a single line
-                                ellipsizeMode="tail" // Truncate at the end with ellipsis
-                            >
-                                {tree1.sapling_id}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : (
-                    <View style={{ ...commonStyles.borderedDisplay, flex: 1, justifyContent: 'space-around', width: '25%' }}>
-                        <TouchableOpacity onPress={() => {
-                            navigation.navigate(
-                                Strings.screenNames.getString(
-                                    'EditLocalTree',
-                                    Strings.english,
-                                ),
-                                {
-                                    sapling_id: tree1.sapling_id,
-                                    shiftID: shiftIDs.localShiftId
-                                },
-                            );
-                        }}>
-                            <Text
-                                style={{ ...commonStyles.text, color: 'black', textAlign: 'center' }}
-                                numberOfLines={1} // Limit to a single line
-                                ellipsizeMode="tail" // Truncate at the end with ellipsis
-                            >
-                                {tree1.sapling_id}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : <View style={{ justifyContent: 'space-around', width: '25%' }}></View>
-                }
-
-                {/* Second Tree */}
-                {tree2 ? tree2.uploaded ? (
-                    <View style={{ ...commonStyles.borderedDisplay2, backgroundColor: '#059636', flex: 1, justifyContent: 'space-around', width: '25%' }}>
-                        <TouchableOpacity
-                            onPress={() => {
-                                ToastAndroid.show(Strings.alertMessages.Synched, ToastAndroid.SHORT);
-                            }}
-                        >
-                            <Text
-                                style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}
-                                numberOfLines={1} // Limit to a single line
-                                ellipsizeMode="tail" // Truncate at the end with ellipsis
-                            >
-                                {tree2.sapling_id}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                ) :
-                    (<View style={{ ...commonStyles.borderedDisplay, flex: 1, justifyContent: 'space-around', width: '25%' }}>
-                        <TouchableOpacity onPress={() => {
-                            navigation.navigate(
-                                Strings.screenNames.getString(
-                                    'EditLocalTree',
-                                    Strings.english,
-                                ),
-                                {
-                                    sapling_id: tree2.sapling_id,
-                                    shiftID: shiftIDs.localShiftId
-                                },
-                            );
-                        }}>
-                            <Text
-                                style={{ ...commonStyles.text, color: 'black', textAlign: 'center' }}
-                                numberOfLines={1} // Limit to a single line
-                                ellipsizeMode="tail" // Truncate at the end with ellipsis
-                            >
-                                {tree2.sapling_id}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                    ) : <View style={{ justifyContent: 'space-around', width: '25%' }}></View>
-                }
-
-                {/* Third Tree */}
-                {tree3 ? tree3.uploaded ? (
-                    <View style={{ ...commonStyles.borderedDisplay2, backgroundColor: '#059636', flex: 1, justifyContent: 'space-around', width: '25%' }}>
-                        <TouchableOpacity
-                            onPress={() => {
-                                ToastAndroid.show(Strings.alertMessages.Synched, ToastAndroid.SHORT);
-                            }}
-                        >
-                            <Text
-                                style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}
-                                numberOfLines={1} // Limit to a single line
-                                ellipsizeMode="tail" // Truncate at the end with ellipsis
-                            >
-                                {tree3.sapling_id}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : (<View style={{ ...commonStyles.borderedDisplay, flex: 1, justifyContent: 'space-around', width: '25%' }}>
-                    <TouchableOpacity onPress={() => {
-                        navigation.navigate(
-                            Strings.screenNames.getString(
-                                'EditLocalTree',
-                                Strings.english,
-                            ),
-                            {
-                                sapling_id: tree3.sapling_id,
-                                shiftID: shiftIDs.localShiftId
-                            },
-                        );
-                    }}>
-                        <Text
-                            style={{ ...commonStyles.text, color: 'black', textAlign: 'center' }}
-                            numberOfLines={1} // Limit to a single line
-                            ellipsizeMode="tail" // Truncate at the end with ellipsis
-                        >
-                            {tree3.sapling_id}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-                ) : <View style={{ justifyContent: 'space-around', width: '25%' }}></View>
-                }
-
-                {/* Fourth Tree */}
-
-                {tree4 ? tree4.uploaded ? (
-                    <View style={{ ...commonStyles.borderedDisplay2, backgroundColor: '#059636', flex: 1, justifyContent: 'space-around', width: '25%' }}>
-                        <TouchableOpacity
-                            onPress={() => {
-                                ToastAndroid.show(Strings.alertMessages.Synched, ToastAndroid.SHORT);
-                            }}
-                        >
-                            <Text
-                                style={{ ...commonStyles.text, color: 'white', fontWeight: '600', textAlign: 'center' }}
-                                numberOfLines={1} // Limit to a single line
-                                ellipsizeMode="tail" // Truncate at the end with ellipsis
-                            >
-                                {tree4.sapling_id}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                ) :
-                    (<View style={{ ...commonStyles.borderedDisplay, flex: 1, justifyContent: 'space-around', width: '25%' }}>
-                        <TouchableOpacity onPress={() => {
-                            navigation.navigate(
-                                Strings.screenNames.getString(
-                                    'EditLocalTree',
-                                    Strings.english,
-                                ),
-                                {
-                                    sapling_id: tree4.sapling_id,
-                                    shiftID: shiftIDs.localShiftId
-                                },
-                            );
-                        }}>
-                            <Text
-                                style={{ ...commonStyles.text, color: 'black', textAlign: 'center' }}
-                                numberOfLines={1} // Limit to a single line
-                                ellipsizeMode="tail" // Truncate at the end with ellipsis
-                            >
-                                {tree4.sapling_id}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                    ) : <View style={{ justifyContent: 'space-around', width: '25%' }}></View>
-                }
-            </View>
-        );
-    };
 
     return (
         <ScrollView keyboardShouldPersistTaps='handled' style={{ backgroundColor: 'white', height: '100%' }}>
+            
+            <ShiftsCard item={itemData} disableHandlePress={true} />
 
-
-            <View style={{ ...commonStyles.borderedDisplay, flex: 1, flexDirection: 'row', justifyContent: 'space-around', backgroundColor: 'white', opacity: 0.8, borderRadius: 6 }}>
-                <View style={{ flex: 1, flexDirection: 'column', paddingVertical: 8 }}>
-                    <Text style={{
-                        ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
-                        fontSize: 18, textAlign: 'center'
-                    }}
-                        numberOfLines={1} // Limit to a single line
-                        ellipsizeMode="tail" // Truncate at the end with ellipsis
-                    >
-                        {plotselected}
-                    </Text>
-
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: '100%', padding: 4 }}>
-                        {/* First View */}
-
-                        <View style={{
-                            //flex: 1, 
-                            flexDirection: 'column', flexWrap: 'wrap', width: '50%', marginBottom: 1, marginTop: 0,
-                            marginLeft: 12
-                        }}>
-                            <Text style={{
-                                ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
-                                fontSize: 14
-                            }}>
-                                {Strings.labels.Date} : {timestamp}
-                            </Text>
-                            <Text style={{
-                                ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
-                                fontSize: 14
-                            }}>
-                                {Strings.labels.StartTime} :{starttime}
-                            </Text>
-                            <Text style={{
-                                ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
-                                fontSize: 14
-                            }}>
-                                {Strings.labels.EndTime} : {endtime}
-                            </Text>
-                            <Text style={{
-                                ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
-                                fontSize: 14
-                            }}>
-                                {Strings.labels.TimeTaken} :{timetaken}
-                            </Text>
-                        </View>
-                        {/* Second View */}
-
-                        <View style={{ ...commonStyles.secondView, backgroundColor: 'lightgrey', marginRight: 2, marginLeft: 22, width: '30%' }}>
-                            {/* Icon */}
-                            <View style={{ margin: 6, flex: 1, marginTop: 12, marginLeft: 11, marginRight: 12 }}>
-                                <View style={{ backgroundColor: 'green', borderRadius: 70, padding: 10, margin: 2 }}>
-                                    <Icon name="tree" size={32} color="white" style={{ marginLeft: 5 }} />
-                                </View>
-                            </View>
-
-                            {/* TreesPlanted */}
-
-                            <View style={{ flex: 1 }}>
-                                <Text style={{
-                                    color: lightTheme ? '#52525C' : 'black',
-                                    fontSize: 28, fontWeight: 'bold', padding: 0, textAlign: 'center', marginRight: 5
-                                }}>
-                                    {treesplanted}
-                                </Text>
-                            </View>
-
-                        </View>
-                    </View>
-                </View>
-
-            </View>
-
-            <View style={{ margin: 2, borderColor: '#5DB075', borderRadius: 5, flexDirection: 'row', backgroundColor: 'white' }}>
+            <View style={treesInShiftStyles.treeListContainer}>
                 {finalList === null ? (
                     <Text style={commonStyles.text2}>{Strings.messages.LoadingTrees}</Text>
                 ) : (<FlatList
-                    style={{ flex: 1, backgroundColor: 'white' }}
+                    style={treesInShiftStyles.flatList}
                     scrollEnabled={false}
                     ListEmptyComponent={() => (
-                        <View style={{ ...commonStyles.borderedDisplay, marginTop: 40 }}>
-                            <Text style={{ ...commonStyles.text5, padding: 15 }}>
+                        <View style={[commonStyles.borderedDisplay, treesInShiftStyles.emptyList]}>
+                            <Text style={treesInShiftStyles.emptyListText}>
                                 {Strings.messages.NoShiftTree}
                             </Text>
                         </View>
                     )}
                     data={finalList}
-
                     renderItem={({ item, index }) => {
                         if (index % 4 === 0) {
-
-                            if (index + 3 < finalList.length) {
-                                return renderTree(item, finalList[index + 1], finalList[index + 2], finalList[index + 3])
-                            } else if (index + 2 < finalList.length) {
-                                return renderTree(item, finalList[index + 1], finalList[index + 2], null);
-                            } else if (index + 1 < finalList.length) {
-                                return renderTree(item, finalList[index + 1], null, null);
-                            } else {
-                                return renderTree(item, null, null, null)
-                            }
+                            const trees = [
+                                item,
+                                finalList[index + 1] || null,
+                                finalList[index + 2] || null,
+                                finalList[index + 3] || null,
+                            ];
+                            return (<TreeRow
+                                tree1={trees[0]}
+                                tree2={trees[1]}
+                                tree3={trees[2]}
+                                tree4={trees[3]}
+                                shiftID={shiftIDs.localShiftId}
+                                modalMode={false}
+                            />);
                         }
+                        return null;
                     }}
+                    keyExtractor={(item, index) => `${item.sapling_id}-${index}`}
                 />
                 )}
             </View>
@@ -376,3 +131,5 @@ const TreesInShift = ({ navigation, route }) => {
 }
 
 export default TreesInShift;
+
+

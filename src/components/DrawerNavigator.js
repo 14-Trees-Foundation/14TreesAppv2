@@ -4,18 +4,18 @@ import EditTreeScreen from '../screens/EditTree';
 import VerifyusersScreen from '../screens/VerifyUsers';
 import { stackNavRef } from '../App';
 import GlobalContext from "../context/GlobalContext ";
-import { commonStyles } from "../services/Styles";
+import { CustomButtonStyles, commonStyles, drawerNavigatorStyles } from "../services/Styles";
 import { styleConfigs } from "../services/Styles";
 import { useState, useEffect, useCallback, useContext } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { TouchableOpacity, View, Image, Text, BackHandler, Alert } from "react-native";
+import { View, Image, Text, BackHandler, Alert } from "react-native";
 import { Constants, Utils, getImageSourceObject, logoSrc } from "../services/Utils";
 import { DrawerContentScrollView, DrawerItemList, createDrawerNavigator, } from '@react-navigation/drawer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import About from '../screens/About';
 import Shifts from "../screens/Shifts";
 import ScreenHeaderContent from './ScreenHeaderContent';
-
+import { Button } from 'react-native-paper';
 const Drawer = createDrawerNavigator();
 
 const fillInUserDetails = async (setIsAdmin, setUserDetails) => {
@@ -45,39 +45,26 @@ const DrawerContent = (props) => {
 
     return (
         <DrawerContentScrollView {...props}>
-            <View
-                style={{
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    marginTop: 50,
-                    bottom: 0,
-                }}>
-                <Image
-                    source={Constants.logoImage()}
-                    style={{ width: '50%', height: 150, marginLeft: 10, marginBottom: '2rem' }}
-                />
+            <View style={drawerNavigatorStyles.navigatorView}>
+                <Image source={Constants.logoImage()} style={drawerNavigatorStyles.image} />
                 {/* <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>
                     14 Trees
                 </Text> */}
                 {userDetails ? (
                     <View
-                        style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            alignSelf: 'flex-start',
-                            margin: 10,
-                            justifyContent: 'space-around',
-                        }}>
+                        style={drawerNavigatorStyles.userDetails}>
                         <Image
                             source={getImageSourceObject(userDetails.image)}
-                            style={{ width: 75, height: 75, borderRadius: 37.5 }}></Image>
+                            style={drawerNavigatorStyles.userImage}></Image>
                         <View style={{ flexDirection: 'column', marginLeft: 15 }}>
                             <View style={{ width: 160 }}>
-                                <Text style={{ fontFamily: 'Inter-Regular', fontSize: 20, color: 'black', fontWeight: 'bold' }}>
+                                <Text
+                                    style={drawerNavigatorStyles.userName}>
                                     {userDetails.name}
                                 </Text>
                             </View>
-                            <Text style={{ fontFamily: 'Inter-Regular', fontSize: 16, color: "green" }}>
+                            <Text
+                                style={drawerNavigatorStyles.userType}>
                                 {isAdmin ? Strings.labels.admin : Strings.labels.logger}
                             </Text>
                         </View>
@@ -87,20 +74,16 @@ const DrawerContent = (props) => {
                 )}
             </View>
             <DrawerItemList {...props} />
-            <View
-                style={{
-                    flexDirection: 'column',
-                    position: 'relative',
-                    //marginTop: 100,
-                    alignSelf: 'center',
-                }}>
-                <TouchableOpacity
-                    style={{ ...commonStyles.logOutButton }}
-                    onPress={() => Utils.confirmAction(() => logout(props.navigationRef), undefined, Strings.messages.logoutConfirm)}>
-                    <Text style={{ fontFamily: 'Inter-Regular', color: 'white', fontSize: 18 }}>
-                        {Strings.buttonLabels.logOut}
-                    </Text>
-                </TouchableOpacity>
+            <View style={drawerNavigatorStyles.logOutButton}>
+                <Button
+                    onPress={() => Utils.confirmAction(() => logout(props.navigationRef), undefined, Strings.messages.logoutConfirm)}
+                    mode="contained"
+                    buttonColor='red'
+                    labelStyle={CustomButtonStyles.buttonLabel}
+                    style={CustomButtonStyles.button}
+                >
+                    {Strings.buttonLabels.logOut}
+                </Button>
             </View>
         </DrawerContentScrollView>
     );
@@ -181,7 +164,7 @@ export const DrawerNavigator = () => {
                     }
                 }}
             />
-            
+
             {isAdmin && (
                 <Drawer.Screen
                     name={Strings.screenNames.getString('EditTree', Strings.english)}

@@ -1,10 +1,10 @@
 import Geolocation from "@react-native-community/geolocation"
-import { Text, View, Alert, ToastAndroid, TextInput, TouchableOpacity } from "react-native";
+import { Text, View, Alert, ToastAndroid, StyleSheet, TouchableOpacity } from "react-native";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Strings } from "../services/Strings";
 import { Utils } from "../services/Utils";
 import { useFocusEffect } from "@react-navigation/native";
-import { commonStyles } from "../services/Styles";
+import { coordinateSetterStyles } from "../services/Styles";
 import GlobalContext from "../context/GlobalContext ";
 
 
@@ -95,29 +95,17 @@ export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng }) => {
     const CoordinatesDisplay = ({ latitude, longitude, title }) => {
         //console.log("latitude---", latitude, 'longitude---', longitude);
         return (
-            <View style={{ marginTop: 15, borderRadius: 12, padding: 8, flexDirection: 'column', backgroundColor: '#e8e9ea' }}>
-                <Text style={{
-                    ...commonStyles.text3, color: lightTheme ? '#52525C' : 'black',
-                    fontSize: 18,
-                    fontFamily: 'Inter-Regular', fontWeight: 'bold', marginTop: 0
-                }}>
+            <View style = {coordinateSetterStyles.coordinatesView}>
+                <Text style={{...coordinateSetterStyles.coordinatesText(lightTheme),fontWeight: 'bold',fontSize: 18}}>
                     {title}:
                 </Text>
                 <Text
-                    style={{
-                        ...commonStyles.text3, color: lightTheme ? '#52525C' : 'black',
-                        fontFamily: 'Inter-Regular',
-                        marginTop: 0
-                    }}
+                    style={coordinateSetterStyles.coordinatesText(lightTheme)}
                 >
                     Latitude: {getReadableCoordinate(latitude)}
                 </Text>
                 <Text
-                    style={{
-                        ...commonStyles.text3, color: lightTheme ? '#52525C' : 'black',
-                        fontFamily: 'Inter-Regular',
-                        marginTop: 0
-                    }}
+                    style={coordinateSetterStyles.coordinatesText(lightTheme)}
                 >
                     Longitude: {getReadableCoordinate(longitude)}
                 </Text>
@@ -126,8 +114,8 @@ export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng }) => {
     }
 
     return (
-        <View style={{ flexDirection: 'column', padding: 0 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' }}>
+        <View style={{ flexDirection: 'column'}}>
+            <View style= {coordinateSetterStyles.innerContainer}>
                 <TouchableOpacity style={{ flexDirection: 'column' }}
                     onPress={() => requestLocation(onSetLat, onSetLng, setLat, setLng)}
                 >
@@ -137,3 +125,4 @@ export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng }) => {
         </View>
     )
 }
+

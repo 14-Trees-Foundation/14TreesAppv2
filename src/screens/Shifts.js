@@ -1,8 +1,8 @@
-import { View, BackHandler, FlatList, Text, TouchableOpacity, Alert, ScrollView, Modal } from "react-native";
+import { View, BackHandler, FlatList, Text, TouchableOpacity, Alert, ScrollView, Modal, StyleSheet } from "react-native";
 import { Strings } from '../services/Strings';
-import { MyIconButton } from '../components/Components';
+import { StackedIcons } from '../components/Components';
 import React, { useContext, useEffect, useState, useCallback } from "react";
-import { commonStyles } from "../services/Styles";
+import { commonStyles, shiftsStyles } from "../services/Styles";
 import GlobalContext from "../context/GlobalContext ";
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Utils } from "../services/Utils";
@@ -10,6 +10,10 @@ import { useFocusEffect } from "@react-navigation/native";
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import CustomModal from "../components/CustomModal";
 import { treeFormModes } from "../components/TreeForm";
+import { Button } from 'react-native-paper';
+import { Iconstyles } from "../services/Styles";
+import { Card } from 'react-native-paper';
+import ShiftsCard from "../components/ShiftsCard";
 
 const Shifts = ({ navigation }) => {
 
@@ -27,7 +31,7 @@ const Shifts = ({ navigation }) => {
 
     const fetchLiveShiftsAndSaplings = async () => {
         const syncedShiftsFromLiveDB = await Utils.getShiftsLive();
-        
+
         return syncedShiftsFromLiveDB
     };
 
@@ -68,7 +72,6 @@ const Shifts = ({ navigation }) => {
     );
 
 
-
     useEffect(() => {
         const backAction = () => {
             //console.log('closing modal in shifts----');
@@ -84,115 +87,9 @@ const Shifts = ({ navigation }) => {
     }, []);
 
 
-    const renderData = useCallback((item) => {
-        const syncUploadComplete = (item.shiftuploadcomplete == 1);
-
-        return (
-            <TouchableOpacity style={{ ...commonStyles.borderedDisplay, flex: 1, flexDirection: 'row', justifyContent: 'space-around', backgroundColor: 'white', opacity: 0.8, borderRadius: 6 }}
-                onPress={() => {
-                    navigation.navigate(
-                        Strings.screenNames.getString(
-                            'TreesInShift',
-                            Strings.english,
-                        ),
-                        {
-                            shiftIDs: { liveShiftId: item.shift_id, localShiftId: item.id },
-                            plotselected: item.plotselected,
-                            starttime: item.starttime,
-                            endtime: item.endtime,
-                            timetaken: item.timetaken,
-                            treesplanted: item.treesplanted,
-                            timestamp: item.timestamp
-                        },
-                    )
-                }}
-            >
-                <View style={{ flex: 1, flexDirection: 'column', paddingVertical: 8 }}>
-                    <View style={{ flex: 1, flexDirection: 'row', }}>
-
-                        <View style={{ width: syncUploadComplete ? '85%' : '100%' }}>
-                            <Text style={{
-                                ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
-                                fontSize: 18, textAlign: 'center', marginLeft: 8
-                            }}
-                                numberOfLines={1} // Limit to a single line
-                                ellipsizeMode="tail" // Truncate at the end with ellipsis
-                            >
-                                {item.plotselected}
-                            </Text>
-                        </View>
-
-                        {syncUploadComplete && <View style={{ width: '15%', marginLeft: 5 }}>
-                                 <MCIcon name={"wifi-sync"} size={20} color={"green"} />
-                            </View>
-                        }
-                    </View>
-
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: '100%', padding: 4 }}>
-                        {/* First View */}
-
-                        <View style={{
-                            //flex: 1, 
-                            flexDirection: 'column', flexWrap: 'wrap', width: '50%', marginBottom: 1, marginTop: 0,
-                            marginLeft: 12
-                        }}>
-                            <Text style={{
-                                ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
-                                fontSize: 14
-                            }}>
-                                {Strings.labels.Date} : {item.timestamp}
-                            </Text>
-                            <Text style={{
-                                ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
-                                fontSize: 14
-                            }}>
-                                {Strings.labels.StartTime} :{item.starttime}
-                            </Text>
-                            <Text style={{
-                                ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
-                                fontSize: 14
-                            }}>
-                                {Strings.labels.EndTime} : {item.endtime}
-                            </Text>
-                            <Text style={{
-                                ...commonStyles.text, color: lightTheme ? '#52525C' : 'black',
-                                fontSize: 14
-                            }}>
-                                {Strings.labels.TimeTaken} :{item.timetaken}
-                            </Text>
-                        </View>
-                        {/* Second View */}
-
-                        <View style={{ ...commonStyles.secondView, backgroundColor: 'lightgrey', marginRight: 2, marginLeft: 22, width: '30%' }}>
-                            {/* Icon */}
-                            <View style={{ margin: 6, flex: 1, marginTop: 12, marginLeft: 11, marginRight: 12 }}>
-                                <View style={{ backgroundColor: 'green', borderRadius: 70, padding: 10, margin: 2 }}>
-                                    <Icon name="tree" size={32} color="white" style={{ marginLeft: 5 }} />
-                                </View>
-                            </View>
-
-                            {/* TreesPlanted */}
-
-                            <View style={{ flex: 1 }}>
-                                <Text style={{
-                                    color: lightTheme ? '#52525C' : 'black',
-                                    fontSize: 28, fontWeight: 'bold', padding: 0, textAlign: 'center', marginRight: 2
-                                }}>
-                                    {item.treesplanted}
-                                </Text>
-                            </View>
-
-                        </View>
-                    </View>
-                </View>
-
-
-            </TouchableOpacity>
-        )
-    }, []);
 
     return (
-        <ScrollView keyboardShouldPersistTaps='handled' style={{ marginTop: 0, backgroundColor: "white" }}>
+        <ScrollView keyboardShouldPersistTaps='handled' style={shiftsStyles.scrollView}>
 
             <CustomModal
                 modalVisible={modalVisible}
@@ -200,33 +97,37 @@ const Shifts = ({ navigation }) => {
                 mode={mode}
             />
 
-
-
-            <View
-                style={{
-                    marginHorizontal: 50,
-                    marginTop: 20,
-                    marginBottom: 10
-                }}
-            >
-                <MyIconButton
-                    names={['plus', 'tree']}
-                    styles={[{ opacity: 0.9 }, { opacity: 0.5 }]}
-                    text={Strings.buttonLabels.StartShift}
+            <View style={shiftsStyles.buttonContainer}>
+                <Button
+                    icon={() => (
+                        <View style={Iconstyles.buttonPosition}>
+                            <StackedIcons
+                                names={['plus', 'tree']}
+                                styles={[{ opacity: 0.9, position: 'absolute' }, { opacity: 0.5, position: 'absolute' }]}
+                            />
+                        </View>
+                    )}
+                    mode="contained"
+                    buttonColor='#059636'
                     onPress={() => {
                         setModalVisible(true);
                         setMode(treeFormModes.startShift)
 
                     }}
-                />
+                    contentStyle={Iconstyles.buttonContent}
+                    labelStyle={Iconstyles.buttonLabel}
+                >
+                    {Strings.buttonLabels.StartShift}
+
+                </Button>
             </View>
 
 
             {
-                !modalVisible && <View style={{ backgroundColor: 'white', height: '100%', marginTop: 20 }}>
+                !modalVisible && <View style={shiftsStyles.shiftsView}>
                     {finalList && finalList.length !== 0 ? (
                         <FlatList
-                            style={{ backgroundColor: 'white' }}
+                            style={shiftsStyles.flatList}
                             ListHeaderComponent={() => (
                                 <View style={{ ...commonStyles.borderedDisplay }}>
                                     <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black', }}>
@@ -238,7 +139,9 @@ const Shifts = ({ navigation }) => {
                             data={finalList}
                             scrollEnabled={false}
                             renderItem={({ item }) => {
-                                return renderData(item);
+                                return (
+                                    <ShiftsCard item={item} />
+                                );
                             }}
                         />
 
@@ -257,3 +160,4 @@ const Shifts = ({ navigation }) => {
 }
 
 export default Shifts;
+

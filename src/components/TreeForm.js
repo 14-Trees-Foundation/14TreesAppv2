@@ -1,13 +1,13 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { Alert, Button, ScrollView, Text, TextInput, Image, View, ToastAndroid, Modal, TouchableOpacity } from 'react-native';
+import { Alert, ScrollView, Text, TextInput, Image, View, ToastAndroid, Modal, TouchableOpacity } from 'react-native';
 import { Strings } from "../services/Strings";
 import { Utils } from "../services/Utils";
-import { CustomButton } from "./Components";
 import { CoordinateSetter } from "./CoordinateSetter";
 import { CustomDropdown } from "./CustomDropdown";
-import { commonStyles } from "../services/Styles";
+import { CustomButtonStyles, commonStyles, treeFormStyles } from "../services/Styles";
 import Icon from 'react-native-vector-icons/Ionicons';
 import GlobalContext from '../context/GlobalContext ';
+import { Button } from 'react-native-paper';
 
 export const treeFormModes = {
     addTree: 0,
@@ -201,27 +201,17 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         <ScrollView
             keyboardShouldPersistTaps='handled'
             scrollEnabled={true}
-            style={{
-                backgroundColor: 'white',
-                padding: 2, margin: 4,
-                borderRadius: 10, borderColor: '#ccc', borderWidth: 3,
-            }} >
+            style={treeFormStyles.detailsContainerOuter} >
             <View style={{ margin: 4, borderRadius: 10 }}>
 
 
-
-                {(mode === treeFormModes.localEdit && selectedPlot) && <Text style={{
-                    ...commonStyles.text4, color: '#113160',
-                    fontFamily: 'Inter-Regular', fontSize: 20, textAlign: 'center', marginTop: 25, fontWeight: '300'
-                }}>
-                    {selectedPlot.name}
-                </Text>
+                {(mode === treeFormModes.localEdit && selectedPlot) &&
+                    <Text style={treeFormStyles.plotSapling}>
+                        {selectedPlot.name}
+                    </Text>
                 }
 
-                {mode === treeFormModes.remoteEdit && <Text style={{
-                    ...commonStyles.text4, color: '#113160',
-                    fontFamily: 'Inter-Regular', fontSize: 20, textAlign: 'center', marginTop: 25, fontWeight: '300'
-                }}>
+                {mode === treeFormModes.remoteEdit && <Text style={treeFormStyles.plotSapling}>
                     {saplingid}
                 </Text>
                 }
@@ -230,12 +220,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     <View style={{ marginTop: 15 }}>
                         <TextInput
                             defaultValue={saplingid}
-                            style={{
-                                ...commonStyles.txtInput,
-                                color: lightTheme ? '#52525C' : 'black',
-                                fontSize: 15, borderRadius: 13,
-                                fontWeight: saplingid ? '800' : 'normal'
-                            }}
+                            style={treeFormStyles.textInput(lightTheme, saplingid)}
                             placeholder={Strings.labels.SaplingId}
                             placeholderTextColor={'black'}
                             onChangeText={(text) => { setSaplingId(text) }}
@@ -245,6 +230,8 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     </View>
                 )
                 }
+
+
 
 
                 <CustomDropdown
@@ -261,23 +248,13 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
 
                 />}
 
-                {/* add the click button functionality for edit tree screen */}
-                <View style={{ flexDirection: "column", marginHorizontal: 20, marginTop: 20, marginBottom: 25, alignItems: 'center', justifyContent: 'space-around' }}>
-                    {/* First View */}
+                <View style={treeFormStyles.imageContainer}>
+
                     <View style={{ width: '100%', height: 200 }}>
                         <TouchableOpacity
                             style={{
-                                flex: 1,
-                                backgroundColor: (mode === treeFormModes.remoteEdit && disableButton) ? "#969393" : "#969393",
-                                padding: 0,
-                                borderColor: "#059636",
-                                borderRadius: 10,
-                                alignItems: "center",
-                                borderWidth: 1,
-                                marginTop: 0,
-                                marginHorizontal: 0,
-                                margin: 0,
-                                position: 'relative'
+                                ...treeFormStyles.imagePicker, backgroundColor:
+                                    mode === treeFormModes.remoteEdit && disableButton ? '#969393' : '#969393',
                             }}
                             onPress={() => {
                                 if (mode === treeFormModes.remoteEdit && disableButton) {
@@ -290,31 +267,17 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
 
                             {!showImage ? <Image
                                 source={require('../../assets/camera.png')}
-                                style={{
-                                    width: '100%',
-                                    height: 197,
-                                    margin: 0,
-                                    borderRadius: 10,
-                                    //aspectRatio: 720 / 960, // Aspect ratio of your image (maxWidth / maxHeight)
-                                    //resizeMode: 'contain', // Preserve aspect ratio and fit within the specified dimensions 
-                                }}
+                                style={treeFormStyles.emptyImage}
                             /> : <Image
                                 source={{ uri: `data:image/jpeg;base64,${images[images.length - 1].data}` }}
-                                style={{
-                                    width: '100%',
-                                    height: 197,
-                                    margin: 1,
-                                    //borderRadius: 10,
-                                    aspectRatio: 1220 / 920, // Aspect ratio of your image (maxWidth / maxHeight)
-                                    //resizeMode: 'contain', // Preserve aspect ratio and fit within the specified dimensions 
-                                }}
+                                style={treeFormStyles.imageExists}
                             />
                             }
 
-                            {showImage && <TouchableOpacity style={{ position: 'absolute', top: 8, right: 8 }} onPress={() => Utils.confirmAction(() => handleDeleteItem(images[images.length - 1].name), Strings.alertMessages.confirmDeleteImage)}>
+                            {showImage && <TouchableOpacity style={treeFormStyles.imageDelete} onPress={() => Utils.confirmAction(() => handleDeleteItem(images[images.length - 1].name), Strings.alertMessages.confirmDeleteImage)}>
                                 <Image
                                     source={require('../../assets/icondelete.png')} // Replace with your delete icon image
-                                    style={{ width: 25, height: 25, marginLeft: 10 }} // Adjust the icon dimensions and margin
+                                    style={treeFormStyles.deleteIcon} // Adjust the icon dimensions and margin
                                 />
                             </TouchableOpacity>}
                         </TouchableOpacity>
@@ -322,7 +285,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
 
                     </View>
 
-                    {/* Second View */}
+
                     <View style={{ width: '100%', marginTop: 0 }}>
                         <CoordinateSetter
                             inLat={lat}
@@ -341,18 +304,18 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                         setModalVisible(false);
                     }}
                 >
-                    <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <View style={treeFormStyles.modalContainer}>
                         <View style={{ backgroundColor: 'white', padding: 40 }}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', margin: 10 }}>
+                            <View style={treeFormStyles.buttonContainer}>
 
-                                <TouchableOpacity onPress={() => pickImage(0)} style={{ backgroundColor: "green", padding: 10, }}>
-                                    <Text style={{ color: "white", fontWeight: 'bold', fontSize: 15 }}> {Strings.buttonLabels.openCamera}</Text>
+                                <TouchableOpacity onPress={() => pickImage(0)} style={treeFormStyles.modalButtons}>
+                                    <Text style={treeFormStyles.buttonText}> {Strings.buttonLabels.openCamera}</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => pickImage(1)} style={{ backgroundColor: "green", padding: 10, }}>
-                                    <Text style={{ color: "white", fontWeight: 'bold', fontSize: 15 }}> {Strings.buttonLabels.openGallery}</Text>
+                                <TouchableOpacity onPress={() => pickImage(1)} style={treeFormStyles.modalButtons}>
+                                    <Text style={treeFormStyles.buttonText}> {Strings.buttonLabels.openGallery}</Text>
                                 </TouchableOpacity>
                             </View>
-                            <TouchableOpacity style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }} onPress={() => setModalVisible(false)}  >
+                            <TouchableOpacity style={treeFormStyles.cancelModal} onPress={() => setModalVisible(false)}  >
                                 <Icon name="close-circle" size={28} color="red" />
                             </TouchableOpacity>
                         </View>
@@ -360,18 +323,39 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     </View>
                 </Modal>
 
-                <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: 30, marginTop: 0, marginBottom: 2 }}>
-                    {
-                        (onCancel !== undefined)
-                        &&
-                        <CustomButton text={Strings.buttonLabels.cancel} onPress={onCancel} opacityStyle={{ backgroundColor: 'red' }} />
-                    }
-                    <CustomButton
-                        text={Strings.buttonLabels.Submit}
-                        onPress={onSave}
-                    />
+                <View style={CustomButtonStyles.container}>
+                    <View style={CustomButtonStyles.buttonRow}>
+                        <View style={CustomButtonStyles.buttonContainer}>
+                            {
+                                (onCancel !== undefined)
+                                &&
+                                <Button
+                                    mode="contained"
+                                    buttonColor='red'
+                                    labelStyle={CustomButtonStyles.buttonLabel}
+                                    style={CustomButtonStyles.button}
+                                    onPress={onCancel}
+                                >
+                                    {Strings.buttonLabels.cancel}
+                                </Button>
+                            }
+                        </View>
+                        <View style={CustomButtonStyles.buttonContainer}>
+                            <Button
+                                onPress={onSave}
+                                mode="contained"
+                                buttonColor='#1D4ED8'
+                                labelStyle={CustomButtonStyles.buttonLabel}
+                                style={CustomButtonStyles.button}
+                            >
+                                {Strings.buttonLabels.Submit}
+                            </Button>
+                        </View>
+                    </View>
                 </View>
+
             </View>
         </ScrollView>
     )
 }
+

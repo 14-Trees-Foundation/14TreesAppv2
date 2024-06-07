@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useCallback, useContext, useRef } from 'react';
-import { Button, Text, View, TouchableOpacity, FlatList, BackHandler, ToastAndroid } from 'react-native';
+import { Text, View, FlatList, BackHandler, ToastAndroid, StyleSheet } from 'react-native';
 import { Constants, Utils } from '../services/Utils';
-import { MyIconButton } from '../components/Components';
 import { Strings } from '../services/Strings';
 import * as Progress from 'react-native-progress';
 import { useFocusEffect } from '@react-navigation/native';
-import { commonStyles } from "../services/Styles";
+import { commonStyles, syncButtonStyles, syncDisplayStyles } from "../services/Styles";
 import GlobalContext from '../context/GlobalContext ';
+import { Button } from 'react-native-paper';
+import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const updateSyncStatus = async (setSyncDate, setCounts, setShiftsCount) => {
   const lsdate = await Utils.getLastSyncDate();
@@ -66,24 +67,29 @@ const SyncDisplay = ({ navigation }) => {
   }
 
   const deleteSyncedTreesAndShifts = async (response, uploadedSaplings) => {
-    
+
     const uploadedShiftIDs = Object.values(response.shiftDetails)
       .filter(shift => shift.shiftUploaded)
       .map(shift => shift.shiftID);
 
-      //take care of uploadedSaplings
+    //take care of uploadedSaplings
     await Utils.deleteSyncedShiftsBasedOnSaplings(uploadedShiftIDs, uploadedSaplings);
 
     //await Utils.deleteSyncedSaplingsInLocalShifts(uploadedSaplings);
-    
+
     //same as my code
     let remainingTrees = await Utils.deleteSyncedTreesInTreesTable()
     //console.log("------------remainingTrees------------", remainingTrees)
   };
 
-  const commenceUpload = async () => {
 
-    if (treeCounts && treeCounts.pending === 0 && shiftsCount && shiftsCount.pending === 0) {
+  const commenceUpload = async () => {
+    if (
+      treeCounts &&
+      treeCounts.pending === 0 &&
+      shiftsCount &&
+      shiftsCount.pending === 0
+    ) {
       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
       return;
     }
@@ -93,13 +99,45 @@ const SyncDisplay = ({ navigation }) => {
     try {
       await syncLogs();
     } catch (error) {
-      console.log("unable to sync logs---", error);
+      console.log('unable to sync logs---', error);
       const stackTrace = error.stack;
       const errorLog = {
-        msg: "happened while trying to sync logs(inside sync display)",
+        msg: 'happened while trying to sync logs(inside sync display)',
         error: JSON.stringify(error),
-        stackTrace: stackTrace
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
+
+    let uploadedSaplings;
+    let failures;
+    try {
+      if (treeCounts && treeCounts.pending === 0) {
+        ToastAndroid.show(
+          Strings.alertMessages.NothingToSync,
+          ToastAndroid.LONG,
+        );
+        return;
       }
+      //let {failures,uploadedSaplings }= await Utils.upload(setProgress);
+      let result = await Utils.upload(setProgress);
+      uploadedSaplings = result.uploadedSaplings
+      failures = result.failures
+      console.log("----------------uploadedSaplings-ni Syncdisplay-----------", uploadedSaplings)
+      setFailedTrees(failures);
+      setProgress(1);
+      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+      setTimeout(() => {
+        setShowProgress(false);
+      }, 2000);
+    } catch (error) {
+      console.log('unable to sync trees---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync trees(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
       await Utils.logException(JSON.stringify(errorLog));
     }
 
@@ -107,11 +145,14 @@ const SyncDisplay = ({ navigation }) => {
 
     try {
       if (shiftsCount && shiftsCount.pending == 0) {
-        ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
+        ToastAndroid.show(
+          Strings.alertMessages.NothingToSync,
+          ToastAndroid.LONG,
+        );
         return;
       }
       //const failures = await Utils.syncShifts();
-       responseFromSyncShifts = await Utils.syncShifts();
+      responseFromSyncShifts = await Utils.syncShifts(uploadedSaplings);
 
       setFailedShifts(responseFromSyncShifts.failures);
       setProgress(1);
@@ -120,128 +161,199 @@ const SyncDisplay = ({ navigation }) => {
         setShowProgress(false);
       }, 2000);
 
+      await deleteSyncedTreesAndShifts(
+        responseFromSyncShifts,
+        uploadedSaplings,
+      );
+      await Utils.fetchAndStoreHelperData();
+      await Utils.fetchAndStoreShifts();
     } catch (error) {
-      console.log("unable to sync shifts---", error);
+      console.log('unable to sync shifts---', error);
       const stackTrace = error.stack;
       const errorLog = {
-        msg: "happened while trying to sync shifts(inside sync display)",
+        msg: 'happened while trying to sync shifts(inside sync display)',
         error: JSON.stringify(error),
-        stackTrace: stackTrace
-      }
+        stackTrace: stackTrace,
+      };
       await Utils.logException(JSON.stringify(errorLog));
     }
+  };
+
+  // const commenceUpload = async () => {
+
+  //   if (treeCounts && treeCounts.pending === 0 && shiftsCount && shiftsCount.pending === 0) {
+  //     ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
+  //     return;
+  //   }
+
+  //   setShowProgress(true);
+
+  //   try {
+  //     await syncLogs();
+  //   } catch (error) {
+  //     console.log("unable to sync logs---", error);
+  //     const stackTrace = error.stack;
+  //     const errorLog = {
+  //       msg: "happened while trying to sync logs(inside sync display)",
+  //       error: JSON.stringify(error),
+  //       stackTrace: stackTrace
+  //     }
+  //     await Utils.logException(JSON.stringify(errorLog));
+  //   }
+
+  //   let responseFromSyncShifts;
+
+  //   try {
+  //     if (shiftsCount && shiftsCount.pending == 0) {
+  //       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
+  //       return;
+  //     }
+  //     //const failures = await Utils.syncShifts();
+  //     responseFromSyncShifts = await Utils.syncShifts();
+
+  //     setFailedShifts(responseFromSyncShifts.failures);
+  //     setProgress(1);
+  //     updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+  //     setTimeout(() => {
+  //       setShowProgress(false);
+  //     }, 2000);
+
+  //   } catch (error) {
+  //     console.log("unable to sync shifts---", error);
+  //     const stackTrace = error.stack;
+  //     const errorLog = {
+  //       msg: "happened while trying to sync shifts(inside sync display)",
+  //       error: JSON.stringify(error),
+  //       stackTrace: stackTrace
+  //     }
+  //     await Utils.logException(JSON.stringify(errorLog));
+  //   }
 
 
-    try {
-      if (treeCounts && treeCounts.pending === 0) {
-        ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
-        return;
-      }
-      //const failures = await Utils.upload(setProgress);
-      let {failures, uploadedSaplings} = await Utils.upload(setProgress);
+  //   try {
+  //     if (treeCounts && treeCounts.pending === 0) {
+  //       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
+  //       return;
+  //     }
+  //     //const failures = await Utils.upload(setProgress);
+  //     let { failures, uploadedSaplings } = await Utils.upload(setProgress);
 
-      setFailedTrees(failures);
-      setProgress(1);
-      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
-      setTimeout(() => {
-        setShowProgress(false);
-      }, 2000);
+  //     setFailedTrees(failures);
+  //     setProgress(1);
+  //     updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+  //     setTimeout(() => {
+  //       setShowProgress(false);
+  //     }, 2000);
 
-      await deleteSyncedTreesAndShifts(responseFromSyncShifts, uploadedSaplings);
-      await Utils.fetchAndStoreHelperData();
-      await Utils.fetchAndStoreShifts()
+  //     await deleteSyncedTreesAndShifts(responseFromSyncShifts, uploadedSaplings);
+  //     await Utils.fetchAndStoreHelperData();
+  //     await Utils.fetchAndStoreShifts()
 
-    } catch (error) {
-      console.log("unable to sync trees---", error);
-      const stackTrace = error.stack;
-      const errorLog = {
-        msg: "happened while trying to sync trees(inside sync display)",
-        error: JSON.stringify(error),
-        stackTrace: stackTrace
-      }
-      await this.logExceptionLocalDB(JSON.stringify(errorLog));
-    }
+  //   } catch (error) {
+  //     console.log("unable to sync trees---", error);
+  //     const stackTrace = error.stack;
+  //     const errorLog = {
+  //       msg: "happened while trying to sync trees(inside sync display)",
+  //       error: JSON.stringify(error),
+  //       stackTrace: stackTrace
+  //     }
+  //     await this.logExceptionLocalDB(JSON.stringify(errorLog));
+  //   }
 
-  }
+  // }
 
 
   return (
     <View style={{ backgroundColor: 'white', height: '100%' }}>
-
       <View style={{ marginBottom: 30 }}>
-        <Text style={{
-          ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black',
-          margin: 20
-        }}>
+        <Text style={syncDisplayStyles.lastSyncedText(lightTheme)}>
           {Strings.messages.LastSynced}
         </Text>
-        <Text style={{
-          ...commonStyles.borderText, marginHorizontal: 20, color: lightTheme ? '#52525C' : 'black',
-          padding: 5, textAlign: 'center', fontWeight: '500'
-        }}>
+        <Text style={syncDisplayStyles.lastSyncedStatus(lightTheme)}>
           {syncDate}
         </Text>
       </View>
 
-
       <View style={{ ...commonStyles.borderedDisplay, margin: 20 }}>
-
-        {
-          treeCounts &&
-          <View style={{ flexDirection: 'row', justifyContent: 'space-around', margin: 3 }}>
-            <Text style={{ ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black', }}>
+        {treeCounts && (
+          <View style={syncDisplayStyles.syncDetailsContainer}>
+            <Text style={syncDisplayStyles.syncText(lightTheme)}>
               {Strings.messages.pending}: {treeCounts.pending}
             </Text>
-            <Text style={{ ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black', }}>{treeCounts.pending > 0 ? '❗' : '✅'}</Text>
-            <Text style={{ ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black', }}>
+            <Text style={syncDisplayStyles.syncText(lightTheme)}>
+              {treeCounts.pending > 0 ? '❗' : '✅'}
+            </Text>
+            <Text style={syncDisplayStyles.syncText(lightTheme)}>
               {Strings.messages.synced}: {treeCounts.uploaded}
             </Text>
           </View>
-        }
+        )}
 
-
-        <View
-          style={{
-            marginHorizontal: 40,
-            marginTop: 25,
-            marginBottom: 10
-          }}
-        >
-          <MyIconButton
-            name={"wifi-sync"}
-            text={Strings.buttonLabels.SyncData}
+        <View style={syncDisplayStyles.buttonWifiContainer}>
+          <Button
+            icon={() => (
+              <MCIcon name="wifi-sync" size={30} color="white" />
+            )}
+            mode="contained"
+            buttonColor='#059636'
             onPress={commenceUpload}
-          />
+            contentStyle={syncDisplayStyles.buttonContent}
+            labelStyle={syncDisplayStyles.buttonLabel}
+          >
+            {Strings.buttonLabels.SyncData}
+
+          </Button>
+
         </View>
-        {
-          showProgress &&
-          <View style={{ flexDirection: 'row', justifyContent: 'space-around', margin: 5, alignItems: 'center' }}>
-            <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black', }}>Progress: </Text>
+        {showProgress && (
+          <View style={syncDisplayStyles.progressBar}>
+            <Text style={syncDisplayStyles.progressBarText(lightTheme)}>
+              Progress:{' '}
+            </Text>
             <Progress.Bar progress={progress} style={{ height: 6 }} />
-            <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black', }}>{getReadableProgress(progress)}</Text>
+            <Text style={syncDisplayStyles.progressBarText(lightTheme)}>
+              {getReadableProgress(progress)}
+            </Text>
           </View>
-        }
-        {
-          (failedTrees.length > 0) &&
+        )}
+        {failedTrees.length > 0 && (
           <FlatList
-            ListHeaderComponent={() => <Text style={commonStyles.text5}>{Strings.messages.failedToUpload} {failedTrees.length} {Strings.messages.trees}: </Text>}
+            ListHeaderComponent={() => (
+              <Text style={commonStyles.text5}>
+                {Strings.messages.failedToUpload} {failedTrees.length}{' '}
+                {Strings.messages.trees}:{' '}
+              </Text>
+            )}
             data={failedTrees}
-            keyExtractor={(item) => item.sapling_id}
+            keyExtractor={item => item.sapling_id}
             renderItem={({ item, index }) => {
-              return <Text style={commonStyles.text5}>{index + 1}. {Strings.messages.SaplingNo} : : {item.sapling_id}</Text>
+              return (
+                <Text style={commonStyles.text5}>
+                  {index + 1}. {Strings.messages.SaplingNo} : :{' '}
+                  {item.sapling_id}
+                </Text>
+              );
             }}
           />
-        }
-        {
-          (failedShifts.length > 0) &&
+        )}
+        {failedShifts.length > 0 && (
           <FlatList
-            ListHeaderComponent={() => <Text style={commonStyles.text5}>{Strings.messages.failedToUpload} {failedTrees.length} {`${Strings.messages.Shift}s`}: </Text>}
+            ListHeaderComponent={() => (
+              <Text style={commonStyles.text5}>
+                {Strings.messages.failedToUpload} {failedTrees.length}{' '}
+                {`${Strings.messages.Shift}s`}:{' '}
+              </Text>
+            )}
             data={failedShifts}
             renderItem={({ item, index }) => {
-              return <Text style={commonStyles.text5}>{index + 1}. {Strings.messages.ShiftNo} : {item}</Text>
+              return (
+                <Text style={commonStyles.text5}>
+                  {index + 1}. {Strings.messages.ShiftNo} : {item}
+                </Text>
+              );
             }}
           />
-        }
+        )}
       </View>
     </View>
 
@@ -249,3 +361,5 @@ const SyncDisplay = ({ navigation }) => {
 }
 
 export default SyncDisplay;
+
+
