@@ -7,6 +7,7 @@ import RNRestart from 'react-native-restart';
 import { Strings } from "./Strings";
 import ImageResizer from "react-native-image-resizer";
 import RNFS from 'react-native-fs';
+import ReactNativeForegroundService from '@supersami/rn-foreground-service';
 
 const MIN_BATCH_SIZE = 5
 
@@ -714,7 +715,9 @@ export class Utils {
             Alert.alert(Strings.alertMessages.SyncFailure, Strings.alertMessages.ContactExpert);
         }
         const finalSaplingIds = final.map(item => item.sapling_id);
-        const uploadedSaplings = finalSaplingIds.filter(sapling_id => !failures.includes(sapling_id));
+        //console.log("-----finalSaplingIds-----", finalSaplingIds);
+        const failureSaplingIds = failures.map(failure => failure.sapling_id);
+        const uploadedSaplings = finalSaplingIds.filter(sapling_id => !failureSaplingIds.includes(sapling_id));
         return { failures: failures, uploadedSaplings: uploadedSaplings };
     };
 
@@ -901,6 +904,44 @@ export class Utils {
         console.log("height:--- ", height, "width:--", width);
 
     }
+
+    static addTasks() {
+        const log = () => console.log('clicking photo');
+
+        ReactNativeForegroundService.add_task(() => log(), {
+            delay: 1000,
+            onLoop: true,
+            taskId: 'taskid',
+            onError: e => console.log(`Error logging:`, e),
+        });
+    }
+
+    static startTask() {
+        console.log("--------starting the services------");
+
+        ReactNativeForegroundService.start({
+            id: 1244,
+            title: 'Foreground Service',
+            message: 'We are live World',
+            icon: 'ic_launcher',
+            button: true,
+            button2: true,
+            buttonText: 'Button',
+            button2Text: 'Anther Button',
+            buttonOnPress: 'cray',
+            setOnlyAlertOnce: 'true',
+            color: '#000000',
+            progress: {
+                max: 100,
+                curr: 50,
+            },
+        });
+    };
+
+    static stopTask() {
+        console.log("--------stopping the services------");
+        ReactNativeForegroundService.stopAll();
+    };
 
     static async getImage(compressionRequired = false, selectionId) {
 

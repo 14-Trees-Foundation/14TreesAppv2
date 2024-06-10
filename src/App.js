@@ -73,7 +73,7 @@ async function requestPermissions() {
     PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
     PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
     PERMISSIONS.ANDROID.ACCESS_BACKGROUND_LOCATION,
-    PERMISSIONS.ANDROID.READ_PHONE_NUMBERS
+    PERMISSIONS.ANDROID.READ_PHONE_NUMBERS,
   ];
   if (androidVersion < versionOfPermissionChange) {
     permissions.push(...[
@@ -85,7 +85,7 @@ async function requestPermissions() {
     permissions.push(...[
       PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
       PERMISSIONS.ANDROID.READ_MEDIA_VIDEO,
-      PERMISSIONS.ANDROID.READ_MEDIA_AUDIO
+      PERMISSIONS.ANDROID.READ_MEDIA_AUDIO,
     ])
   }
   console.log("permission array: ", permissions);
