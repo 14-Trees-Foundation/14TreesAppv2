@@ -14,6 +14,8 @@ export const GlobalContextProvider = ({ children }) => {
     const [shiftTime, setShiftTime] = useState(null);
     const [plotSelected, setPlotSelected] = useState(null);
     const [playSound, setPlaySound] = useState(false);
+    const [shiftType, setShiftType] = useState(null);
+    const [newPlotSelected, setNewPlotSelected] = useState(null);
 
     return (
         <GlobalContext.Provider value={{
@@ -25,7 +27,9 @@ export const GlobalContextProvider = ({ children }) => {
             shiftTime, setShiftTime,
             plotSelected, setPlotSelected,
             shiftID, setShiftID,
-            playSound, setPlaySound
+            playSound, setPlaySound,
+            shiftType, setShiftType,
+            newPlotSelected, setNewPlotSelected
         }}>
             {children}
         </GlobalContext.Provider>

@@ -13,9 +13,8 @@ export const treeFormModes = {
     addTree: 0,
     localEdit: 1,
     remoteEdit: 2,
-    plotSelect: 3,
+    plotChange: 3,
     startShift: 4,
-    showSync: 5,
 }
 
 export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage, onDeleteImage }) => {
@@ -43,7 +42,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     const { lightTheme } = useContext(GlobalContext);
 
     useEffect(() => {
-        Utils.addTasks(); //ForegroundService
+        Utils.addTasks();
     }, []);
 
     useEffect(() => {
@@ -120,7 +119,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
 
     const pickImage = async (selectionId) => {
         Utils.startTask();
-        setModalVisible(false)
         let newImage = await Utils.getImage(true, selectionId);
         if (newImage === undefined) return;
         newImage = await Utils.formatImageForSapling(newImage, saplingid);

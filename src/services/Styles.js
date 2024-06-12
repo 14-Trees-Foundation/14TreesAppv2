@@ -360,7 +360,8 @@ export const Iconstyles = StyleSheet.create({
     paddingTop: 12
   },
   buttonPosition: {
-    paddingBottom: 28
+    paddingBottom: 28,
+    marginRight: 10
   },
   buttonContent2: {
     flexDirection: 'row',
@@ -369,7 +370,12 @@ export const Iconstyles = StyleSheet.create({
     //marginBottom: 22,
     gap: 15
   },
-
+  cancelButtonContent: {
+    height: 40,
+  },
+  cancelButtonLabel: {
+    fontSize: 19,
+  },
 });
 
 export const CustomButtonStyles = StyleSheet.create({
@@ -440,7 +446,7 @@ export const customDropdownStyles = StyleSheet.create({
 
 export const customModalStyles = StyleSheet.create({
   plotSelectScrollView: {
-    marginTop: 200,
+    marginTop: 80,
     backgroundColor: 'rgba(0,0,0,.5)',
     margin: 2
   },
@@ -452,7 +458,7 @@ export const customModalStyles = StyleSheet.create({
     width: '98%'
   },
   centeredView: {
-    marginTop: 200,
+    marginTop: 205,
     //backgroundColor: 'rgba(0,0,0,1)',
     // width: '100%',
     // height: '100%'
@@ -749,6 +755,7 @@ export const treeFormModalStyles = StyleSheet.create({
     height: 200,
     marginHorizontal: 2,
     marginLeft: 15,
+    width: 360
   },
   imagePicker: {
     backgroundColor: '#969393',
@@ -970,7 +977,7 @@ export const shiftsStyles = StyleSheet.create({
     flex: 1,
   },
   scrollView: {
-    marginTop: 10,
+    //marginTop: 10,
     backgroundColor: 'white',
   },
   buttonContainer: {
@@ -991,32 +998,32 @@ export const shiftsStyles = StyleSheet.create({
 
 export const TreeRowStyles = StyleSheet.create({
   container: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      width: '100%',
-      backgroundColor: 'white',
-      margin: 2,
-      borderRadius: 6,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    backgroundColor: 'white',
+    margin: 2,
+    borderRadius: 6,
   },
   treeContainer: {
-      flex: 1,
-      justifyContent: 'space-around',
-      width: '25%',
+    flex: 1,
+    justifyContent: 'space-around',
+    width: '25%',
   },
   emptyTreeContainer: {
-      justifyContent: 'space-around',
-      width: '25%',
+    justifyContent: 'space-around',
+    width: '25%',
   },
   uploadedTreeStyle: {
-      backgroundColor: '#059636',
+    backgroundColor: '#059636',
   },
   uploadedTextStyle: {
-      color: 'white',
-      fontWeight: '600',
-      textAlign: 'center',
+    color: 'white',
+    fontWeight: '600',
+    textAlign: 'center',
   },
   textStyle: {
-      textAlign: 'center',
+    textAlign: 'center',
   },
 });
 

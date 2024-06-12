@@ -12,6 +12,7 @@ const TreesInShift = ({ navigation, route }) => {
     console.log("shiftID TreesInShift---", shiftIDs);
 
     const [finalList, setFinalList] = useState(null);
+    const [shiftTypeOfTrees, setShiftTypeOfTrees] = useState(null)
 
     useEffect(() => {
 
@@ -26,10 +27,10 @@ const TreesInShift = ({ navigation, route }) => {
         return () => backHandler.remove();
     }, []);
 
-    const fetchTreesFromLocalDB = async () => { //shiftId -> normal id AUTOINCREMENTED(1,2,3,4)
+    const fetchTreesFromLocalDB = async () => {
         if (shiftIDs.localShiftId) {
-            let treesInLocalShifts = await Utils.fetchSaplingsFromLocalShiftDB(shiftIDs.localShiftId);
-
+            let { treesInLocalShifts, shiftType } = await Utils.fetchSaplingsFromLocalShiftDB(shiftIDs.localShiftId);
+            console.log("----------shiftType-------", shiftType, treesInLocalShifts)
             treesInLocalShifts.sort((a, b) => {
                 if (a.uploaded && !b.uploaded) {
                     return 1; // Move uploaded trees to the end
@@ -41,7 +42,8 @@ const TreesInShift = ({ navigation, route }) => {
             });
 
             //setFinalList(modifiedTrees);
-            //console.log("--------treesInLocalShifts---", treesInLocalShifts);
+            console.log("--------treesInLocalShifts---", treesInLocalShifts);
+            setShiftTypeOfTrees(shiftType);
             return treesInLocalShifts;
         }
         return [];
@@ -49,14 +51,15 @@ const TreesInShift = ({ navigation, route }) => {
 
     const fetchTreesFromLiveShifts = async () => { //shiftId -> UUID
         if (shiftIDs.liveShiftId) {
-            const treesInLiveShifts = await Utils.fetchSaplingsFromLiveShiftDB(shiftIDs.liveShiftId);
+            let { treesInLiveShifts, shiftType } = await Utils.fetchSaplingsFromLiveShiftDB(shiftIDs.liveShiftId);
+            console.log("----------shiftType-------", shiftType, treesInLiveShifts)
+            setShiftTypeOfTrees(shiftType);
             return treesInLiveShifts;
         }
         return [];
     };
 
     const getCombinedList = async (treesInLiveShifts, treesInLocalShifts) => {
-
 
         let combinedList = [];
         combinedList = [
@@ -66,12 +69,14 @@ const TreesInShift = ({ navigation, route }) => {
 
 
         setFinalList(combinedList);
+
     }
 
     const fetchData = async () => {
         const treesInLiveShifts = await fetchTreesFromLiveShifts();
-        //const treesInLiveShifts = [];
         const treesInLocalShifts = await fetchTreesFromLocalDB();
+        // console.log(shiftType);
+
         await getCombinedList(treesInLiveShifts, treesInLocalShifts)
     };
 
@@ -85,7 +90,7 @@ const TreesInShift = ({ navigation, route }) => {
 
     return (
         <ScrollView keyboardShouldPersistTaps='handled' style={{ backgroundColor: 'white', height: '100%' }}>
-            
+
             <ShiftsCard item={itemData} disableHandlePress={true} />
 
             <View style={treesInShiftStyles.treeListContainer}>
@@ -117,6 +122,7 @@ const TreesInShift = ({ navigation, route }) => {
                                 tree4={trees[3]}
                                 shiftID={shiftIDs.localShiftId}
                                 modalMode={false}
+                                shiftTypeOfTrees={shiftTypeOfTrees}
                             />);
                         }
                         return null;

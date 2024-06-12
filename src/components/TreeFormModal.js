@@ -10,11 +10,11 @@ import GlobalContext from '../context/GlobalContext ';
 import { treeFormModes } from './TreeForm';
 import { Button } from 'react-native-paper';
 
-
 export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
 
     const { inSaplingId, inLng, inLat, inImages, inTreeType, inPlot, inUserId } = treeData;
-
+    // console.log("mode is: ", mode, inLat, inLng);
+    //console.log("inTreeTpe: ", inTreeType, "inPlot: ", inPlot);
     const [saplingid, setSaplingId] = useState(inSaplingId);
     const [lat, setlat] = useState(inLat);
     const [lng, setlng] = useState(inLng);
@@ -32,7 +32,6 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
     useEffect(() => {
         Utils.addTasks();
     }, []);
-
 
     useEffect(() => {
         if (mode === treeFormModes.localEdit) {
@@ -205,7 +204,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
             />
 
 
-            <View style={treeFormModalStyles.imageContainer}>
+            <View style={{ ...treeFormModalStyles.imageContainer }}>
                 <TouchableOpacity
                     style={treeFormModalStyles.imagePicker}
                     onPress={() => {

@@ -8,8 +8,13 @@ import { Strings } from "./Strings";
 import ImageResizer from "react-native-image-resizer";
 import RNFS from 'react-native-fs';
 import ReactNativeForegroundService from '@supersami/rn-foreground-service';
-
 const MIN_BATCH_SIZE = 5
+
+const shiftTypesObject = {
+    addSapling: 0,
+    addImage: 1,
+    updatePlot: 2
+}
 
 export class Utils {
     static localdb = new LocalDatabase();
@@ -42,22 +47,6 @@ export class Utils {
         const shifts = await this.localdb.getAllShiftsLive();
         //console.log("------------live shifts return-----------", shifts , shifts.length)
         return shifts
-    }
-
-    static async fetchSaplingsFromLiveShiftDB(id) {
-        let res = await this.localdb.getSaplingsInLiveShifts(id);
-
-        var final = [];
-        for (let index = 0; index < res.length; index++) {
-            let element = res[index];
-            let treedata = {
-                ...element,
-                uploaded: (element.uploaded === 1),
-            }
-            final.push(treedata);
-        }
-        console.log("final sapling from live shifts---", res);
-        return final;
     }
 
     static async deleteLogsFromLocalDB() {
@@ -103,6 +92,23 @@ export class Utils {
 
     static async updateSaplingInShiftDB(newSaplingId, inSaplingId, shiftID) {
         await this.localdb.updateSaplingLocalShiftDb(newSaplingId, inSaplingId, shiftID);
+    }
+
+    static async deleteSaplingInShiftDB(sapling_id, shiftID) {
+        await this.localdb.deleteSaplingInShiftDB(sapling_id, shiftID);
+    }
+
+    static async checkSaplinginUpdatePlotDB(saplingid) {
+        console.log("sapling---", saplingid);
+        return await this.localdb.checkSaplingUpdatePlotDB(saplingid);
+    }
+
+    static async saveUpdatePlot(treeData) {
+        await this.localdb.saveUpdatePlots(treeData);
+    }
+
+    static async deleteSaplingUpdatePlotDB(saplingid) {
+        await this.localdb.deleteSaplingUpdatePlotDB(saplingid)
     }
 
     static async saveShiftsToLocalDB(shiftData) {
@@ -227,6 +233,10 @@ export class Utils {
         await this.localdb.createShiftTblLive();
     }
 
+    static async deleteUpdateTreesPlots(sapling_id) {
+        await this.localdb.deleteUpdateTreesPlots(sapling_id);
+    }
+
     static async fetchAndStoreHelperData() {
         console.log('fetching helper data in Utils');
         // console.log('ldb: ', this.localdb)
@@ -303,9 +313,9 @@ export class Utils {
     }
 
     //namrata
-    static async deleteSyncedShiftsBasedOnSaplings(shifts, uploadedSaplings) {
-        //console.log("-------------type of shifts-------------", typeof shifts)
-        await this.localdb.deleteSyncedShifts(shifts, uploadedSaplings)
+    static async deleteSyncedShiftsBasedOnSaplings(shifts) {
+        console.log("-------------type of shifts-------------", shifts)
+        await this.localdb.deleteSyncedShifts(shifts)
     }
 
     //not needed for my code
@@ -335,15 +345,15 @@ export class Utils {
             //console.log("shift got---", shifts);
             for (const shift of shifts) {
                 const saplings = JSON.parse(shift?.saplings || '[]');
-                //console.log("checkShiftsComplte----", saplings);
+                console.log("checkShiftsComplte----", saplings);
+
+                if (saplings.length === 0) {
+                    //delete the shift for this id
+                    await this.localdb.deleteShiftLocalDB(shift.id);
+                    continue;
+                }
 
                 if (shift.shiftended == 0) {
-                    if (saplings.length === 0) {
-                        //delete the shift for this id
-                        await this.localdb.deleteShiftLocalDB(shift.id);
-                        continue;
-                    }
-
                     //check if saplings are uploaded make the shiftended = 1 and shiftupdloadcomplete = 1
                     let uploadedShift = true;
                     for (const sapling of saplings) {
@@ -468,6 +478,7 @@ export class Utils {
         }
     }
 
+
     //store all trees - Namrata
     static async storeTrees(saplingsDocs) {
 
@@ -584,10 +595,24 @@ export class Utils {
     }
 
 
+    static async fetchTreesWithNewPlot(upload) {
+        return await this.localdb.getTreesWithNewPlots(upload);
+    }
+
     static async getTreesCounts() {
-        const pending = (await Utils.fetchTreesFromLocalDB(0)).length;
-        const uploaded = (await Utils.fetchTreesFromLocalDB(1)).length;
-        return { pending, uploaded };
+        const pendingTrees = (await Utils.fetchTreesFromLocalDB(0)).length;
+        const uploadedTrees = (await Utils.fetchTreesFromLocalDB(1)).length;
+        //for trees With New Plot
+        const pendingTreesPlots = (await Utils.fetchTreesWithNewPlot(0)).length;
+        const uploadedTreesPlots = (await Utils.fetchTreesWithNewPlot(1)).length;
+
+        const pending = {
+            treesUpload: pendingTrees,
+            plotUpload: pendingTreesPlots
+            //image
+        }
+
+        return { pending, uploaded: uploadedTrees + uploadedTreesPlots };
     }
 
     static async getShiftsCounts() {
@@ -596,28 +621,17 @@ export class Utils {
         return { pending, uploaded };
     }
 
-    // static async syncShifts() {
-    //     try {
-    //         const shifts = await Utils.getShiftsIDLocalDB(0); //get not uploaded shifts
-    //         console.log("before upload shift data:---", shifts);
-    //         const response = await DataService.uploadShifts(shifts);
-    //         console.log("response from syncShifts---", response);
-    //         let failures = await Utils.setShiftsSyncStatus(response, shifts);
-    //         return { shiftDetails: response, failures: failures };
 
-    //     } catch (error) {
-    //         console.log("happended while sync shifts---", error);
-    //     }
 
-    // }
-
-    static async syncShifts(uploadedSaplings) {
+    static async syncShifts(combinedUploadedSaplings) {
         try {
             let shifts = await Utils.getShiftsIDLocalDB(0); //get not uploaded shifts
-            //console.log("---before upload shift data:-------", shifts);
+            console.log("combined one---", combinedUploadedSaplings);
+
+            //include only thgose saplings which are uploaded
             shifts = shifts.map(shift => {
                 const filteredSaplings = shift.saplings.filter(sapling =>
-                    uploadedSaplings.includes(sapling.sapling_id)
+                    combinedUploadedSaplings.includes(sapling.sapling_id)
                 );
 
                 // Return a new shift object with the filtered saplings
@@ -626,7 +640,9 @@ export class Utils {
                     saplings: filteredSaplings
                 };
             });
-            console.log("-----saplings in shift---------", shifts[0].saplings)
+
+            console.log("-----saplings in shift---------", shifts)
+
             const response = await DataService.uploadShifts(shifts);
             //console.log("response from syncShifts---", response);
             let failures = await Utils.setShiftsSyncStatus(response, shifts);
@@ -661,6 +677,32 @@ export class Utils {
         } catch (error) {
             console.log("---------error while updating plot in local trees--------", error);
         }
+    }
+
+    static async batchPlotUpload(batch) {
+        let failures = batch;
+        // console.log("batch before sync---", batch);
+
+        try {
+            let response = await DataService.uploadTreesNewPlot(batch);
+            console.log("response from uploadPlots: ", response);
+            if (response) {
+                failures = await Utils.setTreePlotSyncStatus(response, batch);
+                //console.log('batch failures: ', failures);
+            }
+        }
+        catch (error) {
+            console.error(error);
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: "happened while trying to batchUpload(inside Utils)",
+                error: JSON.stringify(error),
+                stackTrace: stackTrace
+            }
+            await this.logException(JSON.stringify(errorLog));
+        }
+        //console.log("failed upload response: ---", failures);
+        return failures;
     }
 
     static async batchUpload(batch) {
@@ -715,40 +757,62 @@ export class Utils {
             Alert.alert(Strings.alertMessages.SyncFailure, Strings.alertMessages.ContactExpert);
         }
         const finalSaplingIds = final.map(item => item.sapling_id);
-        //console.log("-----finalSaplingIds-----", finalSaplingIds);
-        const failureSaplingIds = failures.map(failure => failure.sapling_id);
-        const uploadedSaplings = finalSaplingIds.filter(sapling_id => !failureSaplingIds.includes(sapling_id));
+        const uploadedSaplings = finalSaplingIds.filter(sapling_id => !failures.includes(sapling_id));
         return { failures: failures, uploadedSaplings: uploadedSaplings };
     };
 
-    //manjur
-    // static async upload(onProgress = undefined) {
-    //     const final = await Utils.fetchTreesFromLocalDB(0);//not uploaded.
-    //     console.log('Attempting upload with total trees = ', final.length);
+    static async uploadTreesPlots(onProgress = undefined) {
+        const final = await Utils.fetchTreesWithNewPlot(0);//not uploaded.
+        const failures = [];
 
-    //     const failures = [];
-    //     for (let i = 0; i < final.length; i += MIN_BATCH_SIZE) {
-    //         const batchFailures = await Utils.batchUpload(final.slice(i, i + MIN_BATCH_SIZE));
-    //         failures.push(...batchFailures);
-    //         if (onProgress) {
-    //             onProgress(i / final.length);
-    //         }
-    //     }
-    //     await Utils.setLastSyncDateNow();
-    //     console.log("failed upload: ---", failures);
-    //     if (failures.length === 0) {
-    //         Alert.alert(Strings.alertMessages.SyncSuccess, Strings.alertMessages.CheckLocalList);
-    //     }
-    //     else {
-    //         Alert.alert(Strings.alertMessages.SyncFailure, Strings.alertMessages.ContactExpert);
-    //     }
-    //     return failures;
-    // };
+        for (let i = 0; i < final.length; i += MIN_BATCH_SIZE) {
+            const batchFailures = await Utils.batchPlotUpload(final.slice(i, i + MIN_BATCH_SIZE));
+            failures.push(...batchFailures);
+            if (onProgress) {
+                onProgress(i / final.length);
+            }
+        }
+
+
+        await Utils.setLastSyncDateNow();
+        console.log("failed upload: ---", failures);
+        if (failures.length === 0) {
+            Alert.alert(Strings.alertMessages.SyncSuccess, Strings.alertMessages.CheckLocalList);
+        }
+        else {
+            Alert.alert(Strings.alertMessages.SyncFailure, Strings.alertMessages.ContactExpert);
+        }
+        const finalSaplingIds = final.map(item => item.sapling_id);
+        const uploadedSaplings = finalSaplingIds.filter(sapling_id => !failures.includes(sapling_id));
+        return { failures: failures, uploadedSaplings: uploadedSaplings };
+    };
+
 
     static userId;
     static adminId;
     static localdb;
     // static lang;
+
+    static async setTreePlotSyncStatus(statuses, batch) {
+        const failures = [];
+        for (let tree of batch) {
+            const status = statuses[tree.sapling_id];
+            if (status && status.dataUploaded) {
+                await this.localdb.updateTreePlotUpload(tree.sapling_id);
+            }
+            else {
+                failures.push(tree.sapling_id);
+                //delete from local db and show toast
+                await Utils.deleteUpdateTreesPlots(tree.sapling_id);
+                await this.deleteSaplingShiftLocalDB(tree.sapling_id);
+                //ToastAndroid.show(status.message, ToastAndroid.LONG);
+                let msg = `${status.message} ${tree.sapling_id}`
+                Alert.alert(Strings.alertMessages.SyncFailure, msg);
+            }
+        }
+        return failures;
+    }
+
     static async setTreeSyncStatus(statuses, batch) {
         const failures = [];
         for (let tree of batch) {
@@ -764,19 +828,38 @@ export class Utils {
 
     }
 
-    static async fetchSaplingsFromLocalShiftDB(id) {
-        let res = await this.localdb.getSaplingsLocalShiftDB(id);
+    static async fetchSaplingsFromLiveShiftDB(id) {
+        let res = await this.localdb.getSaplingsInLiveShifts(id);
+        let saplingArray = res.saplingArray
         var final = [];
-        for (let index = 0; index < res.length; index++) {
-            let element = res[index];
+        for (let index = 0; index < saplingArray.length; index++) {
+            let element = saplingArray[index];
             let treedata = {
                 ...element,
                 uploaded: (element.uploaded === 1),
             }
             final.push(treedata);
         }
-        console.log("final sapling from local shifts11---", res,);
-        return final;
+        //console.log("final shiftTypesObject.value(res.shiftType) live---",  final);
+
+        return { treesInLiveShifts: final, shiftType: shiftTypesObject[res.shiftType] };
+    }
+
+    static async fetchSaplingsFromLocalShiftDB(id) {
+        let res = await this.localdb.getSaplingsLocalShiftDB(id);
+        //console.log("------------fetchSaplingsFromLocalShiftDB------------",res)
+        let saplingArray = res.saplingArray
+        var final = [];
+        for (let index = 0; index < saplingArray.length; index++) {
+            let element = saplingArray[index];
+            let treedata = {
+                ...element,
+                uploaded: (element.uploaded === 1),
+            }
+            final.push(treedata);
+        }
+        //console.log("final shiftTypesObject.value(res.shiftType) local---", shiftTypesObject[res.shiftType], res.shiftType);
+        return { treesInLocalShifts: final, shiftType: shiftTypesObject[res.shiftType] };
     }
 
 

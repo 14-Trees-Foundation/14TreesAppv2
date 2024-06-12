@@ -9,7 +9,7 @@ import GlobalContext from '../context/GlobalContext ';
 import { Button } from 'react-native-paper';
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const updateSyncStatus = async (setSyncDate, setCounts, setShiftsCount) => {
+const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount) => {
   const lsdate = await Utils.getLastSyncDate();
   if (lsdate) {
     setSyncDate(Utils.getReadableDate(lsdate));
@@ -18,7 +18,8 @@ const updateSyncStatus = async (setSyncDate, setCounts, setShiftsCount) => {
     setSyncDate(Strings.messages.Never);
   }
   const counts = await Utils.getTreesCounts();
-  setCounts(counts);
+  console.log("count before sync---", counts);
+  setTreeCounts(counts);
   const shiftsCount = await Utils.getShiftsCounts();
   setShiftsCount(shiftsCount);
   console.log('setting counts: ', counts, "setting shifts count: ", shiftsCount);
@@ -66,14 +67,14 @@ const SyncDisplay = ({ navigation }) => {
 
   }
 
-  const deleteSyncedTreesAndShifts = async (response, uploadedSaplings) => {
+  const deleteSyncedTreesAndShifts = async (response) => {
 
     const uploadedShiftIDs = Object.values(response.shiftDetails)
       .filter(shift => shift.shiftUploaded)
       .map(shift => shift.shiftID);
 
     //take care of uploadedSaplings
-    await Utils.deleteSyncedShiftsBasedOnSaplings(uploadedShiftIDs, uploadedSaplings);
+    await Utils.deleteSyncedShiftsBasedOnSaplings(uploadedShiftIDs);
 
     //await Utils.deleteSyncedSaplingsInLocalShifts(uploadedSaplings);
 
@@ -83,13 +84,89 @@ const SyncDisplay = ({ navigation }) => {
   };
 
 
+  const uploadShift = async (uploadedSaplings = [], uploadedTreesPlotsSaplings = []) => {
+    let responseFromSyncShifts;
+    let combinedUploadedSaplings = [...uploadedSaplings, ...uploadedTreesPlotsSaplings]
+
+    if ((shiftsCount && shiftsCount.pending == 0) || combinedUploadedSaplings.length === 0) {
+      // ToastAndroid.show(
+      //   Strings.alertMessages.NothingToSync,
+      //   ToastAndroid.LONG,
+      // );
+      return;
+    }
+
+
+
+    responseFromSyncShifts = await Utils.syncShifts(combinedUploadedSaplings);
+
+    setFailedShifts(responseFromSyncShifts.failures);
+
+    setProgress(1);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+    setTimeout(() => {
+      setShowProgress(false);
+    }, 2000);
+
+    await deleteSyncedTreesAndShifts(responseFromSyncShifts);
+    await Utils.deleteUpdateTreesPlots();
+    await Utils.fetchAndStoreHelperData();
+    await Utils.fetchAndStoreShifts();
+
+  }
+
+  const uploadTrees = async () => {
+    if (treeCounts && treeCounts.pending.treesUpload === 0) {
+      //ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
+      return;
+    }
+
+    let result = await Utils.upload(setProgress);
+    let uploadedSaplings = result.uploadedSaplings;
+    let failures = result.failures;
+    console.log("----------------uploadedSaplings-ni Syncdisplay-----------", uploadedSaplings);
+
+
+    //setFailedTrees({ ...failedTrees, failures });
+    setFailedTrees(failures)
+    setProgress(1);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+    setTimeout(() => {
+      setShowProgress(false);
+    }, 2000);
+    return uploadedSaplings;
+  }
+
+  const uploadTreesPlots = async () => {
+
+    if (treeCounts && treeCounts.pending.plotUpload === 0) {
+      // ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
+      return;
+    }
+
+
+    let result = await Utils.uploadTreesPlots(setProgress); //plotUpload
+
+    let uploadedSaplings = result.uploadedSaplings;
+    let failures = result.failures
+    console.log("----------------uploadedSaplings-ni Syncdisplay-----------", uploadedSaplings, failures);
+    //setFailedTrees({ ...failedTrees, failures });
+    setFailedTrees(failures);
+    setProgress(1);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+    setTimeout(() => {
+      setShowProgress(false);
+    }, 2000);
+
+    return uploadedSaplings;
+  }
+
   const commenceUpload = async () => {
+
     if (
       treeCounts &&
-      treeCounts.pending === 0 &&
-      shiftsCount &&
-      shiftsCount.pending === 0
-    ) {
+      treeCounts.pending.treesUpload === 0 && treeCounts.pending.plotUpload === 0 &&
+      shiftsCount && shiftsCount.pending === 0) {
       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
       return;
     }
@@ -97,7 +174,9 @@ const SyncDisplay = ({ navigation }) => {
     setShowProgress(true);
 
     try {
+
       await syncLogs();
+
     } catch (error) {
       console.log('unable to sync logs---', error);
       const stackTrace = error.stack;
@@ -109,27 +188,10 @@ const SyncDisplay = ({ navigation }) => {
       await Utils.logException(JSON.stringify(errorLog));
     }
 
-    let uploadedSaplings;
-    let failures;
+    let uploadedSaplings = [];
+
     try {
-      if (treeCounts && treeCounts.pending === 0) {
-        ToastAndroid.show(
-          Strings.alertMessages.NothingToSync,
-          ToastAndroid.LONG,
-        );
-        return;
-      }
-      //let {failures,uploadedSaplings }= await Utils.upload(setProgress);
-      let result = await Utils.upload(setProgress);
-      uploadedSaplings = result.uploadedSaplings
-      failures = result.failures
-      console.log("----------------uploadedSaplings-ni Syncdisplay-----------", uploadedSaplings)
-      setFailedTrees(failures);
-      setProgress(1);
-      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
-      setTimeout(() => {
-        setShowProgress(false);
-      }, 2000);
+      uploadedSaplings = await uploadTrees();
     } catch (error) {
       console.log('unable to sync trees---', error);
       const stackTrace = error.stack;
@@ -141,32 +203,23 @@ const SyncDisplay = ({ navigation }) => {
       await Utils.logException(JSON.stringify(errorLog));
     }
 
-    let responseFromSyncShifts;
+    let uploadedTreesPlotsSaplings = [];
 
     try {
-      if (shiftsCount && shiftsCount.pending == 0) {
-        ToastAndroid.show(
-          Strings.alertMessages.NothingToSync,
-          ToastAndroid.LONG,
-        );
-        return;
-      }
-      //const failures = await Utils.syncShifts();
-      responseFromSyncShifts = await Utils.syncShifts(uploadedSaplings);
+      uploadedTreesPlotsSaplings = await uploadTreesPlots();
+    } catch (error) {
+      console.log('unable to sync trees---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync trees(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
 
-      setFailedShifts(responseFromSyncShifts.failures);
-      setProgress(1);
-      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
-      setTimeout(() => {
-        setShowProgress(false);
-      }, 2000);
-
-      await deleteSyncedTreesAndShifts(
-        responseFromSyncShifts,
-        uploadedSaplings,
-      );
-      await Utils.fetchAndStoreHelperData();
-      await Utils.fetchAndStoreShifts();
+    try {
+      await uploadShift(uploadedSaplings, uploadedTreesPlotsSaplings);
     } catch (error) {
       console.log('unable to sync shifts---', error);
       const stackTrace = error.stack;
@@ -179,88 +232,6 @@ const SyncDisplay = ({ navigation }) => {
     }
   };
 
-  // const commenceUpload = async () => {
-
-  //   if (treeCounts && treeCounts.pending === 0 && shiftsCount && shiftsCount.pending === 0) {
-  //     ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
-  //     return;
-  //   }
-
-  //   setShowProgress(true);
-
-  //   try {
-  //     await syncLogs();
-  //   } catch (error) {
-  //     console.log("unable to sync logs---", error);
-  //     const stackTrace = error.stack;
-  //     const errorLog = {
-  //       msg: "happened while trying to sync logs(inside sync display)",
-  //       error: JSON.stringify(error),
-  //       stackTrace: stackTrace
-  //     }
-  //     await Utils.logException(JSON.stringify(errorLog));
-  //   }
-
-  //   let responseFromSyncShifts;
-
-  //   try {
-  //     if (shiftsCount && shiftsCount.pending == 0) {
-  //       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
-  //       return;
-  //     }
-  //     //const failures = await Utils.syncShifts();
-  //     responseFromSyncShifts = await Utils.syncShifts();
-
-  //     setFailedShifts(responseFromSyncShifts.failures);
-  //     setProgress(1);
-  //     updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
-  //     setTimeout(() => {
-  //       setShowProgress(false);
-  //     }, 2000);
-
-  //   } catch (error) {
-  //     console.log("unable to sync shifts---", error);
-  //     const stackTrace = error.stack;
-  //     const errorLog = {
-  //       msg: "happened while trying to sync shifts(inside sync display)",
-  //       error: JSON.stringify(error),
-  //       stackTrace: stackTrace
-  //     }
-  //     await Utils.logException(JSON.stringify(errorLog));
-  //   }
-
-
-  //   try {
-  //     if (treeCounts && treeCounts.pending === 0) {
-  //       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
-  //       return;
-  //     }
-  //     //const failures = await Utils.upload(setProgress);
-  //     let { failures, uploadedSaplings } = await Utils.upload(setProgress);
-
-  //     setFailedTrees(failures);
-  //     setProgress(1);
-  //     updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
-  //     setTimeout(() => {
-  //       setShowProgress(false);
-  //     }, 2000);
-
-  //     await deleteSyncedTreesAndShifts(responseFromSyncShifts, uploadedSaplings);
-  //     await Utils.fetchAndStoreHelperData();
-  //     await Utils.fetchAndStoreShifts()
-
-  //   } catch (error) {
-  //     console.log("unable to sync trees---", error);
-  //     const stackTrace = error.stack;
-  //     const errorLog = {
-  //       msg: "happened while trying to sync trees(inside sync display)",
-  //       error: JSON.stringify(error),
-  //       stackTrace: stackTrace
-  //     }
-  //     await this.logExceptionLocalDB(JSON.stringify(errorLog));
-  //   }
-
-  // }
 
 
   return (
@@ -278,10 +249,10 @@ const SyncDisplay = ({ navigation }) => {
         {treeCounts && (
           <View style={syncDisplayStyles.syncDetailsContainer}>
             <Text style={syncDisplayStyles.syncText(lightTheme)}>
-              {Strings.messages.pending}: {treeCounts.pending}
+              {Strings.messages.pending}: {treeCounts.pending.treesUpload + treeCounts.pending.plotUpload}
             </Text>
             <Text style={syncDisplayStyles.syncText(lightTheme)}>
-              {treeCounts.pending > 0 ? '❗' : '✅'}
+              {treeCounts.pending.treesUpload + treeCounts.pending.plotUpload > 0 ? '❗' : '✅'}
             </Text>
             <Text style={syncDisplayStyles.syncText(lightTheme)}>
               {Strings.messages.synced}: {treeCounts.uploaded}
@@ -325,12 +296,13 @@ const SyncDisplay = ({ navigation }) => {
               </Text>
             )}
             data={failedTrees}
-            keyExtractor={item => item.sapling_id}
+            keyExtractor={item => item.sapling_id ? item.sapling_id : item}
             renderItem={({ item, index }) => {
+
               return (
                 <Text style={commonStyles.text5}>
-                  {index + 1}. {Strings.messages.SaplingNo} : :{' '}
-                  {item.sapling_id}
+                  {index + 1}. {Strings.messages.SaplingNo} : {' '}
+                  {item.sapling_id ? item.sapling_id : item}
                 </Text>
               );
             }}

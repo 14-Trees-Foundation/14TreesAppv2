@@ -18,12 +18,15 @@ export class Strings {
             DrawerScreen: 'Homescreen',
             startScreen: 'start',
             Shifts: "Shifts", //manjur
-            Shift: "Shift", //manjur
+            //AddTree: "Add Tree", //manjur
+            AddImageShift: "Add Image",
+            UpdatePlot: "Update Plot",
             AppInfo: "App Info",
             TreesInShift: "Trees In Shift", //manjur
             PlotSelect: "Select Plot",
             SyncDisplay: "Sync Data", //manjur
-            LoadingScreen: 'Load'
+            LoadingScreen: 'Load',
+            UpdateSaplingsPlot: "UpdateSaplingsPlot",
         },
         "mr": {
             HomePage: "मुख्य पृष्ठ",
@@ -37,12 +40,15 @@ export class Strings {
             DrawerScreen: 'होम स्क्रीन',
             startScreen: 'प्रारंभ स्क्रीन',
             Shifts: "शिफ्ट",
-            Shift: "शिफ्ट",
+            //Shift: "शिफ्ट",
+            AddImageShift: "अ‍ॅड इमेज शिफ्ट",
+            UpdatePlot: "प्लॉट अपडेट करा", //manjur
             AppInfo: "अ‍ॅपची माहिती",
-            TreesInShift: "शिफ्टमध्ये झाडे", //manjur
-            PlotSelect: "एक प्लॉट निवडा", //manjur
+            TreesInShift: "शिफ्ट मधील झाडे", //manjur
+            PlotSelect: "प्लॉट निवडा", //manjur
             SyncDisplay: "सिंक डेटा",
-            LoadingScreen: 'लोड' //manjur
+            LoadingScreen: 'लोड',
+            UpdateSaplingsPlot: "झाडाचा प्लॉट अपडेट करा"
         }
     })
 
@@ -70,6 +76,7 @@ export class Strings {
             defaultRemark: "Default Remark",
             // local data view
             NoTreesFound: "No Trees Found on phone",
+            NoTreesWithAddedImage: "No Trees with Added Image",
             NoShiftTree: "No Trees planted in this shift",//manjur
             NoShiftsFound: "No Shifts Found",//manjur
             AllShifts: "All Shifts", //manjur
@@ -77,7 +84,7 @@ export class Strings {
             Filters: "Filters",
             LoadingTrees: "Loading Trees...",
             SaplingNo: "Sapling ID",
-            ShiftNo : "Shift ID",
+            ShiftNo: "Shift ID",
             Type: "Type",
             Plot: "Plot",
             Synced: "Synced",
@@ -90,10 +97,13 @@ export class Strings {
             //Edit tree
             EnterSaplingId: " Enter the Sapling ID",
             EnterPlotName: "Select the Plot",
+            OldPlotName: "Select old Plot",
+            NewPlotName: "Select new Plot",
             //general:
             logoutConfirm: "Do you want to log out?",
             PlotName: "Plot Name",
-            Shift: "shift" //manjur
+            Shift: "shift", //manjur
+            ClickToDelete: "Click on saplings to delete",
         },
         "mr": {
             SignIn: "साइन इन करा",
@@ -117,6 +127,7 @@ export class Strings {
             defaultRemark: "डीफॉल्ट टिप्पणी",
             // local data view
             NoTreesFound: "फोनवर झाडे आढळली नाहीत",
+            NoTreesWithAddedImage: "नवीन प्रतिमा जोडलेली झाडे नाहीत",
             NoShiftTree: "या शिफ्टमध्ये झाडे लावलेली नाहीत",//manjur
             NoShiftsFound: "कोणत्याही शिफ्ट आढळल्या नाहीत", //manjur
             NoTreesInShift: "शिफ्टमध्ये कोणतीही झाडे जोडलेली नाहीत", //manjur
@@ -124,7 +135,7 @@ export class Strings {
             Filters: "फिल्टर",
             LoadingTrees: "झाडे लोड होत आहेत...",
             SaplingNo: "रोप क्र",
-            ShiftNo : "शिफ्ट आयडी", //manjur
+            ShiftNo: "शिफ्ट आयडी", //manjur
             Type: "प्रकार",
             Plot: "प्लॉट",
             Synced: "सिंक केले गेले",
@@ -137,9 +148,12 @@ export class Strings {
             //Edit tree
             EnterSaplingId: "रोपाची संख्या लिहा",
             EnterPlotName: "प्लॉटचे नाव निवडा", //manjur
+            OldPlotName: "जुना प्लॉट निवडा", //manjur
+            NewPlotName: "नवीन प्लॉट निवडा",
             PlotName: "प्लॉटचे नाव",
             logoutConfirm: "तुम्हाला लॉग आउट करायचे आहे का?",
-            Shift: "शिफ्ट"
+            Shift: "शिफ्ट",
+            ClickToDelete: "हटवण्यासाठी रोपे वर क्लिक करा" //manjur
         },
     });
     static alertMessages = new LocalizedStrings({
@@ -161,7 +175,7 @@ export class Strings {
             Settings: "Please go to Settings and grant permissions",
             //utils
             DataUptodate: "Tree types and plot up to date.",
-            DataGettingFetched : "Please wait while helper data is being fetched.",
+            DataGettingFetched: "Please wait while helper data is being fetched.",
             ShiftDataUptodate: "Shift data up to date",
             plotSaplingsDataUpToDate: "Plot sapling data up-to-date",
             FailureSavingTrees: "Failed to save some tree types. See logs.",
@@ -173,12 +187,13 @@ export class Strings {
             No: "No",
             SyncSuccess: "Sync Successful!",
             SyncFailure: "Sync Failed!",
-            NothingToSync : "No trees to sync. Please Add trees",
+            NothingToSync: "No trees to sync. Please Add trees",
             CheckLocalList: "See local tree list to check statuses.",
             ContactExpert: "Contact an expert, please.",
             //tree form
             invalidSaplingId: "Invalid Sapling Id",
             alreadyExists: "already exists in local data.",
+            doesNotExist: "does not exist",
             alreadyExistsInDB: "exists in database. Enter Unique Sapling id.",
             Error: "Error",
             IncompleteFields: "Please fill all fields.",
@@ -186,6 +201,7 @@ export class Strings {
             NoTreeLoaction: "Please locate the tree", //manjur
             selectPlotFirst: "Select plot to view other trees.",
             confirmDeleteImage: "Delete image?",
+            confirmDeleteSapling: "Delete Sapling?",
             //verify users
             UserVerified: "User Verified",
             //localdataview
@@ -213,15 +229,16 @@ export class Strings {
             userNotSetup: "user not set up correctly. contact admin",
             deleteImageEdit: "Delete the existing image to add a new image",
             SelectPlot: "Please Select a Plot",
+            SelectDifferentPlot: "Please Select different plots",
             NoPlotSelected: "No Plot Selected",
             FinishShift: "Do you want to finish the Shift ?", //manjur,
             Synched: "Synched",
-            FailedUpdateSapling : "Failed to update sapling: ",
+            FailedUpdateSapling: "Failed to update sapling: ",
             //editlocaltree
-            UnableToFetch : "Unable to fetch data for",
+            UnableToFetch: "Unable to fetch data for",
             CorruptedData: "The data for selected sapling seems to be corrupted. Please add it again",
-            DeleteTreeData : "Unable to fetch complete data... Please add tree details again !!",
-            UnableToFetchHelperData : "Unable to fetch helper data. Please check internet connection..."
+            DeleteTreeData: "Unable to fetch complete data... Please add tree details again !!",
+            UnableToFetchHelperData: "Unable to fetch helper data. Please check internet connection..."
         },
         "mr": {
             GPSUnavailable: "त्रुटी: विनंतीची वेळ संपली. GPS सध्या उपलब्ध नाही.",
@@ -241,8 +258,8 @@ export class Strings {
             Settings: "कृपया सेटिंग्ज वर जाऊन परवानगी द्या",
             //utils
             DataUptodate: "झाडाचे प्रकार आणि प्लॉट अद्याप अपडेट आहेत.",
-            DataGettingFetched : "कृपया मदतनीस डेटा प्राप्त होत असताना प्रतीक्षा करा.",
-            ShiftDataUptodate: "डेटा अद्ययावत शिफ्ट करा", //manjur
+            DataGettingFetched: "कृपया मदतनीस डेटा प्राप्त होत असताना प्रतीक्षा करा.",
+            ShiftDataUptodate: "शिफ्ट्स अद्ययावत आहेत", //manjur
             plotSaplingsDataUpToDate: "प्लॉट रोपटी डेटा अद्ययावत.",
             FailureSavingTrees: "काही झाडाचे प्रकार सेव करण्यात असफल. लॉग पहा.",
             FailureSavingPlots: "काही प्लॉट सेव करण्यात असफल. लॉग पहा.",
@@ -266,9 +283,10 @@ export class Strings {
             NoTreeLoaction: "कृपया झाड शोधा", //manjur
             selectPlotFirst: "इतर झाडे पाहण्यासाठी प्लॉट निवडा.",
             confirmDeleteImage: "इमेज हटवायची??",
+            confirmDeleteSapling: "रोपटे हटवायची?",
             //verify users
             UserVerified: "वापरकर्ता सत्यापित केला गेला",
-
+            doesNotExist: "अस्तित्वात नाही", //manjur
             //localdataview
             NoTreeswithFilter: "दिलेल्या फिल्टरशी झाडे आढळली नाहीत",
             //edit tree
@@ -294,14 +312,15 @@ export class Strings {
             userNotSetup: "वापरकर्ता योग्यरित्या सेट नाही. प्रशासकाशी संपर्क साधा",
             deleteImageEdit: "नवीन फोटो जोडण्यासाठी सध्याचा फोटो हटवा",
             SelectPlot: "कृपया एक प्लॉट निवडा",
+            SelectDifferentPlot: "कृपया भिन्न भूखंड निवडा", //manjur
             NoPlotSelected: "कोणताही भूखंड निवडलेला नाही",
             FinishShift: "तुम्हाला शिफ्ट पूर्ण करायची आहे का ?", //manjur
             Synched: "समक्रमित", //manjur
             FailedUpdateSapling: "रोपे अपडेट करण्यात अयशस्वी", //manjur
             //editlocaltree
-            UnableToFetch : "डेटा आणण्यात अयशस्वी",
-            CorruptedData : "निवडलेल्या रोपट्याचा डेटा करप्ट झाला आहे. कृपया ते पुन्हा जोडा",
-            DeleteTreeData : "संपूर्ण डेटा आणण्यात अक्षम... कृपया वृक्ष तपशील पुन्हा जोडा!!",
+            UnableToFetch: "डेटा आणण्यात अयशस्वी",
+            CorruptedData: "निवडलेल्या रोपट्याचा डेटा करप्ट झाला आहे. कृपया ते पुन्हा जोडा",
+            DeleteTreeData: "संपूर्ण डेटा आणण्यात अक्षम... कृपया वृक्ष तपशील पुन्हा जोडा!!",
             UnableToFetchHelperData: "मदतनीस डेटा आणण्यात अक्षम. कृपया इंटरनेट कनेक्शन तपासा..." //manjur
         }
     })
@@ -310,11 +329,18 @@ export class Strings {
             // home
             SyncData: "Sync Data",
             AddNewTree: "Add New Tree",
+            AddImage: "Add New Image",
+            UpdateSapling: "Update Saplings",
             StartShift: "Start a Shift",
             Shifts: "Shifts",
             FetchHelperData: "Fetch Helper Data",
             fetchPlotSaplingData: "Fetch Plot-Sapling Data",
             SelectLanguage: "Language/भाषा",
+
+            //shift types
+            UploadTree: "Add Sapling",
+            UpdatePlot: "Update Plot",
+            EnterShiftType: "Select Shift Type",
 
             // add tree
             ClickPhoto: "Click Photo",
@@ -348,11 +374,20 @@ export class Strings {
             // home
             SyncData: "डेटा सिंक करा",
             AddNewTree: "नवीन झाड जोडा",
+            AddImage: "नवीन इमेज जोडा",
+            UpdateSapling: "सॅपलिंग अपडेट करा",
             StartShift: "शिफ्ट सुरू करा",
             Shifts: "शिफ्ट",
             FetchHelperData: "मदतकारी डेटा तयार करा",
             fetchPlotSaplingData: "प्लॉट-सॅपलिंग डेटा मिळवा",
             SelectLanguage: "भाषा/Language",
+
+            //shifttypes
+            UploadTree: "वृक्ष अपलोड", //manjur
+            //UpdateImage: "प्रतिमा अद्यतनित करा", //manjur
+            UpdatePlot: "प्लॉट अपडेट करा", //manjur,
+            EnterShiftType: "शिफ्ट प्रकार प्रविष्ट करा",
+
             // add tree
             ClickPhoto: "फोटो घ्या",
             Submit: "सबमिट करा",
@@ -413,11 +448,11 @@ export class Strings {
             Plot: "प्लॉट",
             admin: 'प्रशासक',
             logger: 'माली',
-            
+
             //manjur
             Date: 'तारीख',
-            StartTime: 'सुरवातीची वेळ',
-            EndTime: 'समाप्तीचा कालावधी',
+            StartTime: 'प्रारंभ वेळ',
+            EndTime: 'समाप्ती वेळ',
             TimeTaken: 'वेळ घेतला',
         }
     })

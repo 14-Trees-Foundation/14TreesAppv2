@@ -14,7 +14,7 @@ import DeviceInfo from 'react-native-device-info';
 import { DataService } from './services/DataService';
 import { commonStyles } from './services/Styles';
 import GlobalContext from './context/GlobalContext ';
-import Shift from './screens/Shift';
+import AddTree from './screens/AddTree';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Text, View } from 'react-native';
 import { EditLocalTree } from './screens/EditLocalTree';
@@ -24,6 +24,8 @@ import SplashScreen from './screens/SplashScreen';
 import ScreenHeaderContent from './components/ScreenHeaderContent';
 import { setJSExceptionHandler } from 'react-native-exception-handler';
 import RNRestart from 'react-native-restart';
+import AddImageShift from './screens/AddImageShift';
+import UpdatePlot from './screens/UpdatePlot';
 
 
 const errorHandler = async (e, isFatal) => {
@@ -73,7 +75,7 @@ async function requestPermissions() {
     PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
     PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
     PERMISSIONS.ANDROID.ACCESS_BACKGROUND_LOCATION,
-    PERMISSIONS.ANDROID.READ_PHONE_NUMBERS,
+    PERMISSIONS.ANDROID.READ_PHONE_NUMBERS
   ];
   if (androidVersion < versionOfPermissionChange) {
     permissions.push(...[
@@ -85,7 +87,7 @@ async function requestPermissions() {
     permissions.push(...[
       PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
       PERMISSIONS.ANDROID.READ_MEDIA_VIDEO,
-      PERMISSIONS.ANDROID.READ_MEDIA_AUDIO,
+      PERMISSIONS.ANDROID.READ_MEDIA_AUDIO
     ])
   }
   console.log("permission array: ", permissions);
@@ -265,8 +267,8 @@ const App = () => {
           component={LoadingScreen}
           options={{ headerShown: false }} />
         <Stack.Screen
-          name={Strings.screenNames.getString('Shift', Strings.english)}
-          component={Shift}
+          name={Strings.screenNames.getString('AddTree', Strings.english)}
+          component={AddTree}
           options={{
             headerLeft: () => null,
             headerRight: () => (
@@ -287,7 +289,57 @@ const App = () => {
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
             headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
             headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
-            title: Strings.screenNames.Shift
+            title: Strings.screenNames.AddTree
+          }} />
+        <Stack.Screen
+          name={Strings.screenNames.getString('AddImageShift', Strings.english)}
+          component={AddImageShift}
+          options={{
+            headerLeft: () => null,
+            headerRight: () => (
+              <View style={{
+                marginRight: 35,
+              }}>
+                <Text style={{
+                  fontFamily: 'Inter-Regular',
+                  color: lightTheme ? '#52525C' : 'black',
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  padding: 15,
+                }}>
+                  {userName}
+                </Text>
+              </View>
+            ),
+            headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+            headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+            headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+            title: Strings.screenNames.AddImageShift
+          }} />
+        <Stack.Screen
+          name={Strings.screenNames.getString('UpdatePlot', Strings.english)}
+          component={UpdatePlot}
+          options={{
+            headerLeft: () => null,
+            headerRight: () => (
+              <View style={{
+                marginRight: 35,
+              }}>
+                <Text style={{
+                  fontFamily: 'Inter-Regular',
+                  color: lightTheme ? '#52525C' : 'black',
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  padding: 15,
+                }}>
+                  {userName}
+                </Text>
+              </View>
+            ),
+            headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+            headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+            headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+            title: Strings.screenNames.UpdatePlot
           }} />
         <Stack.Screen
           name={Strings.screenNames.getString('SyncDisplay', Strings.english)}
@@ -347,6 +399,13 @@ const App = () => {
           }} />
         <Stack.Screen
           name={Strings.screenNames.getString('DrawerScreen', Strings.english)}
+          component={DrawerNavigator}
+          options={{
+            headerLeft: () => null,
+            headerShown: false
+          }} />
+        <Stack.Screen
+          name={Strings.screenNames.getString('UpdateSaplingsPlot', Strings.english)}
           component={DrawerNavigator}
           options={{
             headerLeft: () => null,

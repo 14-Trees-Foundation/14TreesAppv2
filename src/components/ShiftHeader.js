@@ -8,7 +8,7 @@ import { ScrollView, Text, TouchableOpacity, View, } from 'react-native';
 import { Utils } from '../services/Utils';
 import { Card } from 'react-native-paper';
 
-const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
+const ShiftHeader =  React.memo(({ onSetTime, handleModalChanges }) => {
 
     const { treesPlanted, shiftTime, setShiftTime, plotSelected, lightTheme, playSound, setPlaySound } = useContext(GlobalContext);
 
@@ -141,6 +141,6 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
         </View>
 
     )
-}
+})
 
 export default ShiftHeader;
