@@ -16,12 +16,10 @@ import { shiftTypes } from '../screens/Shifts';
 
 
 
-export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onPlotModalClose, onUpdatePlotModalClose }) => {
+export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onShiftModalClose, onUpdatePlotModalClose }) => {
     const { lightTheme } = useContext(GlobalContext);
 
-    const { setShiftType } = useContext(GlobalContext)
-
-    // const [mode, setMode] = useState(null)
+    const { setShiftType } = useContext(GlobalContext);
 
     return (
 
@@ -54,7 +52,7 @@ export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onPlot
                                     buttonColor='#059636'
                                     onPress={() => {
                                         setShiftModalVisible(false)
-                                        onPlotModalClose()
+                                        onShiftModalClose()
                                         setShiftType(shiftTypes.addSapling)
 
                                     }}
@@ -80,7 +78,7 @@ export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onPlot
                                     buttonColor='#059636'
                                     onPress={() => {
                                         setShiftModalVisible(false)
-                                        onPlotModalClose()
+                                        onShiftModalClose()
                                         setShiftType(shiftTypes.addImage)
                                     }}
                                     contentStyle={Iconstyles.buttonContent}
@@ -125,7 +123,7 @@ export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onPlot
                                     contentStyle={Iconstyles.cancelButtonContent}
                                     labelStyle={Iconstyles.cancelButtonLabel}
                                 >
-                                    Cancel
+                                    {Strings.buttonLabels.cancel}
                                 </Button>
                             </View>
                         </View>

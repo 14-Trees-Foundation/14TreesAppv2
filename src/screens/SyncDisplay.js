@@ -36,10 +36,10 @@ const SyncDisplay = ({ navigation }) => {
   const [showProgress, setShowProgress] = useState(false);
   const [failedTrees, setFailedTrees] = useState([]);
   const [failedShifts, setFailedShifts] = useState([]);
+  const [failedImagesTrees, setFailedImagesTrees] = useState([]);
+  const [failedPlotTrees, setFailedPlotTrees] = useState([]);
   const [shiftsCount, setShiftsCount] = useState(null);
-  const { lightTheme , shiftID} = useContext(GlobalContext);
-
-
+  const { lightTheme, shiftID, shiftDone } = useContext(GlobalContext);
 
   useEffect(() => {
     const backAction = () => {
@@ -75,19 +75,17 @@ const SyncDisplay = ({ navigation }) => {
 
     //take care of uploadedSaplings
     await Utils.deleteSyncedShiftsBasedOnSaplings(uploadedShiftIDs);
+    await Utils.deleteSyncedTreesAndImages()
 
-    //await Utils.deleteSyncedSaplingsInLocalShifts(uploadedSaplings);
-
-    //same as my code
-    let remainingTrees = await Utils.deleteSyncedTreesInTreesTable()
-    //console.log("------------remainingTrees------------", remainingTrees)
   };
 
 
-  const uploadShift = async (uploadedSaplings = [], uploadedTreesPlotsSaplings = []) => {
+  const uploadShift = async (uploadedSaplings = [], uploadedImageSaplings = [], uploadedTreesPlotsSaplings = []) => {
     let responseFromSyncShifts;
-    let combinedUploadedSaplings = [...uploadedSaplings, ...uploadedTreesPlotsSaplings]
-console.log("combinedUploadedSaplings----" , combinedUploadedSaplings);
+    let combinedUploadedSaplings = [...uploadedSaplings, ...uploadedImageSaplings, ...uploadedTreesPlotsSaplings]
+
+    console.log("combinedUploadedSaplings----", combinedUploadedSaplings);
+
     if ((shiftsCount && shiftsCount.pending == 0) || combinedUploadedSaplings.length === 0) {
       // ToastAndroid.show(
       //   Strings.alertMessages.NothingToSync,
@@ -108,12 +106,13 @@ console.log("combinedUploadedSaplings----" , combinedUploadedSaplings);
       setShowProgress(false);
     }, 2000);
 
-    await deleteSyncedTreesAndShifts(responseFromSyncShifts);
-    await Utils.deleteUpdateTreesPlots();
     await Utils.fetchAndStoreHelperData();
-    await Utils.fetchAndStoreShifts();
-
+    if (shiftDone) {
+      await deleteSyncedTreesAndShifts(responseFromSyncShifts);
+      await Utils.fetchAndStoreShifts();
+    }
   }
+
 
   const uploadTrees = async () => {
     if (treeCounts && treeCounts.pending.treesUpload === 0) {
@@ -126,8 +125,6 @@ console.log("combinedUploadedSaplings----" , combinedUploadedSaplings);
     let failures = result.failures;
     console.log("----------------uploadedSaplings-ni Syncdisplay-----------", uploadedSaplings);
 
-
-    //setFailedTrees({ ...failedTrees, failures });
     setFailedTrees(failures)
     setProgress(1);
     updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
@@ -135,6 +132,30 @@ console.log("combinedUploadedSaplings----" , combinedUploadedSaplings);
       setShowProgress(false);
     }, 2000);
     return uploadedSaplings;
+  }
+
+  const uploadImages = async () => {
+    if (treeCounts && treeCounts.pending.imagesUpload === 0) {
+      ToastAndroid.show(
+        Strings.alertMessages.NothingToSync,
+        ToastAndroid.LONG,
+      );
+      return;
+    }
+
+    let result = await Utils.uploadNewImages(setProgress);
+
+    await Utils.fetchTreesWithNewImage();
+    let uploadedImageSaplings = result.uploadedImageSaplings
+    let failures = result.failures
+    //console.log("----------------treesinNewImageTable-----------", treesinNewImageTable[0].uploaded)
+    setFailedImagesTrees(failures);
+    setProgress(1);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+    setTimeout(() => {
+      setShowProgress(false);
+    }, 2000);
+    return uploadedImageSaplings
   }
 
   const uploadTreesPlots = async () => {
@@ -150,8 +171,7 @@ console.log("combinedUploadedSaplings----" , combinedUploadedSaplings);
     let uploadedSaplings = result.uploadedSaplings;
     let failures = result.failures
     console.log("----------------uploadedSaplings-ni Syncdisplay-----------", uploadedSaplings, failures);
-    //setFailedTrees({ ...failedTrees, failures });
-    setFailedTrees(failures);
+    setFailedPlotTrees(failures);
     setProgress(1);
     updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
     setTimeout(() => {
@@ -165,7 +185,7 @@ console.log("combinedUploadedSaplings----" , combinedUploadedSaplings);
 
     if (
       treeCounts &&
-      treeCounts.pending.treesUpload === 0 && treeCounts.pending.plotUpload === 0 &&
+      treeCounts.pending.treesUpload === 0 && treeCounts.pending.plotUpload === 0 && treeCounts.pending.imagesUpload &&
       shiftsCount && shiftsCount.pending === 0) {
       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
       return;
@@ -203,6 +223,23 @@ console.log("combinedUploadedSaplings----" , combinedUploadedSaplings);
       await Utils.logException(JSON.stringify(errorLog));
     }
 
+
+
+    let uploadedImageSaplings;
+    try {
+      uploadedImageSaplings = await uploadImages()
+    } catch (error) {
+      console.log('unable to sync new images---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync new images(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
+
+
     let uploadedTreesPlotsSaplings;
 
     try {
@@ -219,7 +256,7 @@ console.log("combinedUploadedSaplings----" , combinedUploadedSaplings);
     }
 
     try {
-      await uploadShift(uploadedSaplings, uploadedTreesPlotsSaplings);
+      await uploadShift(uploadedSaplings, uploadedImageSaplings, uploadedTreesPlotsSaplings);
     } catch (error) {
       console.log('unable to sync shifts---', error);
       const stackTrace = error.stack;
@@ -232,6 +269,12 @@ console.log("combinedUploadedSaplings----" , combinedUploadedSaplings);
     }
   };
 
+  //  const allFailedTrees = [
+  //   ...failedTrees.map(item => ({ ...item, type: 'failedTree' })),
+  //   ...failedPlotTrees.map(item => ({ ...item, type: 'failedPlotTree' })),
+  //   ...failedImagesTrees.map(item => ({ ...item, type: 'failedImagesTree' })),
+  //   ...failedShifts.map(item => ({ sapling_id: item, type: 'failedShift' })),
+  // ];
 
 
   return (
@@ -249,10 +292,10 @@ console.log("combinedUploadedSaplings----" , combinedUploadedSaplings);
         {treeCounts && (
           <View style={syncDisplayStyles.syncDetailsContainer}>
             <Text style={syncDisplayStyles.syncText(lightTheme)}>
-              {Strings.messages.pending}: {treeCounts.pending.treesUpload + treeCounts.pending.plotUpload}
+              {Strings.messages.pending}: {treeCounts.pending.treesUpload + treeCounts.pending.plotUpload + treeCounts.pending.imagesUpload}
             </Text>
             <Text style={syncDisplayStyles.syncText(lightTheme)}>
-              {treeCounts.pending.treesUpload + treeCounts.pending.plotUpload > 0 ? '❗' : '✅'}
+              {treeCounts.pending.treesUpload + treeCounts.pending.plotUpload + treeCounts.pending.imagesUpload > 0 ? '❗' : '✅'}
             </Text>
             <Text style={syncDisplayStyles.syncText(lightTheme)}>
               {Strings.messages.synced}: {treeCounts.uploaded}
@@ -308,6 +351,48 @@ console.log("combinedUploadedSaplings----" , combinedUploadedSaplings);
             }}
           />
         )}
+        {failedPlotTrees.length > 0 && (
+          <FlatList
+            ListHeaderComponent={() => (
+              <Text style={commonStyles.text5}>
+                {Strings.messages.failedToUpload} {failedPlotTrees.length}{' '}
+                {Strings.messages.trees}:{' '}
+              </Text>
+            )}
+            data={failedPlotTrees}
+            keyExtractor={item => item.sapling_id ? item.sapling_id : item}
+            renderItem={({ item, index }) => {
+
+              return (
+                <Text style={commonStyles.text5}>
+                  {index + 1}. {Strings.messages.SaplingNo} : {' '}
+                  {item.sapling_id ? item.sapling_id : item}
+                </Text>
+              );
+            }}
+          />
+        )}
+        {failedImagesTrees.length > 0 && (
+          <FlatList
+            ListHeaderComponent={() => (
+              <Text style={commonStyles.text5}>
+                {Strings.messages.failedToUpload} {failedImagesTrees.length}{' '}
+                {Strings.messages.trees}:{' '}
+              </Text>
+            )}
+            data={failedImagesTrees}
+            keyExtractor={item => item.sapling_id ? item.sapling_id : item}
+            renderItem={({ item, index }) => {
+
+              return (
+                <Text style={commonStyles.text5}>
+                  {index + 1}. {Strings.messages.SaplingNo} : {' '}
+                  {item.sapling_id ? item.sapling_id : item}
+                </Text>
+              );
+            }}
+          />
+        )}
         {failedShifts.length > 0 && (
           <FlatList
             ListHeaderComponent={() => (
@@ -331,6 +416,7 @@ console.log("combinedUploadedSaplings----" , combinedUploadedSaplings);
 
   );
 }
+
 
 export default SyncDisplay;
 

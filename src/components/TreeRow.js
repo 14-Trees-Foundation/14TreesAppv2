@@ -31,7 +31,7 @@ export const TreeRow = ({ tree1, tree2, tree3, tree4, shiftID, modalMode, shiftT
             if (modalMode) {
                 handleSaplingChanges(tree.sapling_id);
             } else {
-                
+
                 navigation.navigate(
                     Strings.screenNames.getString('EditLocalTree', Strings.english),
                     { sapling_id: tree.sapling_id, shiftID }
@@ -80,11 +80,12 @@ export const TreeRow = ({ tree1, tree2, tree3, tree4, shiftID, modalMode, shiftT
                 }
 
                 {shiftTypeOfTrees === shiftTypes.addImage &&
-                    (<TouchableOpacity disabled={true}>
+                    (<TouchableOpacity disabled={tree.uploaded ? false : true} onPress={onPress}>
                         <Text style={textStyle} numberOfLines={1} ellipsizeMode="tail">
                             {tree.sapling_id}
                         </Text>
-                    </TouchableOpacity>)}
+                    </TouchableOpacity>)
+                }
 
                 {
                     shiftTypeOfTrees === shiftTypes.updatePlot &&

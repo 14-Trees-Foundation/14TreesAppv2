@@ -80,7 +80,7 @@ export class DataService {
     });
 
   }
-  
+
   static async fetchPlotSaplings(user_id, lasthash) {
     const url = `${DataService.serverBase}/fetchPlotSaplings`;
     return await axios.post(url, {
@@ -112,7 +112,7 @@ export class DataService {
     const url = `${DataService.serverBase}/updateSapling`;
     return await axios.post(url, { adminID: adminID, sapling: sapling });
   }
-  
+
   //manjur
   static async uploadLogs(logs) {
     const url = `${DataService.serverBase}/uploadLogs`;
@@ -142,6 +142,15 @@ export class DataService {
     return;
   }
 
+  static async uploadNewImages(treeList) {
+    const url = `${DataService.serverBase}/uploadNewImages`;
+    const response = await axios.post(url, treeList);
+    if (response) {
+      return response.data;
+    }
+    return;
+  }
+  
   static async uploadTreesNewPlot(treeList) {
     console.log("treelist:---", treeList, treeList.length);
     const url = `${DataService.serverBase}/uploadTreesNewPlot`;
@@ -171,7 +180,7 @@ export class DataService {
 
       // Convert the response data to a Base64 string
       const base64String = Buffer.from(response.data, 'binary').toString('base64');
-    
+
       return base64String;
 
     } catch (error) {

@@ -67,8 +67,12 @@ const TreesInShift = ({ navigation, route }) => {
             ...treesInLiveShifts
         ];
 
+        const uniqueList = Array.from(new Set(combinedList.map(item => item.sapling_id))).map(id => {
+                return combinedList.find(item => item.sapling_id === id);
+        });
 
-        setFinalList(combinedList);
+        // console.log("uniqueList---", uniqueList);
+        setFinalList(uniqueList);
 
     }
 

@@ -18,7 +18,6 @@ export class Strings {
             DrawerScreen: 'Homescreen',
             startScreen: 'start',
             Shifts: "Shifts", //manjur
-            //AddTree: "Add Tree", //manjur
             AddImageShift: "Add Image",
             UpdatePlotShift: "Update Plot",
             AppInfo: "App Info",
@@ -41,7 +40,7 @@ export class Strings {
             startScreen: 'प्रारंभ स्क्रीन',
             Shifts: "शिफ्ट",
             //Shift: "शिफ्ट",
-            AddImageShift: "अ‍ॅड इमेज शिफ्ट",
+            AddImageShift: "अ‍ॅड इमेज",
             UpdatePlotShift: "प्लॉट अपडेट करा", //manjur
             AppInfo: "अ‍ॅपची माहिती",
             TreesInShift: "शिफ्ट मधील झाडे", //manjur
@@ -187,6 +186,8 @@ export class Strings {
             No: "No",
             SyncSuccess: "Sync Successful!",
             SyncFailure: "Sync Failed!",
+            SyncFailureForTrees: "Sync for added trees Failed!",
+            SyncFailureForImages : "Sync for added Images Failed!",
             NothingToSync: "No trees to sync. Please Add trees",
             CheckLocalList: "See local tree list to check statuses.",
             ContactExpert: "Contact an expert, please.",
@@ -238,7 +239,8 @@ export class Strings {
             UnableToFetch: "Unable to fetch data for",
             CorruptedData: "The data for selected sapling seems to be corrupted. Please add it again",
             DeleteTreeData: "Unable to fetch complete data... Please add tree details again !!",
-            UnableToFetchHelperData: "Unable to fetch helper data. Please check internet connection..."
+            UnableToFetchHelperData: "Unable to fetch helper data. Please check internet connection...",
+            imageAddedAlready:"Image already added for",
         },
         "mr": {
             GPSUnavailable: "त्रुटी: विनंतीची वेळ संपली. GPS सध्या उपलब्ध नाही.",
@@ -270,6 +272,8 @@ export class Strings {
             No: "नाही",
             SyncSuccess: "समक्रमण यशस्वी!",
             SyncFailure: "समक्रमण अयशस्वी!",
+            SyncFailureForTrees: "जोडलेल्या झाडांसाठी सिंक अयशस्वी!",
+            SyncFailureForImages : "जोडलेल्या प्रतिमांसाठी सिंक अयशस्वी!",
             NothingToSync: "समक्रमित करण्यासाठी झाडे नाहीत! कृपया झाडे जोडा", //manjur
             CheckLocalList: "लोकल झाडांची यादी पहा स्थिती तपासण्यासाठी.",
             ContactExpert: "कृपया एक तज्ञाशी संपर्क साधा.",
@@ -321,7 +325,8 @@ export class Strings {
             UnableToFetch: "डेटा आणण्यात अयशस्वी",
             CorruptedData: "निवडलेल्या रोपट्याचा डेटा करप्ट झाला आहे. कृपया ते पुन्हा जोडा",
             DeleteTreeData: "संपूर्ण डेटा आणण्यात अक्षम... कृपया वृक्ष तपशील पुन्हा जोडा!!",
-            UnableToFetchHelperData: "मदतनीस डेटा आणण्यात अक्षम. कृपया इंटरनेट कनेक्शन तपासा..." //manjur
+            UnableToFetchHelperData: "मदतनीस डेटा आणण्यात अक्षम. कृपया इंटरनेट कनेक्शन तपासा...", //manjur
+            imageAddedAlready : "प्रतिमा आधीच जोडली आहे",
         }
     })
     static buttonLabels = new LocalizedStrings({

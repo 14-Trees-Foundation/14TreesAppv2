@@ -13,19 +13,21 @@ import { Button } from 'react-native-paper';
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { TreeRow } from '../components/TreeRow';
 import { AddImageModal } from '../components/AddImageModal';
+import PlotSelectModal from '../components/PlotSelectModal';
 
-const AddImageShift = ({ navigation }) => {
-    const { plotSelected, treesPlanted, setTreesPlanted, setShiftDone, setPlotSelected, shiftTime, shiftID, setShiftID, lightTheme } = useContext(GlobalContext);
+const AddImageShift = ({ route,navigation }) => {
+    const { plotSelected, treesPlanted, setTreesPlanted, setShiftDone, shiftType,setPlotSelected, shiftTime, shiftID, setShiftID, lightTheme } = useContext(GlobalContext);
 
     const [finalList, setFinalList] = useState(null);
-
+    
 
     const [modalVisible, setModalVisible] = useState(false);
+    const [plotModalVisible, setPlotModalVisible] = useState(false);
     const [mode, setMode] = useState(null);
     const [saplingID, setSaplingID] = useState(null);
 
-    const finalRef = useRef({ shiftTime: null, seconds: null, treesPlanted: 0, plotselected: null });
-    finalRef.current.shiftTime = shiftTime;
+    const finalRef = useRef({ shift_id: null, shiftTime: null, seconds: null, treesPlanted: 0, plotselected: null });
+    finalRef.current.shift_id = shiftID;
     finalRef.current.treesPlanted = treesPlanted;
     finalRef.current.plotselected = plotSelected ? plotSelected.name : null;
 
@@ -42,7 +44,9 @@ const AddImageShift = ({ navigation }) => {
                     },
                     {
                         text: "Yes",
-                        onPress: () => { saveShiftToDB() }
+                        onPress: () => { 
+                            console.log("----------------saving shift to DB--------------")
+                            saveShiftToDB() }
                     }
                 ]
             );
@@ -58,14 +62,13 @@ const AddImageShift = ({ navigation }) => {
 
     }, []);
 
-    useEffect(() => {
-        console.log("shiftID inside shift------", shiftID);
-    }, [shiftID])
 
     const fetchSaplingsForShift = async () => {
-        const saplingsForShift = await Utils.fetchSaplingsFromLocalShiftDB(shiftID);
+        
+        //if(!shiftID) return
+        const { treesInLocalShifts, shiftType } = await Utils.fetchSaplingsFromLocalShiftDB(shiftID);
 
-        saplingsForShift.sort((a, b) => {
+        treesInLocalShifts.sort((a, b) => {
             if (a.uploaded && !b.uploaded) {
                 return 1; // Move uploaded trees to the end
             }
@@ -75,16 +78,17 @@ const AddImageShift = ({ navigation }) => {
             return 0; // Maintain the original order
         });
 
-        setFinalList(saplingsForShift);
-        console.log('setting both lists to: ', saplingsForShift, saplingsForShift.length);
+        setFinalList(treesInLocalShifts);
+        console.log('setting both lists to: ', treesInLocalShifts, treesInLocalShifts.length);
     };
 
-
-    useFocusEffect(
+    useFocusEffect( 
         useCallback(() => {
-            console.log('focus');
-            fetchSaplingsForShift();
-        }, []),
+            console.log('-------------------focus---------------------',shiftID);
+            if (shiftID) {
+                fetchSaplingsForShift();
+            }
+        }, [shiftID])
     );
 
 
@@ -120,8 +124,8 @@ const AddImageShift = ({ navigation }) => {
             await Utils.saveShiftsToLocalDB(shiftData);
         } else {
             //delete the shift from db.
-            console.log("final list----", finalList);
-            await Utils.deleteShiftLocalDB(shiftID);
+            console.log("shift id to delete---", shiftID, finalRef.current.shift_id);
+            await Utils.deleteShiftLocalDB(finalRef.current.shift_id);
         }
 
         navigation.navigate(
@@ -130,6 +134,7 @@ const AddImageShift = ({ navigation }) => {
         setTreesPlanted(0);
         setPlotSelected(null);
         setShiftDone(true);
+        console.log("--------------------setting shiftID null--image-------------")
         setShiftID(null);
     }
 
@@ -173,8 +178,9 @@ const AddImageShift = ({ navigation }) => {
                             buttonColor='#059636'
                             onPress={() => {
                                 navigation.navigate(
-                                    Strings.screenNames.getString('SyncDisplay', Strings.english)
+                                    Strings.screenNames.getString('SyncDisplay', Strings.english),
                                 )
+                              
                             }}
                             contentStyle={Iconstyles.buttonContent2}
                             labelStyle={Iconstyles.buttonLabel}
@@ -214,7 +220,8 @@ const AddImageShift = ({ navigation }) => {
 
     const handleModalChanges = () => {
         setMode(treeFormModes.plotSelect);
-        setModalVisible(true);
+        //setModalVisible(true);
+        setPlotModalVisible(true);
     }
 
     //final return
@@ -233,22 +240,25 @@ const AddImageShift = ({ navigation }) => {
                         }}
                         handleModalChanges={handleModalChanges}
                     />
+                    
 
-                    {!modalVisible && <RenderHeader2 />}
+                    {!modalVisible && !plotModalVisible && <RenderHeader2 />}
 
-                    {/* <CustomModal
+
+                    <AddImageModal
                         modalVisible={modalVisible}
                         setModalVisible={setModalVisible}
+                        finalShiftData={finalRef}
+                        onFetchData={fetchSaplingsForShift}
+                    />
+
+
+                    <PlotSelectModal
+                        plotModalVisible={plotModalVisible}
+                        setPlotModalVisible={setPlotModalVisible}
                         mode={mode}
                         onFetchData={fetchSaplingsForShift}
-                        saplingID={saplingID}
-                        finalShiftData={finalRef}
-                    /> */}
-
-                   <AddImageModal
-                   modalVisible={modalVisible}
-                   setModalVisible={setModalVisible}
-                   />
+                    />
                 </View>
 
 
@@ -281,6 +291,7 @@ const AddImageShift = ({ navigation }) => {
                                         tree4={trees[3]}
                                         modalMode={true}
                                         handleSaplingChanges={handleSaplingChanges}
+                                        shiftTypeOfTrees={shiftType}
                                     />);
                                 }
                                 return null;

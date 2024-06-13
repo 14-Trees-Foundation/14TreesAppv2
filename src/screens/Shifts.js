@@ -69,13 +69,9 @@ const Shifts = ({ navigation }) => {
     };
 
     const fetchData = async () => {
-        await Utils.checkShiftsComplete(); //to delete with no trees
-
         const shiftsIDLocalDB = await fetchShiftsFromLocalDB();
         const syncedShiftsFromLiveDB = await fetchLiveShiftsAndSaplings();
         await getCombinedShiftList(shiftsIDLocalDB, syncedShiftsFromLiveDB);
-
-
     };
 
 
@@ -100,18 +96,13 @@ const Shifts = ({ navigation }) => {
 
     }, []);
 
-
-    const handlePlotSelectionModal = () => {
-        setPlotModalVisible(true)
-    }
-
     return (
         <ScrollView keyboardShouldPersistTaps='handled' style={shiftsStyles.scrollView}>
 
             <ShiftTypeModal
                 shiftModalVisible={shiftModalVisible}
                 setShiftModalVisible={setShiftModalVisible}
-                onPlotModalClose={handlePlotSelectionModal}
+                onShiftModalClose={() => setPlotModalVisible(true)}
                 onUpdatePlotModalClose={() => setUpdatePlotModalVisible(true)}
             />
 
@@ -146,7 +137,6 @@ const Shifts = ({ navigation }) => {
                                 onPress={() => {
                                     setShiftModalVisible(true); //when this is true then Custommodal is visible
                                     setMode(treeFormModes.startShift)
-
                                 }}
                                 contentStyle={Iconstyles.buttonContent}
                                 labelStyle={Iconstyles.buttonLabel}

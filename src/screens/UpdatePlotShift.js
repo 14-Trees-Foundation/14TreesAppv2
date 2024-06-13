@@ -29,8 +29,8 @@ const UpdatePlotShift = ({ navigation }) => {
 
     const [updatePlotModalVisible, setUpdatePlotModalVisible] = useState(false);
 
-    const finalRef = useRef({ shiftTime: null, seconds: null, treesPlanted: 0, plotselected: null });
-    finalRef.current.shiftTime = shiftTime;
+    const finalRef = useRef({ shift_id: null, shiftTime: null, seconds: null, treesPlanted: 0, plotselected: null });
+    finalRef.current.shift_id = shiftID;
     finalRef.current.treesPlanted = treesPlanted;
     finalRef.current.plotselected = plotSelected ? plotSelected.name : null;
 
@@ -124,8 +124,8 @@ const UpdatePlotShift = ({ navigation }) => {
             await Utils.saveShiftsToLocalDB(shiftData);
         } else {
             //delete the shift from db.
-            console.log("final list----", finalList);
-            await Utils.deleteShiftLocalDB(shiftID);
+            console.log("shift id to delete---", shiftID, finalRef.current.shift_id);
+            await Utils.deleteShiftLocalDB(finalRef.current.shift_id);
         }
 
         navigation.navigate(

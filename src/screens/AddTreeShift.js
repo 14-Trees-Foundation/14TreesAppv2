@@ -18,7 +18,7 @@ import { shiftTypes } from './Shifts';
 
 const AddTreeShift = ({ navigation }) => {
 
-    const { plotSelected, treesPlanted, shiftType, setTreesPlanted, setShiftDone, setPlotSelected, shiftTime, shiftID, setShiftID, lightTheme } = useContext(GlobalContext);
+    const { shiftID, plotSelected, treesPlanted, shiftType, setTreesPlanted, setShiftDone, setPlotSelected, shiftTime, setShiftID, lightTheme } = useContext(GlobalContext);
 
     const [finalList, setFinalList] = useState(null);
 
@@ -29,7 +29,8 @@ const AddTreeShift = ({ navigation }) => {
     const [plotModalVisible, setPlotModalVisible] = useState(false);
     const [saplingID, setSaplingID] = useState(null);
 
-    const finalRef = useRef({ shiftTime: null, seconds: null, treesPlanted: 0, plotselected: null });
+    const finalRef = useRef({ shift_id: null, shiftTime: null, seconds: null, treesPlanted: 0, plotselected: null });
+    finalRef.current.shift_id = shiftID;
     finalRef.current.shiftTime = shiftTime;
     finalRef.current.treesPlanted = treesPlanted;
     finalRef.current.plotselected = plotSelected ? plotSelected.name : null;
@@ -93,6 +94,7 @@ const AddTreeShift = ({ navigation }) => {
 
 
     const saveShiftToDB = async () => {
+
         if (finalList && finalList.length > 0) {
             const endtime = Utils.getCurrentTime12Hr();
             const timetaken = Utils.formatTime(finalRef.current.seconds);
@@ -124,8 +126,8 @@ const AddTreeShift = ({ navigation }) => {
             await Utils.saveShiftsToLocalDB(shiftData);
         } else {
             //delete the shift from db.
-            console.log("final list----", finalList);
-            await Utils.deleteShiftLocalDB(shiftID);
+            console.log("shift id to delete---", shiftID, finalRef.current.shift_id);
+            await Utils.deleteShiftLocalDB(finalRef.current.shift_id);
         }
 
         navigation.navigate(
