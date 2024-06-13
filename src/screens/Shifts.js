@@ -8,7 +8,6 @@ import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Utils } from "../services/Utils";
 import { useFocusEffect } from "@react-navigation/native";
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import AddTreeModal from "../components/AddTreeModal";
 import { treeFormModes } from "../components/TreeForm";
 import { Button } from 'react-native-paper';
 import { Iconstyles } from "../services/Styles";

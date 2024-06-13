@@ -14,7 +14,7 @@ import DeviceInfo from 'react-native-device-info';
 import { DataService } from './services/DataService';
 import { commonStyles } from './services/Styles';
 import GlobalContext from './context/GlobalContext ';
-import AddTree from './screens/AddTree';
+import AddTreeShift from './screens/AddTreeShift';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Text, View } from 'react-native';
 import { EditLocalTree } from './screens/EditLocalTree';
@@ -25,7 +25,7 @@ import ScreenHeaderContent from './components/ScreenHeaderContent';
 import { setJSExceptionHandler } from 'react-native-exception-handler';
 import RNRestart from 'react-native-restart';
 import AddImageShift from './screens/AddImageShift';
-import UpdatePlot from './screens/UpdatePlot';
+import UpdatePlotShift from './screens/UpdatePlotShift';
 
 
 const errorHandler = async (e, isFatal) => {
@@ -267,8 +267,8 @@ const App = () => {
           component={LoadingScreen}
           options={{ headerShown: false }} />
         <Stack.Screen
-          name={Strings.screenNames.getString('AddTree', Strings.english)}
-          component={AddTree}
+          name={Strings.screenNames.getString('AddTreeShift', Strings.english)}
+          component={AddTreeShift}
           options={{
             headerLeft: () => null,
             headerRight: () => (
@@ -289,7 +289,7 @@ const App = () => {
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
             headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
             headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
-            title: Strings.screenNames.AddTree
+            title: Strings.screenNames.AddTreeShift
           }} />
         <Stack.Screen
           name={Strings.screenNames.getString('AddImageShift', Strings.english)}
@@ -317,8 +317,8 @@ const App = () => {
             title: Strings.screenNames.AddImageShift
           }} />
         <Stack.Screen
-          name={Strings.screenNames.getString('UpdatePlot', Strings.english)}
-          component={UpdatePlot}
+          name={Strings.screenNames.getString('UpdatePlotShift', Strings.english)}
+          component={UpdatePlotShift}
           options={{
             headerLeft: () => null,
             headerRight: () => (
@@ -339,7 +339,7 @@ const App = () => {
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
             headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
             headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
-            title: Strings.screenNames.UpdatePlot
+            title: Strings.screenNames.UpdatePlotShift
           }} />
         <Stack.Screen
           name={Strings.screenNames.getString('SyncDisplay', Strings.english)}

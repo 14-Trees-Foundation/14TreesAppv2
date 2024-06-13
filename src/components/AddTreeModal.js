@@ -6,10 +6,10 @@ import GlobalContext from '../context/GlobalContext ';
 import { treeFormModes } from './TreeForm';
 import { TreeFormModal } from './TreeFormModal';
 import LoadingScreen from '../screens/LoadingScreen';
-import {  customModalStyles } from '../services/Styles';
+import { customModalStyles } from '../services/Styles';
 
 const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplingID, finalShiftData }) => {
-    const { setPlaySound, setShiftDone, setTreesPlanted, treesPlanted, plotSelected, setPlotSelected, shiftID, setShiftID, lightTheme } = useContext(GlobalContext);
+    const { setPlaySound, setTreesPlanted, treesPlanted, plotSelected, setPlotSelected, shiftID, lightTheme } = useContext(GlobalContext);
 
 
     const [details, setDetails] = useState(null);

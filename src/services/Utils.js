@@ -345,7 +345,7 @@ export class Utils {
             //console.log("shift got---", shifts);
             for (const shift of shifts) {
                 const saplings = JSON.parse(shift?.saplings || '[]');
-                console.log("checkShiftsComplte----", saplings);
+                //console.log("checkShiftsComplte----", saplings);
 
                 if (saplings.length === 0) {
                     //delete the shift for this id
@@ -376,7 +376,7 @@ export class Utils {
                         saplings: saplings
                     }
 
-                    console.log("final shift data from home screen---", shiftData);
+                    //console.log("final shift data from home screen---", shiftData);
 
                     await Utils.saveShiftsToLocalDB(shiftData);
                 }
@@ -640,6 +640,8 @@ export class Utils {
                     saplings: filteredSaplings
                 };
             });
+
+            shifts =  shifts.filter(item => item.saplings && item.saplings.length > 0);
 
             console.log("-----saplings in shift---------", shifts)
 

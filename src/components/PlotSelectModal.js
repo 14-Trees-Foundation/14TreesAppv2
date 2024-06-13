@@ -50,7 +50,7 @@ const PlotSelectModal = ({ plotModalVisible, setPlotModalVisible, mode, onFetchD
 
                 if (shiftType === shiftTypes.addSapling) {
                     stackNavRef.current?.navigate(
-                        Strings.screenNames.getString('AddTree', Strings.english),
+                        Strings.screenNames.getString('AddTreeShift', Strings.english),
                     );
                 } else {
                     stackNavRef.current?.navigate(
@@ -106,7 +106,7 @@ const PlotSelectModal = ({ plotModalVisible, setPlotModalVisible, mode, onFetchD
             }
             onRequestClose={() => handlePlotChanges(0)} // Add this line
         >
-            <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ ...customModalStyles.plotSelectScrollView }}>
+            <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ ...customModalStyles.plotSelectScrollView,  marginTop : mode === treeFormModes.plotChange ? 205 : 80 }}>
                 <View style={customModalStyles.plotSelectOuterView}>
                     <View style={customModalStyles.plotSelectView}>
                         <Text style={customModalStyles.textView(lightTheme)}>{Strings.messages.EnterPlotName}</Text>

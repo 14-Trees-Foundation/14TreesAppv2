@@ -52,7 +52,7 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
 
                 if (shiftType === shiftTypes.updatePlot) {
                     stackNavRef.current?.navigate(
-                        Strings.screenNames.getString('UpdatePlot', Strings.english),
+                        Strings.screenNames.getString('UpdatePlotShift', Strings.english),
                     );
                 }
 
@@ -83,7 +83,7 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
 
         }
         else {
-            console.log("changing plot-----" , cancel);
+            console.log("changing plot-----", cancel);
             if (plotSelected === null || newPlotSelected === null) {
                 Alert.alert(Strings.alertMessages.NoPlotSelected, Strings.alertMessages.SelectPlot);
                 return;
@@ -105,7 +105,7 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
             }
             onRequestClose={() => handlePlotChanges(0)} // Add this line
         >
-            <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ ...customModalStyles.plotSelectScrollView }}>
+            <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ ...customModalStyles.plotSelectScrollView, marginTop: mode === treeFormModes.plotChange ? 205 : 80 }}>
                 <View style={customModalStyles.plotSelectOuterView}>
                     <View style={customModalStyles.plotSelectView}>
 

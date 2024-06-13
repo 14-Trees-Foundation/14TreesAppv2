@@ -8,7 +8,7 @@ export class Strings {
     static screenNames = new LocalizedStrings({
         "en": {
             HomePage: "Home",
-            AddTree: "Add Tree",
+            AddTreeShift: "Add Tree",
             LocalDataView: "Local Data",
             LocalDataNavigator: "LocalDataNavigator",
             VerifyUsers: "Verify Users",
@@ -20,7 +20,7 @@ export class Strings {
             Shifts: "Shifts", //manjur
             //AddTree: "Add Tree", //manjur
             AddImageShift: "Add Image",
-            UpdatePlot: "Update Plot",
+            UpdatePlotShift: "Update Plot",
             AppInfo: "App Info",
             TreesInShift: "Trees In Shift", //manjur
             PlotSelect: "Select Plot",
@@ -30,7 +30,7 @@ export class Strings {
         },
         "mr": {
             HomePage: "मुख्य पृष्ठ",
-            AddTree: "नवीन झाड जोडा",
+            AddTreeShift: "नवीन झाड जोडा",
             LocalDataView: "लोकल डेटा",
             LocalDataNavigator: "LocalDataNavigator",
             VerifyUsers: "वापरकर्ते सत्यापित करा",
@@ -42,7 +42,7 @@ export class Strings {
             Shifts: "शिफ्ट",
             //Shift: "शिफ्ट",
             AddImageShift: "अ‍ॅड इमेज शिफ्ट",
-            UpdatePlot: "प्लॉट अपडेट करा", //manjur
+            UpdatePlotShift: "प्लॉट अपडेट करा", //manjur
             AppInfo: "अ‍ॅपची माहिती",
             TreesInShift: "शिफ्ट मधील झाडे", //manjur
             PlotSelect: "प्लॉट निवडा", //manjur

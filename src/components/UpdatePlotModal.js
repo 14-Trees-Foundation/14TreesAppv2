@@ -108,55 +108,63 @@ const UpdatePlotModal = ({ modalVisible, setModalVisible, mode, onFetchData, fin
             }
             onRequestClose={handleDetailsChanges}
         >
-            <ScrollView keyboardShouldPersistTaps="handled" style={{ ...commonStyles.borderedDisplay, ...customModalStyles.centeredView }}>
-                <View style={{ ...customModalStyles.modalView, marginTop: 14, }}>
-                    <View>
-                        {newPlotSelected && <Text style={shiftHeaderStyles.plotName(lightTheme)}>
-                            {newPlotSelected.name}
-                        </Text>}
-                    </View>
 
-                    <TextInput
-                        defaultValue={saplingid}
-                        style={[
-                            commonStyles.txtInput,
-                            treeFormModalStyles.saplingIdInput(lightTheme, saplingid),
-                        ]}
-                        placeholder={Strings.labels.SaplingId}
-                        placeholderTextColor={'black'}
-                        onChangeText={text => {
-                            setSaplingId(text);
-                        }}
-                    />
+            <ScrollView keyboardShouldPersistTaps="handled" style={customModalStyles.centeredView}>
+                <View style={customModalStyles.modalView}>
+
+                    <View style={treeFormModalStyles.container}>
+                        
+                        <View style={{ marginTop: 18, }}>
+                            {newPlotSelected && <Text style={shiftHeaderStyles.plotName(lightTheme)}>
+                                {newPlotSelected.name}
+                            </Text>}
+                        </View>
+
+                        <View style={{ marginTop: 38, width: '100%' }}>
+                            <TextInput
+                                defaultValue={saplingid}
+                                style={[
+                                    commonStyles.txtInput,
+                                    treeFormModalStyles.saplingIdInput(lightTheme, saplingid),
+                                ]}
+                                placeholder={Strings.labels.SaplingId}
+                                placeholderTextColor={'black'}
+                                onChangeText={text => {
+                                    setSaplingId(text);
+                                }}
+                            />
+                        </View>
 
 
 
-                    <View style={CustomButtonStyles.container}>
-                        <View style={CustomButtonStyles.buttonRow}>
-                            <View style={CustomButtonStyles.buttonContainer}>
-                                <Button
-                                    mode="contained"
-                                    buttonColor='red'
-                                    labelStyle={CustomButtonStyles.buttonLabel}
-                                    style={CustomButtonStyles.button}
-                                    onPress={handleDetailsChanges}
-                                >
-                                    {Strings.buttonLabels.cancel}
-                                </Button>
+                        <View style={{ ...CustomButtonStyles.container, marginTop: 30 }}>
+                            <View style={CustomButtonStyles.buttonRow}>
+                                <View style={CustomButtonStyles.buttonContainer}>
+                                    <Button
+                                        mode="contained"
+                                        buttonColor='red'
+                                        labelStyle={CustomButtonStyles.buttonLabel}
+                                        style={CustomButtonStyles.button}
+                                        onPress={handleDetailsChanges}
+                                    >
+                                        {Strings.buttonLabels.cancel}
+                                    </Button>
 
-                            </View>
-                            <View style={CustomButtonStyles.buttonContainer}>
-                                <Button
-                                    onPress={onVerifiedSave}
-                                    mode="contained"
-                                    buttonColor='#1D4ED8'
-                                    labelStyle={CustomButtonStyles.buttonLabel}
-                                    style={CustomButtonStyles.button}
-                                >
-                                    {Strings.buttonLabels.Submit}
-                                </Button>
+                                </View>
+                                <View style={CustomButtonStyles.buttonContainer}>
+                                    <Button
+                                        onPress={onVerifiedSave}
+                                        mode="contained"
+                                        buttonColor='#1D4ED8'
+                                        labelStyle={CustomButtonStyles.buttonLabel}
+                                        style={CustomButtonStyles.button}
+                                    >
+                                        {Strings.buttonLabels.Submit}
+                                    </Button>
+                                </View>
                             </View>
                         </View>
+
                     </View>
 
                 </View>
@@ -164,24 +172,6 @@ const UpdatePlotModal = ({ modalVisible, setModalVisible, mode, onFetchData, fin
         </Modal>
     );
 
-    // } else {
-    //     return (
-    //         <Modal
-    //             animationType="slide"
-    //             transparent={true}
-    //             visible={
-    //                 modalVisible //changesNeeded
-    //             }
-    //             onRequestClose={handleDetailsChanges} // Add this line
-    //         >
-
-    //             <View style={customModalStyles.loadingView}>
-    //                 <LoadingScreen />
-    //             </View>
-
-    //         </Modal>
-    //     );
-    // }
 
 };
 

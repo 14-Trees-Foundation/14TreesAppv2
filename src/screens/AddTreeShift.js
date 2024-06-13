@@ -6,28 +6,28 @@ import { Strings } from '../services/Strings';
 import { Utils } from '../services/Utils';
 import { Iconstyles, commonStyles, shiftStyles } from '../services/Styles';
 import GlobalContext from '../context/GlobalContext ';
-
 import ShiftHeader from '../components/ShiftHeader';
-import UpdatePlotModal from '../components/UpdatePlotModal';
-
-import { treeFormModes } from '../components/TreeForm';
+import AddTreeModal from '../components/AddTreeModal';
+import { TreeForm, treeFormModes } from '../components/TreeForm';
 import LoadingScreen from './LoadingScreen';
 import { Button } from 'react-native-paper';
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { TreeRow } from '../components/TreeRow';
 import PlotSelectModal from '../components/PlotSelectModal';
-import UpdatePlotSelectModal from '../components/UpdatePlotSelectModal';
 import { shiftTypes } from './Shifts';
 
-const UpdatePlot = ({ navigation }) => {
-    const { plotSelected, treesPlanted,shiftType, setTreesPlanted, setShiftDone, setNewPlotSelected, setPlotSelected, shiftTime, shiftID, setShiftID, lightTheme } = useContext(GlobalContext);
+const AddTreeShift = ({ navigation }) => {
+
+    const { plotSelected, treesPlanted, shiftType, setTreesPlanted, setShiftDone, setPlotSelected, shiftTime, shiftID, setShiftID, lightTheme } = useContext(GlobalContext);
 
     const [finalList, setFinalList] = useState(null);
+
 
     const [modalVisible, setModalVisible] = useState(false);
     const [mode, setMode] = useState(null);
 
-    const [updatePlotModalVisible, setUpdatePlotModalVisible] = useState(false);
+    const [plotModalVisible, setPlotModalVisible] = useState(false);
+    const [saplingID, setSaplingID] = useState(null);
 
     const finalRef = useRef({ shiftTime: null, seconds: null, treesPlanted: 0, plotselected: null });
     finalRef.current.shiftTime = shiftTime;
@@ -63,13 +63,7 @@ const UpdatePlot = ({ navigation }) => {
 
     }, []);
 
-    useEffect(() => {
-        console.log("shiftID inside shift------", shiftID);
-    }, [shiftID])
-
     const fetchSaplingsForShift = async () => {
-
-        console.log("shiftID inside shift2------", shiftID);
 
         const { treesInLocalShifts } = await Utils.fetchSaplingsFromLocalShiftDB(shiftID);
 
@@ -91,8 +85,10 @@ const UpdatePlot = ({ navigation }) => {
     useFocusEffect(
         useCallback(() => {
             console.log('focus');
-            fetchSaplingsForShift();
-        }, []),
+            if (shiftID) {
+                fetchSaplingsForShift();
+            }
+        }, [shiftID])
     );
 
 
@@ -137,7 +133,6 @@ const UpdatePlot = ({ navigation }) => {
         )
         setTreesPlanted(0);
         setPlotSelected(null);
-        setNewPlotSelected(null);
         setShiftDone(true);
         setShiftID(null);
     }
@@ -160,12 +155,14 @@ const UpdatePlot = ({ navigation }) => {
                         mode="contained"
                         buttonColor='#059636'
                         onPress={() => {
+                            setMode(treeFormModes.addTree);
                             setModalVisible(true);
+                            setSaplingID(null);
                         }}
                         contentStyle={Iconstyles.buttonContent}
                         labelStyle={Iconstyles.buttonLabel}
                     >
-                        {Strings.buttonLabels.UpdateSapling}
+                        {Strings.buttonLabels.AddNewTree}
 
                     </Button>
                 </View>
@@ -212,10 +209,16 @@ const UpdatePlot = ({ navigation }) => {
         );
     };
 
+    const handleSaplingChanges = (saplingID) => {
+        console.log("handleSaplingChanges", saplingID);
+        setMode(treeFormModes.localEdit);
+        setSaplingID(saplingID);
+        setModalVisible(true);
+    }
 
     const handleModalChanges = () => {
         setMode(treeFormModes.plotChange);
-        setUpdatePlotModalVisible(true);
+        setPlotModalVisible(true);
     }
 
     //final return
@@ -228,39 +231,36 @@ const UpdatePlot = ({ navigation }) => {
             <ScrollView keyboardShouldPersistTaps='handled' style={shiftStyles.scrollView}>
 
                 <View style={shiftStyles.container}>
-                    {!updatePlotModalVisible && <ShiftHeader
+                    <ShiftHeader
                         onSetTime={(seconds) => {
                             finalRef.current.seconds = seconds;
                         }}
                         handleModalChanges={handleModalChanges}
                     />
-                    }
-
-                    {!modalVisible && !updatePlotModalVisible && <RenderHeader2 />}
 
 
-                    <UpdatePlotModal
+                    {!modalVisible && !plotModalVisible && <RenderHeader2 />}
+
+                    <AddTreeModal
                         modalVisible={modalVisible}
                         setModalVisible={setModalVisible}
                         mode={mode}
                         onFetchData={fetchSaplingsForShift}
+                        saplingID={saplingID}
                         finalShiftData={finalRef}
                     />
 
-
-                    <UpdatePlotSelectModal
-                        updatePlotModalVisible={updatePlotModalVisible}
-                        setUpdatePlotModalVisible={setUpdatePlotModalVisible}
+                    <PlotSelectModal
+                        plotModalVisible={plotModalVisible}
+                        setPlotModalVisible={setPlotModalVisible}
                         mode={mode}
                         onFetchData={fetchSaplingsForShift}
                     />
-
                 </View>
 
 
                 {
-                    !modalVisible && <View style={shiftStyles.treeListContainer}>
-
+                    !modalVisible && !plotModalVisible && <View style={shiftStyles.treeListContainer}>
                         <FlatList
                             style={shiftStyles.flatList}
                             scrollEnabled={false}
@@ -271,13 +271,6 @@ const UpdatePlot = ({ navigation }) => {
                                     </Text>
                                 </View>
                             )}
-                            ListHeaderComponent={finalList.length > 0 ? () => (
-                                <View style={commonStyles.borderedDisplay}>
-                                    <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black' }}>
-                                        {Strings.messages.ClickToDelete}
-                                    </Text>
-                                </View>
-                            ) : null}
                             data={finalList}
 
                             renderItem={({ item, index }) => {
@@ -295,8 +288,8 @@ const UpdatePlot = ({ navigation }) => {
                                         tree4={trees[3]}
                                         modalMode={true}
                                         shiftTypeOfTrees={shiftType}
+                                        handleSaplingChanges={handleSaplingChanges}
                                         shiftID={shiftID}
-                                        handleSaplingChanges={fetchSaplingsForShift}
                                     />);
                                 }
                                 return null;
@@ -314,4 +307,4 @@ const UpdatePlot = ({ navigation }) => {
 
 }
 
-export default UpdatePlot;
+export default AddTreeShift;

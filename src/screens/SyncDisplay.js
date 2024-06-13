@@ -37,7 +37,7 @@ const SyncDisplay = ({ navigation }) => {
   const [failedTrees, setFailedTrees] = useState([]);
   const [failedShifts, setFailedShifts] = useState([]);
   const [shiftsCount, setShiftsCount] = useState(null);
-  const { lightTheme } = useContext(GlobalContext);
+  const { lightTheme , shiftID} = useContext(GlobalContext);
 
 
 
@@ -55,7 +55,7 @@ const SyncDisplay = ({ navigation }) => {
 
   useFocusEffect(useCallback(() => {
     updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
-    console.log('sync date updated')
+    console.log('sync date updated', shiftID)
   }, []))
 
   const syncLogs = async () => {
@@ -87,7 +87,7 @@ const SyncDisplay = ({ navigation }) => {
   const uploadShift = async (uploadedSaplings = [], uploadedTreesPlotsSaplings = []) => {
     let responseFromSyncShifts;
     let combinedUploadedSaplings = [...uploadedSaplings, ...uploadedTreesPlotsSaplings]
-
+console.log("combinedUploadedSaplings----" , combinedUploadedSaplings);
     if ((shiftsCount && shiftsCount.pending == 0) || combinedUploadedSaplings.length === 0) {
       // ToastAndroid.show(
       //   Strings.alertMessages.NothingToSync,
@@ -188,7 +188,7 @@ const SyncDisplay = ({ navigation }) => {
       await Utils.logException(JSON.stringify(errorLog));
     }
 
-    let uploadedSaplings = [];
+    let uploadedSaplings;
 
     try {
       uploadedSaplings = await uploadTrees();
@@ -203,7 +203,7 @@ const SyncDisplay = ({ navigation }) => {
       await Utils.logException(JSON.stringify(errorLog));
     }
 
-    let uploadedTreesPlotsSaplings = [];
+    let uploadedTreesPlotsSaplings;
 
     try {
       uploadedTreesPlotsSaplings = await uploadTreesPlots();
