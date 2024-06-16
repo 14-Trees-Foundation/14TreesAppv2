@@ -689,7 +689,7 @@ export class Utils {
             console.log("-----saplings in shift---------", shifts)
 
             const response = await DataService.uploadShifts(shifts);
-            console.log("response from syncShifts---", response , response?.["dataSaveError"].keyPattern, "---", response?.["dataSaveError"].keyValue);
+            console.log("response from syncShifts---", response);
             let failures = await Utils.setShiftsSyncStatus(response, shifts);
             return { shiftDetails: response, failures: failures };
 
