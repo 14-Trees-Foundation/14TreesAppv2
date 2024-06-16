@@ -1,5 +1,5 @@
-import { View, Text, Modal, StyleSheet, Dimensions, ScrollView, ToastAndroid, Alert } from 'react-native';
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import { View, Text, Modal,  ScrollView,  Alert } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
 import { Utils, Constants } from '../services/Utils';
 import { Strings } from '../services/Strings';
 import GlobalContext from '../context/GlobalContext ';
@@ -12,7 +12,7 @@ import { shiftTypes } from '../screens/Shifts';
 
 
 function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisible, mode, onFetchData }) {
-    const { newPlotSelected, setNewPlotSelected, setShiftDone, setTreesPlanted, treesPlanted, plotSelected, shiftType, setPlotSelected, shiftID, setShiftID, lightTheme } = useContext(GlobalContext);
+    const { newPlotSelected, setNewPlotSelected, setShiftDone, plotSelected, shiftType, setPlotSelected, shiftID, setShiftID, lightTheme } = useContext(GlobalContext);
 
     const [plotItems, setPlotItems] = useState([]); //for plots
 
@@ -22,7 +22,6 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
     };
 
     useEffect(() => {
-        console.log("-------------in PlotSelect-------------", shiftType)
         if (updatePlotModalVisible) {
             fetchDetails();
         }
@@ -101,9 +100,9 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
             animationType="slide"
             transparent={true}
             visible={
-                updatePlotModalVisible //changesNeeded
+                updatePlotModalVisible
             }
-            onRequestClose={() => handlePlotChanges(0)} // Add this line
+            onRequestClose={() => handlePlotChanges(0)} 
         >
             <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ ...customModalStyles.plotSelectScrollView, marginTop: mode === treeFormModes.plotChange ? 205 : 80 }}>
                 <View style={customModalStyles.plotSelectOuterView}>
@@ -162,7 +161,6 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
                                 </View>
                             </View>
                         </View>
-
                     </View>
                 </View>
             </ScrollView>

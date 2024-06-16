@@ -5,7 +5,6 @@ import VerifyusersScreen from '../screens/VerifyUsers';
 import { stackNavRef } from '../App';
 import GlobalContext from "../context/GlobalContext ";
 import { CustomButtonStyles, commonStyles, drawerNavigatorStyles } from "../services/Styles";
-import { styleConfigs } from "../services/Styles";
 import { useState, useEffect, useCallback, useContext } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { View, Image, Text, BackHandler, Alert } from "react-native";
@@ -47,9 +46,6 @@ const DrawerContent = (props) => {
         <DrawerContentScrollView {...props}>
             <View style={drawerNavigatorStyles.navigatorView}>
                 <Image source={Constants.logoImage()} style={drawerNavigatorStyles.image} />
-                {/* <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>
-                    14 Trees
-                </Text> */}
                 {userDetails ? (
                     <View
                         style={drawerNavigatorStyles.userDetails}>
@@ -100,7 +96,7 @@ export const DrawerNavigator = () => {
         const backAction = () => {
             console.log("exiting from drawerScreen-------");
             BackHandler.exitApp();
-            return true; // Prevent default behavior (exit app)
+            return true; 
         };
 
         const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
@@ -217,7 +213,6 @@ export const DrawerNavigator = () => {
                     }
                 }}
             />
-
         </Drawer.Navigator >
     );
 };

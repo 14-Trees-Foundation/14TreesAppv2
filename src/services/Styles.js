@@ -49,7 +49,6 @@ export const commonStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  //Namrata
   borderText: {
     borderColor: '#ccc',
     borderWidth: 1,
@@ -128,7 +127,6 @@ export const commonStyles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
   },
-  //Namrata #FFD700
   drawerHeaderLight: {
     backgroundColor: '#F1FAEE',
   },
@@ -154,7 +152,6 @@ export const commonStyles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 13
   },
-  //namrata
   searchButton: {
     backgroundColor: "#1D4ED8",
     padding: 3,
@@ -256,7 +253,6 @@ export const commonStyles = StyleSheet.create({
     alignSelf: 'center',
     color: '#52525C',
   },
-  //namrata
   textX: {
     fontSize: 17,
     fontFamily: 'Inter-Regular',
@@ -279,8 +275,6 @@ export const commonStyles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 3,
   },
-  //Namrata
-
   txtInput: {
     height: 50,
     fontFamily: 'Inter-Regular',
@@ -317,7 +311,6 @@ export const commonStyles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
   },
 
-  //manjur
   secondView: {
     flex: 1,
     flexDirection: 'row',
@@ -755,7 +748,6 @@ export const treeFormModalStyles = StyleSheet.create({
     height: 200,
     marginHorizontal: 2,
     marginLeft: 15,
-    width: 360
   },
   imagePicker: {
     backgroundColor: '#969393',

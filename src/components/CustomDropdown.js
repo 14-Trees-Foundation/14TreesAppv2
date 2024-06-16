@@ -13,9 +13,6 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
     const { setPlotSelected, lightTheme } = useContext(GlobalContext);
 
     useEffect(() => {
-        //console.log("item: ---", initItem);
-        //console.log("re-rendered custom dropdown");
-
         if (initItem) {
             setSelectedItem(initItem);
         } else {
@@ -27,10 +24,6 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
         }
 
     }, [initItem])
-
-    // if (scrollEnabled === undefined) {
-    //     scrollEnabled = false;
-    // }
 
     const updateFilteredOptions = (text) => {
         if (text.length > 0) {
@@ -99,8 +92,6 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
             />
             }
         </View>
-
-
     );
 }
 

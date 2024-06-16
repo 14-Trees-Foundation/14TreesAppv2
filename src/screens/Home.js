@@ -1,22 +1,13 @@
-import React, {useEffect, useContext, useCallback, useState} from 'react';
-import {
-  View,
-  BackHandler,
-  ToastAndroid,
-  TouchableOpacity,
-  Image,
-  Text,
-  StyleSheet,
-  ScrollView,
-} from 'react-native';
-import {Strings} from '../services/Strings';
-import {Utils} from '../services/Utils';
+import React, { useEffect, useContext, useCallback, useState } from 'react';
+import { View, BackHandler, ToastAndroid, TouchableOpacity, Image, Text, ScrollView } from 'react-native';
+import { Strings } from '../services/Strings';
+import { Utils } from '../services/Utils';
 import GlobalContext from '../context/GlobalContext ';
-import {useFocusEffect} from '@react-navigation/native';
-import {homeStyles} from '../services/Styles';
+import { useFocusEffect } from '@react-navigation/native';
+import { homeStyles } from '../services/Styles';
 
-const HomeScreen = ({navigation}) => {
-  const {langChanged, lightTheme} = useContext(GlobalContext);
+const HomeScreen = ({ navigation }) => {
+  const { langChanged, lightTheme } = useContext(GlobalContext);
   const [dataUptoDate, setDataUptoDate] = useState(false);
 
   const fetchHelperDataAndShifts = async () => {
@@ -47,19 +38,16 @@ const HomeScreen = ({navigation}) => {
   };
 
   useEffect(() => {
-    //console.log('fetching from homescreen----');
     initTask();
   }, []);
 
   useEffect(() => {
-    //console.log('langChanged inside HomeScreen: ', langChanged);
+    console.log('langChanged inside HomeScreen: ', langChanged);
   }, [langChanged]);
 
   useFocusEffect(
     useCallback(() => {
       const backAction = () => {
-        //console.log('exiting from homescreen-----');
-
         BackHandler.exitApp();
         return true;
       };
@@ -74,17 +62,17 @@ const HomeScreen = ({navigation}) => {
   );
 
   return (
-    <ScrollView style={{backgroundColor: 'white', height: '100%'}}>
-      <View style={{margin: 10}}>
+    <ScrollView style={{ backgroundColor: 'white', height: '100%' }}>
+      <View style={{ margin: 10 }}>
         <TouchableOpacity
           style={{
             ...homeStyles.button(lightTheme),
             backgroundColor: lightTheme ? dataUptoDate
-                ? '#e5e7ea'
-                : '#cccccc'
+              ? '#e5e7ea'
+              : '#cccccc'
               : dataUptoDate
-              ? 'lightgrey'
-              : '#999999',
+                ? 'lightgrey'
+                : '#999999',
           }}
           onPress={() =>
             navigation.navigate(
@@ -92,11 +80,10 @@ const HomeScreen = ({navigation}) => {
             )
           }
           disabled={!dataUptoDate}>
-          <View style={{padding: 20, alignItems: 'center'}}>
+          <View style={{ padding: 20, alignItems: 'center' }}>
             <Image
               source={require('../../assets/icon-add-new-tree.png')}
-              //style={{ width: 100, height: 100, }}
-              style={{...homeStyles.imageSpecs, opacity: dataUptoDate ? 1 : 0.5}}
+              style={{ ...homeStyles.imageSpecs, opacity: dataUptoDate ? 1 : 0.5 }}
             />
             <Text
               style={{
@@ -106,8 +93,8 @@ const HomeScreen = ({navigation}) => {
                     ? '#113160'
                     : '#666666'
                   : dataUptoDate
-                  ? 'black'
-                  : '#333333',
+                    ? 'black'
+                    : '#333333',
               }}>
               {Strings.buttonLabels.Shifts}
             </Text>
@@ -116,7 +103,7 @@ const HomeScreen = ({navigation}) => {
         <TouchableOpacity
           style={homeStyles.button(lightTheme)}
           onPress={fetchHelperDataAndShifts}>
-          <View style={{padding: 20, alignItems: 'center'}}>
+          <View style={{ padding: 20, alignItems: 'center' }}>
             <Image
               source={require('../../assets/icon-fetch-data.png')}
               style={homeStyles.imageSpecs}
@@ -132,13 +119,13 @@ const HomeScreen = ({navigation}) => {
           onPress={() =>
             navigation.navigate(
               Strings.screenNames.getString('SyncDisplay', Strings.english),
-              {data: 0},
+              { data: 0 },
             )
           }>
-          <View style={{padding: 20, alignItems: 'center'}}>
+          <View style={{ padding: 20, alignItems: 'center' }}>
             <Image
               source={require('../../assets/icon-sync-data.png')}
-              style={{width: 130, height: 100}}
+              style={{ width: 130, height: 100 }}
             />
             <Text style={homeStyles.buttonText(lightTheme)}>
               {Strings.buttonLabels.SyncData}

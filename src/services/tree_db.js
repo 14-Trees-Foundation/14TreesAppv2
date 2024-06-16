@@ -36,11 +36,8 @@ export class LocalDatabase {
 
     };
 
-    // add lat lng later !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
     createTreesTable = async () => {
         try {
-            //create table if not exists
             const query = `CREATE TABLE IF NOT EXISTS ${treeTableName}(
             treeid TEXT NOT NULL,
             saplingid TEXT NOT NULL PRIMARY KEY,
@@ -106,7 +103,6 @@ export class LocalDatabase {
 
     createNewImageTable = async () => {
         try {
-            //console.log('------------creating new image table---------');
             const newImageTablequery = `
             CREATE TABLE IF NOT EXISTS ${newImageTable} (
                 user_id TEXT NOT NULL,
@@ -118,7 +114,6 @@ export class LocalDatabase {
                 lat TEXT,
                 lng TEXT,
                 timestamp TEXT NOT NULL
-
                )`;
 
             await this.db.executeSql(newImageTablequery);
@@ -133,7 +128,6 @@ export class LocalDatabase {
     //Shift table
     createShiftTblLive = async () => {
         try {
-            console.log('------------setting live shifts---------');
             const shiftTableQuery = `
             CREATE TABLE IF NOT EXISTS ${previousShiftTableName} (
                 shift_id TEXT NOT NULL PRIMARY KEY,
@@ -178,7 +172,7 @@ export class LocalDatabase {
         }
     };
 
-    //Manjur
+
     logExceptionLocalDB = async (logs) => {
         try {
             const phoneinfo = await DeviceInfo.getPhoneNumber() || await AsyncStorage.getItem(Constants.phoneNumber);
@@ -187,11 +181,6 @@ export class LocalDatabase {
             const deviceinfo = deviceManufacter + "" + deviceName;
             const timestamp = new Date().toISOString();
             const userid = await AsyncStorage.getItem(Constants.userIdKey);
-            // console.log("inserting  logs to local db------------");
-            // console.log("phone no: ", phoneinfo, " deviceinfo: ", deviceinfo, "user_id: ", userid);
-            // console.log("logs got: ", logs);
-
-            // Check if the log already exists in the local database
             const [results] = await this.db.executeSql(`
             SELECT * FROM logs_table 
             WHERE deviceinfo = ? AND phoneinfo = ? AND logs = ?`,
@@ -229,7 +218,6 @@ export class LocalDatabase {
         try {
             const query = `SELECT * FROM logs_table`;
             const [results] = await this.db.executeSql(query);
-            console.log('sending Logs--------------');
             const logs = results.rows.raw();
             return logs;
         } catch (error) {
@@ -257,7 +245,7 @@ export class LocalDatabase {
                 }
             });
 
-            console.log("final plot data before syncing---", trees);
+            //console.log("final plot data before syncing---", trees);
             return trees;
 
         } catch (error) {
@@ -339,7 +327,6 @@ export class LocalDatabase {
 
             return { saplingArray, shiftType };
         } catch (error) {
-            //TODO: remove raw throw. Convert to Alert.
             console.error(error);
             Alert.alert(Strings.alertMessages.getString('FailedGetTreedata', Strings.english));
             const stackTrace = error.stack;
@@ -393,7 +380,7 @@ export class LocalDatabase {
                     trees.push(result.rows.item(index));
                 }
             });
-            //console.log("trre--", trees);
+            
             return trees;
 
         } catch (error) {
@@ -436,7 +423,6 @@ export class LocalDatabase {
 
     deleteSyncedTrees = async () => {
         const query = `DELETE FROM ${treeTableName} where uploaded = ?`;
-        //console.log(query);
         await this.db.executeSql(query, [1]);
         return await this.getAllTrees();
     }
@@ -656,10 +642,10 @@ export class LocalDatabase {
             if (results.rows.length > 0) {
                 const sapling = results.rows.item(0).sapling_id;
 
-                console.log("sapling got-----", sapling, saplingid);
+                //console.log("sapling got-----", sapling, saplingid);
                 return sapling === saplingid;
             } else {
-                console.log("No sapling found with id:", saplingid);
+                //console.log("No sapling found with id:", saplingid);
                 return false;
             }
 
@@ -677,7 +663,7 @@ export class LocalDatabase {
 
     deleteShiftLocalDB = async (id) => {
         try {
-            // console.log("id---", id);
+            
             if (id) {
                 const query = `DELETE FROM ${localShiftTable} WHERE id = ?`;
                 await this.db.executeSql(query, [id]);
@@ -707,7 +693,6 @@ export class LocalDatabase {
                     const result = results[0].rows.item(0);
                     let saplingArray = JSON.parse(result.saplings || '[]');
                     saplingArray.push(shiftData.sapling);
-                    console.log('parsing sapling---', saplingArray);
                     const updateQuery = `UPDATE ${localShiftTable} 
                      SET plotselected = ?, 
                          starttime = ?, 
@@ -821,9 +806,9 @@ export class LocalDatabase {
 
             await this.db.executeSql(updateQuery, [JSON.stringify(saplings), treesPlanted, id]);
 
-            const get = `SELECT * from ${localShiftTable} WHERE id = ?`;
-            const [result1] = await this.db.executeSql(get, [id])
-            console.log("Shift updated successfully---", result1.rows.item(0));
+            // const get = `SELECT * from ${localShiftTable} WHERE id = ?`;
+            // const [result1] = await this.db.executeSql(get, [id])
+            // console.log("Shift updated successfully---", result1.rows.item(0));
 
         } catch (error) {
             console.log("Error deleting sapling of the local shift table---", error);
@@ -1008,7 +993,7 @@ export class LocalDatabase {
             const insertQuery =
                 `INSERT OR REPLACE INTO sapling_images(saplingid, image, imageid, remark, timestamp) values` +
                 `('${treeimage.saplingid}', '${treeimage.image}', '${treeimage.imageid}', '${treeimage.remark.replace("'", "''")}', '${treeimage.timestamp}')`;
-            console.log('image stored!')
+           
             return this.db.executeSql(insertQuery);
         } catch (error) {
             const stackTrace = error.stack;
@@ -1070,8 +1055,6 @@ export class LocalDatabase {
                 await this.db.executeSql(updateQuery, [shift_id, JSON.stringify(saplings), id]);
 
             }
-
-
             // const get = `SELECT * from ${localShiftTable} WHERE id = ?`;
             // const [result1] = await this.db.executeSql(get, [id])
             // console.log("Shift updated successfully---", result1.rows.item(0));
@@ -1091,7 +1074,7 @@ export class LocalDatabase {
 
 
     updateTreesWithChangedPlot = async (plot_id, id) => {
-        console.log("shift id updateTreesWithChangedPlot---", id);
+        //console.log("shift id updateTreesWithChangedPlot---", id);
 
         try {
             const results = await this.db.executeSql(`SELECT saplings,shifttype FROM ${localShiftTable} WHERE id = ?`, [id]);
@@ -1507,13 +1490,12 @@ export class LocalDatabase {
             }
         }
         insertQuery = insertQuery + ";";
-        // console.log(insertQuery)
+       
         await this.db.executeSql(insertQuery);
         console.log('trees stored for plot id: ', plot_id)
 
     }
 
-    //namrata
     deleteSyncedShifts = async (shift_ids) => {
         console.log('-------------deleting shifts------------', shift_ids);
         try {

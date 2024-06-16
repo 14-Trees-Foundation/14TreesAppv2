@@ -4,14 +4,11 @@ import { StackedIcons } from '../components/Components';
 import React, { useContext, useEffect, useState, useCallback } from "react";
 import { commonStyles, shiftsStyles } from "../services/Styles";
 import GlobalContext from "../context/GlobalContext ";
-import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Utils } from "../services/Utils";
 import { useFocusEffect } from "@react-navigation/native";
-import Icon from 'react-native-vector-icons/FontAwesome5';
 import { treeFormModes } from "../components/TreeForm";
 import { Button } from 'react-native-paper';
 import { Iconstyles } from "../services/Styles";
-import { Card } from 'react-native-paper';
 import ShiftsCard from "../components/ShiftsCard";
 import { ShiftTypeModal } from "../components/ShiftTypeModal";
 import PlotSelectModal from "../components/PlotSelectModal";
@@ -35,7 +32,6 @@ const Shifts = ({ navigation }) => {
 
     const fetchShiftsFromLocalDB = async () => {
         const shiftsIDLocalDB = await Utils.getShiftsIDLocalDB();
-        //console.log('---local shift------', shiftsIDLocalDB[0]);
         return shiftsIDLocalDB
     };
 
@@ -64,7 +60,6 @@ const Shifts = ({ navigation }) => {
             return 0; // Maintain the original order
         });
 
-        //console.log("-------combinedList---------", combinedList)
         setFinalList(combinedList);
     };
 
@@ -84,14 +79,13 @@ const Shifts = ({ navigation }) => {
 
     useEffect(() => {
         const backAction = () => {
-            //console.log('closing modal in shifts----');
             navigation.goBack();
-            return true; // Prevent default behavior (exit app)
+            return true; 
         };
 
         const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
 
-        return () => backHandler.remove(); // Remove event listener on cleanup
+        return () => backHandler.remove();
 
 
     }, []);

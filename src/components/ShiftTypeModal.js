@@ -1,20 +1,11 @@
-import { View, Text, Modal, StyleSheet, Dimensions, ScrollView, ToastAndroid, Alert } from 'react-native';
-import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { Utils, Constants } from '../services/Utils';
+import { View, Text, Modal, ScrollView } from 'react-native';
+import React, {  useContext } from 'react';
 import { Strings } from '../services/Strings';
 import GlobalContext from '../context/GlobalContext ';
-import { treeFormModes } from './TreeForm';
-import { TreeFormModal } from './TreeFormModal';
-import LoadingScreen from '../screens/LoadingScreen';
-import { CustomButtonStyles, Iconstyles, shiftsStyles, customModalStyles, shiftStyles } from '../services/Styles';
-import { CustomDropdown } from './CustomDropdown';
-import { stackNavRef } from '../App';
+import {  Iconstyles, customModalStyles, shiftStyles } from '../services/Styles';
 import { Button } from 'react-native-paper';
 import { StackedIcons } from './Components';
-import PlotSelectModal from './PlotSelectModal';
 import { shiftTypes } from '../screens/Shifts';
-
-
 
 export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onShiftModalClose, onUpdatePlotModalClose }) => {
     const { lightTheme } = useContext(GlobalContext);
@@ -27,7 +18,7 @@ export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onShif
             animationType="slide"
             transparent={true}
             visible={
-                shiftModalVisible //changesNeeded
+                shiftModalVisible 
             }
             onRequestClose={() => setShiftModalVisible(false)}
         >
@@ -38,7 +29,7 @@ export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onShif
                             <Text style={customModalStyles.textView(lightTheme)}>Choose Shift Type</Text>
                         </View>
                         <View style={{ alignItems: 'center' }}>
-                            <View style={{ ...shiftStyles.buttonContainerInner, width: 350 }}>
+                            <View style={{ ...shiftStyles.buttonContainerInner, width: '85%' }}>
                                 <Button
                                     icon={() => (
                                         <View style={Iconstyles.buttonPosition}>
@@ -64,7 +55,7 @@ export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onShif
                                 </Button>
                             </View>
 
-                            <View style={{ ...shiftStyles.buttonContainerInner, width: 350 }}>
+                            <View style={{ ...shiftStyles.buttonContainerInner, width: '85%' }}>
                                 <Button
                                     icon={() => (
                                         <View style={Iconstyles.buttonPosition}>
@@ -89,12 +80,12 @@ export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onShif
                                 </Button>
                             </View>
 
-                            <View style={{ ...shiftStyles.buttonContainerInner, width: 350 }}>
+                            <View style={{ ...shiftStyles.buttonContainerInner, width: '85%' }}>
                                 <Button
                                     icon={() => (
                                         <View style={Iconstyles.buttonPosition}>
                                             <StackedIcons
-                                                names={['plus', 'home']}
+                                                names={['plus', 'mountain']}
                                                 styles={[{ opacity: 0.9, position: 'absolute' }, { opacity: 0.5, position: 'absolute' }]}
                                             />
                                         </View>
@@ -131,6 +122,5 @@ export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onShif
                 </View>
             </ScrollView>
         </Modal>
-
     )
 }

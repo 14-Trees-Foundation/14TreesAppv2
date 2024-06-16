@@ -10,7 +10,7 @@ const SplashScreen = () => {
                 animation="pulse"
                 easing="ease-out"
                 iterationCount="infinite"
-                source={require('../../assets/logo.png')} // Replace 'your-logo.png' with the path to your logo file
+                source={require('../../assets/logo.png')}
                 style={splashScreenStyles.logo}
             />
             <Text style={{ marginTop: 20, fontSize: 30, fontWeight: 'bold', color: 'black' }}>14 Trees</Text>

@@ -119,7 +119,7 @@ const LanguageModal = ({ langModalVisible, setLangModalVisible }) => {
                   )}
                   mode="contained"
                   buttonColor='red'
-                  labelStyle={CustomButtonStyles.buttonLabel}
+                  labelStyle={{...CustomButtonStyles.buttonLabel,fontSize: 15}}
                   style={CustomButtonStyles.button}
                   onPress={handleCancelChanges}
                 >
@@ -137,7 +137,7 @@ const LanguageModal = ({ langModalVisible, setLangModalVisible }) => {
                   onPress={handleLanguageChanges}
                   mode="contained"
                   buttonColor='#059636'
-                  labelStyle={CustomButtonStyles.buttonLabel}
+                  labelStyle={{...CustomButtonStyles.buttonLabel,fontSize: 15}}
                   style={CustomButtonStyles.button}
                 >
                   {Strings.buttonLabels.Submit}

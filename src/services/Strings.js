@@ -18,8 +18,8 @@ export class Strings {
             DrawerScreen: 'Homescreen',
             startScreen: 'start',
             Shifts: "Shifts", //manjur
-            AddImageShift: "Add Image",
-            UpdatePlotShift: "Update Plot",
+            AddImageShift: "Add Tree Image",
+            UpdatePlotShift: "Update Tree Plot",
             AppInfo: "App Info",
             TreesInShift: "Trees In Shift", //manjur
             PlotSelect: "Select Plot",
@@ -40,8 +40,8 @@ export class Strings {
             startScreen: 'प्रारंभ स्क्रीन',
             Shifts: "शिफ्ट",
             //Shift: "शिफ्ट",
-            AddImageShift: "अ‍ॅड इमेज",
-            UpdatePlotShift: "प्लॉट अपडेट करा", //manjur
+            AddImageShift: "अ‍ॅड सॅपलिंग इमेज",
+            UpdatePlotShift: "सॅपलिंग प्लॉट अपडेट",
             AppInfo: "अ‍ॅपची माहिती",
             TreesInShift: "शिफ्ट मधील झाडे", //manjur
             PlotSelect: "प्लॉट निवडा", //manjur
@@ -60,9 +60,14 @@ export class Strings {
             Never: "Never",
             LastSynced: "Last Synced: ",
             pending: "Pending",
+            pendingTrees:"New Trees",
+            pendingImages:"Tree Images",
+            pendingPlotTrees:"Updated Plot Trees",
             synced: "Synced",
             LocalOrSynced: "Local Or Synced",
-            failedToUpload: "Failed to upload",
+            failedToUpload: "Could not upload",
+            failedToUpdate : "Could not update plot for",
+            couldNotAdd: "Could not add images for",
             trees: "trees",
             // add tree
             Location: "Tree Location",
@@ -103,6 +108,7 @@ export class Strings {
             PlotName: "Plot Name",
             Shift: "shift", //manjur
             ClickToDelete: "Click on saplings to delete",
+            
         },
         "mr": {
             SignIn: "साइन इन करा",
@@ -111,9 +117,14 @@ export class Strings {
             Never: "कधीच नाही",
             LastSynced: "शेवटचा सिंक केलेला डेटा : ",
             pending: "प्रलंबित",
+            pendingTrees:"नवीन झाडे",
+            pendingImages:"नवीन प्रतिमासह झाडे",
+            pendingPlotTrees:"अपडेटेड प्लॉटसह झाडे",
             synced: "समक्रमित",
             LocalOrSynced: "स्थानिक किंवा समक्रमित",
-            failedToUpload: "अपलोड करण्यात अयशस्वी",
+            failedToUpload: "अपलोड करू शकलो नाही",
+            failedToUpdate: "साठी प्लॉट अपडेट करू शकलो नाही",
+            couldNotAdd: "साठी प्रतिमा जोडू शकलो नाही",
             trees: "झाडे",
             // add tree
             Location: "स्थान",
@@ -187,7 +198,7 @@ export class Strings {
             SyncSuccess: "Sync Successful!",
             SyncFailure: "Sync Failed!",
             SyncFailureForTrees: "Sync for added trees Failed!",
-            SyncFailureForImages : "Sync for added Images Failed!",
+            SyncFailureForImages: "Sync for added Images Failed!",
             NothingToSync: "No trees to sync. Please Add trees",
             CheckLocalList: "See local tree list to check statuses.",
             ContactExpert: "Contact an expert, please.",
@@ -240,7 +251,10 @@ export class Strings {
             CorruptedData: "The data for selected sapling seems to be corrupted. Please add it again",
             DeleteTreeData: "Unable to fetch complete data... Please add tree details again !!",
             UnableToFetchHelperData: "Unable to fetch helper data. Please check internet connection...",
-            imageAddedAlready:"Image already added for",
+            imageAddedAlready: "Image already added for",
+            SyncingTrees: 'Syncing Trees',
+            SyncingPlotTrees : "Syncing Updated plot trees",
+            SyncingImageTrees: "Syncing New image trees",
         },
         "mr": {
             GPSUnavailable: "त्रुटी: विनंतीची वेळ संपली. GPS सध्या उपलब्ध नाही.",
@@ -273,7 +287,7 @@ export class Strings {
             SyncSuccess: "समक्रमण यशस्वी!",
             SyncFailure: "समक्रमण अयशस्वी!",
             SyncFailureForTrees: "जोडलेल्या झाडांसाठी सिंक अयशस्वी!",
-            SyncFailureForImages : "जोडलेल्या प्रतिमांसाठी सिंक अयशस्वी!",
+            SyncFailureForImages: "जोडलेल्या प्रतिमांसाठी सिंक अयशस्वी!",
             NothingToSync: "समक्रमित करण्यासाठी झाडे नाहीत! कृपया झाडे जोडा", //manjur
             CheckLocalList: "लोकल झाडांची यादी पहा स्थिती तपासण्यासाठी.",
             ContactExpert: "कृपया एक तज्ञाशी संपर्क साधा.",
@@ -326,7 +340,10 @@ export class Strings {
             CorruptedData: "निवडलेल्या रोपट्याचा डेटा करप्ट झाला आहे. कृपया ते पुन्हा जोडा",
             DeleteTreeData: "संपूर्ण डेटा आणण्यात अक्षम... कृपया वृक्ष तपशील पुन्हा जोडा!!",
             UnableToFetchHelperData: "मदतनीस डेटा आणण्यात अक्षम. कृपया इंटरनेट कनेक्शन तपासा...", //manjur
-            imageAddedAlready : "प्रतिमा आधीच जोडली आहे",
+            imageAddedAlready: "प्रतिमा आधीच जोडली आहे",
+            SyncingTrees: 'नवीन झाडे सिंक करणे सुरू',
+            SyncingPlotTrees : "अपडेटेड प्लॉट झाडे सिंक करणे सुरू",
+            SyncingImageTrees: "नवीन प्रतिमा झाडे सिंक करणे सुरू",
         }
     })
     static buttonLabels = new LocalizedStrings({
@@ -334,7 +351,7 @@ export class Strings {
             // home
             SyncData: "Sync Data",
             AddNewTree: "Add New Tree",
-            AddImage: "Add New Image",
+            AddImage: "Add Tree Image",
             UpdateSapling: "Update Saplings",
             StartShift: "Start a Shift",
             Shifts: "Shifts",
@@ -344,7 +361,7 @@ export class Strings {
 
             //shift types
             UploadTree: "Add Sapling",
-            UpdatePlot: "Update Plot",
+            UpdatePlot: "Update Tree Plot",
             EnterShiftType: "Select Shift Type",
 
             // add tree
@@ -379,7 +396,7 @@ export class Strings {
             // home
             SyncData: "डेटा सिंक करा",
             AddNewTree: "नवीन झाड जोडा",
-            AddImage: "नवीन इमेज जोडा",
+            AddImage: "सॅपलिंग इमेज जोडा",
             UpdateSapling: "सॅपलिंग अपडेट करा",
             StartShift: "शिफ्ट सुरू करा",
             Shifts: "शिफ्ट",
@@ -390,7 +407,7 @@ export class Strings {
             //shifttypes
             UploadTree: "वृक्ष अपलोड", //manjur
             //UpdateImage: "प्रतिमा अद्यतनित करा", //manjur
-            UpdatePlot: "प्लॉट अपडेट करा", //manjur,
+            UpdatePlot: "सॅपलिंग प्लॉट अपडेट करा",
             EnterShiftType: "शिफ्ट प्रकार प्रविष्ट करा",
 
             // add tree

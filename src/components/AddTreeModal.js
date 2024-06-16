@@ -72,7 +72,7 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
     }
 
     const fetchTreeDetails = async (saplingId) => {
-        // console.log('fetching tree details');    
+      
         if (saplingId === null || saplingId === undefined) {
             ToastAndroid.show(`${Strings.alertMessages.UnableToFetch} ${saplingId} `, ToastAndroid.LONG);
             setModalVisible(false)
@@ -113,7 +113,6 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
     }
 
     const fetchDetails = async () => {
-        //console.log('useEffect is called');
 
         if (mode === treeFormModes.localEdit && saplingID) {
             console.log('fetching the tree details in CustomModal--- local edit');
@@ -151,7 +150,7 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
                 animationType="slide"
                 transparent={true}
                 visible={
-                    modalVisible //changesNeeded
+                    modalVisible 
                 }
                 onRequestClose={handleDetailsChanges}
             >
@@ -174,9 +173,9 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
                 animationType="slide"
                 transparent={true}
                 visible={
-                    modalVisible //changesNeeded
+                    modalVisible 
                 }
-                onRequestClose={handleDetailsChanges} // Add this line
+                onRequestClose={handleDetailsChanges} 
             >
 
                 <View style={customModalStyles.loadingView}>

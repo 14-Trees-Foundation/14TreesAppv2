@@ -16,7 +16,7 @@ const fetchTreeDetails = async (saplingId, setDetails, navigation, shiftID) => {
     const treeDetails = await Utils.fetchLocalTree(saplingId);
     //console.log("treeDetails: ", treeDetails, typeof saplingId);
     if (!treeDetails) {
-        navigation.goBack() //remains on the trees in shift screen
+        navigation.goBack();
         ToastAndroid.show(`${Strings.alertMessages.UnableToFetch} ${saplingId} `, ToastAndroid.LONG);
         return;
     }
@@ -59,7 +59,7 @@ export const EditLocalTree = ({ navigation, route }) => {
         console.log("inside local tree edit");
         const backAction = () => {
             navigation.goBack()
-            return true; // Prevent default behavior (exit app)
+            return true; 
         };
 
         const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);

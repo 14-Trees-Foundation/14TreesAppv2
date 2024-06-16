@@ -75,8 +75,6 @@ export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng }) => {
     const [lng, setLng] = useState(inLng);
     const { lightTheme } = useContext(GlobalContext);
 
-    //console.log("incoming lat and lng---", inLat, inLng, lat, lng);
-
     useEffect(() => {
         setLat(inLat);
         setLng(inLng);
@@ -93,7 +91,7 @@ export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng }) => {
 
 
     const CoordinatesDisplay = ({ latitude, longitude, title }) => {
-        //console.log("latitude---", latitude, 'longitude---', longitude);
+
         return (
             <View style = {coordinateSetterStyles.coordinatesView}>
                 <Text style={{...coordinateSetterStyles.coordinatesText(lightTheme),fontWeight: 'bold',fontSize: 18}}>

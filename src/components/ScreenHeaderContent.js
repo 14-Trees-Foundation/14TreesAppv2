@@ -18,7 +18,6 @@ const ScreenHeaderContent = () => {
             <TouchableOpacity
                 style={{ marginRight: 15 }}
                 onPress={() => {
-                    //console.log('changing the theme', lightTheme);
                     setToggleMode(!toggleMode);
                     setLightTheme(!lightTheme);
                 }}

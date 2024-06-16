@@ -7,9 +7,9 @@ import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { ScrollView, Text, TouchableOpacity, View, } from 'react-native';
 import { Utils } from '../services/Utils';
 
-const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
+const PlotShiftHeader = ({ onSetTime, handleModalChanges }) => {
 
-    const { treesPlanted, shiftTime, setShiftTime, plotSelected, lightTheme, playSound, setPlaySound } = useContext(GlobalContext);
+    const { treesPlanted, shiftTime, setShiftTime, plotSelected, newPlotSelected, lightTheme, playSound, setPlaySound } = useContext(GlobalContext);
 
     const [showGradient, setShowGradient] = useState(false);
 
@@ -76,11 +76,30 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
                     </TouchableOpacity>
                 }
 
+                <View style={{ flexDirection: 'row' , justifyContent : 'center' }}>
+                    <Icon name="arrow-down" size={15} color={lightTheme ? "#52525C" : 'black'} />
+                </View>
+                {
+                    newPlotSelected && <TouchableOpacity
+                        style={{ marginTop: 3 }}
+                        onPress={() => { handleModalChanges(); }
+                        }>
+
+                        <Text
+                            style={shiftHeaderStyles.plotName(lightTheme)}
+                            numberOfLines={1} // Limit to a single line
+                            ellipsizeMode="tail" // Truncate at the end with ellipsis
+                        >
+                             {newPlotSelected.name}
+                        </Text>
+
+                    </TouchableOpacity>
+                }
 
                 <View style={shiftHeaderStyles.shiftDetailsContainer}>
                     <View style={shiftHeaderStyles.shiftDetailsView}>
                         <View style={shiftHeaderStyles.innerView}>
-                            <View style={{ margin: 3, marginTop: 0,  }}>
+                            <View style={{ margin: 3, marginTop: 0 }}>
                                 <Icon name="clock" size={15} color={lightTheme ? "#52525C" : 'black'} />
                             </View>
                             <Text style={shiftHeaderStyles.shiftTime(lightTheme)}>
@@ -105,7 +124,7 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
                     <View style={shiftHeaderStyles.treeDetailsContainer(showGradient)}>
                         <View style={{ margin: 6, flex: 1, }}>
                             <View style={shiftHeaderStyles.iconContainer}>
-                                <Icon name="tree" size={32} color="white"  />
+                                <Icon name="tree" size={32} color="white" style={{ marginLeft: 7 }} />
                             </View>
                         </View>
                         <View style={{ flex: 1 }}>
@@ -121,4 +140,4 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
     )
 }
 
-export default ShiftHeader;
+export default PlotShiftHeader;

@@ -11,12 +11,9 @@ import { treeFormModes } from './TreeForm';
 import { Button } from 'react-native-paper';
 import { shiftTypes } from '../screens/Shifts';
 
-export const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchData}) => {
+export const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchData }) => {
 
-    //const { inSaplingId, inLng, inLat, inImages, inTreeType, inPlot, inUserId } = treeData;
-    // console.log("mode is: ", mode, inLat, inLng);
-    //console.log("inTreeTpe: ", inTreeType, "inPlot: ", inPlot);
-    const { setPlaySound, setShiftDone, setTreesPlanted, treesPlanted, plotSelected, shiftType, shiftID, } = useContext(GlobalContext)
+    const { setPlaySound, lightTheme, setTreesPlanted, treesPlanted, plotSelected, shiftType, shiftID, } = useContext(GlobalContext);
     const [saplingid, setSaplingId] = useState(null);
     const [lat, setlat] = useState(null);
     const [lng, setlng] = useState(null);
@@ -24,12 +21,10 @@ export const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, o
     const [image, setImage] = useState(null);
     const [showImage, setShowImage] = useState(false);
 
-    const [treeItems, setTreeItems] = useState([]);
-    //const [selectedPlot, setSelectedPlot] = useState(null);
     const [userId, setUserId] = useState(null);
 
-    const { lightTheme } = useContext(GlobalContext);
-    //console.log("--------------in addImageModal------------")
+    const [existsInLocalDB, setExistsInLocalDB] = useState(false);
+    const [existsInLiveDB, setExistsInLiveDB] = useState(true);
 
 
     useEffect(() => {
@@ -52,7 +47,6 @@ export const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, o
                 error: JSON.stringify(error),
                 stackTrace: stackTrace,
             };
-            //console.log("error phone: ", errorLog);
             await Utils.logException(JSON.stringify(errorLog));
         }
     }, []);
@@ -65,23 +59,15 @@ export const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, o
     const handleDeleteItem = async (name) => {
         console.log("successfully deleted the image");
         setShowImage(false);
-        //const newImages = images.filter((item) => item.name !== name);
         setImage(null);
     };
 
-
-
-    // const handleAddImage = async (image) => {
-    //     //console.log("handling setting image----");
-    //     setImage(image);
-    // }
 
     const pickImage = async (selectionId) => {
         Utils.startTask();
         let newImage = await Utils.getImage(true, selectionId);
         if (newImage === undefined) return;
         newImage = await Utils.formatImageForSapling(newImage, saplingid);
-        console.log("-------------newImage-----------",newImage.name,newImage.meta.capturetimestamp)
         setImage(newImage);
         setShowImage(true);
         Utils.stopTask();
@@ -93,6 +79,8 @@ export const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, o
         const endtime = Utils.getCurrentTime12Hr();
         const timetaken = Utils.formatTime(finalShiftData.current.seconds);
         const user_id = await Utils.getUserId();
+
+        console.log("finalShiftData---", finalShiftData);
 
         const sapling = {
             sapling_id: saplingId,
@@ -119,28 +107,36 @@ export const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, o
 
     }
 
+    const checkIfExists = async () => {
+
+        if (saplingid == null) {
+            return;
+        }
+        let existsLocally = await Utils.checkIfImageAddedAlready(saplingid);
+        console.log("checking existsLocally---", existsLocally);
+        if (existsLocally) {
+            setExistsInLocalDB(true);
+            return;
+        }
+        let existsInLive = await Utils.checkIfSaplingExistsInLiveDB(saplingid);
+        console.log("checking existsInLive---", existsInLive);
+        if (!existsInLive) {
+            setExistsInLiveDB(false);
+            return;
+        }
+    }
+
     const onSave = async () => {
-        //console.log("------------------sapling_id---",saplingid,"-----plot-----",plotSelected,"----Object.keys(plotSelected).length--",Object.keys(plotSelected).length)
-        //console.log("Sapling id value : ", saplingid)
-        let treesImages = await Utils.fetchTreesWithNewImage()
-        //console.log("-----------------treesImages--------------",treesImages)
+
         let existsLocally = await Utils.checkIfImageAddedAlready(saplingid);
 
         if (existsLocally) {
-            Alert.alert(
-                Strings.alertMessages.invalidSaplingId,
-                ' ' + Strings.alertMessages.imageAddedAlready + ' ' + Strings.labels.SaplingId + ' ' +
-                saplingid
-            );
+            Alert.alert(Strings.alertMessages.invalidSaplingId,
+                ' ' + Strings.alertMessages.imageAddedAlready + ' ' + Strings.labels.SaplingId + ' ' + saplingid);
             return;
         } else {
-            let existsInLiveDB = await Utils.checkIfSaplingExistsInLiveDB(
-                saplingid,
-            );
-            console.log(
-                '---------------does sapling exist in live---------',
-                existsInLiveDB,
-            );
+            let existsInLiveDB = await Utils.checkIfSaplingExistsInLiveDB(saplingid);
+
             if (!existsInLiveDB) {
                 Alert.alert(
                     Strings.alertMessages.invalidSaplingId,
@@ -155,7 +151,6 @@ export const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, o
 
         }
         if (saplingid === null || plotSelected === null || (plotSelected && Object.keys(plotSelected).length === 0)) {
-            //console.log("sd---", saplingid, selectedTreeType, plotSelected);
             Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
             return;
         }
@@ -186,9 +181,6 @@ export const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, o
                 await Utils.saveNewImage(tree)
                 await saveShiftsAndTreesToDB(tree.sapling_id);
 
-                const result = await Utils.fetchTreesWithNewImage();
-                //console.log("----------------just saved------------", result)
-
             } catch (error) {
                 console.error(error);
                 const stackTrace = error.stack;
@@ -197,7 +189,6 @@ export const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, o
                     error: JSON.stringify(error),
                     stackTrace: stackTrace
                 }
-                //console.log("error phone: ", errorLog);
                 await Utils.logException(JSON.stringify(errorLog));
             }
         };
@@ -208,9 +199,9 @@ export const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, o
             animationType="slide"
             transparent={true}
             visible={
-                modalVisible //changesNeeded
+                modalVisible
             }
-        //onRequestClose={handleDetailsChanges}
+            onRequestClose={() => setModalVisible(false)}
         >
             <ScrollView keyboardShouldPersistTaps="handled" style={{ ...commonStyles.borderedDisplay, ...customModalStyles.centeredView }}>
                 <View style={{ ...customModalStyles.modalView, marginTop: 4 }}>
@@ -220,13 +211,32 @@ export const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, o
                         style={[
                             commonStyles.txtInput,
                             treeFormModalStyles.saplingIdInput(lightTheme, saplingid),
+
                         ]}
                         placeholder={Strings.labels.SaplingId}
                         placeholderTextColor={'black'}
                         onChangeText={text => {
+                            setExistsInLocalDB(false);
+                            setExistsInLiveDB(true);
                             setSaplingId(text);
+
                         }}
+                        onBlur={checkIfExists}
                     />
+
+                    {saplingid &&
+                        existsInLocalDB ? (
+                        <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>
+                            {saplingid} {Strings.alertMessages.alreadyExists}
+                        </Text>
+                    ) : (
+                        saplingid && !existsInLiveDB && (
+                            <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>
+                                {saplingid} {Strings.alertMessages.doesNotExist}
+                            </Text>
+                        )
+                    )
+                    }
 
 
 
@@ -309,6 +319,6 @@ export const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, o
 
                 </View>
             </ScrollView>
-        </Modal>
+        </Modal >
     )
 }

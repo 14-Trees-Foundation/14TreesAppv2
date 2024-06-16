@@ -7,9 +7,8 @@ const About = ({ navigation }) => {
     useEffect(() => {
         const backAction = () => {
             navigation.goBack()
-            return true; // Prevent default behavior (exit app)
+            return true; 
         };
-
         const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
 
         return () => backHandler.remove();

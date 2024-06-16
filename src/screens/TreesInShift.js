@@ -52,7 +52,7 @@ const TreesInShift = ({ navigation, route }) => {
     const fetchTreesFromLiveShifts = async () => { //shiftId -> UUID
         if (shiftIDs.liveShiftId) {
             let { treesInLiveShifts, shiftType } = await Utils.fetchSaplingsFromLiveShiftDB(shiftIDs.liveShiftId);
-            console.log("----------shiftType-------", shiftType, treesInLiveShifts)
+            //console.log("----------shiftType-------", shiftType, treesInLiveShifts)
             setShiftTypeOfTrees(shiftType);
             return treesInLiveShifts;
         }
@@ -71,7 +71,6 @@ const TreesInShift = ({ navigation, route }) => {
                 return combinedList.find(item => item.sapling_id === id);
         });
 
-        // console.log("uniqueList---", uniqueList);
         setFinalList(uniqueList);
 
     }
@@ -79,8 +78,6 @@ const TreesInShift = ({ navigation, route }) => {
     const fetchData = async () => {
         const treesInLiveShifts = await fetchTreesFromLiveShifts();
         const treesInLocalShifts = await fetchTreesFromLocalDB();
-        // console.log(shiftType);
-
         await getCombinedList(treesInLiveShifts, treesInLocalShifts)
     };
 
@@ -135,7 +132,6 @@ const TreesInShift = ({ navigation, route }) => {
                 />
                 )}
             </View>
-
         </ScrollView>
     )
 }

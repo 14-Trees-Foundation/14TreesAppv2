@@ -24,7 +24,6 @@ const PlotSelectModal = ({ plotModalVisible, setPlotModalVisible, mode, onFetchD
     };
 
     useEffect(() => {
-        console.log("-------------in PlotSelect-------------", shiftType)
         if (plotModalVisible) {
             fetchDetails();
         }
@@ -101,9 +100,9 @@ const PlotSelectModal = ({ plotModalVisible, setPlotModalVisible, mode, onFetchD
             animationType="slide"
             transparent={true}
             visible={
-                plotModalVisible //changesNeeded
+                plotModalVisible
             }
-            onRequestClose={() => handlePlotChanges(0)} // Add this line
+            onRequestClose={() => handlePlotChanges(0)} 
         >
             <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ ...customModalStyles.plotSelectScrollView, marginTop: mode === treeFormModes.plotChange ? 205 : 80 }}>
                 <View style={customModalStyles.plotSelectOuterView}>

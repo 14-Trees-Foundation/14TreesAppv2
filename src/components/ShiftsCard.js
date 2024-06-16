@@ -64,7 +64,7 @@ const ShiftsCard = ({ item, disableHandlePress }) => {
                     <View style={ShiftsCardStyles.treeContainer}>
                         <View style={ShiftsCardStyles.iconContainer}>
                             <View style={ShiftsCardStyles.treeIcon}>
-                                <Icon name="tree" size={32} color="white" style={{ marginLeft: 5 }} />
+                                <Icon name="tree" size={32} color="white" />
                             </View>
                         </View>
 

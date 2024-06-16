@@ -18,7 +18,7 @@ const EditTreeScreen = ({ navigation }) => {
     useEffect(() => {
         const backAction = () => {
             navigation.goBack()
-            return true; // Prevent default behavior (exit app)
+            return true; 
         };
 
         const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
@@ -76,7 +76,6 @@ const EditTreeScreen = ({ navigation }) => {
         const response = await DataService.updateSapling(adminID, requestData);
 
         if (!response) {
-            //show toast cannot update the sapling id
             let toastmsg = Strings.alertMessages.FailedUpdateSapling + saplingid + Strings.alertMessages.ContactExpert;
             ToastAndroid.show(toastmsg, ToastAndroid.LONG);
             return;
@@ -88,9 +87,6 @@ const EditTreeScreen = ({ navigation }) => {
         setNewImages([]);
         setDeletedImages([]);
         setSaplingid(null);
-        //Format saplingData using tree,newIamges, deletedImages.
-        // Dataservice.updateSapling call...
-        // check reply.
     }
 
     const fetchTreeDetails = async () => {
@@ -115,18 +111,6 @@ const EditTreeScreen = ({ navigation }) => {
         for (let image of detailsForTreeForm.inImages) {
             image.data = await DataService.fileURLToBase64(image.name);
         }
-        /*
-         {
-             data: generate on spot,
-             name: s3url,
-             meta: {
-                 capturetimestamp: timestamp,
-                 remark: 'default remark',
-             }
-         }
-        */
-        //   console.log(detailsForTreeForm);
-        //   detailsForTreeForm.inImages = [];
 
         detailsForTreeForm.inLat = 0;
         detailsForTreeForm.inLng = 0;
@@ -138,9 +122,6 @@ const EditTreeScreen = ({ navigation }) => {
         detailsForTreeForm.inTreeType = treeType;
         detailsForTreeForm.inPlot = plot;
         detailsForTreeForm.inUserId = treeDetails.user_id;
-        // detailsForTreeForm.inShiftId = treeDetails.shiftID;
-        // detailsForTreeForm.inSequenceNo = treeDetails.sequenceNo
-        //console.log("han bhai---",detailsForTreeForm.inShiftId, detailsForTreeForm.inSequenceNo, detailsForTreeForm.inLat, detailsForTreeForm.inLng);
         setDetails(detailsForTreeForm);
     }
 
@@ -150,8 +131,6 @@ const EditTreeScreen = ({ navigation }) => {
                 mode={treeFormModes.remoteEdit}
                 treeData={details}
                 onCancel={() => setDetails(null)}
-                // updateUserId={false}
-                // updateLocation={false}
                 onVerifiedSave={updateDetails}
                 onNewImage={(image) => { setNewImages([...newImages, image]); }}
                 onDeleteImage={(name) => { setDeletedImages([...deletedImages, name]); }}

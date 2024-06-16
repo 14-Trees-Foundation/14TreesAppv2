@@ -10,7 +10,7 @@ import GlobalContext from '../context/GlobalContext ';
 export const TreeRow = ({ tree1, tree2, tree3, tree4, shiftID, modalMode, shiftTypeOfTrees, handleSaplingChanges }) => {
     const navigation = useNavigation();
 
-    console.log("----------shiftTypeOfTrees----------", shiftTypeOfTrees, shiftID)
+    //console.log("----------shiftTypeOfTrees----------", shiftTypeOfTrees, shiftID)
     const { treesPlanted, setTreesPlanted } = useContext(GlobalContext);
 
     const renderTree = (tree) => {
@@ -41,7 +41,6 @@ export const TreeRow = ({ tree1, tree2, tree3, tree4, shiftID, modalMode, shiftT
         };
 
         const handleDeleteItem = async () => {
-            // console.log("modalmode---", modalMode, tree.sapling_id);
             await Utils.deleteSaplingUpdatePlotDB(tree.sapling_id);
             await Utils.deleteSaplingInShiftDB(tree.sapling_id, shiftID);
             handleSaplingChanges();

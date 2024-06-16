@@ -18,14 +18,13 @@ const shiftTypesObject = {
 
 export class Utils {
     static localdb = new LocalDatabase();
-    //treeTypes and PLots
+   
     static async getLocalTreeTypesAndPlots() {
         let treeTypes = await this.localdb.getAllTreeTypes();
         let plots = await this.localdb.getAllPlots();
         return { treeTypes, plots };
     }
 
-    //Manjur
     static async logException(logs) {
         await this.localdb.logExceptionLocalDB(logs);
         return;
@@ -138,8 +137,6 @@ export class Utils {
                 remark: images[index].meta.remark,
                 timestamp: images[index].meta.capturetimestamp,
             };
-
-            //namrata - delete previous image first
             await this.localdb.saveTreeImages(element);
         }
     }
@@ -354,16 +351,10 @@ export class Utils {
         console.log("--------------shiftsForCurrentUser---------", shiftsForCurrentUser.data)
     }
 
-    //namrata
     static async deleteSyncedShiftsBasedOnSaplings(shifts) {
         console.log("-------------type of shifts-------------", shifts)
         await this.localdb.deleteSyncedShifts(shifts)
     }
-
-    //not needed for my code
-    // static async deleteSyncedSaplingsInLocalShifts(saplings) {
-    //     await this.localdb.deleteSyncedSaplingsInLocalShifts(saplings);
-    // }
 
     static async deletePlotSaplings() {
         await this.localdb.deletePlotSaplings();
@@ -651,8 +642,8 @@ export class Utils {
         const pendingTrees = (await Utils.fetchTreesFromLocalDB(0)).length;
         const uploadedTrees = (await Utils.fetchTreesFromLocalDB(1)).length;
 
-        const treesWithNewImages = (await this.localdb.getUnUploadedTreesWithNewImage(0)).length;
-        const uploadedImages = (await this.localdb.getUnUploadedTreesWithNewImage(1)).length;
+        const treesWithNewImages = (await Utils.fetchTreesWithNewImage(0)).length;
+        const uploadedImages = (await Utils.fetchTreesWithNewImage(1)).length;
 
         //for trees With New Plot
         const pendingTreesPlots = (await Utils.fetchTreesWithNewPlot(0)).length;
@@ -681,24 +672,24 @@ export class Utils {
             console.log("combined one---", combinedUploadedSaplings);
 
             //include only thgose saplings which are uploaded
-            shifts = shifts.map(shift => {
-                const filteredSaplings = shift.saplings.filter(sapling =>
-                    combinedUploadedSaplings.includes(sapling.sapling_id)
-                );
+            // shifts = shifts.map(shift => {
+            //     const filteredSaplings = shift.saplings.filter(sapling =>
+            //         combinedUploadedSaplings.includes(sapling.sapling_id)
+            //     );
 
-                // Return a new shift object with the filtered saplings
-                return {
-                    ...shift,
-                    saplings: filteredSaplings
-                };
-            });
+            //     // Return a new shift object with the filtered saplings
+            //     return {
+            //         ...shift,
+            //         saplings: filteredSaplings
+            //     };
+            // });
 
-            shifts = shifts.filter(item => item.saplings && item.saplings.length > 0);
+            // shifts = shifts.filter(item => item.saplings && item.saplings.length > 0);
 
             console.log("-----saplings in shift---------", shifts)
 
             const response = await DataService.uploadShifts(shifts);
-            //console.log("response from syncShifts---", response);
+            console.log("response from syncShifts---", response , response?.["dataSaveError"].keyPattern, "---", response?.["dataSaveError"].keyValue);
             let failures = await Utils.setShiftsSyncStatus(response, shifts);
             return { shiftDetails: response, failures: failures };
 
@@ -921,13 +912,13 @@ export class Utils {
                 await this.localdb.updateTreePlotUpload(tree.sapling_id);
             }
             else {
-                failures.push(tree.sapling_id);
+                failures.push(status.message);
                 //delete from local db and show toast
                 // await Utils.deleteUpdateTreesPlots(tree.sapling_id);
                 // await this.deleteSaplingShiftLocalDB(tree.sapling_id);
                 //ToastAndroid.show(status.message, ToastAndroid.LONG);
-                let msg = `${status.message} ${tree.sapling_id}`
-                Alert.alert(Strings.alertMessages.SyncFailure, msg);
+                // let msg = `${status.message} ${tree.sapling_id}`
+                // Alert.alert(Strings.alertMessages.SyncFailure, msg);
             }
         }
         return failures;
@@ -1156,7 +1147,6 @@ export class Utils {
         };
 
         try {
-            //namrata
             let response = {}
             if (selectionId === 0) {
                 response = await launchCamera(options);

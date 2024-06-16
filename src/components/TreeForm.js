@@ -54,10 +54,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         }
 
         if (mode === treeFormModes.remoteEdit) {
-            console.log("-- now mode is remote edit---");
-            console.log("treeData.image.length-- ", treeData.inImages.length);
-            //setImages(treeData.inImages);
-
             if (treeData.inImages.length === 0) {
                 setDisableButton(false);
             } else {
@@ -102,7 +98,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         }
 
         if (onDeleteImage) {
-            console.log("----new set images-----", newImages, "-----onDeleteImage-----", onDeleteImage, "------exisitingImages-----", exisitingImages)
             await onDeleteImage(name);
         }
     };
@@ -113,8 +108,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
             await onNewImage(image);
         }
         setImages([image]);
-
-        //setImages([...images, image]);
     }
 
     const pickImage = async (selectionId) => {
@@ -129,10 +122,8 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
 
 
     const onSave = async () => {
-        console.log("Sapling id value : ", saplingid)
 
         if (mode === treeFormModes.localEdit && inSaplingId !== saplingid) {
-            console.log("-------------localEdit in TreeForm------------")
             let existsLocally = await Utils.checkIfSaplingExistsLocally(saplingid);
 
             if (existsLocally) {
@@ -176,14 +167,12 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                 console.log("final tree data----", tree);
                 setSaplingId(null);
                 setSelectedTreeType(null);
-
-                //setSelectedPlot({}); //to default the plot
                 setShowImage(false)
                 setImages([]);
                 setlat(0);
                 setlng(0);
                 await onVerifiedSave(tree, images);
-                // setLocalDataChanged(true);
+
             } catch (error) {
                 console.error(error);
                 const stackTrace = error.stack;
@@ -192,7 +181,6 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     error: JSON.stringify(error),
                     stackTrace: stackTrace
                 }
-                //console.log("error phone: ", errorLog);
                 await Utils.logException(JSON.stringify(errorLog));
             }
         };
@@ -229,12 +217,8 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                         />
 
 
-                    </View>
-                )
+                    </View>)
                 }
-
-
-
 
                 <CustomDropdown
                     initItem={selectedTreeType}

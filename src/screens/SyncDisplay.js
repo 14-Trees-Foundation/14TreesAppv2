@@ -86,7 +86,9 @@ const SyncDisplay = ({ navigation }) => {
 
     console.log("combinedUploadedSaplings----", combinedUploadedSaplings);
 
-    if ((shiftsCount && shiftsCount.pending == 0) || combinedUploadedSaplings.length === 0) {
+    if ((shiftsCount && shiftsCount.pending == 0) 
+      //|| combinedUploadedSaplings.length === 0
+    ) {
       // ToastAndroid.show(
       //   Strings.alertMessages.NothingToSync,
       //   ToastAndroid.LONG,
@@ -116,9 +118,10 @@ const SyncDisplay = ({ navigation }) => {
 
   const uploadTrees = async () => {
     if (treeCounts && treeCounts.pending.treesUpload === 0) {
-      //ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
       return;
     }
+
+    ToastAndroid.show(Strings.alertMessages.SyncingTrees, ToastAndroid.SHORT);
 
     let result = await Utils.upload(setProgress);
     let uploadedSaplings = result.uploadedSaplings;
@@ -136,16 +139,11 @@ const SyncDisplay = ({ navigation }) => {
 
   const uploadImages = async () => {
     if (treeCounts && treeCounts.pending.imagesUpload === 0) {
-      ToastAndroid.show(
-        Strings.alertMessages.NothingToSync,
-        ToastAndroid.LONG,
-      );
       return;
     }
 
+    ToastAndroid.show(Strings.alertMessages.SyncingImageTrees, ToastAndroid.SHORT);
     let result = await Utils.uploadNewImages(setProgress);
-
-    await Utils.fetchTreesWithNewImage();
     let uploadedImageSaplings = result.uploadedImageSaplings
     let failures = result.failures
     //console.log("----------------treesinNewImageTable-----------", treesinNewImageTable[0].uploaded)
@@ -161,16 +159,14 @@ const SyncDisplay = ({ navigation }) => {
   const uploadTreesPlots = async () => {
 
     if (treeCounts && treeCounts.pending.plotUpload === 0) {
-      // ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
       return;
     }
 
-
+    ToastAndroid.show(Strings.alertMessages.SyncingPlotTrees, ToastAndroid.SHORT);
     let result = await Utils.uploadTreesPlots(setProgress); //plotUpload
 
     let uploadedSaplings = result.uploadedSaplings;
-    let failures = result.failures
-    console.log("----------------uploadedSaplings-ni Syncdisplay-----------", uploadedSaplings, failures);
+    let failures = result.failures;
     setFailedPlotTrees(failures);
     setProgress(1);
     updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
@@ -269,14 +265,6 @@ const SyncDisplay = ({ navigation }) => {
     }
   };
 
-  //  const allFailedTrees = [
-  //   ...failedTrees.map(item => ({ ...item, type: 'failedTree' })),
-  //   ...failedPlotTrees.map(item => ({ ...item, type: 'failedPlotTree' })),
-  //   ...failedImagesTrees.map(item => ({ ...item, type: 'failedImagesTree' })),
-  //   ...failedShifts.map(item => ({ sapling_id: item, type: 'failedShift' })),
-  // ];
-
-
   return (
     <View style={{ backgroundColor: 'white', height: '100%' }}>
       <View style={{ marginBottom: 30 }}>
@@ -290,17 +278,32 @@ const SyncDisplay = ({ navigation }) => {
 
       <View style={{ ...commonStyles.borderedDisplay, margin: 20 }}>
         {treeCounts && (
-          <View style={syncDisplayStyles.syncDetailsContainer}>
-            <Text style={syncDisplayStyles.syncText(lightTheme)}>
-              {Strings.messages.pending}: {treeCounts.pending.treesUpload + treeCounts.pending.plotUpload + treeCounts.pending.imagesUpload}
-            </Text>
-            <Text style={syncDisplayStyles.syncText(lightTheme)}>
-              {treeCounts.pending.treesUpload + treeCounts.pending.plotUpload + treeCounts.pending.imagesUpload > 0 ? '❗' : '✅'}
-            </Text>
-            <Text style={syncDisplayStyles.syncText(lightTheme)}>
-              {Strings.messages.synced}: {treeCounts.uploaded}
-            </Text>
+          <View>
+            <View style={syncDisplayStyles.syncDetailsContainer}>
+              <Text style={syncDisplayStyles.syncText(lightTheme)}>
+                {Strings.messages.pending}:
+              </Text>
+              <Text style={syncDisplayStyles.syncText(lightTheme)}>
+                {treeCounts.pending.treesUpload + treeCounts.pending.plotUpload + treeCounts.pending.imagesUpload > 0 ? '❗' : '✅'}
+              </Text>
+              <Text style={syncDisplayStyles.syncText(lightTheme)}>
+                {Strings.messages.synced}: {treeCounts.uploaded}
+              </Text>
+            </View>
+
+            <View style={{ margin: 0, paddingLeft: 27 }}>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium" }}>
+                {Strings.messages.pendingTrees}: {treeCounts.pending.treesUpload}
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium" }}>
+                {Strings.messages.pendingImages}: {treeCounts.pending.imagesUpload}
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium" }}>
+                {Strings.messages.pendingPlotTrees}: {treeCounts.pending.plotUpload}
+              </Text>
+            </View>
           </View>
+
         )}
 
         <View style={syncDisplayStyles.buttonWifiContainer}>
@@ -341,7 +344,6 @@ const SyncDisplay = ({ navigation }) => {
             data={failedTrees}
             keyExtractor={item => item.sapling_id ? item.sapling_id : item}
             renderItem={({ item, index }) => {
-
               return (
                 <Text style={commonStyles.text5}>
                   {index + 1}. {Strings.messages.SaplingNo} : {' '}
@@ -355,7 +357,7 @@ const SyncDisplay = ({ navigation }) => {
           <FlatList
             ListHeaderComponent={() => (
               <Text style={commonStyles.text5}>
-                {Strings.messages.failedToUpload} {failedPlotTrees.length}{' '}
+                {Strings.messages.failedToUpdate} {failedPlotTrees.length}{' '}
                 {Strings.messages.trees}:{' '}
               </Text>
             )}
@@ -365,8 +367,7 @@ const SyncDisplay = ({ navigation }) => {
 
               return (
                 <Text style={commonStyles.text5}>
-                  {index + 1}. {Strings.messages.SaplingNo} : {' '}
-                  {item.sapling_id ? item.sapling_id : item}
+                  {index + 1}. {item.sapling_id ? item.sapling_id : item}
                 </Text>
               );
             }}
@@ -376,7 +377,7 @@ const SyncDisplay = ({ navigation }) => {
           <FlatList
             ListHeaderComponent={() => (
               <Text style={commonStyles.text5}>
-                {Strings.messages.failedToUpload} {failedImagesTrees.length}{' '}
+                {Strings.messages.couldNotAdd} {failedImagesTrees.length}{' '}
                 {Strings.messages.trees}:{' '}
               </Text>
             )}
@@ -397,7 +398,7 @@ const SyncDisplay = ({ navigation }) => {
           <FlatList
             ListHeaderComponent={() => (
               <Text style={commonStyles.text5}>
-                {Strings.messages.failedToUpload} {failedTrees.length}{' '}
+                {Strings.messages.failedToUpload} {failedShifts.length}{' '}
                 {`${Strings.messages.Shift}s`}:{' '}
               </Text>
             )}
