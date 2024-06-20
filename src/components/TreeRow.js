@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { View, Text, TouchableOpacity, ToastAndroid } from 'react-native';
+import { View, Text, TouchableOpacity, ToastAndroid, Alert } from 'react-native';
 import { Strings } from '../services/Strings';
 import { commonStyles, TreeRowStyles } from '../services/Styles';
 import { useNavigation } from '@react-navigation/native';
@@ -7,10 +7,10 @@ import { shiftTypes } from '../screens/Shifts';
 import { Utils } from '../services/Utils';
 import GlobalContext from '../context/GlobalContext ';
 
-export const TreeRow = ({ tree1, tree2, tree3, tree4, shiftID, modalMode, shiftTypeOfTrees, handleSaplingChanges }) => {
+export const TreeRow = ({ tree1, tree2, tree3, tree4, shiftID, modalMode, shiftTypeOfTrees, handleSaplingChanges, plotSelected }) => {
     const navigation = useNavigation();
 
-    //console.log("----------shiftTypeOfTrees----------", shiftTypeOfTrees, shiftID)
+    console.log("----------shiftTypeOfTrees----------", shiftTypeOfTrees, shiftID, modalMode)
     const { treesPlanted, setTreesPlanted } = useContext(GlobalContext);
 
     const renderTree = (tree) => {
@@ -26,23 +26,59 @@ export const TreeRow = ({ tree1, tree2, tree3, tree4, shiftID, modalMode, shiftT
             ? { ...commonStyles.text, ...TreeRowStyles.uploadedTextStyle }
             : { ...commonStyles.text, ...TreeRowStyles.textStyle, color: 'black' };
 
-        const handlePress = () => {
+        const handleDeleteItemAddImage = async (saplingID) => {
+            console.log("sapling id---", saplingID);
+            await Utils.deleteAddTreeImagesBySaplingId(saplingID);
+            await Utils.deleteSaplingInShiftDB(saplingID, shiftID);
+            handleSaplingChanges();
+            setTreesPlanted(treesPlanted - 1);
+        }
+
+        const handlePress = async () => {
 
             if (modalMode) {
                 handleSaplingChanges(tree.sapling_id);
             } else {
 
-                navigation.navigate(
-                    Strings.screenNames.getString('EditLocalTree', Strings.english),
-                    { sapling_id: tree.sapling_id, shiftID }
-                );
+                if (shiftTypeOfTrees === shiftTypes.addSapling) {
+                    navigation.navigate(
+                        Strings.screenNames.getString('EditLocalTree', Strings.english),
+                        { sapling_id: tree.sapling_id, shiftID }
+                    );
 
+                } else if (shiftTypeOfTrees === shiftTypes.addImage) {
+                    //add feature/check to delete dead sapling
+                    const treeDetails = await Utils.fetchLocalTreeImage(tree.sapling_id);
+
+                    if (!treeDetails || treeDetails?.inActive === 1) {
+
+                        Alert.alert(Strings.alertMessages.MarkedSaplingDead, Strings.alertMessages.ConfirmDeleteEntry, [
+                            {
+                                text: Strings.alertMessages.Yes,
+                                onPress: () => handleDeleteItemAddImage(tree.sapling_id)
+                            },
+                            {
+                                text: Strings.alertMessages.No,
+                                onPress: () => null
+                            }
+                        ])
+                        return;
+                    }
+
+                    navigation.navigate(
+                        Strings.screenNames.getString('EditLocalAddImage', Strings.english),
+                        {
+                            sapling_id: tree.sapling_id, shiftID,
+                            plotSelected: plotSelected
+                        }
+                    );
+                }
             }
         };
 
-        const handleDeleteItem = async () => {
-            await Utils.deleteSaplingUpdatePlotDB(tree.sapling_id);
-            await Utils.deleteSaplingInShiftDB(tree.sapling_id, shiftID);
+        const handleDeleteItem = async (saplingid) => {
+            await Utils.deleteSaplingUpdatePlotDB(saplingid);
+            await Utils.deleteSaplingInShiftDB(saplingid, shiftID);
             handleSaplingChanges();
             setTreesPlanted(treesPlanted - 1);
         }
@@ -54,10 +90,16 @@ export const TreeRow = ({ tree1, tree2, tree3, tree4, shiftID, modalMode, shiftT
                 return;
             }
 
-            Utils.confirmAction(
-                () => handleDeleteItem(tree.sapling_id),
-                Strings.alertMessages.confirmDeleteSapling,
-            )
+            Alert.alert("", Strings.alertMessages.ConfirmDeleteEntry, [
+                {
+                    text: Strings.alertMessages.Yes,
+                    onPress: () => handleDeleteItem(tree.sapling_id)
+                },
+                {
+                    text: Strings.alertMessages.No,
+                    onPress: () => null
+                }
+            ])
         }
 
         const onPress = () => {
@@ -79,7 +121,7 @@ export const TreeRow = ({ tree1, tree2, tree3, tree4, shiftID, modalMode, shiftT
                 }
 
                 {shiftTypeOfTrees === shiftTypes.addImage &&
-                    (<TouchableOpacity disabled={tree.uploaded ? false : true} onPress={onPress}>
+                    (<TouchableOpacity onPress={onPress}>
                         <Text style={textStyle} numberOfLines={1} ellipsizeMode="tail">
                             {tree.sapling_id}
                         </Text>

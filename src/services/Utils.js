@@ -8,6 +8,7 @@ import { Strings } from "./Strings";
 import ImageResizer from "react-native-image-resizer";
 import RNFS from 'react-native-fs';
 import ReactNativeForegroundService from '@supersami/rn-foreground-service';
+import { shiftTypes } from "../screens/Shifts";
 const MIN_BATCH_SIZE = 5
 
 const shiftTypesObject = {
@@ -16,9 +17,14 @@ const shiftTypesObject = {
     updatePlot: 2
 }
 
+export const addTreeImageModes = {
+    addImage: 0,
+    editImage: 1,
+}
+
 export class Utils {
     static localdb = new LocalDatabase();
-   
+
     static async getLocalTreeTypesAndPlots() {
         let treeTypes = await this.localdb.getAllTreeTypes();
         let plots = await this.localdb.getAllPlots();
@@ -73,7 +79,10 @@ export class Utils {
     static async deleteTreeAndImages(saplingId) {
         await this.localdb.deleteTreeImages(saplingId);
         await this.localdb.deleteTree(saplingId);
-        return;
+    }
+
+    static async deleteAddTreeImagesBySaplingId(saplingID) {
+        await this.localdb.deleteAddTreeImagesBySaplingId(saplingID)
     }
 
     static async deleteSaplingShiftLocalDB(saplingId, shiftID) {
@@ -87,6 +96,12 @@ export class Utils {
             return await this.formatLocalTreeToJSON(results[0]);
         }
         return null;
+    }
+
+    static async fetchLocalTreeImage(saplingId) {
+        console.log("fetching for sapling--", saplingId);
+        const results = await this.localdb.getTreeImageBySaplingID(saplingId);
+        return results[0];
     }
 
     static async updateSaplingInShiftDB(newSaplingId, inSaplingId, shiftID) {
@@ -171,34 +186,36 @@ export class Utils {
     static async fetchTreesWithNewImage(uploaded) {
         let res;
         if (uploaded !== undefined) {
-            res = await this.localdb.getUnUploadedTreesWithNewImage(uploaded);
+            res = await this.localdb.getTreesWithNewImage(uploaded);
             //console.log("----------------unuploaded trees with images------------",res)
 
         } else {
             res = await this.localdb.getAllTreesWithNewImage();
         }
+
         let final = [];
 
         for (let index = 0; index < res.length; index++) {
-            //console.log("-------------res[index]---------------",Object.keys(res[index]))
+            //console.log("-------------res[index]---------------",res[index])
             let tree = {
                 sapling_id: res[index].sapling_id,
                 uploaded: res[index].uploaded,
                 user_id: res[index].user_id,
                 lat: res[index].lat,
                 lng: res[index].lng,
+                inActive: res[index].inActive,
                 image: {
-                    name: res[index].imageid,
-                    data: res[index].image,
+                    name: res[index]?.imageid,
+                    data: res[index]?.image,
                     meta: {
-                        remark: res[index].remark.replace("''", "'"),
+                        remark: res[index]?.remark?.replace("''", "'"),
                         capturetimestamp: res[index].timestamp,
                     },
                 }
             }
-            final.push(tree)
+            final.push(tree);
         }
-        //console.log("----------------res------------", final)
+
         return final;
 
     }
@@ -261,7 +278,6 @@ export class Utils {
     }
 
     static async createLocalTablesIfNeeded() {
-        // console.log('creating tables if needed.', this.localdb)
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
         await this.localdb.createSaplingTbl();
@@ -635,7 +651,14 @@ export class Utils {
 
 
     static async fetchTreesWithNewPlot(upload) {
-        return await this.localdb.getTreesWithNewPlots(upload);
+        let res;
+        if (upload !== undefined) {
+            res = await this.localdb.getTreesWithNewPlots(upload);
+
+        } else {
+            res = await this.localdb.getAllTreesWithNewPlots();
+        }
+        return res;
     }
 
     static async getTreesCounts() {
@@ -664,39 +687,95 @@ export class Utils {
         return { pending, uploaded };
     }
 
+    static async fetchTreesAddSaplings() {
+        let res = await this.localdb.getAllTrees();
+        return res;
+    }
 
+    static async syncShifts(onProgress = undefined) {
+        let shifts = await Utils.getShiftsIDLocalDB(0); //not uploaded.
 
-    static async syncShifts(combinedUploadedSaplings) {
-        try {
-            let shifts = await Utils.getShiftsIDLocalDB(0); //get not uploaded shifts
-            console.log("combined one---", combinedUploadedSaplings);
+        for (const shift of shifts) {
+            const shiftType = shiftTypesObject[shift.shifttype];
+            let saplingsInShift = shift.saplings;
+            let saplingsFromLocalTable;
 
-            //include only thgose saplings which are uploaded
-            // shifts = shifts.map(shift => {
-            //     const filteredSaplings = shift.saplings.filter(sapling =>
-            //         combinedUploadedSaplings.includes(sapling.sapling_id)
-            //     );
+            if (shiftType === shiftTypes.addSapling) {
+                saplingsFromLocalTable = await Utils.fetchTreesAddSaplings();
+            } else if (shiftType === shiftTypes.addImage) {
+                saplingsFromLocalTable = await Utils.fetchTreesWithNewImage();
+            } else if (shiftType === shiftTypes.updatePlot) {
+                saplingsFromLocalTable = await Utils.fetchTreesWithNewPlot(0)
+            }
 
-            //     // Return a new shift object with the filtered saplings
-            //     return {
-            //         ...shift,
-            //         saplings: filteredSaplings
-            //     };
-            // });
+            //console.log(shiftType, "saplingsFromLocalTable---", saplingsFromLocalTable);
 
-            // shifts = shifts.filter(item => item.saplings && item.saplings.length > 0);
+            saplingsInShift = saplingsInShift.filter(saplingId => {
+                for (const sapling of saplingsFromLocalTable) {
+                    if ((sapling.sapling_id === saplingId.sapling_id && sapling.uploaded === 0)) {
+                        console.log("here---", sapling.sapling_id, saplingId.sapling_id, sapling.uploaded);
+                        //skip this sapling don't add to saplingsInShift and continue the loop 
+                        return false;
+                    }
+                }
+                return true;
 
-            console.log("-----saplings in shift---------", shifts)
+            });
 
-            const response = await DataService.uploadShifts(shifts);
-            console.log("response from syncShifts---", response , response?.["dataSaveError"].keyPattern, "---", response?.["dataSaveError"].keyValue);
-            let failures = await Utils.setShiftsSyncStatus(response, shifts);
-            return { shiftDetails: response, failures: failures };
-
-        } catch (error) {
-            console.log("happended while sync shifts---", error);
+            console.log("filtered saplingsInShift---", saplingsInShift);
+            shift.saplings = saplingsInShift;
         }
 
+        shifts = shifts.filter(item => item.saplings && item.saplings.length > 0);
+
+        console.log("filtered shifts to sync", shifts);
+
+        const failures = [];
+        let shiftResponse;
+        for (let i = 0; i < shifts.length; i += MIN_BATCH_SIZE) {
+            shiftResponse = await Utils.batchUploadShifts(shifts.slice(i, i + MIN_BATCH_SIZE));
+            console.log("shiftResponse---", shiftResponse);
+            let batchFailures = shiftResponse.failures;
+            failures.push(...batchFailures);
+            if (onProgress) {
+                onProgress(i / shifts.length);  
+            }
+        }
+        console.log("failed shifts---", failures);
+        await Utils.setLastSyncDateNow();
+
+        // if (failures.length === 0) {
+        //     Alert.alert(Strings.alertMessages.SyncSuccess, Strings.alertMessages.CheckLocalList);
+        // }
+        // else {
+        //     //change to sync failure for sync
+        //     Alert.alert(Strings.alertMessages.SyncFailureForShifts, Strings.alertMessages.ContactExpert);
+        // }
+
+        return { shiftDetails: shiftResponse.response, failures: failures };
+    }
+
+    static async batchUploadShifts(batch) {
+        let failures = batch;
+        let response
+        try {
+            response = await DataService.uploadShifts(batch);
+            if (response) {
+                failures = await Utils.setShiftsSyncStatus(response, batch);
+            }
+        }
+        catch (error) {
+            console.error(error);
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: "happened while trying to batchUploadShifts(inside Utils)",
+                error: JSON.stringify(error),
+                stackTrace: stackTrace
+            }
+            await this.logException(JSON.stringify(errorLog));
+        }
+
+        return { response: response, failures: failures };
     }
 
     static async setShiftsSyncStatus(statuses, shifts) {
@@ -742,13 +821,10 @@ export class Utils {
 
     static async batchUploadImages(batch) {
         let failures = batch;
-        //console.log("-------image batch before sync------------", typeof batch[0].image);
         try {
             let response = await DataService.uploadNewImages(batch);
-            //console.log("----------response from uploadImages:--------- ", response);
             if (response) {
                 failures = await Utils.setImagesSyncStatus(response, batch);
-                //console.log('batch failures: ', failures);
             }
         }
         catch (error) {
@@ -787,7 +863,7 @@ export class Utils {
             }
             await this.logException(JSON.stringify(errorLog));
         }
-        //console.log("failed upload response: ---", failures);
+        console.log("failed upload response: ---", failures);
         return failures;
     }
 
@@ -893,9 +969,13 @@ export class Utils {
         else {
             Alert.alert(Strings.alertMessages.SyncFailure, Strings.alertMessages.ContactExpert);
         }
+
         const finalSaplingIds = final.map(item => item.sapling_id);
-        const uploadedSaplings = finalSaplingIds.filter(sapling_id => !failures.includes(sapling_id));
-        return { failures: failures, uploadedSaplings: uploadedSaplings };
+        const failedMessages = failures.map(item => item.message);
+        const failedSaplingIds = failures.map(item => item.sapling_id);
+        const uploadedSaplings = finalSaplingIds.filter(sapling_id => !failedSaplingIds.includes(sapling_id));
+
+        return { failures: failedMessages, uploadedSaplings: uploadedSaplings };
     };
 
 
@@ -912,13 +992,10 @@ export class Utils {
                 await this.localdb.updateTreePlotUpload(tree.sapling_id);
             }
             else {
-                failures.push(status.message);
-                //delete from local db and show toast
-                // await Utils.deleteUpdateTreesPlots(tree.sapling_id);
-                // await this.deleteSaplingShiftLocalDB(tree.sapling_id);
-                //ToastAndroid.show(status.message, ToastAndroid.LONG);
-                // let msg = `${status.message} ${tree.sapling_id}`
-                // Alert.alert(Strings.alertMessages.SyncFailure, msg);
+                failures.push({
+                    sapling_id: tree.sapling_id,
+                    message: status.message
+                });
             }
         }
         return failures;
@@ -991,6 +1068,7 @@ export class Utils {
         }
         return final;
     }
+
     static async formatLocalTreeToJSON(element) {
         // if lat or lng is null, change it to 0
         if (element.lat === 'undefined') {
@@ -1207,7 +1285,11 @@ export class Utils {
 
 
     }
+
+
+
     static async formatImageForSapling(image, saplingid) {
+        //console.log("image---", image);
         let newImage = { ...image }
         newImage.saplingid = saplingid;
         const timestamp = newImage.meta.capturetimestamp;

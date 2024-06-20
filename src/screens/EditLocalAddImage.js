@@ -1,45 +1,85 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
-import { Alert, ScrollView, Text, TextInput, Image, View, ToastAndroid, Modal, TouchableOpacity } from 'react-native';
-import { Strings } from "../services/Strings";
-import { Utils } from "../services/Utils";
-import { CoordinateSetter } from "./CoordinateSetter";
-import { CustomDropdown } from "./CustomDropdown";
-import { CustomButtonStyles, commonStyles, customModalStyles, treeFormModalStyles } from "../services/Styles";
+import React, { useState, useEffect, useCallback, useContext } from 'react';
+import { Strings } from '../services/Strings';
+import { Utils } from '../services/Utils';
+import LoadingScreen from '../screens/LoadingScreen';
+import { Alert, ScrollView, Text, TextInput, Image, View, ToastAndroid, Modal, TouchableOpacity, BackHandler } from 'react-native';
+import { CoordinateSetter } from "../components/CoordinateSetter";
+import { CustomButtonStyles, commonStyles, customModalStyles, treeFormModalStyles, treeFormStyles } from "../services/Styles";
 import Icon from 'react-native-vector-icons/Ionicons';
-import GlobalContext from '../context/GlobalContext ';
 import { Button } from 'react-native-paper';
-import { shiftTypes } from '../screens/Shifts';
-import { Checkbox } from 'react-native-paper';
+import GlobalContext from '../context/GlobalContext ';
 
-const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchData }) => {
+function EditLocalAddImage({ navigation, route }) {
 
-    const { setPlaySound, lightTheme, setTreesPlanted, treesPlanted, plotSelected, shiftType, shiftID, } = useContext(GlobalContext);
+    const { sapling_id, shiftID, plotSelected } = route.params;
+    const { lightTheme } = useContext(GlobalContext);
     const [saplingid, setSaplingId] = useState(null);
     const [lat, setlat] = useState(null);
     const [lng, setlng] = useState(null);
     // array of images
     const [image, setImage] = useState(null);
     const [showImage, setShowImage] = useState(false);
+    const [isFetchingDetails, setIsFetchingDetails] = useState(true);
 
     const [userId, setUserId] = useState(null);
 
     const [existsInLocalDB, setExistsInLocalDB] = useState(false);
     const [existsInLiveDB, setExistsInLiveDB] = useState(true);
-    const [checked, setChecked] = useState(false);
+    const [inActive, setInActive] = useState(0);
     const [galleryModalVisible, setGalleryModalVisible] = useState(false);
+    const [clickedNewImage, setClickedNewImage] = useState(false);
 
     useEffect(() => {
         Utils.addTasks();
     }, []);
 
+    useEffect(() => {
 
-    const loadDataCallback = useCallback(async () => {
+        console.log("inside local tree edit");
+        const backAction = () => {
+            navigation.goBack()
+            return true;
+        };
+
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+        return () => backHandler.remove();
+    }, [])
+
+    const fetchDetails = useCallback(async (saplingid) => {
 
         try {
-            if (shiftType === shiftTypes.addImage) {
-                let userId = await Utils.getUserId();
-                setUserId(userId);
+            if (saplingid === null || saplingid === undefined) {
+                ToastAndroid.show(`${Strings.alertMessages.UnableToFetch} ${saplingid} `, ToastAndroid.LONG);
+                navigation.go
+                return
             }
+
+            const treeDetails = await Utils.fetchLocalTreeImage(saplingid);
+            if (!treeDetails) {
+                navigation.goBack()
+                ToastAndroid.show(`${Strings.alertMessages.UnableToFetch} ${saplingid} `, ToastAndroid.LONG);
+                return;
+            }
+            console.log("treeDetails for add tree image---", saplingid, treeDetails.lat, treeDetails.lng);
+
+            const inImage = {
+                data: treeDetails.image,
+                name: treeDetails.imageid,
+                meta: { remark: treeDetails.remark },
+                timestamp: treeDetails.timestamp
+            }
+
+            //console.log("inImage---" , inImage);
+
+            setImage(inImage);
+            setShowImage(true);
+            setlat(JSON.parse(treeDetails.lat));
+            setlng(JSON.parse(treeDetails.lng));
+            setUserId(treeDetails.user_id);
+            setInActive(treeDetails.inActive);
+            setIsFetchingDetails(false);
+
         } catch (error) {
             console.error(error);
             const stackTrace = error.stack;
@@ -52,9 +92,11 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
         }
     }, []);
 
+
     useEffect(() => {
-        loadDataCallback();
-    }, []);
+        setSaplingId(sapling_id);
+        fetchDetails(sapling_id);
+    }, [sapling_id]);
 
 
     const handleDeleteItem = async (name) => {
@@ -71,45 +113,18 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
         if (newImage === undefined) return;
         newImage = await Utils.formatImageForSapling(newImage, saplingid);
         setImage(newImage);
+        setClickedNewImage(true);
         setShowImage(true);
         Utils.stopTask();
     };
 
 
-    const saveShiftsAndTreesToDB = async (saplingId) => {
-
-        const endtime = Utils.getCurrentTime12Hr();
-        const timetaken = Utils.formatTime(finalShiftData.current.seconds);
-        const user_id = await Utils.getUserId();
-
-        console.log("finalShiftData---", finalShiftData);
-
-        const sapling = {
-            sapling_id: saplingId,
-            sequence_no: (treesPlanted + 1),
-            uploaded: 0,
-        }
-
-        const shiftData = {
-            id: shiftID,
-            user_id: user_id,
-            plotselected: finalShiftData.current.plotselected,
-            starttime: finalShiftData.current.shiftTime,
-            endtime: endtime,
-            shiftended: 0,
-            shiftuploadcomplete: 0,
-            timetaken: timetaken,
-            treesplanted: finalShiftData.current.treesPlanted,
-            sapling: sapling
-        }
-
-
-        console.log("final shift data add tree----", shiftData);
-        await Utils.saveShiftsToLocalDB(shiftData);
-
-    }
 
     const checkIfExists = async () => {
+        //console.log("compare", sapling_id, saplingid);
+        if (saplingid == null || sapling_id === saplingid) {
+            return
+        }
 
         if (saplingid == null) {
             return;
@@ -130,61 +145,75 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
 
     const onSave = async () => {
 
-        let existsLocally = await Utils.checkIfImageAddedAlready(saplingid);
+        if (sapling_id !== saplingid) {
 
-        if (existsLocally) {
-            Alert.alert(Strings.alertMessages.invalidSaplingId,
-                ' ' + Strings.alertMessages.imageAddedAlready + ' ' + Strings.labels.SaplingId + ' ' + saplingid);
-            return;
-        } else {
-            let existsInLiveDB = await Utils.checkIfSaplingExistsInLiveDB(saplingid);
+            let existsLocally = await Utils.checkIfImageAddedAlready(saplingid);
 
-            if (!existsInLiveDB) {
-                Alert.alert(
-                    Strings.alertMessages.invalidSaplingId,
-                    Strings.labels.SaplingId +
-                    ' ' +
-                    saplingid +
-                    ' ' +
-                    Strings.alertMessages.doesNotExist,
-                );
+            if (existsLocally) {
+                Alert.alert(Strings.alertMessages.invalidSaplingId,
+                    ' ' + Strings.alertMessages.imageAddedAlready + ' ' + Strings.labels.SaplingId + ' ' + saplingid);
                 return;
-            }
+            } else {
+                let existsInLiveDB = await Utils.checkIfSaplingExistsInLiveDB(saplingid);
 
+                if (!existsInLiveDB) {
+                    Alert.alert(
+                        Strings.alertMessages.invalidSaplingId,
+                        Strings.labels.SaplingId +
+                        ' ' +
+                        saplingid +
+                        ' ' +
+                        Strings.alertMessages.doesNotExist,
+                    );
+                    return;
+                }
+
+            }
         }
-        if (saplingid === null || plotSelected === null || (plotSelected && Object.keys(plotSelected).length === 0)) {
+
+        if (saplingid === null) {
             Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
             return;
         }
-        else if (image === null && !checked) {
+        else if (image === null) {
             Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.NoImage);
             return;
         }
 
         else {
             try {
+
+                if (sapling_id !== saplingid) {
+                    //new sapling id 
+                    if (!clickedNewImage) {
+                        const timestamp = image.timestamp;
+                        const imageName = `${saplingid}_${timestamp}.jpg`;
+                        image.name = imageName
+                    }
+                    await Utils.deleteAddTreeImagesBySaplingId(sapling_id);
+                    await Utils.updateSaplingInShiftDB(saplingid, sapling_id, shiftID);
+                }
+
                 const tree = {
                     sapling_id: saplingid,
                     lat: lat,
                     lng: lng,
                     user_id: userId,
                     image: image,
-                    inActive: checked ? 1 : 0,
+                    inActive: inActive,
                     timestamp: new Date().toISOString()
                 };
-                //console.log("--------------new image for tree ss---------", tree);
-                setSaplingId(null);
-                setShowImage(false)
-                setImage(null);
-                setlat(0);
-                setlng(0);
-                setTreesPlanted(treesPlanted + 1)
-                setPlaySound(true);
-                setChecked(false)
-                ToastAndroid.show(Strings.alertMessages.TreeSaved, ToastAndroid.SHORT);
-                await Utils.saveNewImage(tree)
-                await saveShiftsAndTreesToDB(tree.sapling_id);
-                onFetchData();
+
+                //console.log("--------------new image for tree---------", tree);
+
+                await Utils.saveNewImage(tree);
+
+                let toastmsg = Strings.alertMessages.TreeUpdatedfirsthalf + saplingid + Strings.alertMessages.TreeUpdatedsecondhalf;
+                ToastAndroid.show(toastmsg, ToastAndroid.LONG);
+
+                setClickedNewImage(false);
+                navigation.goBack();
+
             } catch (error) {
                 console.error(error);
                 const stackTrace = error.stack;
@@ -198,17 +227,19 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
         };
     }
 
-    return (
-        <Modal
-            animationType="slide"
-            transparent={true}
-            visible={
-                modalVisible
-            }
-            onRequestClose={() => setModalVisible(false)}
-        >
-            <ScrollView keyboardShouldPersistTaps="handled" style={{ ...commonStyles.borderedDisplay, ...customModalStyles.centeredView }}>
-                <View style={{ ...customModalStyles.modalView, marginTop: 4 }}>
+    if (!isFetchingDetails) {
+
+        return (
+
+            <ScrollView
+                keyboardShouldPersistTaps='handled'
+                scrollEnabled={true}
+                style={treeFormStyles.detailsContainerOuter} >
+                <View style={{ margin: 4, borderRadius: 10, marginTop: 31 }}>
+
+                    <Text style={treeFormStyles.plotSapling}>
+                        {plotSelected}
+                    </Text>
 
                     <TextInput
                         defaultValue={saplingid}
@@ -228,21 +259,6 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
                         onBlur={checkIfExists}
                     />
 
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Checkbox
-                            status={checked ? 'checked' : 'unchecked'}
-                            color='green'
-                            onPress={() => {
-                                setChecked(!checked);
-                                setImage(null);
-                                setShowImage(false);
-                                setlat(0);
-                                setlng(0);
-                            }}
-                        />
-                        <Text style={{color: "black", marginLeft: 5, fontSize: 16 }}>{Strings.buttonLabels.DeadTreeCheck} </Text>
-                    </View>
-
                     {saplingid &&
                         existsInLocalDB ? (
                         <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>
@@ -259,45 +275,47 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
 
 
 
-                    {!checked && <View style={{ ...treeFormModalStyles.imageContainer, marginLeft: 4, marginTop: 4 }}>
-                        <TouchableOpacity
-                            style={{ ...treeFormModalStyles.imagePicker }}
-                            onPress={() => {
-                                setGalleryModalVisible(true);
-                            }}>
-                            {!showImage ? (
-                                <Image
-                                    source={require('../../assets/camera.png')}
-                                    style={treeFormModalStyles.cameraIcon}
-                                />
-                            ) : (
-                                <Image
-                                    source={{
-                                        uri: `data:image/jpeg;base64,${image.data}`,
-                                    }}
-                                    style={treeFormModalStyles.image}
-                                />
-                            )}
+                    <View style={treeFormStyles.imageContainer}>
+                        <View style={{ width: '100%', height: 200 }}>
+                            <TouchableOpacity
+                                style={{ ...treeFormModalStyles.imagePicker }}
+                                onPress={() => {
+                                    setGalleryModalVisible(true);
+                                }}>
 
-                            {showImage && (
-                                <TouchableOpacity
-                                    style={treeFormModalStyles.deleteButton}
-                                    onPress={() =>
-                                        Utils.confirmAction(
-                                            () => handleDeleteItem(image.name),
-                                            Strings.alertMessages.confirmDeleteImage,
-                                        )
-                                    }>
+                                {!showImage ? (
                                     <Image
-                                        source={require('../../assets/icondelete.png')} // Replace with your delete icon image
-                                        style={treeFormModalStyles.deleteIcon} // Adjust the icon dimensions and margin
+                                        source={require('../../assets/camera.png')}
+                                        style={treeFormModalStyles.cameraIcon}
                                     />
-                                </TouchableOpacity>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                    }
+                                ) : (
 
+                                    <Image
+                                        source={{
+                                            uri: `data:image/jpeg;base64,${image.data}`,
+                                        }}
+                                        style={treeFormModalStyles.image}
+                                    />
+                                )}
+
+                                {showImage && (
+                                    <TouchableOpacity
+                                        style={treeFormModalStyles.deleteButton}
+                                        onPress={() =>
+                                            Utils.confirmAction(
+                                                () => handleDeleteItem(image.name),
+                                                Strings.alertMessages.confirmDeleteImage,
+                                            )
+                                        }>
+                                        <Image
+                                            source={require('../../assets/icondelete.png')} // Replace with your delete icon image
+                                            style={treeFormModalStyles.deleteIcon} // Adjust the icon dimensions and margin
+                                        />
+                                    </TouchableOpacity>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    </View>
 
                     <Modal
                         animationType="fade"
@@ -309,11 +327,7 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
                     >
                         <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                             <View style={{ backgroundColor: 'white', padding: 40 }}>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 10 }}>
-                                    {/* <Button title={Strings.buttonLabels.openCamera} onPress={() => pickImage(0)} color="green" // Change text color
-                                    />
-                                    <Button title={Strings.buttonLabels.openGallery}  onPress={() => pickImage(1)} color="green" // Change text color
-                                    /> */}
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', margin: 10 }}>
                                     <TouchableOpacity onPress={() => pickImage(0)} style={{ backgroundColor: "green", padding: 10, }}>
                                         <Text style={{ color: "white", fontWeight: 'bold', fontSize: 15 }}> {Strings.buttonLabels.openCamera}</Text>
                                     </TouchableOpacity>
@@ -329,13 +343,12 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
                         </View>
                     </Modal>
 
-                    {!checked && <CoordinateSetter
+                    <CoordinateSetter
                         inLat={lat}
                         inLng={lng}
                         onSetLat={item => setlat(item)}
                         onSetLng={item => setlng(item)}
                     />
-                    }
 
                     <View style={CustomButtonStyles.container}>
                         <View style={CustomButtonStyles.buttonRow}>
@@ -346,8 +359,7 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
                                     labelStyle={CustomButtonStyles.buttonLabel}
                                     style={CustomButtonStyles.button}
                                     onPress={() => {
-                                        setModalVisible(false)
-                                        onFetchData()
+                                        navigation.goBack()
                                     }}
                                 >
                                     {Strings.buttonLabels.cancel}
@@ -370,8 +382,12 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
 
                 </View>
             </ScrollView>
-        </Modal >
-    )
+
+        )
+    } else {
+        <LoadingScreen />
+    }
 }
 
-export default AddImageModal;
+
+export default EditLocalAddImage

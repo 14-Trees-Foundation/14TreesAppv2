@@ -49,8 +49,8 @@ export class DataService {
 
   static productionHostName = 'https://api.14trees.org';
   static hostName = 'http://10.0.2.2:8088';
-  //static phoneHostName = "http://192.168.31.11:7001";
-  static serverBase = `${this.productionHostName}/api/appv2`;
+  static phoneHostName = "http://192.168.31.11:8088";
+  static serverBase = `${this.hostName}/api/appv2`;
 
   static async loginUser(userDataPayload) {
     const url = `${DataService.serverBase}/login`;

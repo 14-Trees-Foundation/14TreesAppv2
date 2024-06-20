@@ -243,7 +243,7 @@ const AddTreeShift = ({ navigation }) => {
 
                     {!modalVisible && !plotModalVisible && <RenderHeader2 />}
 
-                    <AddTreeModal
+                    <AddTreeModal    
                         modalVisible={modalVisible}
                         setModalVisible={setModalVisible}
                         mode={mode}

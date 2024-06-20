@@ -68,27 +68,23 @@ const SyncDisplay = ({ navigation }) => {
   }
 
   const deleteSyncedTreesAndShifts = async (response) => {
+    if (response) {
 
-    const uploadedShiftIDs = Object.values(response.shiftDetails)
-      .filter(shift => shift.shiftUploaded)
-      .map(shift => shift.shiftID);
+      const uploadedShiftIDs = Object.values(response.shiftDetails)
+        .filter(shift => shift.shiftUploaded)
+        .map(shift => shift.shiftID);
 
-    //take care of uploadedSaplings
-    await Utils.deleteSyncedShiftsBasedOnSaplings(uploadedShiftIDs);
-    await Utils.deleteSyncedTreesAndImages()
-
+      //take care of uploadedSaplings
+      await Utils.deleteSyncedShiftsBasedOnSaplings(uploadedShiftIDs);
+      await Utils.deleteSyncedTreesAndImages()
+    }
   };
 
 
-  const uploadShift = async (uploadedSaplings = [], uploadedImageSaplings = [], uploadedTreesPlotsSaplings = []) => {
+  const uploadShift = async () => {
     let responseFromSyncShifts;
-    let combinedUploadedSaplings = [...uploadedSaplings, ...uploadedImageSaplings, ...uploadedTreesPlotsSaplings]
 
-    console.log("combinedUploadedSaplings----", combinedUploadedSaplings);
-
-    if ((shiftsCount && shiftsCount.pending == 0) 
-      //|| combinedUploadedSaplings.length === 0
-    ) {
+    if ((shiftsCount && shiftsCount.pending == 0)) {
       // ToastAndroid.show(
       //   Strings.alertMessages.NothingToSync,
       //   ToastAndroid.LONG,
@@ -98,7 +94,7 @@ const SyncDisplay = ({ navigation }) => {
 
 
 
-    responseFromSyncShifts = await Utils.syncShifts(combinedUploadedSaplings);
+    responseFromSyncShifts = await Utils.syncShifts(setProgress);
 
     setFailedShifts(responseFromSyncShifts.failures);
 
@@ -109,6 +105,7 @@ const SyncDisplay = ({ navigation }) => {
     }, 2000);
 
     await Utils.fetchAndStoreHelperData();
+
     if (shiftDone) {
       await deleteSyncedTreesAndShifts(responseFromSyncShifts);
       await Utils.fetchAndStoreShifts();
@@ -223,7 +220,7 @@ const SyncDisplay = ({ navigation }) => {
 
     let uploadedImageSaplings;
     try {
-      uploadedImageSaplings = await uploadImages()
+      uploadedImageSaplings = await uploadImages();
     } catch (error) {
       console.log('unable to sync new images---', error);
       const stackTrace = error.stack;
@@ -240,6 +237,7 @@ const SyncDisplay = ({ navigation }) => {
 
     try {
       uploadedTreesPlotsSaplings = await uploadTreesPlots();
+      //console.log("uploadedTreesPlotsSaplings---", uploadedTreesPlotsSaplings);
     } catch (error) {
       console.log('unable to sync trees---', error);
       const stackTrace = error.stack;
@@ -252,7 +250,8 @@ const SyncDisplay = ({ navigation }) => {
     }
 
     try {
-      await uploadShift(uploadedSaplings, uploadedImageSaplings, uploadedTreesPlotsSaplings);
+
+      await uploadShift();
     } catch (error) {
       console.log('unable to sync shifts---', error);
       const stackTrace = error.stack;
@@ -293,13 +292,16 @@ const SyncDisplay = ({ navigation }) => {
 
             <View style={{ margin: 0, paddingLeft: 27 }}>
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium" }}>
-                {Strings.messages.pendingTrees}: {treeCounts.pending.treesUpload}
+                {Strings.messages.pendingTrees}: {treeCounts?.pending.treesUpload}
               </Text>
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium" }}>
-                {Strings.messages.pendingImages}: {treeCounts.pending.imagesUpload}
+                {Strings.messages.pendingImages}: {treeCounts?.pending.imagesUpload}
               </Text>
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium" }}>
-                {Strings.messages.pendingPlotTrees}: {treeCounts.pending.plotUpload}
+                {Strings.messages.pendingPlotTrees}: {treeCounts?.pending.plotUpload}
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium" }}>
+                {Strings.screenNames.Shifts}: {shiftsCount?.pending}
               </Text>
             </View>
           </View>
@@ -318,7 +320,6 @@ const SyncDisplay = ({ navigation }) => {
             labelStyle={syncDisplayStyles.buttonLabel}
           >
             {Strings.buttonLabels.SyncData}
-
           </Button>
 
         </View>
@@ -362,12 +363,12 @@ const SyncDisplay = ({ navigation }) => {
               </Text>
             )}
             data={failedPlotTrees}
-            keyExtractor={item => item.sapling_id ? item.sapling_id : item}
+            keyExtractor={item => item.message ? item.message : item}
             renderItem={({ item, index }) => {
 
               return (
                 <Text style={commonStyles.text5}>
-                  {index + 1}. {item.sapling_id ? item.sapling_id : item}
+                  {index + 1}. {item.message ? item.message : item}
                 </Text>
               );
             }}
@@ -406,7 +407,8 @@ const SyncDisplay = ({ navigation }) => {
             renderItem={({ item, index }) => {
               return (
                 <Text style={commonStyles.text5}>
-                  {index + 1}. {Strings.messages.ShiftNo} : {item}
+                  {index + 1}. {Strings.messages.ShiftNo} : {' '}
+                  {item.id ? item.id : item}
                 </Text>
               );
             }}

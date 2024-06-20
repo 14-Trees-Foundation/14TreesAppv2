@@ -930,7 +930,7 @@ export const syncDisplayStyles = StyleSheet.create({
   },
   buttonLabel: {
     fontFamily: 'Inter-Regular',
-    fontSize: 22,
+    fontSize: 21,
     marginLeft: 8,  // Adjust the spacing between the icon and text as needed
     fontWeight: 'bold',
     marginTop: 16

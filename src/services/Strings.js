@@ -14,6 +14,7 @@ export class Strings {
             VerifyUsers: "Verify Users",
             EditTree: "Edit Tree",
             EditLocalTree: "Edit Local Tree",
+            EditLocalAddImage: "Edit Local Add Images",
             LogIn: 'Log In',
             DrawerScreen: 'Homescreen',
             startScreen: 'start',
@@ -35,6 +36,7 @@ export class Strings {
             VerifyUsers: "वापरकर्ते सत्यापित करा",
             EditTree: "झाड संपादन",
             EditLocalTree: "एक स्थानिक झाड संपादित करा",
+            EditLocalAddImage: "स्थानिक प्रतिमा संपादित करा", 
             LogIn: 'लॉग इन',
             DrawerScreen: 'होम स्क्रीन',
             startScreen: 'प्रारंभ स्क्रीन',
@@ -60,13 +62,13 @@ export class Strings {
             Never: "Never",
             LastSynced: "Last Synced: ",
             pending: "Pending",
-            pendingTrees:"New Trees",
-            pendingImages:"Tree Images",
-            pendingPlotTrees:"Updated Plot Trees",
+            pendingTrees: "New Trees",
+            pendingImages: "Tree Images",
+            pendingPlotTrees: "Updated Plot Trees",
             synced: "Synced",
             LocalOrSynced: "Local Or Synced",
             failedToUpload: "Could not upload",
-            failedToUpdate : "Could not update plot for",
+            failedToUpdate: "Could not update plot for",
             couldNotAdd: "Could not add images for",
             trees: "trees",
             // add tree
@@ -107,8 +109,8 @@ export class Strings {
             logoutConfirm: "Do you want to log out?",
             PlotName: "Plot Name",
             Shift: "shift", //manjur
-            ClickToDelete: "Click on saplings to delete",
-            
+            ClickToDelete: "Click on saplings to delete the entry",
+
         },
         "mr": {
             SignIn: "साइन इन करा",
@@ -117,9 +119,9 @@ export class Strings {
             Never: "कधीच नाही",
             LastSynced: "शेवटचा सिंक केलेला डेटा : ",
             pending: "प्रलंबित",
-            pendingTrees:"नवीन झाडे",
-            pendingImages:"नवीन प्रतिमासह झाडे",
-            pendingPlotTrees:"अपडेटेड प्लॉटसह झाडे",
+            pendingTrees: "नवीन झाडे",
+            pendingImages: "नवीन प्रतिमासह झाडे",
+            pendingPlotTrees: "अपडेटेड प्लॉटसह झाडे",
             synced: "समक्रमित",
             LocalOrSynced: "स्थानिक किंवा समक्रमित",
             failedToUpload: "अपलोड करू शकलो नाही",
@@ -163,7 +165,7 @@ export class Strings {
             PlotName: "प्लॉटचे नाव",
             logoutConfirm: "तुम्हाला लॉग आउट करायचे आहे का?",
             Shift: "शिफ्ट",
-            ClickToDelete: "हटवण्यासाठी रोपे वर क्लिक करा" //manjur
+            ClickToDelete: "एंट्री हटवण्यासाठी रोपावर क्लिक करा" //manjur
         },
     });
     static alertMessages = new LocalizedStrings({
@@ -199,6 +201,7 @@ export class Strings {
             SyncFailure: "Sync Failed!",
             SyncFailureForTrees: "Sync for added trees Failed!",
             SyncFailureForImages: "Sync for added Images Failed!",
+            SyncFailureForShifts: "Sync for Shifts Failed",
             NothingToSync: "No trees to sync. Please Add trees",
             CheckLocalList: "See local tree list to check statuses.",
             ContactExpert: "Contact an expert, please.",
@@ -253,8 +256,11 @@ export class Strings {
             UnableToFetchHelperData: "Unable to fetch helper data. Please check internet connection...",
             imageAddedAlready: "Image already added for",
             SyncingTrees: 'Syncing Trees',
-            SyncingPlotTrees : "Syncing Updated plot trees",
+            SyncingPlotTrees: "Syncing Updated plot trees",
             SyncingImageTrees: "Syncing New image trees",
+            MarkedSaplingDead : "You have marked this sapling dead.",
+            ConfirmDeleteEntry: "Do you want to delete the entry?"
+
         },
         "mr": {
             GPSUnavailable: "त्रुटी: विनंतीची वेळ संपली. GPS सध्या उपलब्ध नाही.",
@@ -288,6 +294,7 @@ export class Strings {
             SyncFailure: "समक्रमण अयशस्वी!",
             SyncFailureForTrees: "जोडलेल्या झाडांसाठी सिंक अयशस्वी!",
             SyncFailureForImages: "जोडलेल्या प्रतिमांसाठी सिंक अयशस्वी!",
+            SyncFailureForShifts: "शिफ्टसाठी सिंक अयशस्वी",
             NothingToSync: "समक्रमित करण्यासाठी झाडे नाहीत! कृपया झाडे जोडा", //manjur
             CheckLocalList: "लोकल झाडांची यादी पहा स्थिती तपासण्यासाठी.",
             ContactExpert: "कृपया एक तज्ञाशी संपर्क साधा.",
@@ -342,8 +349,10 @@ export class Strings {
             UnableToFetchHelperData: "मदतनीस डेटा आणण्यात अक्षम. कृपया इंटरनेट कनेक्शन तपासा...", //manjur
             imageAddedAlready: "प्रतिमा आधीच जोडली आहे",
             SyncingTrees: 'नवीन झाडे सिंक करणे सुरू',
-            SyncingPlotTrees : "अपडेटेड प्लॉट झाडे सिंक करणे सुरू",
+            SyncingPlotTrees: "अपडेटेड प्लॉट झाडे सिंक करणे सुरू",
             SyncingImageTrees: "नवीन प्रतिमा झाडे सिंक करणे सुरू",
+            MarkedSaplingDead : "तुम्ही हे रोपटे मृत मार्क केले आहे",
+            ConfirmDeleteEntry : "तुम्हाला एंट्री हटवायची आहे का?"
         }
     })
     static buttonLabels = new LocalizedStrings({
@@ -352,6 +361,7 @@ export class Strings {
             SyncData: "Sync Data",
             AddNewTree: "Add New Tree",
             AddImage: "Add Tree Image",
+            DeadTreeCheck: "Click if the tree is dead",
             UpdateSapling: "Update Saplings",
             StartShift: "Start a Shift",
             Shifts: "Shifts",
@@ -397,6 +407,7 @@ export class Strings {
             SyncData: "डेटा सिंक करा",
             AddNewTree: "नवीन झाड जोडा",
             AddImage: "सॅपलिंग इमेज जोडा",
+            DeadTreeCheck: "झाड मेले असल्यास क्लिक करा",
             UpdateSapling: "सॅपलिंग अपडेट करा",
             StartShift: "शिफ्ट सुरू करा",
             Shifts: "शिफ्ट",

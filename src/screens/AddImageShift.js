@@ -1,28 +1,30 @@
 import React, { useContext, useEffect, useState, useCallback, useRef } from 'react';
-import { FlatList, Text,  View, Alert, ScrollView, BackHandler } from 'react-native';
+import { FlatList, Text, View, Alert, ScrollView, BackHandler, ToastAndroid } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackedIcons } from '../components/Components';
 import { Strings } from '../services/Strings';
-import { Utils } from '../services/Utils';
+import { Utils, addTreeImageModes } from '../services/Utils';
 import { Iconstyles, commonStyles, shiftStyles } from '../services/Styles';
 import GlobalContext from '../context/GlobalContext ';
 import ShiftHeader from '../components/ShiftHeader';
-import {  treeFormModes } from '../components/TreeForm';
+import { treeFormModes } from '../components/TreeForm';
 import LoadingScreen from './LoadingScreen';
 import { Button } from 'react-native-paper';
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { TreeRow } from '../components/TreeRow';
-import { AddImageModal } from '../components/AddImageModal';
 import PlotSelectModal from '../components/PlotSelectModal';
+import AddImageModal from '../components/AddImageModal';
+import EditImageModal from '../components/EditImageModal';
 
-const AddImageShift = ({ route,navigation }) => {
-    const { plotSelected, treesPlanted, setTreesPlanted, setShiftDone, shiftType,setPlotSelected, shiftTime, shiftID, setShiftID, lightTheme } = useContext(GlobalContext);
+const AddImageShift = ({ route, navigation }) => {
+    const { plotSelected, treesPlanted, setTreesPlanted, setShiftDone, shiftType, setPlotSelected, shiftTime, shiftID, setShiftID, lightTheme } = useContext(GlobalContext);
 
     const [finalList, setFinalList] = useState(null);
-    
+
     const [modalVisible, setModalVisible] = useState(false);
     const [plotModalVisible, setPlotModalVisible] = useState(false);
     const [mode, setMode] = useState(null);
+    const [editSaplingID, setEditSaplingID] = useState(null);
 
     const finalRef = useRef({ shift_id: null, shiftTime: null, seconds: null, treesPlanted: 0, plotselected: null });
     finalRef.current.shift_id = shiftID;
@@ -61,7 +63,7 @@ const AddImageShift = ({ route,navigation }) => {
 
 
     const fetchSaplingsForShift = async () => {
-        console.log("shiftid--" , shiftID);
+        console.log("shiftid--", shiftID);
         const { treesInLocalShifts, shiftType } = await Utils.fetchSaplingsFromLocalShiftDB(shiftID);
 
         treesInLocalShifts.sort((a, b) => {
@@ -78,7 +80,7 @@ const AddImageShift = ({ route,navigation }) => {
         console.log('setting both lists to: ', treesInLocalShifts, treesInLocalShifts.length);
     };
 
-    useFocusEffect( 
+    useFocusEffect(
         useCallback(() => {
             if (shiftID) {
                 fetchSaplingsForShift();
@@ -150,7 +152,7 @@ const AddImageShift = ({ route,navigation }) => {
                         mode="contained"
                         buttonColor='#059636'
                         onPress={() => {
-                            setMode(treeFormModes.addTree);
+                            setMode(addTreeImageModes.addImage);
                             setModalVisible(true);
                         }}
                         contentStyle={Iconstyles.buttonContent}
@@ -173,7 +175,7 @@ const AddImageShift = ({ route,navigation }) => {
                                 navigation.navigate(
                                     Strings.screenNames.getString('SyncDisplay', Strings.english),
                                 )
-                              
+
                             }}
                             contentStyle={Iconstyles.buttonContent2}
                             labelStyle={Iconstyles.buttonLabel}
@@ -204,10 +206,40 @@ const AddImageShift = ({ route,navigation }) => {
         );
     };
 
-    // const handleSaplingChanges = () => {
-    //     setMode(treeFormModes.localEdit);
-    //     setModalVisible(true);
-    // }
+    const handleDeleteItem = async (saplingID) => {
+        //verify
+        await Utils.deleteAddTreeImagesBySaplingId(saplingID); 
+        await Utils.deleteSaplingInShiftDB(saplingID, shiftID);
+        fetchSaplingsForShift();
+        setTreesPlanted(treesPlanted - 1);
+    }
+
+    const handleSaplingChanges = async (saplingID) => {
+        console.log("handleSaplingChanges", saplingID);
+        const treeDetails = await Utils.fetchLocalTreeImage(saplingID);
+
+        if (!treeDetails || treeDetails?.inActive === 1) {
+
+            Alert.alert(Strings.alertMessages.MarkedSaplingDead, Strings.alertMessages.ConfirmDeleteEntry, [
+                {
+                    text: Strings.alertMessages.Yes,
+                    onPress: () => handleDeleteItem(saplingID)
+                },
+                {
+                    text: Strings.alertMessages.No,
+                    onPress: () => null
+                }
+            ])
+
+            
+            setModalVisible(false);
+            return;
+        }
+
+        setMode(addTreeImageModes.editImage);
+        setEditSaplingID(saplingID)
+        setModalVisible(true);
+    }
 
     const handleModalChanges = () => {
         setMode(treeFormModes.plotSelect);
@@ -229,18 +261,26 @@ const AddImageShift = ({ route,navigation }) => {
                         }}
                         handleModalChanges={handleModalChanges}
                     />
-                    
+
 
                     {!modalVisible && !plotModalVisible && <RenderHeader2 />}
 
 
-                    <AddImageModal
+
+
+                    {mode === addTreeImageModes.addImage && <AddImageModal
                         modalVisible={modalVisible}
                         setModalVisible={setModalVisible}
                         finalShiftData={finalRef}
                         onFetchData={fetchSaplingsForShift}
-                    />
+                    />}
 
+                    {mode === addTreeImageModes.editImage && <EditImageModal
+                        modalVisible={modalVisible}
+                        setModalVisible={setModalVisible}
+                        saplingID={editSaplingID}
+                        onFetchData={fetchSaplingsForShift}
+                    />}
 
                     <PlotSelectModal
                         plotModalVisible={plotModalVisible}
@@ -279,7 +319,7 @@ const AddImageShift = ({ route,navigation }) => {
                                         tree3={trees[2]}
                                         tree4={trees[3]}
                                         modalMode={true}
-                                        //handleSaplingChanges={handleSaplingChanges}
+                                        handleSaplingChanges={handleSaplingChanges}
                                         shiftTypeOfTrees={shiftType}
                                     />);
                                 }

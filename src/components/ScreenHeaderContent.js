@@ -1,8 +1,8 @@
 import { useContext, useState } from "react";
-import { Image, TouchableOpacity, View,StyleSheet } from "react-native";
+import { Image, TouchableOpacity, View, StyleSheet, Text } from "react-native";
 import LanguageModal from "./Languagemodal";
 import GlobalContext from "../context/GlobalContext ";
-import { ScreenHeaderContentStyles } from "../services/Styles";
+import { ScreenHeaderContentStyles, aboutStyles } from "../services/Styles";
 
 const ScreenHeaderContent = () => {
 
@@ -14,6 +14,9 @@ const ScreenHeaderContent = () => {
         <View
             style={ScreenHeaderContentStyles.container}
         >
+            <View style={{ width: 40, height: 35, backgroundColor: "#37B281", marginRight: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                <Text style={{ color: "white", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+            </View>
             
             <TouchableOpacity
                 style={{ marginRight: 15 }}
@@ -31,7 +34,7 @@ const ScreenHeaderContent = () => {
                 />}
             </TouchableOpacity>
 
-            
+
             <TouchableOpacity
                 style={{ marginRight: 35 }}
                 onPress={() => {

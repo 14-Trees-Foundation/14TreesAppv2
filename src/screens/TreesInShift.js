@@ -9,6 +9,7 @@ import { TreeRow } from "../components/TreeRow";
 
 const TreesInShift = ({ navigation, route }) => {
     const { shiftIDs, itemData } = route.params;
+
     console.log("shiftID TreesInShift---", shiftIDs);
 
     const [finalList, setFinalList] = useState(null);
@@ -68,7 +69,7 @@ const TreesInShift = ({ navigation, route }) => {
         ];
 
         const uniqueList = Array.from(new Set(combinedList.map(item => item.sapling_id))).map(id => {
-                return combinedList.find(item => item.sapling_id === id);
+            return combinedList.find(item => item.sapling_id === id);
         });
 
         setFinalList(uniqueList);
@@ -124,6 +125,8 @@ const TreesInShift = ({ navigation, route }) => {
                                 shiftID={shiftIDs.localShiftId}
                                 modalMode={false}
                                 shiftTypeOfTrees={shiftTypeOfTrees}
+                                handleSaplingChanges={fetchData}
+                                plotSelected={itemData.plotselected}
                             />);
                         }
                         return null;

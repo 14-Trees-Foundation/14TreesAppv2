@@ -11,7 +11,6 @@ import { customModalStyles } from '../services/Styles';
 const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplingID, finalShiftData }) => {
     const { setPlaySound, setTreesPlanted, treesPlanted, plotSelected, setPlotSelected, shiftID, lightTheme } = useContext(GlobalContext);
 
-
     const [details, setDetails] = useState(null);
 
     const saveShiftsAndTreesToDB = async (saplingId) => {
@@ -46,7 +45,6 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
     }
 
     async function onVerifiedSave(tree, images) {
-
         if (mode === treeFormModes.addTree) {
             setTreesPlanted(treesPlanted + 1);
             await Utils.saveTreeAndImagesToLocalDB(tree, images);
@@ -64,11 +62,13 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
 
             await Utils.deleteTreeImages(tree.saplingid);
             await Utils.saveTreeAndImagesToLocalDB(tree, images);
-            onFetchData();
+            //onFetchData();
             let toastmsg = Strings.alertMessages.TreeUpdatedfirsthalf + saplingID + Strings.alertMessages.TreeUpdatedsecondhalf;
             ToastAndroid.show(toastmsg, ToastAndroid.LONG);
             setModalVisible(false);
         }
+
+        onFetchData();
     }
 
     const fetchTreeDetails = async (saplingId) => {

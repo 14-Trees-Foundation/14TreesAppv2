@@ -96,7 +96,7 @@ export const DrawerNavigator = () => {
         const backAction = () => {
             console.log("exiting from drawerScreen-------");
             BackHandler.exitApp();
-            return true; 
+            return true;
         };
 
         const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
@@ -157,7 +157,14 @@ export const DrawerNavigator = () => {
                     drawerStyle: {
                         backgroundColor: '#f0f3f7',
                         fontFamily: 'Inter-Regular'
-                    }
+                    },
+                    headerRight: () => (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 10 }}>
+                            <View style={{ width: 40, height: 35, marginRight: 6, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                                <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+                            </View>
+                        </View>
+                    )
                 }}
             />
 
@@ -175,7 +182,14 @@ export const DrawerNavigator = () => {
                         drawerStyle: {
                             backgroundColor: '#f0f3f7',
                             fontFamily: 'Inter-Regular'
-                        }
+                        },
+                        headerRight: () => (
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 10 }}>
+                                <View style={{ width: 40, height: 35, marginRight: 6, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                                    <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+                                </View>
+                            </View>
+                        )
                     }}
                 />
             )}

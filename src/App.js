@@ -26,6 +26,7 @@ import { setJSExceptionHandler } from 'react-native-exception-handler';
 import RNRestart from 'react-native-restart';
 import AddImageShift from './screens/AddImageShift';
 import UpdatePlotShift from './screens/UpdatePlotShift';
+import EditLocalAddImage from './screens/EditLocalAddImage';
 
 
 const errorHandler = async (e, isFatal) => {
@@ -273,14 +274,17 @@ const App = () => {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{
-                marginRight: 35,
+                marginRight: 30, flexDirection: "row"
               }}>
+                <View style={{ width: 40, height: 35, marginRight: 7, marginTop: 5, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+                </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
                   color: lightTheme ? '#52525C' : 'black',
                   fontSize: 18,
                   fontWeight: 'bold',
-                  padding: 15,
+                  padding: 10,
                 }}>
                   {userName}
                 </Text>
@@ -298,14 +302,18 @@ const App = () => {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{
-                marginRight: 35,
+                marginRight: 30, flexDirection: "row"
               }}>
+                <View style={{ width: 40, height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+                </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
                   color: lightTheme ? '#52525C' : 'black',
                   fontSize: 18,
                   fontWeight: 'bold',
                   padding: 15,
+                  paddingLeft: 10
                 }}>
                   {userName}
                 </Text>
@@ -323,14 +331,18 @@ const App = () => {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{
-                marginRight: 35,
+                marginRight: 30, flexDirection: "row"
               }}>
+                <View style={{ width: 40, height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+                </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
                   color: lightTheme ? '#52525C' : 'black',
                   fontSize: 18,
                   fontWeight: 'bold',
                   padding: 15,
+                  paddingLeft: 10
                 }}>
                   {userName}
                 </Text>
@@ -354,6 +366,11 @@ const App = () => {
                 </TouchableOpacity>
               </View>
             ),
+            headerRight: () => (
+              <View style={{ width: 40, height: 35, marginRight: 13, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+              </View>
+            ),
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
             headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
             headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
@@ -366,8 +383,13 @@ const App = () => {
           options={{
             headerRight: () => (
               <View style={{
-                marginRight: 35,
+                marginRight: 30, flexDirection: "row"
               }}>
+
+                <View style={{ width: 40, height: 35, marginRight: 0, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+                </View>
+
                 <Text style={{
                   fontFamily: 'Inter-Regular',
                   color: lightTheme ? '#52525C' : 'black',
@@ -417,8 +439,11 @@ const App = () => {
           options={{
             headerRight: () => (
               <View style={{
-                marginRight: 70,
+                marginRight: 35, flexDirection: "row"
               }}>
+                <View style={{ width: 40, height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+                </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
                   color: lightTheme ? '#52525C' : 'black',
@@ -435,7 +460,42 @@ const App = () => {
             headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
             title: Strings.screenNames.EditLocalTree
           }} />
-
+        <Stack.Screen
+          name={Strings.screenNames.getString('EditLocalAddImage', Strings.english)}
+          component={EditLocalAddImage}
+          options={{
+            headerLeft: () => (
+              <View style={{ marginLeft: 5 }}>
+                <TouchableOpacity onPress={() => {
+                  stackNavRef.current.goBack() // Go back when the button is pressed
+                }}>
+                  <Icon name="arrow-back" size={24} color="black" />
+                </TouchableOpacity>
+              </View>
+            ),
+            headerRight: () => (    
+              <View style={{ 
+                marginRight: 28, flexDirection: "row"
+              }}>
+                <View style={{ width: 40, height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+                </View>
+                <Text style={{
+                  fontFamily: 'Inter-Regular',
+                  color: lightTheme ? '#52525C' : 'black',
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  padding: 8,
+                }}>
+                  {userName}
+                </Text>
+              </View>
+            ),
+            headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+            headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+            headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+            title: Strings.screenNames.EditLocalAddImage
+          }} />
       </Stack.Navigator>
     </NavigationContainer>
 

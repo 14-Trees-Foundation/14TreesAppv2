@@ -8,6 +8,7 @@ import { CustomButtonStyles, commonStyles, treeFormModalStyles } from "../servic
 import GlobalContext from '../context/GlobalContext ';
 import { treeFormModes } from './TreeForm';
 import { Button } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
 
@@ -25,6 +26,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
     const [userId, setUserId] = useState(inUserId);
     const [existsInLocalDB, setExistsInLocalDB] = useState(false);
     const [existsInLiveDB, setExistsInLiveDB] = useState(false);
+    const [galleryModalVisible, setGalleryModalVisible] = useState(false);
 
     const { lightTheme } = useContext(GlobalContext);
 
@@ -76,6 +78,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
     };
 
     const pickImage = async (selectionId) => {
+        setGalleryModalVisible(false);
         Utils.startTask();
         let newImage = await Utils.getImage(true, selectionId);
         if (newImage === undefined) return;
@@ -92,7 +95,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
         }
         let existsLocally = await Utils.checkIfSaplingExistsLocally(saplingid);
         console.log("checking existsLocally---", existsLocally);
-        
+
         if (existsLocally) {
             setExistsInLocalDB(true);
             return;
@@ -226,7 +229,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                 <TouchableOpacity
                     style={treeFormModalStyles.imagePicker}
                     onPress={() => {
-                        pickImage(0);
+                        setGalleryModalVisible(true);
                     }}>
                     {!showImage ? (
                         <Image
@@ -260,6 +263,32 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                 </TouchableOpacity>
             </View>
 
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={galleryModalVisible}
+                onRequestClose={() => {
+                    setGalleryModalVisible(false);
+                }}
+            >
+                <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <View style={{ backgroundColor: 'white', padding: 40 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 10 }}>
+                           
+                            <TouchableOpacity onPress={() => pickImage(0)} style={{ backgroundColor: "green", padding: 10, }}>
+                                <Text style={{ color: "white", fontWeight: 'bold', fontSize: 15 }}> {Strings.buttonLabels.openCamera}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => pickImage(1)} style={{ backgroundColor: "green", padding: 10, }}>
+                                <Text style={{ color: "white", fontWeight: 'bold', fontSize: 15 }}> {Strings.buttonLabels.openGallery}</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <TouchableOpacity style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }} onPress={() => setGalleryModalVisible(false)}  >
+                            <Icon name="close-circle" size={28} color="red" />
+                        </TouchableOpacity>
+                    </View>
+
+                </View>
+            </Modal>
 
             <CoordinateSetter
                 inLat={lat}

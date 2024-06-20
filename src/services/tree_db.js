@@ -107,10 +107,11 @@ export class LocalDatabase {
             CREATE TABLE IF NOT EXISTS ${newImageTable} (
                 user_id TEXT NOT NULL,
                 sapling_id TEXT NOT NULL PRIMARY KEY,
-                image TEXT NOT NULL,
-                imageid TEXT NOT NULL,
+                image TEXT,
+                imageid TEXT,
                 remark TEXT,  
-                uploaded INTEGER NOT NULL, 
+                uploaded INTEGER NOT NULL,
+                inActive INTEGER NOT NULL,
                 lat TEXT,
                 lng TEXT,
                 timestamp TEXT NOT NULL
@@ -232,6 +233,7 @@ export class LocalDatabase {
         }
     };
 
+   
     getTreesWithNewPlots = async (uploaded) => {
         try {
             const trees = [];
@@ -380,7 +382,38 @@ export class LocalDatabase {
                     trees.push(result.rows.item(index));
                 }
             });
-            
+
+            return trees;
+
+        } catch (error) {
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: "happened while trying to get tree by saplingID(inside tree_tb(getTreeBySaplingID))",
+                error: JSON.stringify(error),
+                stackTrace: stackTrace
+            }
+            await this.logExceptionLocalDB(JSON.stringify(errorLog));
+        }
+
+    }
+
+    getTreeImageBySaplingID = async (saplingId) => {
+
+        try {
+
+            const trees = [];
+            const queryString = `SELECT * FROM ${newImageTable} WHERE sapling_id = ?`
+
+            const results = await this.db.executeSql(
+                queryString, [saplingId]
+            );
+
+            results.forEach(result => {
+                for (let index = 0; index < result.rows.length; index++) {
+                    trees.push(result.rows.item(index));
+                }
+            });
+
             return trees;
 
         } catch (error) {
@@ -498,11 +531,37 @@ export class LocalDatabase {
         }
     };
 
+    getAllTreesWithNewPlots = async () => {
+        try {
+            const trees = [];
+
+            const query = `SELECT * FROM ${updatePlotsTable}`;
+            const results = await this.db.executeSql(query);
+
+            results.forEach(result => {
+                for (let index = 0; index < result.rows.length; index++) {
+                    trees.push(result.rows.item(index));
+                }
+            });
+            return trees;
+
+        } catch (error) {
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: "happened while trying to get Trees With New Plots from local db(inside tree_tb(getTreesWithNewPlots))",
+                error: JSON.stringify(error),
+                stackTrace: stackTrace
+            }
+            await this.logExceptionLocalDB(JSON.stringify(errorLog));
+            return [];
+        }
+    }
+
     getAllTreesWithNewImage = async () => {
         try {
             const trees = [];
             const results = await this.db.executeSql(
-                `SELECT user_id,sapling_id,image,imageid,remark,uploaded,lat,lng,timestamp FROM ${newImageTable}`
+                `SELECT user_id,sapling_id,image,imageid,remark,uploaded,inActive,lat,lng,timestamp FROM ${newImageTable}`
 
             );
             results.forEach(result => {
@@ -526,11 +585,11 @@ export class LocalDatabase {
         }
     }
 
-    getUnUploadedTreesWithNewImage = async (uploaded) => {
+    getTreesWithNewImage = async (uploaded) => {
         try {
             const trees = [];
             const results = await this.db.executeSql(
-                `SELECT user_id,sapling_id,image,imageid,remark,lat,lng,timestamp,uploaded FROM ${newImageTable} WHERE uploaded='${uploaded}'`
+                `SELECT user_id,sapling_id,image,imageid,remark,lat,lng,timestamp,uploaded,inActive FROM ${newImageTable} WHERE uploaded='${uploaded}'`
 
             );
             //console.log("--------------results----------",results)
@@ -663,7 +722,7 @@ export class LocalDatabase {
 
     deleteShiftLocalDB = async (id) => {
         try {
-            
+
             if (id) {
                 const query = `DELETE FROM ${localShiftTable} WHERE id = ?`;
                 await this.db.executeSql(query, [id]);
@@ -876,11 +935,27 @@ export class LocalDatabase {
     saveImage = async (tree, uploaded) => {
         try {
 
-            const insertQuery =
-                `INSERT OR REPLACE INTO ${newImageTable}(user_id, sapling_id, image,imageid,remark,uploaded,lat,lng,timestamp ) values` +
-                `('${tree.user_id}', '${tree.sapling_id}', '${tree.image.data}','${tree.image.name}','${tree.image.meta.remark}', '${uploaded}', '${tree.lat}','${tree.lng}', '${tree.timestamp}')`;
+            const insertQuery = `
+            INSERT OR REPLACE INTO ${newImageTable} 
+            (user_id, sapling_id, image, imageid, remark, uploaded, inActive, lat, lng, timestamp) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `;
 
-            return this.db.executeSql(insertQuery);
+            const params = [
+                tree.user_id,
+                tree.sapling_id,
+                tree.image?.data,
+                tree.image?.name,
+                tree.image?.meta.remark,
+                uploaded,
+                tree.inActive,
+                tree.lat,
+                tree.lng,
+                tree.timestamp
+            ];
+
+            this.db.executeSql(insertQuery, params);
+            console.log("succesfully inserted image---");
         } catch (error) {
             const stackTrace = error.stack;
             const errorLog = {
@@ -988,12 +1063,18 @@ export class LocalDatabase {
         return;
     }
 
+    deleteAddTreeImagesBySaplingId = async (saplingId) => {
+        const deleteQuery = `DELETE FROM ${newImageTable} where sapling_id = ?`;
+        await this.db.executeSql(deleteQuery, [saplingId]);
+        console.log("deleted sapling newImageTable----", saplingId);
+    }
+
     saveTreeImages = async (treeimage) => {
         try {
             const insertQuery =
                 `INSERT OR REPLACE INTO sapling_images(saplingid, image, imageid, remark, timestamp) values` +
                 `('${treeimage.saplingid}', '${treeimage.image}', '${treeimage.imageid}', '${treeimage.remark.replace("'", "''")}', '${treeimage.timestamp}')`;
-           
+
             return this.db.executeSql(insertQuery);
         } catch (error) {
             const stackTrace = error.stack;
@@ -1490,7 +1571,7 @@ export class LocalDatabase {
             }
         }
         insertQuery = insertQuery + ";";
-       
+
         await this.db.executeSql(insertQuery);
         console.log('trees stored for plot id: ', plot_id)
 

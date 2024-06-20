@@ -80,7 +80,7 @@ const Shifts = ({ navigation }) => {
     useEffect(() => {
         const backAction = () => {
             navigation.goBack();
-            return true; 
+            return true;
         };
 
         const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
@@ -93,7 +93,7 @@ const Shifts = ({ navigation }) => {
     return (
         <ScrollView keyboardShouldPersistTaps='handled' style={shiftsStyles.scrollView}>
 
-            <ShiftTypeModal
+            <ShiftTypeModal     
                 shiftModalVisible={shiftModalVisible}
                 setShiftModalVisible={setShiftModalVisible}
                 onShiftModalClose={() => setPlotModalVisible(true)}
@@ -137,7 +137,7 @@ const Shifts = ({ navigation }) => {
                             >
                                 {Strings.buttonLabels.StartShift}
 
-                            </Button>
+                            </Button> 
                         </View>
 
                         <View style={shiftsStyles.shiftsView}>
@@ -160,7 +160,6 @@ const Shifts = ({ navigation }) => {
                                         );
                                     }}
                                 />
-
                             ) : (
                                 <View style={{ ...commonStyles.borderedDisplay }}>
                                     <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black' }}>
@@ -177,4 +176,3 @@ const Shifts = ({ navigation }) => {
 }
 
 export default Shifts;
-
