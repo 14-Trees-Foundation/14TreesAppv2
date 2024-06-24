@@ -82,7 +82,7 @@ const HomeScreen = ({ navigation }) => {
           disabled={!dataUptoDate}>
           <View style={{ padding: 20, alignItems: 'center' }}>
             <Image
-              source={require('../../assets/icon-add-new-tree.png')}
+              source={require('../../assets/ico-add-new-tree.png')}
               style={{ ...homeStyles.imageSpecs, opacity: dataUptoDate ? 1 : 0.5 }}
             />
             <Text

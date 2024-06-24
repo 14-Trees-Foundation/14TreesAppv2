@@ -109,7 +109,18 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
     }
 
     const onSave = async () => {
-
+        if (saplingid === null || selectedTreeType === null || selectedPlot === null || (selectedTreeType && Object.keys(selectedTreeType).length === 0) || (selectedPlot && Object.keys(selectedPlot).length === 0)) {
+            Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
+            return;
+        }
+        else if (images.length === 0) {
+            Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.NoImage);
+            return;
+        } else if (lat === 0 || lng === 0 || lat === null || lng === null) {
+            Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.NoTreeLoaction);
+            return;
+        }
+        
         if (mode === treeFormModes.addTree || (mode === treeFormModes.localEdit && inSaplingId !== saplingid)) {
             let existsLocally = await Utils.checkIfSaplingExistsLocally(saplingid);
 
@@ -138,17 +149,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                 }
             }
         }
-        if (saplingid === null || selectedTreeType === null || selectedPlot === null || (selectedTreeType && Object.keys(selectedTreeType).length === 0) || (selectedPlot && Object.keys(selectedPlot).length === 0)) {
-            Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
-            return;
-        }
-        else if (images.length === 0) {
-            Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.NoImage);
-            return;
-        } else if (lat === 0 || lng === 0 || lat === null || lng === null) {
-            Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.NoTreeLoaction);
-            return;
-        }
+
         else {
             try {
                 const tree = {
@@ -186,7 +187,10 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
         <ScrollView
             keyboardShouldPersistTaps='handled'
             scrollEnabled={true}
-            style={treeFormModalStyles.container}>
+            style={{
+                ...treeFormModalStyles.container,
+                backgroundColor: 'white',
+            }}>
 
             <TextInput
                 defaultValue={saplingid}
@@ -225,17 +229,19 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
             />
 
 
-            <View style={{ ...treeFormModalStyles.imageContainer }}>
+            <View style={{ ...treeFormModalStyles.imageContainer, marginTop: 5 }}>
                 <TouchableOpacity
-                    style={treeFormModalStyles.imagePicker}
+                    style={{ ...treeFormModalStyles.imagePicker }}
                     onPress={() => {
                         setGalleryModalVisible(true);
                     }}>
                     {!showImage ? (
-                        <Image
-                            source={require('../../assets/camera.png')}
-                            style={treeFormModalStyles.cameraIcon}
-                        />
+                        <View style={{ ...treeFormModalStyles.cameraIcon, justifyContent: 'center', alignItems: 'center' }}>
+                            <Image
+                                source={require('../../assets/icon-bw-camera.png')}
+                            />
+                        </View>
+
                     ) : (
                         <Image
                             source={{
@@ -274,7 +280,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                 <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <View style={{ backgroundColor: 'white', padding: 40 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 10 }}>
-                           
+
                             <TouchableOpacity onPress={() => pickImage(0)} style={{ backgroundColor: "green", padding: 10, }}>
                                 <Text style={{ color: "white", fontWeight: 'bold', fontSize: 15 }}> {Strings.buttonLabels.openCamera}</Text>
                             </TouchableOpacity>

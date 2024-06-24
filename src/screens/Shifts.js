@@ -23,7 +23,7 @@ export const shiftTypes = {
 const Shifts = ({ navigation }) => {
 
     const [finalList, setFinalList] = useState(null);
-    const { lightTheme } = useContext(GlobalContext);
+    const { lightTheme, userName } = useContext(GlobalContext);
 
     const [shiftModalVisible, setShiftModalVisible] = useState(false);
     const [mode, setMode] = useState(null);
@@ -93,7 +93,7 @@ const Shifts = ({ navigation }) => {
     return (
         <ScrollView keyboardShouldPersistTaps='handled' style={shiftsStyles.scrollView}>
 
-            <ShiftTypeModal     
+            <ShiftTypeModal
                 shiftModalVisible={shiftModalVisible}
                 setShiftModalVisible={setShiftModalVisible}
                 onShiftModalClose={() => setPlotModalVisible(true)}
@@ -116,7 +116,7 @@ const Shifts = ({ navigation }) => {
 
                 (
                     <>
-                        <View style={shiftsStyles.buttonContainer}>
+                        <View style={{ flex: 1, marginLeft: 22, marginTop: 24, marginBottom: 10 }}>
                             <Button
                                 icon={() => (
                                     <View style={Iconstyles.buttonPosition}>
@@ -132,12 +132,13 @@ const Shifts = ({ navigation }) => {
                                     setShiftModalVisible(true); //when this is true then Custommodal is visible
                                     setMode(treeFormModes.startShift)
                                 }}
+                                style={{ width: "65%", borderRadius: 13 }}
                                 contentStyle={Iconstyles.buttonContent}
                                 labelStyle={Iconstyles.buttonLabel}
                             >
                                 {Strings.buttonLabels.StartShift}
 
-                            </Button> 
+                            </Button>
                         </View>
 
                         <View style={shiftsStyles.shiftsView}>
@@ -145,9 +146,22 @@ const Shifts = ({ navigation }) => {
                                 <FlatList
                                     style={shiftsStyles.flatList}
                                     ListHeaderComponent={() => (
-                                        <View style={{ ...commonStyles.borderedDisplay }}>
-                                            <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black', }}>
-                                                {Strings.messages.AllShifts}
+                                        <View style={{
+                                            marginLeft: 5,
+                                            padding: 3,
+                                            marginBottom: 20,
+                                        }}>
+                                            <Text style={{
+                                                fontSize: 20,
+                                                fontFamily: 'Inter-Regular',
+                                                alignContent: "flex-start",
+                                                justifyContent: 'center',
+                                                alignSelf: "flex-start",
+                                                marginLeft: 22,
+
+                                                color: '#52525C', color: lightTheme ? '#52525C' : 'black', fontWeight: !lightTheme ? "bold" : null
+                                            }}>
+                                                {Strings.messages.AllShifts} : {userName}
                                             </Text>
                                         </View>
                                     )}
@@ -160,10 +174,13 @@ const Shifts = ({ navigation }) => {
                                         );
                                     }}
                                 />
+
                             ) : (
-                                <View style={{ ...commonStyles.borderedDisplay }}>
-                                    <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black' }}>
-                                        {Strings.messages.NoShiftsFound}
+                                <View
+                                //style={{ ...commonStyles.borderedDisplay }}
+                                >
+                                    <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black', fontWeight: !lightTheme ? "bold" : null }}>
+                                        {Strings.messages.NoShiftsFound} : {userName}
                                     </Text>
                                 </View>
                             )}
@@ -171,8 +188,9 @@ const Shifts = ({ navigation }) => {
                     </>
                 )
             }
-        </ScrollView>
+        </ScrollView >
     )
 }
 
 export default Shifts;
+

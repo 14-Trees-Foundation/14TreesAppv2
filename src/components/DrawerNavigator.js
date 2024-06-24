@@ -4,10 +4,10 @@ import EditTreeScreen from '../screens/EditTree';
 import VerifyusersScreen from '../screens/VerifyUsers';
 import { stackNavRef } from '../App';
 import GlobalContext from "../context/GlobalContext ";
-import { CustomButtonStyles, commonStyles, drawerNavigatorStyles } from "../services/Styles";
+import { CustomButtonStyles, commonStyles, drawerNavigatorStyles, ScreenHeaderContentStyles } from "../services/Styles";
 import { useState, useEffect, useCallback, useContext } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { View, Image, Text, BackHandler, Alert } from "react-native";
+import { View, Image, Text, BackHandler, TouchableOpacity } from "react-native";
 import { Constants, Utils, getImageSourceObject, logoSrc } from "../services/Utils";
 import { DrawerContentScrollView, DrawerItemList, createDrawerNavigator, } from '@react-navigation/drawer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,6 +16,7 @@ import Shifts from "../screens/Shifts";
 import ScreenHeaderContent from './ScreenHeaderContent';
 import { Button } from 'react-native-paper';
 const Drawer = createDrawerNavigator();
+
 
 const fillInUserDetails = async (setIsAdmin, setUserDetails) => {
     let storedUserDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
@@ -40,6 +41,7 @@ const logout = async navigationRef => {
 };
 
 const DrawerContent = (props) => {
+  
     let { isAdmin, userDetails } = props;
 
     return (
@@ -89,7 +91,8 @@ export const DrawerNavigator = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const navigationRef = stackNavRef;
     const [userDetails, setUserDetails] = useState(null);
-    const { langChanged, lightTheme } = useContext(GlobalContext);
+    const [toggleMode, setToggleMode] = useState(false); //dark by default
+    const { langChanged, lightTheme,setLightTheme } = useContext(GlobalContext);
 
     useEffect(() => {
 
@@ -160,6 +163,21 @@ export const DrawerNavigator = () => {
                     },
                     headerRight: () => (
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 10 }}>
+                            {/* <TouchableOpacity
+                                style={{ marginRight: 15 }}
+                                onPress={() => {
+                                    setToggleMode(!toggleMode);
+                                    setLightTheme(!lightTheme);
+                                }}
+                            >
+                                {toggleMode ? <Image
+                                    source={require('../../assets/icon-brightness-on.png')}
+                                    style={ScreenHeaderContentStyles.modeIcon}
+                                /> : <Image
+                                    source={require('../../assets/icon-brightness.png')}
+                                    style={ScreenHeaderContentStyles.modeIcon}
+                                />}
+                            </TouchableOpacity> */}
                             <View style={{ width: 40, height: 35, marginRight: 6, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
                                 <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
                             </View>
@@ -185,6 +203,21 @@ export const DrawerNavigator = () => {
                         },
                         headerRight: () => (
                             <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 10 }}>
+                                <TouchableOpacity
+                                    style={{ marginRight: 15 }}
+                                    onPress={() => {
+                                        setToggleMode(!toggleMode);
+                                        setLightTheme(!lightTheme);
+                                    }}
+                                >
+                                    {toggleMode ? <Image
+                                        source={require('../../assets/icon-brightness-on.png')}
+                                        style={ScreenHeaderContentStyles.modeIcon}
+                                    /> : <Image
+                                        source={require('../../assets/icon-brightness.png')}
+                                        style={ScreenHeaderContentStyles.modeIcon}
+                                    />}
+                                </TouchableOpacity>
                                 <View style={{ width: 40, height: 35, marginRight: 6, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
                                     <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
                                 </View>

@@ -66,6 +66,12 @@ const UpdatePlotForm = ({ onFetchData, finalShiftData }) => {
 
     async function onSave() {
 
+        if (saplingid === null || plotSelected === null || newPlotSelected === null || (plotSelected && Object.keys(plotSelected).length === 0) ||
+            (newPlotSelected && Object.keys(newPlotSelected).length === 0)) {
+            Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
+            return;
+        }
+
         const isPresentinLiveDB = await Utils.checkIfSaplingExistsInLiveDB(saplingid);
         if (!isPresentinLiveDB) {
             Alert.alert(Strings.alertMessages.invalidSaplingId, Strings.labels.SaplingId +
@@ -99,7 +105,7 @@ const UpdatePlotForm = ({ onFetchData, finalShiftData }) => {
             timestamp: new Date().toISOString()
         }
 
-        console.log("update plot data----", treeData);
+        //console.log("update plot data----", treeData);
         setTreesPlanted(treesPlanted + 1);
         await Utils.saveUpdatePlot(treeData);
         setPlaySound(true);
@@ -111,7 +117,7 @@ const UpdatePlotForm = ({ onFetchData, finalShiftData }) => {
 
     return (
         <View style={shiftStyles.buttonContainerOuter}>
-            <View style={{ ...shiftStyles.buttonContainerInner, marginTop: 2, marginBottom: 2 }}>
+            <View style={{ ...shiftStyles.buttonContainerInner, marginTop: 0, marginBottom: 2 }}>
                 <View style={{ marginLeft: 12, marginTop: 3, flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
                         defaultValue={saplingid}
@@ -145,30 +151,30 @@ const UpdatePlotForm = ({ onFetchData, finalShiftData }) => {
                                 justifyContent: 'center', // centers the text vertically
                                 alignItems: 'center', // centers the text horizontally
                                 backgroundColor: '#1D4ED8',
-                                height: 52,
+                                height: 50,
                                 marginRight: 4
                             }
                         ]}
                     >
-                        <Text style={CustomButtonStyles.buttonLabel}>
+                        <Text style={{ ...CustomButtonStyles.buttonLabel, paddingTop: 0 }}>
                             {Strings.buttonLabels.Submit}
                         </Text>
                     </TouchableOpacity>
                 </View>
 
                 {saplingid &&
-                        existsInLocalDB ? (
+                    existsInLocalDB ? (
+                    <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>
+                        {saplingid} {Strings.alertMessages.alreadyExists}
+                    </Text>
+                ) : (
+                    saplingid && !existsInLiveDB && (
                         <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>
-                            {saplingid} {Strings.alertMessages.alreadyExists}
+                            {saplingid} {Strings.alertMessages.doesNotExist}
                         </Text>
-                    ) : (
-                        saplingid && !existsInLiveDB && (
-                            <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>
-                                {saplingid} {Strings.alertMessages.doesNotExist}
-                            </Text>
-                        )
                     )
-                    }
+                )
+                }
             </View>
         </View>
     );

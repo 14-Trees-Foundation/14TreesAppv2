@@ -4,7 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { StackedIcons } from '../components/Components';
 import { Strings } from '../services/Strings';
 import { Utils } from '../services/Utils';
-import { Iconstyles, commonStyles, shiftStyles } from '../services/Styles';
+import { CustomButtonStyles, Iconstyles, commonStyles, shiftStyles } from '../services/Styles';
 import GlobalContext from '../context/GlobalContext ';
 import { treeFormModes } from '../components/TreeForm';
 import LoadingScreen from './LoadingScreen';
@@ -30,7 +30,7 @@ const UpdatePlotShift = ({ navigation }) => {
     finalRef.current.shiftTime = shiftTime;
     finalRef.current.treesPlanted = treesPlanted;
     finalRef.current.plotselected = plotSelected ? plotSelected.name : null;
-
+    
     useEffect(() => {
         const backAction = () => {
             Alert.alert(
@@ -139,9 +139,9 @@ const UpdatePlotShift = ({ navigation }) => {
 
         return (
             <View style={shiftStyles.buttonContainerOuter}>
-                <View style={{ ...shiftStyles.buttonContainerInner, marginTop: 12 }}>
+                <View style={{ ...shiftStyles.buttonContainerInner, marginTop: 12, marginBottom: 0 }}>
                     <View style={shiftStyles.buttonRow}>
-                        <View style={shiftStyles.buttonRowInner}>
+                        <View style={{ ...shiftStyles.buttonRowInner, marginRight: 5 }}>
                             <Button
                                 icon={() => (
                                     <MCIcon name="wifi-sync" size={30} color="white" />
@@ -153,24 +153,21 @@ const UpdatePlotShift = ({ navigation }) => {
                                         Strings.screenNames.getString('SyncDisplay', Strings.english)
                                     )
                                 }}
-                                contentStyle={Iconstyles.buttonContent2}
-                                labelStyle={Iconstyles.buttonLabel}
+                                labelStyle={CustomButtonStyles.buttonLabel}
+                                style={CustomButtonStyles.button}
                             >
                                 {Strings.buttonLabels.SyncData}
 
                             </Button>
                         </View>
 
-                        <View style={{ width: '40%' }}>
+                        <View style={{ width: '50%', marginLeft: 5 }}>
                             <Button
-                                icon={() => (
-                                    <MCIcon name="check" size={30} color="white" />
-                                )}
                                 mode="contained"
                                 buttonColor='#059636'
                                 onPress={saveShiftToDB}
-                                contentStyle={Iconstyles.buttonContent2}
-                                labelStyle={Iconstyles.buttonLabel}
+                                labelStyle={CustomButtonStyles.buttonLabel}
+                                style={CustomButtonStyles.button}
                             >
                                 {Strings.buttonLabels.Done}
 
@@ -225,22 +222,26 @@ const UpdatePlotShift = ({ navigation }) => {
                 </View>
 
 
-                <View style={shiftStyles.buttonContainerOuter}>
-                    <View style={{ ...shiftStyles.buttonContainerInner, marginTop: 2, marginBottom: 2 ,}}>
-                        <View style={{...shiftStyles.treeListContainer}}>
+                <View style={{ ...shiftStyles.buttonContainerOuter, marginBottom: 12 }}>
+                    <View style={{ ...shiftStyles.buttonContainerInner, marginTop: 2, marginBottom: 2 }}>
+                        <View style={{ ...shiftStyles.treeListContainer }}>
 
                             <FlatList
                                 style={shiftStyles.flatList}
                                 scrollEnabled={false}
                                 ListEmptyComponent={() => (
-                                    <View style={commonStyles.borderedDisplay}>
+                                    <View
+                                    //style={commonStyles.borderedDisplay}
+                                    >
                                         <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black', }}>
                                             {Strings.messages.NoTreesFound}
                                         </Text>
                                     </View>
                                 )}
                                 ListHeaderComponent={finalList.length > 0 ? () => (
-                                    <View style={commonStyles.borderedDisplay}>
+                                    <View
+                                    //style={commonStyles.borderedDisplay}
+                                    >
                                         <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black' }}>
                                             {Strings.messages.ClickToDelete}
                                         </Text>
@@ -249,25 +250,25 @@ const UpdatePlotShift = ({ navigation }) => {
                                 data={finalList}
 
                                 renderItem={({ item, index }) => {
-                                    if (index % 4 === 0) {
-                                        const trees = [
-                                            item,
-                                            finalList[index + 1] || null,
-                                            finalList[index + 2] || null,
-                                            finalList[index + 3] || null,
-                                        ];
-                                        return (<TreeRow
-                                            tree1={trees[0]}
-                                            tree2={trees[1]}
-                                            tree3={trees[2]}
-                                            tree4={trees[3]}
-                                            modalMode={true}
-                                            shiftTypeOfTrees={shiftType}
-                                            shiftID={shiftID}
-                                            handleSaplingChanges={fetchSaplingsForShift}
-                                        />);
-                                    }
-                                    return null;
+                                    //if (index % 4 === 0) {
+                                    const trees = [
+                                        item,
+                                        // finalList[index + 1] || null,
+                                        // finalList[index + 2] || null,
+                                        // finalList[index + 3] || null,
+                                    ];
+                                    return (<TreeRow
+                                        tree={trees[0]}
+                                        // tree2={trees[1]}
+                                        // tree3={trees[2]}
+                                        // tree4={trees[3]}
+                                        modalMode={true}
+                                        shiftTypeOfTrees={shiftType}
+                                        shiftID={shiftID}
+                                        handleSaplingChanges={fetchSaplingsForShift}
+                                    />);
+                                    // }
+                                    // return null;
                                 }}
                                 keyExtractor={(item, index) => `${item.sapling_id}-${index}`}
                             />

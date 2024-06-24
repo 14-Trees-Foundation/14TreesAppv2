@@ -4,7 +4,7 @@ import { Strings } from "../services/Strings";
 import { Utils } from "../services/Utils";
 import { CoordinateSetter } from "./CoordinateSetter";
 import { CustomDropdown } from "./CustomDropdown";
-import { CustomButtonStyles, commonStyles, treeFormStyles } from "../services/Styles";
+import { CustomButtonStyles, commonStyles, treeFormModalStyles, treeFormStyles } from "../services/Styles";
 import Icon from 'react-native-vector-icons/Ionicons';
 import GlobalContext from '../context/GlobalContext ';
 import { Button } from 'react-native-paper';
@@ -192,7 +192,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         <ScrollView
             keyboardShouldPersistTaps='handled'
             scrollEnabled={true}
-            style={treeFormStyles.detailsContainerOuter} >
+            style={{ ...treeFormStyles.detailsContainerOuter, marginBottom: 10, marginHorizontal: 0 }} >
             <View style={{ margin: 4, borderRadius: 10 }}>
 
 
@@ -252,13 +252,15 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                             }}
                         >
 
-                            {!showImage ? <Image
-                                source={require('../../assets/camera.png')}
-                                style={treeFormStyles.emptyImage}
-                            /> : <Image
-                                source={{ uri: `data:image/jpeg;base64,${images[images.length - 1].data}` }}
-                                style={treeFormStyles.imageExists}
-                            />
+                            {!showImage ? <View style={{ ...treeFormModalStyles.cameraIcon, justifyContent: 'center', alignItems: 'center' }}>
+                                <Image
+                                    source={require('../../assets/icon-bw-camera.png')}
+                                />
+                            </View>
+                                : <Image
+                                    source={{ uri: `data:image/jpeg;base64,${images[images.length - 1].data}` }}
+                                    style={treeFormStyles.imageExists}
+                                />
                             }
 
                             {showImage && <TouchableOpacity style={treeFormStyles.imageDelete} onPress={() => Utils.confirmAction(() => handleDeleteItem(images[images.length - 1].name), Strings.alertMessages.confirmDeleteImage)}>

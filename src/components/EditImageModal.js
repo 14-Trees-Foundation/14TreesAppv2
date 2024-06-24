@@ -109,10 +109,10 @@ function EditImageModal({ modalVisible, setModalVisible, saplingID, onFetchData 
 
     const checkIfExists = async () => {
         //console.log("compare",saplingID, saplingid );
-        if (saplingid == null ||saplingID === saplingid) {
+        if (saplingid == null || saplingID === saplingid) {
             return
         }
-        
+
         let existsLocally = await Utils.checkIfImageAddedAlready(saplingid);
         console.log("checking existsLocally---", existsLocally);
         if (existsLocally) {
@@ -222,147 +222,154 @@ function EditImageModal({ modalVisible, setModalVisible, saplingID, onFetchData 
                 }
                 onRequestClose={() => setModalVisible(false)}
             >
-                <ScrollView keyboardShouldPersistTaps="handled" style={{ ...commonStyles.borderedDisplay, ...customModalStyles.centeredView }}>
-                    <View style={{ ...customModalStyles.modalView, marginTop: 4 }}>
+                <ScrollView keyboardShouldPersistTaps="handled" style={{ ...customModalStyles.centeredView, marginTop: 180 }}>
+                    <View style={customModalStyles.modalView}>
+                        <View
+                            style={{
+                                ...treeFormModalStyles.container,
+                                backgroundColor: 'white',
+                            }}>
 
-                        <TextInput
-                            defaultValue={saplingid}
-                            style={[
-                                commonStyles.txtInput,
-                                treeFormModalStyles.saplingIdInput(lightTheme, saplingid),
+                            <TextInput
+                                defaultValue={saplingid}
+                                style={[
+                                    commonStyles.txtInput,
+                                    treeFormModalStyles.saplingIdInput(lightTheme, saplingid),
 
-                            ]}
-                            placeholder={Strings.labels.SaplingId}
-                            placeholderTextColor={'black'}
-                            onChangeText={text => {
-                                setExistsInLocalDB(false);
-                                setExistsInLiveDB(true);
-                                setSaplingId(text);
+                                ]}
+                                placeholder={Strings.labels.SaplingId}
+                                placeholderTextColor={'black'}
+                                onChangeText={text => {
+                                    setExistsInLocalDB(false);
+                                    setExistsInLiveDB(true);
+                                    setSaplingId(text);
 
-                            }}
-                            onBlur={checkIfExists}
-                        />
+                                }}
+                                onBlur={checkIfExists}
+                            />
 
-                        {saplingid &&
-                            existsInLocalDB ? (
-                            <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>
-                                {saplingid} {Strings.alertMessages.alreadyExists}
-                            </Text>
-                        ) : (
-                            saplingid && !existsInLiveDB && (
+                            {saplingid &&
+                                existsInLocalDB ? (
                                 <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>
-                                    {saplingid} {Strings.alertMessages.doesNotExist}
+                                    {saplingid} {Strings.alertMessages.alreadyExists}
                                 </Text>
+                            ) : (
+                                saplingid && !existsInLiveDB && (
+                                    <Text style={{ ...commonStyles.text5, color: 'red', fontWeight: 'bold', padding: 5 }}>
+                                        {saplingid} {Strings.alertMessages.doesNotExist}
+                                    </Text>
+                                )
                             )
-                        )
-                        }
+                            }
 
 
 
-                        <View style={{ ...treeFormModalStyles.imageContainer, marginLeft: 4, marginTop: 4 }}>
-                            <TouchableOpacity
-                                style={{ ...treeFormModalStyles.imagePicker }}
-                                onPress={() => {
-                                    setGalleryModalVisible(true);
-                                }}>
+                            <View style={{ ...treeFormModalStyles.imageContainer, marginLeft: 16, marginTop: 4 }}>
+                                <TouchableOpacity
+                                    style={{ ...treeFormModalStyles.imagePicker }}
+                                    onPress={() => {
+                                        setGalleryModalVisible(true);
+                                    }}>
 
-                                {!showImage ? (
-                                    <Image
-                                        source={require('../../assets/camera.png')}
-                                        style={treeFormModalStyles.cameraIcon}
-                                    />
-                                ) : (
+                                    {!showImage ? (
+                                        <View style={{ ...treeFormModalStyles.cameraIcon, justifyContent: 'center', alignItems: 'center' }}>
+                                            <Image
+                                                source={require('../../assets/icon-bw-camera.png')}
+                                            />
+                                        </View>
+                                    ) : (
 
-                                    <Image
-                                        source={{
-                                            uri: `data:image/jpeg;base64,${image.data}`,
-                                        }}
-                                        style={treeFormModalStyles.image}
-                                    />
-                                )}
-
-                                {showImage && (
-                                    <TouchableOpacity
-                                        style={treeFormModalStyles.deleteButton}
-                                        onPress={() =>
-                                            Utils.confirmAction(
-                                                () => handleDeleteItem(image.name),
-                                                Strings.alertMessages.confirmDeleteImage,
-                                            )
-                                        }>
                                         <Image
-                                            source={require('../../assets/icondelete.png')} // Replace with your delete icon image
-                                            style={treeFormModalStyles.deleteIcon} // Adjust the icon dimensions and margin
+                                            source={{
+                                                uri: `data:image/jpeg;base64,${image.data}`,
+                                            }}
+                                            style={treeFormModalStyles.image}
                                         />
-                                    </TouchableOpacity>
-                                )}
-                            </TouchableOpacity>
-                        </View>
+                                    )}
 
-                        <Modal
-                            animationType="fade"
-                            transparent={true}
-                            visible={galleryModalVisible}
-                            onRequestClose={() => {
-                                setGalleryModalVisible(false);
-                            }}
-                        >
-                            <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                                <View style={{ backgroundColor: 'white', padding: 40 }}>
-                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', margin: 10 }}>
-                                        <TouchableOpacity onPress={() => pickImage(0)} style={{ backgroundColor: "green", padding: 10, }}>
-                                            <Text style={{ color: "white", fontWeight: 'bold', fontSize: 15 }}> {Strings.buttonLabels.openCamera}</Text>
+                                    {showImage && (
+                                        <TouchableOpacity
+                                            style={treeFormModalStyles.deleteButton}
+                                            onPress={() =>
+                                                Utils.confirmAction(
+                                                    () => handleDeleteItem(image.name),
+                                                    Strings.alertMessages.confirmDeleteImage,
+                                                )
+                                            }>
+                                            <Image
+                                                source={require('../../assets/icondelete.png')} // Replace with your delete icon image
+                                                style={treeFormModalStyles.deleteIcon} // Adjust the icon dimensions and margin
+                                            />
                                         </TouchableOpacity>
-                                        <TouchableOpacity onPress={() => pickImage(1)} style={{ backgroundColor: "green", padding: 10, }}>
-                                            <Text style={{ color: "white", fontWeight: 'bold', fontSize: 15 }}> {Strings.buttonLabels.openGallery}</Text>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+
+                            <Modal
+                                animationType="fade"
+                                transparent={true}
+                                visible={galleryModalVisible}
+                                onRequestClose={() => {
+                                    setGalleryModalVisible(false);
+                                }}
+                            >
+                                <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                                    <View style={{ backgroundColor: 'white', padding: 40 }}>
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 10 }}>
+                                            <TouchableOpacity onPress={() => pickImage(0)} style={{ backgroundColor: "green", padding: 10, }}>
+                                                <Text style={{ color: "white", fontWeight: 'bold', fontSize: 15 }}> {Strings.buttonLabels.openCamera}</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity onPress={() => pickImage(1)} style={{ backgroundColor: "green", padding: 10, }}>
+                                                <Text style={{ color: "white", fontWeight: 'bold', fontSize: 15 }}> {Strings.buttonLabels.openGallery}</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                        <TouchableOpacity style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }} onPress={() => setGalleryModalVisible(false)}  >
+                                            <Icon name="close-circle" size={28} color="red" />
                                         </TouchableOpacity>
                                     </View>
-                                    <TouchableOpacity style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }} onPress={() => setGalleryModalVisible(false)}  >
-                                        <Icon name="close-circle" size={28} color="red" />
-                                    </TouchableOpacity>
-                                </View>
-
-                            </View>
-                        </Modal>
-
-                        <CoordinateSetter
-                            inLat={lat}
-                            inLng={lng}
-                            onSetLat={item => setlat(item)}
-                            onSetLng={item => setlng(item)}
-                        />
-
-                        <View style={CustomButtonStyles.container}>
-                            <View style={CustomButtonStyles.buttonRow}>
-                                <View style={CustomButtonStyles.buttonContainer}>
-                                    <Button
-                                        mode="contained"
-                                        buttonColor='red'
-                                        labelStyle={CustomButtonStyles.buttonLabel}
-                                        style={CustomButtonStyles.button}
-                                        onPress={() => {
-                                            setModalVisible(false)
-                                            onFetchData()
-                                        }}
-                                    >
-                                        {Strings.buttonLabels.cancel}
-                                    </Button>
 
                                 </View>
-                                <View style={CustomButtonStyles.buttonContainer}>
-                                    <Button
-                                        onPress={onSave}
-                                        mode="contained"
-                                        buttonColor='#1D4ED8'
-                                        labelStyle={CustomButtonStyles.buttonLabel}
-                                        style={CustomButtonStyles.button}
-                                    >
-                                        {Strings.buttonLabels.Submit}
-                                    </Button>
+                            </Modal>
+
+                            <CoordinateSetter
+                                inLat={lat}
+                                inLng={lng}
+                                onSetLat={item => setlat(item)}
+                                onSetLng={item => setlng(item)}
+                            />
+
+                            <View style={CustomButtonStyles.container}>
+                                <View style={CustomButtonStyles.buttonRow}>
+                                    <View style={CustomButtonStyles.buttonContainer}>
+                                        <Button
+                                            mode="contained"
+                                            buttonColor='red'
+                                            labelStyle={CustomButtonStyles.buttonLabel}
+                                            style={CustomButtonStyles.button}
+                                            onPress={() => {
+                                                setModalVisible(false)
+                                                onFetchData()
+                                            }}
+                                        >
+                                            {Strings.buttonLabels.cancel}
+                                        </Button>
+
+                                    </View>
+                                    <View style={CustomButtonStyles.buttonContainer}>
+                                        <Button
+                                            onPress={onSave}
+                                            mode="contained"
+                                            buttonColor='#1D4ED8'
+                                            labelStyle={CustomButtonStyles.buttonLabel}
+                                            style={CustomButtonStyles.button}
+                                        >
+                                            {Strings.buttonLabels.Submit}
+                                        </Button>
+                                    </View>
                                 </View>
                             </View>
+
                         </View>
-
                     </View>
                 </ScrollView>
             </Modal >

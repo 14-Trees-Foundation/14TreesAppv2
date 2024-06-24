@@ -4,7 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { StackedIcons } from '../components/Components';
 import { Strings } from '../services/Strings';
 import { Utils } from '../services/Utils';
-import { Iconstyles, commonStyles, shiftStyles } from '../services/Styles';
+import { CustomButtonStyles, Iconstyles, commonStyles, shiftStyles } from '../services/Styles';
 import GlobalContext from '../context/GlobalContext ';
 import ShiftHeader from '../components/ShiftHeader';
 import AddTreeModal from '../components/AddTreeModal';
@@ -143,16 +143,11 @@ const AddTreeShift = ({ navigation }) => {
 
         return (
             <View style={shiftStyles.buttonContainerOuter}>
-                <View style={shiftStyles.buttonContainerInner}>
+                <View style={{ ...shiftStyles.buttonContainerInner, marginHorizontal: 65, }}>
 
                     <Button
                         icon={() => (
-                            <View style={Iconstyles.buttonPosition}>
-                                <StackedIcons
-                                    names={['plus', 'tree']}
-                                    styles={[{ opacity: 0.9, position: 'absolute' }, { opacity: 0.5, position: 'absolute' }]}
-                                />
-                            </View>
+                            <MCIcon name="plus" size={30} color="white" />
                         )}
                         mode="contained"
                         buttonColor='#059636'
@@ -161,8 +156,8 @@ const AddTreeShift = ({ navigation }) => {
                             setModalVisible(true);
                             setSaplingID(null);
                         }}
-                        contentStyle={Iconstyles.buttonContent}
-                        labelStyle={Iconstyles.buttonLabel}
+                        labelStyle={CustomButtonStyles.buttonLabel}
+                        style={CustomButtonStyles.button}
                     >
                         {Strings.buttonLabels.AddNewTree}
 
@@ -170,7 +165,7 @@ const AddTreeShift = ({ navigation }) => {
                 </View>
 
                 <View style={shiftStyles.buttonRow}>
-                    <View style={shiftStyles.buttonRowInner}>
+                    <View style={{ ...shiftStyles.buttonRowInner, marginRight: 5 }}>
                         <Button
                             icon={() => (
                                 <MCIcon name="wifi-sync" size={30} color="white" />
@@ -182,24 +177,21 @@ const AddTreeShift = ({ navigation }) => {
                                     Strings.screenNames.getString('SyncDisplay', Strings.english)
                                 )
                             }}
-                            contentStyle={Iconstyles.buttonContent2}
-                            labelStyle={Iconstyles.buttonLabel}
+                            labelStyle={CustomButtonStyles.buttonLabel}
+                            style={CustomButtonStyles.button}
                         >
                             {Strings.buttonLabels.SyncData}
 
                         </Button>
                     </View>
 
-                    <View style={{ width: '40%' }}>
+                    <View style={{ width: '50%', marginLeft: 5 }}>
                         <Button
-                            icon={() => (
-                                <MCIcon name="check" size={30} color="white" />
-                            )}
                             mode="contained"
                             buttonColor='#059636'
                             onPress={saveShiftToDB}
-                            contentStyle={Iconstyles.buttonContent2}
-                            labelStyle={Iconstyles.buttonLabel}
+                            labelStyle={CustomButtonStyles.buttonLabel}
+                            style={CustomButtonStyles.button}
                         >
                             {Strings.buttonLabels.Done}
 
@@ -243,7 +235,7 @@ const AddTreeShift = ({ navigation }) => {
 
                     {!modalVisible && !plotModalVisible && <RenderHeader2 />}
 
-                    <AddTreeModal    
+                    <AddTreeModal
                         modalVisible={modalVisible}
                         setModalVisible={setModalVisible}
                         mode={mode}
@@ -262,42 +254,49 @@ const AddTreeShift = ({ navigation }) => {
 
 
                 {
-                    !modalVisible && !plotModalVisible && <View style={shiftStyles.treeListContainer}>
-                        <FlatList
-                            style={shiftStyles.flatList}
-                            scrollEnabled={false}
-                            ListEmptyComponent={() => (
-                                <View style={commonStyles.borderedDisplay}>
-                                    <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black', }}>
-                                        {Strings.messages.NoTreesFound}
-                                    </Text>
-                                </View>
-                            )}
-                            data={finalList}
+                    !modalVisible && !plotModalVisible &&
+                    <View style={{ ...shiftStyles.buttonContainerOuter, marginBottom: 12 }}>
+                        <View style={{ ...shiftStyles.buttonContainerInner, marginTop: 0, marginBottom: 2 }}>
+                            <View style={shiftStyles.treeListContainer}>
+                                <FlatList
+                                    style={shiftStyles.flatList}
+                                    scrollEnabled={false}
+                                    ListEmptyComponent={() => (
+                                        <View
+                                        //style={commonStyles.borderedDisplay}
+                                        >
+                                            <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black', }}>
+                                                {Strings.messages.NoTreesFound}
+                                            </Text>
+                                        </View>
+                                    )}
+                                    data={finalList}
 
-                            renderItem={({ item, index }) => {
-                                if (index % 4 === 0) {
-                                    const trees = [
-                                        item,
-                                        finalList[index + 1] || null,
-                                        finalList[index + 2] || null,
-                                        finalList[index + 3] || null,
-                                    ];
-                                    return (<TreeRow
-                                        tree1={trees[0]}
-                                        tree2={trees[1]}
-                                        tree3={trees[2]}
-                                        tree4={trees[3]}
-                                        modalMode={true}
-                                        shiftTypeOfTrees={shiftType}
-                                        handleSaplingChanges={handleSaplingChanges}
-                                        shiftID={shiftID}
-                                    />);
-                                }
-                                return null;
-                            }}
-                            keyExtractor={(item, index) => `${item.sapling_id}-${index}`}
-                        />
+                                    renderItem={({ item, index }) => {
+                                        // if (index % 4 === 0) {
+                                        const trees = [
+                                            item,
+                                            // finalList[index + 1] || null,
+                                            // finalList[index + 2] || null,
+                                            // finalList[index + 3] || null,
+                                        ];
+                                        return (<TreeRow
+                                            tree={trees[0]}
+                                            // tree2={trees[1]}
+                                            // tree3={trees[2]}
+                                            // tree4={trees[3]}
+                                            modalMode={true}
+                                            shiftTypeOfTrees={shiftType}
+                                            handleSaplingChanges={handleSaplingChanges}
+                                            shiftID={shiftID}
+                                        />);
+                                        // }
+                                        // return null;
+                                    }}
+                                    keyExtractor={(item, index) => `${item.sapling_id}-${index}`}
+                                />
+                            </View>
+                        </View>
                     </View>
                 }
 

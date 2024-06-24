@@ -1,4 +1,4 @@
-import { View, Text, Modal, StyleSheet, Dimensions, ScrollView, ToastAndroid, Alert } from 'react-native';
+import { View, Text, Modal, StyleSheet, Dimensions, ScrollView, Image, Alert } from 'react-native';
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Utils, Constants } from '../services/Utils';
 import { Strings } from '../services/Strings';
@@ -13,7 +13,7 @@ import { shiftTypes } from '../screens/Shifts';
 
 
 const PlotSelectModal = ({ plotModalVisible, setPlotModalVisible, mode, onFetchData }) => {
-    const { setPlaySound, setShiftDone, setTreesPlanted, treesPlanted, plotSelected, shiftType, setPlotSelected, shiftID, setShiftID, lightTheme } = useContext(GlobalContext);
+    const { setShiftDone, setTreesPlanted, treesPlanted, plotSelected, shiftType, setPlotSelected, shiftID, setShiftID, lightTheme } = useContext(GlobalContext);
 
     const [plotItems, setPlotItems] = useState([]); //for plots
 
@@ -86,10 +86,12 @@ const PlotSelectModal = ({ plotModalVisible, setPlotModalVisible, mode, onFetchD
                 return;
             }
             setPlotModalVisible(false);
+            
+            await Utils.changeShiftPlot(plotSelected.name, shiftID);
+            
             if (shiftType === shiftTypes.addSapling) {
                 console.log("'----------changing plot--in add sapling shift type---")
-                await Utils.updateTreesWithChangedPlot(plotSelected.value, shiftID); //wrong logic inside tree db
-
+                await Utils.updateTreesWithChangedPlot(plotSelected.value, shiftID);
                 onFetchData()
             }
         }
@@ -102,12 +104,54 @@ const PlotSelectModal = ({ plotModalVisible, setPlotModalVisible, mode, onFetchD
             visible={
                 plotModalVisible
             }
-            onRequestClose={() => handlePlotChanges(0)} 
+            onRequestClose={() => handlePlotChanges(0)}
         >
             <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ ...customModalStyles.plotSelectScrollView, marginTop: mode === treeFormModes.plotChange ? 205 : 80 }}>
-                <View style={customModalStyles.plotSelectOuterView}>
-                    <View style={customModalStyles.plotSelectView}>
-                        <Text style={customModalStyles.textView(lightTheme)}>{Strings.messages.EnterPlotName}</Text>
+                <View style={{
+                    height: '100%',
+                    backgroundColor: 'white',
+                    //borderRadius: 0,
+                    //padding: 35,
+                    alignItems: 'center',
+                    shadowColor: '#000',
+                    shadowOffset: {
+                        width: 0,
+                        height: 2,
+                    }
+                }} >
+                    <View style={{
+                        backgroundColor: 'white',
+                        padding: 2,
+                        margin: 10,
+                        //borderRadius: 10, borderColor: '#ccc', borderWidth: ,
+                        width: '98%'
+                    }}>
+                        <Text style={{
+                            ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black',
+                            margin: 20, fontSize: 22, marginBottom: 10
+
+                        }}>{Strings.messages.EnterPlotName}</Text>
+                        <View style={{ flexDirection: "row" }}>
+                            <Text style={{
+                                ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black',
+                                marginHorizontal: 20, fontSize: 18, marginBottom: 10
+
+                            }}>{Strings.messages.ShiftType}</Text>
+                            <Image
+                                source={shiftType === 0 ? require('../../assets/icon-sprout.png') : require('../../assets/icon-bw-camera.png')}
+                                style={{
+                                    height: 25, width: 25
+                                }}
+                            />
+                            <Text style={{
+                                fontSize: 20,
+                                fontFamily: 'Inter-Regular',
+                                color: 'black',
+                                fontWeight: '600', color: lightTheme ? '#52525C' : 'black',
+                                marginHorizontal: 5, fontSize: 18, marginBottom: 10
+
+                            }}>{shiftType === 0 ? Strings.buttonLabels.AddNewTree : Strings.buttonLabels.AddImage}</Text>
+                        </View>
 
                         <View style={{ margin: 8, marginTop: 0 }}>
                             <CustomDropdown
@@ -121,12 +165,12 @@ const PlotSelectModal = ({ plotModalVisible, setPlotModalVisible, mode, onFetchD
                             />
                         </View>
 
-                        <View style={CustomButtonStyles.container}>
-                            <View style={CustomButtonStyles.buttonRow}>
+                        <View style={{ ...CustomButtonStyles.container }}>
+                            <View style={{ ...CustomButtonStyles.buttonRow, }}>
                                 <View style={CustomButtonStyles.buttonContainer}>
                                     <Button
                                         onPress={() => handlePlotChanges(0)}
-                                        mode="contained"
+                                        mode="elevated"
                                         buttonColor='red'
                                         labelStyle={CustomButtonStyles.buttonLabel}
                                         style={CustomButtonStyles.button}
@@ -137,10 +181,10 @@ const PlotSelectModal = ({ plotModalVisible, setPlotModalVisible, mode, onFetchD
                                 <View style={CustomButtonStyles.buttonContainer}>
                                     <Button
                                         onPress={() => handlePlotChanges(1)}
-                                        mode="contained"
-                                        buttonColor='#1D4ED8'
+                                        mode="elevated"
+                                        buttonColor="#1D4ED8"
                                         labelStyle={CustomButtonStyles.buttonLabel}
-                                        style={CustomButtonStyles.button}
+                                        style={{ ...CustomButtonStyles.button }}
                                     >
                                         {Strings.buttonLabels.Submit}
                                     </Button>
@@ -151,7 +195,7 @@ const PlotSelectModal = ({ plotModalVisible, setPlotModalVisible, mode, onFetchD
                     </View>
                 </View>
             </ScrollView>
-        </Modal>
+        </Modal >
     )
 
 

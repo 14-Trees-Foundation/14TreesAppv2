@@ -379,7 +379,7 @@ export const CustomButtonStyles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
-    marginHorizontal: 13,
+    marginHorizontal: 22,
     marginTop: 15,
     marginBottom: 10,
   },
@@ -390,24 +390,24 @@ export const CustomButtonStyles = StyleSheet.create({
   buttonLabel: {
     fontFamily: 'Inter-Regular',
     color: 'white',
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
-    paddingTop: 2
+    paddingTop: 5,
   },
   button: {
-    height: 52,
+    height: 50,
     justifyContent: 'center',
-    borderRadius: 53,
+    borderRadius: 10,
     borderColor: 'white',
-    borderColor: 'white',
-    borderWidth: 1,
+    //borderColor: 'white',
+    //borderWidth: 1,
     shadowColor: '#1A894E',
     elevation: 4,
     shadowOffset: {
-      width: 50,
-      height: 50,
+      width: 0,
+      height: 4,
     },
-    shadowOpacity: 1,
+    shadowOpacity: 0.5,
     shadowRadius: 10,
   },
 })
@@ -451,7 +451,7 @@ export const customModalStyles = StyleSheet.create({
     width: '98%'
   },
   centeredView: {
-    marginTop: 205,
+    marginTop: 200,
     //backgroundColor: 'rgba(0,0,0,1)',
     // width: '100%',
     // height: '100%'
@@ -602,20 +602,25 @@ export const ScreenHeaderContentStyles = StyleSheet.create({
 
 export const shiftHeaderStyles = StyleSheet.create({
   outerContainer: {
-    backgroundColor: 'white',
-    padding: 2, margin: 4, borderRadius: 10, borderColor: '#ccc', borderWidth: 3,
-    shadowColor: '#1A894E',
-    elevation: 4,
-    shadowOffset: {
-      width: 50,
-      height: 50,
-    },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    //flex: 1, 
-    //height: '100%'
+    marginHorizontal: 10,
+    backgroundColor: '#F5F5F5',
+    padding: 10,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   innerContainer: { margin: 4, borderRadius: 10, marginBottom: 0 },
+  plotText: (lightTheme) => ({
+    fontFamily: 'Inter-Regular',
+    fontWeight: 'bold',
+    color: lightTheme ? '#52525C' : 'black',
+    margin: 8,
+    fontSize: 18,
+    marginTop: 1,
+  }),
   plotName: (lightTheme) => ({
     fontFamily: 'Inter-Regular',
     fontWeight: 'bold',
@@ -624,7 +629,7 @@ export const shiftHeaderStyles = StyleSheet.create({
     fontSize: 18,
     //opacity: 0.5,
     textAlign: 'center',
-    marginTop: 1,
+    marginTop: 5,
     maxWidth: '100%',
     overflow: 'hidden', // Ensure overflow is hidden
     textDecorationLine: 'underline', // Add underline to make it look like a hyperlink
@@ -642,7 +647,7 @@ export const shiftHeaderStyles = StyleSheet.create({
     marginTop: 0
   }),
   innerView: { flexDirection: 'row', alignItems: 'center', marginLeft: 12, },
-  treeDetailsContainer: (showGradient) => ({ ...commonStyles.secondView, backgroundColor: showGradient ? 'lightgreen' : 'lightgrey', marginRight: 20, marginLeft: 22, width: '30%' }),
+  treeDetailsContainer: (showGradient) => ({ ...commonStyles.secondView, backgroundColor: showGradient ? 'lightgreen' : 'white', marginRight: 20, marginLeft: 22, width: '30%', borderWidth: 1, borderColor: "#5CC17B", }),
   iconContainer: { backgroundColor: 'green', borderRadius: 70, padding: 10, margin: 2 },
   treeCount: (lightTheme) => ({
     color: lightTheme ? '#52525C' : 'black',
@@ -652,12 +657,16 @@ export const shiftHeaderStyles = StyleSheet.create({
 
 export const treeFormStyles = StyleSheet.create({
   detailsContainerOuter: {
+    marginTop: 10,
+    //marginHorizontal: 10,
     backgroundColor: 'white',
-    padding: 2,
-    margin: 4,
+    padding: 10,
     borderRadius: 10,
-    borderColor: '#ccc',
-    borderWidth: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   plotSapling: {
     ...commonStyles.text4,
@@ -682,14 +691,15 @@ export const treeFormStyles = StyleSheet.create({
     marginBottom: 15,
     alignItems: 'center',
     justifyContent: 'space-around',
+    // width: "98%"
   },
   imagePicker: {
     flex: 1,
     padding: 0,
-    borderColor: '#059636',
+    //backgroundColor: "#e8e9ea",
     borderRadius: 10,
     alignItems: 'center',
-    borderWidth: 1,
+    //borderWidth: 1,
     marginTop: 0,
     marginHorizontal: 0,
     margin: 0,
@@ -719,7 +729,7 @@ export const treeFormStyles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    margin: 10,
+    marginVertical: 10
   },
   modalButtons: { backgroundColor: 'green', padding: 10 },
   buttonText: { color: 'white', fontWeight: 'bold', fontSize: 15 },
@@ -728,13 +738,20 @@ export const treeFormStyles = StyleSheet.create({
 
 export const treeFormModalStyles = StyleSheet.create({
   container: {
-    backgroundColor: 'white',
+    //backgroundColor: 'white',
     padding: 2,
     margin: 10,
     borderRadius: 10,
     borderColor: '#ccc',
-    borderWidth: 3,
+    borderWidth: 0,
     width: '98%',
+    backgroundColor: '#F5F5F5',
+    //marginHorizontal: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
 
   saplingIdInput: (lightTheme, saplingid) => ({
@@ -744,7 +761,7 @@ export const treeFormModalStyles = StyleSheet.create({
     fontWeight: saplingid ? '800' : 'normal',
   }),
   imageContainer: {
-    width: '90%',
+    width: '93%',
     height: 200,
     marginHorizontal: 2,
     marginLeft: 15,
@@ -752,10 +769,10 @@ export const treeFormModalStyles = StyleSheet.create({
   imagePicker: {
     backgroundColor: '#969393',
     padding: 0,
-    borderColor: '#059636',
-    borderRadius: 10,
+    // borderColor: '#059636',
+     borderRadius: 10,
     alignItems: 'center',
-    borderWidth: 1,
+    //borderWidth: 1,
     marginTop: 0,
     marginHorizontal: 0,
     margin: 0,
@@ -766,6 +783,7 @@ export const treeFormModalStyles = StyleSheet.create({
     height: 200,
     margin: 0,
     borderRadius: 10,
+    backgroundColor: "#e8e9ea"
   },
   image: {
     width: '100%',
@@ -804,7 +822,7 @@ export const aboutStyles = StyleSheet.create({
 })
 
 export const editRemoteTreeStyles = StyleSheet.create({
-  outerView: { backgroundColor: 'white' },
+  outerView: { backgroundColor: '#f5f5f5' },
   headingText: (lightTheme) => ({ ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black', margin: 20, fontSize: 20 }),
   textInput: (lightTheme) => ({ ...commonStyles.txtInput, color: lightTheme ? '#52525C' : 'black', fontSize: 15, borderRadius: 13, width: '85%' }),
   searchButton: { fontFamily: 'Inter-Regular', fontWeight: 'bold', color: 'white', fontSize: 20, marginTop: 3 }
@@ -1036,7 +1054,7 @@ export const ShiftsCardStyles = StyleSheet.create({
     ...commonStyles.text,
     color: lightTheme ? '#52525C' : 'black',
     fontSize: 18,
-    textAlign: 'center',
+    textAlign: 'left',
     marginLeft: 8,
 
   }),
@@ -1092,8 +1110,8 @@ export const ShiftsCardStyles = StyleSheet.create({
   treeCount: {
     fontSize: 28,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginRight: 2,
+    textAlign: 'right',
+    marginRight: "left",
   },
 });
 
@@ -1129,20 +1147,16 @@ export const treesInShiftStyles = StyleSheet.create({
 
 export const shiftStyles = StyleSheet.create({
   buttonContainerOuter: {
-    backgroundColor: 'white',
-    padding: 2,
-    margin: 4,
-    borderRadius: 10,
-    borderColor: '#ccc',
-    borderWidth: 3,
-    shadowColor: '#1A894E',
-    elevation: 4,
-    shadowOffset: {
-      width: 50,
-      height: 50,
-    },
-    shadowOpacity: 1,
-    shadowRadius: 10,
+    marginHorizontal: 10,
+    //backgroundColor: '#F5F5F5',
+    padding: 10,
+    //borderRadius: 10,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 8,
+    // elevation: 5,
+    marginTop: 10
   },
   buttonContainerInner: {
     margin: 5, marginBottom: 10
@@ -1153,7 +1167,7 @@ export const shiftStyles = StyleSheet.create({
     width: '100%',
   },
   buttonRowInner: {
-    width: '57%', marginBottom: 10
+    width: '50%', marginBottom: 10
   },
   scrollView: {
     backgroundColor: 'white',
@@ -1169,11 +1183,12 @@ export const shiftStyles = StyleSheet.create({
     borderColor: '#5DB075',
     borderRadius: 5,
     flexDirection: 'row',
-    backgroundColor: 'white',
+    marginTop: 0
+    //backgroundColor: 'white',
   },
   flatList: {
     flex: 1,
-    backgroundColor: 'white',
+    //backgroundColor: 'white',
   },
 });
 

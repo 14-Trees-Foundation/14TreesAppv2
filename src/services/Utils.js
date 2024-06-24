@@ -738,7 +738,7 @@ export class Utils {
             let batchFailures = shiftResponse.failures;
             failures.push(...batchFailures);
             if (onProgress) {
-                onProgress(i / shifts.length);  
+                onProgress(i / shifts.length);
             }
         }
         console.log("failed shifts---", failures);
@@ -816,6 +816,23 @@ export class Utils {
             await this.localdb.updateTreesWithChangedPlot(plot_id, shiftID)
         } catch (error) {
             console.log("---------error while updating plot in local trees--------", error);
+        }
+    }
+
+    static async updateTreesWithChangedPlotInPlotsTable(old_plot, new_plot, shiftID) {
+        try {
+            await this.localdb.updateTreesWithChangedPlotInPlotsTable(old_plot, new_plot, shiftID)
+        } catch (error) {
+            console.log("---------error while updating plot in local trees--------", error);
+        }
+    }
+
+    static async changeShiftPlot(plotName, shiftID) {
+        try {
+            await this.localdb.changeShiftPlot(plotName, shiftID)
+        }
+        catch (error) {
+            console.log("---------error while updating plot in shift Tbl--------", error);
         }
     }
 
@@ -972,10 +989,14 @@ export class Utils {
 
         const finalSaplingIds = final.map(item => item.sapling_id);
         const failedMessages = failures.map(item => item.message);
+        console.log("-----------failures-----------", failures)
         const failedSaplingIds = failures.map(item => item.sapling_id);
         const uploadedSaplings = finalSaplingIds.filter(sapling_id => !failedSaplingIds.includes(sapling_id));
 
-        return { failures: failedMessages, uploadedSaplings: uploadedSaplings };
+        // Check if any failedMessages contains undefined
+        const hasUndefinedMessages = failedMessages.some(message => message === undefined);
+
+        return { failures: hasUndefinedMessages ? failures : failedMessages, uploadedSaplings: uploadedSaplings };
     };
 
 

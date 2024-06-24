@@ -6,6 +6,7 @@ import { Strings } from "../services/Strings";
 import { commonStyles, treesInShiftStyles } from "../services/Styles";
 import ShiftsCard from "../components/ShiftsCard";
 import { TreeRow } from "../components/TreeRow";
+import TreesInShiftHeader from "../components/TreesInShiftHeader";
 
 const TreesInShift = ({ navigation, route }) => {
     const { shiftIDs, itemData } = route.params;
@@ -93,7 +94,9 @@ const TreesInShift = ({ navigation, route }) => {
     return (
         <ScrollView keyboardShouldPersistTaps='handled' style={{ backgroundColor: 'white', height: '100%' }}>
 
-            <ShiftsCard item={itemData} disableHandlePress={true} />
+            <TreesInShiftHeader item={itemData} disableHandlePress={true} />
+
+            {/* <ShiftsCard item={itemData} disableHandlePress={true} /> */}
 
             <View style={treesInShiftStyles.treeListContainer}>
                 {finalList === null ? (
@@ -110,26 +113,26 @@ const TreesInShift = ({ navigation, route }) => {
                     )}
                     data={finalList}
                     renderItem={({ item, index }) => {
-                        if (index % 4 === 0) {
+                        //if (index % 4 === 0) {
                             const trees = [
                                 item,
-                                finalList[index + 1] || null,
-                                finalList[index + 2] || null,
-                                finalList[index + 3] || null,
+                                // finalList[index + 1] || null,
+                                // finalList[index + 2] || null,
+                                // finalList[index + 3] || null,
                             ];
                             return (<TreeRow
-                                tree1={trees[0]}
-                                tree2={trees[1]}
-                                tree3={trees[2]}
-                                tree4={trees[3]}
+                                tree={trees[0]}
+                                // tree2={trees[1]}
+                                // tree3={trees[2]}
+                                // tree4={trees[3]}
                                 shiftID={shiftIDs.localShiftId}
                                 modalMode={false}
                                 shiftTypeOfTrees={shiftTypeOfTrees}
                                 handleSaplingChanges={fetchData}
                                 plotSelected={itemData.plotselected}
                             />);
-                        }
-                        return null;
+                        //}
+                        //return null;
                     }}
                     keyExtractor={(item, index) => `${item.sapling_id}-${index}`}
                 />

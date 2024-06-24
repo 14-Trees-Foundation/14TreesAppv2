@@ -43,7 +43,7 @@ const errorHandler = async (e, isFatal) => {
 
   Alert.alert(
     'Unexpected error occurred',
-    `Error: ${isFatal ? 'Fatal:' : ''} ${e}
+    `Error: ${isFatal ? 'Fatal:' : ''} ${errorLog.msg}
     \nWe have reported this to our team! Please close the app and start again!`,
     [
       {
@@ -473,8 +473,8 @@ const App = () => {
                 </TouchableOpacity>
               </View>
             ),
-            headerRight: () => (    
-              <View style={{ 
+            headerRight: () => (
+              <View style={{
                 marginRight: 28, flexDirection: "row"
               }}>
                 <View style={{ width: 40, height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>

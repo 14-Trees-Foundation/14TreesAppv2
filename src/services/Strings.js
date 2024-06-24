@@ -35,8 +35,8 @@ export class Strings {
             LocalDataNavigator: "LocalDataNavigator",
             VerifyUsers: "वापरकर्ते सत्यापित करा",
             EditTree: "झाड संपादन",
-            EditLocalTree: "एक स्थानिक झाड संपादित करा",
-            EditLocalAddImage: "स्थानिक प्रतिमा संपादित करा", 
+            EditLocalTree: "झाड संपादित करा",
+            EditLocalAddImage: "प्रतिमा संपादित करा",
             LogIn: 'लॉग इन',
             DrawerScreen: 'होम स्क्रीन',
             startScreen: 'प्रारंभ स्क्रीन',
@@ -70,7 +70,7 @@ export class Strings {
             failedToUpload: "Could not upload",
             failedToUpdate: "Could not update plot for",
             couldNotAdd: "Could not add images for",
-            trees: "trees",
+            trees: "Trees",
             // add tree
             Location: "Tree Location",
             CapturedAt: "Captured At",
@@ -93,6 +93,8 @@ export class Strings {
             ShiftNo: "Shift ID",
             Type: "Type",
             Plot: "Plot",
+            OldPlot: "Old Plot",
+            NewPlot: "New Plot",
             Synced: "Synced",
             Local: "Local",
             NoImageFound: "No Image Found",
@@ -110,6 +112,8 @@ export class Strings {
             PlotName: "Plot Name",
             Shift: "shift", //manjur
             ClickToDelete: "Click on saplings to delete the entry",
+            ShiftType: "Shift type",
+            StartThisShift : "Start this Shift",
 
         },
         "mr": {
@@ -150,6 +154,8 @@ export class Strings {
             ShiftNo: "शिफ्ट आयडी", //manjur
             Type: "प्रकार",
             Plot: "प्लॉट",
+            OldPlot: "जुना प्लॉट",
+            NewPlot: "नवीन प्लॉट",
             Synced: "सिंक केले गेले",
             Local: "लोकल",
             NoImageFound: "फोटो नाही",
@@ -165,7 +171,9 @@ export class Strings {
             PlotName: "प्लॉटचे नाव",
             logoutConfirm: "तुम्हाला लॉग आउट करायचे आहे का?",
             Shift: "शिफ्ट",
-            ClickToDelete: "एंट्री हटवण्यासाठी रोपावर क्लिक करा" //manjur
+            ClickToDelete: "एंट्री हटवण्यासाठी रोपावर क्लिक करा", //manjur
+            ShiftType: "शिफ्ट प्रकार",
+            StartThisShift:"ही शिफ्ट सुरू करा",
         },
     });
     static alertMessages = new LocalizedStrings({
@@ -198,7 +206,7 @@ export class Strings {
             Yes: "Yes",
             No: "No",
             SyncSuccess: "Sync Successful!",
-            SyncFailure: "Sync Failed!",
+            SyncFailure: "Sync Could not Complete!",
             SyncFailureForTrees: "Sync for added trees Failed!",
             SyncFailureForImages: "Sync for added Images Failed!",
             SyncFailureForShifts: "Sync for Shifts Failed",
@@ -258,7 +266,7 @@ export class Strings {
             SyncingTrees: 'Syncing Trees',
             SyncingPlotTrees: "Syncing Updated plot trees",
             SyncingImageTrees: "Syncing New image trees",
-            MarkedSaplingDead : "You have marked this sapling dead.",
+            MarkedSaplingDead: "You have marked this sapling dead.",
             ConfirmDeleteEntry: "Do you want to delete the entry?"
 
         },
@@ -351,8 +359,8 @@ export class Strings {
             SyncingTrees: 'नवीन झाडे सिंक करणे सुरू',
             SyncingPlotTrees: "अपडेटेड प्लॉट झाडे सिंक करणे सुरू",
             SyncingImageTrees: "नवीन प्रतिमा झाडे सिंक करणे सुरू",
-            MarkedSaplingDead : "तुम्ही हे रोपटे मृत मार्क केले आहे",
-            ConfirmDeleteEntry : "तुम्हाला एंट्री हटवायची आहे का?"
+            MarkedSaplingDead: "तुम्ही हे रोपटे मृत मार्क केले आहे",
+            ConfirmDeleteEntry: "तुम्हाला एंट्री हटवायची आहे का?"
         }
     })
     static buttonLabels = new LocalizedStrings({
@@ -399,12 +407,12 @@ export class Strings {
             cancel: "Cancel",
             logOut: 'Log out',
             login: "Log in",
-            Done: "Done", //manjur
+            Done: "End Shift", //manjur
             Continue: "Continue" //manjur
         },
         "mr": {
             // home
-            SyncData: "डेटा सिंक करा",
+            SyncData: "सिंक करा",
             AddNewTree: "नवीन झाड जोडा",
             AddImage: "सॅपलिंग इमेज जोडा",
             DeadTreeCheck: "झाड मेले असल्यास क्लिक करा",
@@ -468,7 +476,7 @@ export class Strings {
             Date: 'Date',
             StartTime: 'Start Time',
             EndTime: 'End Time',
-            TimeTaken: 'Time Taken',
+            TimeTaken: 'Timer',
         },
         "mr": {
             //add tree
@@ -486,7 +494,7 @@ export class Strings {
             Date: 'तारीख',
             StartTime: 'प्रारंभ वेळ',
             EndTime: 'समाप्ती वेळ',
-            TimeTaken: 'वेळ घेतला',
+            TimeTaken: 'वेळ',
         }
     })
     static english = 'en';

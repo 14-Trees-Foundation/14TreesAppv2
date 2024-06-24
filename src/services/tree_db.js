@@ -233,7 +233,7 @@ export class LocalDatabase {
         }
     };
 
-   
+
     getTreesWithNewPlots = async (uploaded) => {
         try {
             const trees = [];
@@ -1152,7 +1152,25 @@ export class LocalDatabase {
         }
     };
 
-
+    changeShiftPlot = async (plotName, shiftID) => {
+        try {
+            const updateQuery = `UPDATE ${localShiftTable} SET plotselected = ? WHERE id = ?`;
+            return this.db.executeSql(updateQuery, [plotName, shiftID]);
+        }
+        catch (error) {
+            console.log(
+                '----------error while changing plot for shift in tree_db-------',
+                error,
+            );
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: 'happened while trying to change plot in local shiftTable (inside tree_tb(changeShiftPLot))',
+                error: JSON.stringify(error),
+                stackTrace: stackTrace,
+            };
+            await this.logExceptionLocalDB(JSON.stringify(errorLog));
+        }
+    }
 
     updateTreesWithChangedPlot = async (plot_id, id) => {
         //console.log("shift id updateTreesWithChangedPlot---", id);
@@ -1164,7 +1182,7 @@ export class LocalDatabase {
 
             const updatePromises = saplingArray.map(sapling => {
                 const updateQuery = `UPDATE ${treeTableName} SET plotid = ? WHERE saplingid = ?`;
-                return this.db.executeSql(updateQuery, [plot_id, sapling]);
+                return this.db.executeSql(updateQuery, [plot_id, sapling.sapling_id]);
             });
 
             await Promise.all(updatePromises);
@@ -1183,7 +1201,37 @@ export class LocalDatabase {
             await this.logExceptionLocalDB(JSON.stringify(errorLog));
         }
     };
-    //check manjur
+
+
+    updateTreesWithChangedPlotInPlotsTable = async (old_plot, new_plot, id) => {
+
+        try {
+            const results = await this.db.executeSql(`SELECT saplings,shifttype FROM ${localShiftTable} WHERE id = ?`, [id]);
+            const result = results[0].rows.item(0);
+            let saplingArray = JSON.parse(result?.saplings || '[]');
+
+            const updatePromises = saplingArray.map(sapling => {
+                const updateQuery = `UPDATE ${updatePlotsTable} SET old_plot = ?, new_plot = ? WHERE saplingid = ?`;
+                return this.db.executeSql(updateQuery, [old_plot, new_plot, sapling.sapling_id]);
+            });
+
+            await Promise.all(updatePromises);
+
+        } catch (error) {
+            console.log(
+                '----------error while changing plot for trees in tree_db-------',
+                error,
+            );
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: 'happened while trying to update tree with changed plot (inside tree_tb(updateTreesWithChangedPlotInPlotsTable))',
+                error: JSON.stringify(error),
+                stackTrace: stackTrace,
+            };
+            await this.logExceptionLocalDB(JSON.stringify(errorLog));
+        }
+    };
+
     createTreetTypesTbl = async () => {
 
         try {

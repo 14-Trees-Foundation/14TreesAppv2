@@ -4,7 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { StackedIcons } from '../components/Components';
 import { Strings } from '../services/Strings';
 import { Utils, addTreeImageModes } from '../services/Utils';
-import { Iconstyles, commonStyles, shiftStyles } from '../services/Styles';
+import { CustomButtonStyles, Iconstyles, commonStyles, shiftStyles } from '../services/Styles';
 import GlobalContext from '../context/GlobalContext ';
 import ShiftHeader from '../components/ShiftHeader';
 import { treeFormModes } from '../components/TreeForm';
@@ -138,25 +138,21 @@ const AddImageShift = ({ route, navigation }) => {
     const RenderHeader2 = () => {
         return (
             <View style={shiftStyles.buttonContainerOuter}>
-                <View style={shiftStyles.buttonContainerInner}>
+                <View style={{ ...shiftStyles.buttonContainerInner, marginHorizontal: 55, }}>
 
                     <Button
                         icon={() => (
-                            <View style={Iconstyles.buttonPosition}>
-                                <StackedIcons
-                                    names={['camera', 'plus']}
-                                    styles={[{ opacity: 0.6, position: 'absolute' }, { opacity: 0.9, position: 'absolute' }]}
-                                />
-                            </View>
+                            <MCIcon name="plus" size={30} color="white" />
                         )}
+
                         mode="contained"
                         buttonColor='#059636'
                         onPress={() => {
                             setMode(addTreeImageModes.addImage);
                             setModalVisible(true);
                         }}
-                        contentStyle={Iconstyles.buttonContent}
-                        labelStyle={Iconstyles.buttonLabel}
+                        labelStyle={CustomButtonStyles.buttonLabel}
+                        style={CustomButtonStyles.button}
                     >
                         {Strings.buttonLabels.AddImage}
 
@@ -164,7 +160,7 @@ const AddImageShift = ({ route, navigation }) => {
                 </View>
 
                 <View style={shiftStyles.buttonRow}>
-                    <View style={shiftStyles.buttonRowInner}>
+                    <View style={{ ...shiftStyles.buttonRowInner, marginRight: 5 }}>
                         <Button
                             icon={() => (
                                 <MCIcon name="wifi-sync" size={30} color="white" />
@@ -177,24 +173,21 @@ const AddImageShift = ({ route, navigation }) => {
                                 )
 
                             }}
-                            contentStyle={Iconstyles.buttonContent2}
-                            labelStyle={Iconstyles.buttonLabel}
+                            labelStyle={CustomButtonStyles.buttonLabel}
+                            style={CustomButtonStyles.button}
                         >
                             {Strings.buttonLabels.SyncData}
 
                         </Button>
                     </View>
 
-                    <View style={{ width: '40%' }}>
+                    <View style={{ width: '50%', marginLeft: 5 }}>
                         <Button
-                            icon={() => (
-                                <MCIcon name="check" size={30} color="white" />
-                            )}
                             mode="contained"
                             buttonColor='#059636'
                             onPress={saveShiftToDB}
-                            contentStyle={Iconstyles.buttonContent2}
-                            labelStyle={Iconstyles.buttonLabel}
+                            labelStyle={CustomButtonStyles.buttonLabel}
+                            style={CustomButtonStyles.button}
                         >
                             {Strings.buttonLabels.Done}
 
@@ -208,7 +201,7 @@ const AddImageShift = ({ route, navigation }) => {
 
     const handleDeleteItem = async (saplingID) => {
         //verify
-        await Utils.deleteAddTreeImagesBySaplingId(saplingID); 
+        await Utils.deleteAddTreeImagesBySaplingId(saplingID);
         await Utils.deleteSaplingInShiftDB(saplingID, shiftID);
         fetchSaplingsForShift();
         setTreesPlanted(treesPlanted - 1);
@@ -231,7 +224,7 @@ const AddImageShift = ({ route, navigation }) => {
                 }
             ])
 
-            
+
             setModalVisible(false);
             return;
         }
@@ -292,41 +285,48 @@ const AddImageShift = ({ route, navigation }) => {
 
 
                 {
-                    !modalVisible && <View style={shiftStyles.treeListContainer}>
-                        <FlatList
-                            style={shiftStyles.flatList}
-                            scrollEnabled={false}
-                            ListEmptyComponent={() => (
-                                <View style={commonStyles.borderedDisplay}>
-                                    <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black', }}>
-                                        {Strings.messages.NoTreesWithAddedImage}
-                                    </Text>
-                                </View>
-                            )}
-                            data={finalList}
+                    !modalVisible &&
+                    <View style={{ ...shiftStyles.buttonContainerOuter, marginBottom: 12 }}>
+                        <View style={{ ...shiftStyles.buttonContainerInner, marginTop: 0, marginBottom: 2 }}>
+                            <View style={shiftStyles.treeListContainer}>
+                                <FlatList
+                                    style={shiftStyles.flatList}
+                                    scrollEnabled={false}
+                                    ListEmptyComponent={() => (
+                                        <View
+                                        //style={commonStyles.borderedDisplay}
+                                        >
+                                            <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black', }}>
+                                                {Strings.messages.NoTreesWithAddedImage}
+                                            </Text>
+                                        </View>
+                                    )}
+                                    data={finalList}
 
-                            renderItem={({ item, index }) => {
-                                if (index % 4 === 0) {
-                                    const trees = [
-                                        item,
-                                        finalList[index + 1] || null,
-                                        finalList[index + 2] || null,
-                                        finalList[index + 3] || null,
-                                    ];
-                                    return (<TreeRow
-                                        tree1={trees[0]}
-                                        tree2={trees[1]}
-                                        tree3={trees[2]}
-                                        tree4={trees[3]}
-                                        modalMode={true}
-                                        handleSaplingChanges={handleSaplingChanges}
-                                        shiftTypeOfTrees={shiftType}
-                                    />);
-                                }
-                                return null;
-                            }}
-                            keyExtractor={(item, index) => `${item.sapling_id}-${index}`}
-                        />
+                                    renderItem={({ item, index }) => {
+                                        //if (index % 4 === 0) {
+                                        const trees = [
+                                            item,
+                                            // finalList[index + 1] || null,
+                                            // finalList[index + 2] || null,
+                                            // finalList[index + 3] || null,
+                                        ];
+                                        return (<TreeRow
+                                            tree={trees[0]}
+                                            // tree2={trees[1]}
+                                            // tree3={trees[2]}
+                                            // tree4={trees[3]}
+                                            modalMode={true}
+                                            handleSaplingChanges={handleSaplingChanges}
+                                            shiftTypeOfTrees={shiftType}
+                                        />);
+                                        // }
+                                        // return null;
+                                    }}
+                                    keyExtractor={(item, index) => `${item.sapling_id}-${index}`}
+                                />
+                            </View>
+                        </View>
                     </View>
                 }
 

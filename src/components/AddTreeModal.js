@@ -154,7 +154,7 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
                 }
                 onRequestClose={handleDetailsChanges}
             >
-                <ScrollView keyboardShouldPersistTaps="handled" style={customModalStyles.centeredView}>
+                <ScrollView keyboardShouldPersistTaps="handled" style={{...customModalStyles.centeredView, marginTop: 180}}>
                     <View style={customModalStyles.modalView}>
 
                         <TreeFormModal

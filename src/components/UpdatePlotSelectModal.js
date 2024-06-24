@@ -1,4 +1,4 @@
-import { View, Text, Modal,  ScrollView,  Alert } from 'react-native';
+import { View, Text, Modal, ScrollView, Alert, Image } from 'react-native';
 import React, { useState, useEffect, useContext } from 'react';
 import { Utils, Constants } from '../services/Utils';
 import { Strings } from '../services/Strings';
@@ -9,6 +9,7 @@ import { CustomDropdown } from './CustomDropdown';
 import { stackNavRef } from '../App';
 import { Button } from 'react-native-paper';
 import { shiftTypes } from '../screens/Shifts';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 
 function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisible, mode, onFetchData }) {
@@ -83,12 +84,19 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
         }
         else {
             console.log("changing plot-----", cancel);
+
             if (plotSelected === null || newPlotSelected === null) {
                 Alert.alert(Strings.alertMessages.NoPlotSelected, Strings.alertMessages.SelectPlot);
                 return;
             }
 
-            await Utils.updateTreesWithChangedPlot(plotSelected.value, shiftID); //wrong logic inside tree db
+            if (plotSelected.name === newPlotSelected.name) {
+                Alert.alert(Strings.alertMessages.NoPlotSelected, Strings.alertMessages.SelectDifferentPlot);
+                return;
+            }
+
+            await Utils.changeShiftPlot(plotSelected.name, shiftID);
+            await Utils.updateTreesWithChangedPlotInPlotsTable(plotSelected.value, newPlotSelected.value, shiftID);
 
             setUpdatePlotModalVisible(false);
             onFetchData();
@@ -102,13 +110,60 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
             visible={
                 updatePlotModalVisible
             }
-            onRequestClose={() => handlePlotChanges(0)} 
+            onRequestClose={() => handlePlotChanges(0)}
         >
             <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ ...customModalStyles.plotSelectScrollView, marginTop: mode === treeFormModes.plotChange ? 205 : 80 }}>
-                <View style={customModalStyles.plotSelectOuterView}>
-                    <View style={customModalStyles.plotSelectView}>
+                <View style={{
+                    height: '100%',
+                    backgroundColor: 'white',
+                    //borderRadius: 0,
+                    //padding: 35,
+                    alignItems: 'center',
+                    shadowColor: '#000',
+                    shadowOffset: {
+                        width: 0,
+                        height: 2,
+                    }
+                }}>
+                    <View style={{
+                        backgroundColor: 'white',
+                        padding: 2,
+                        margin: 5,
+                        //borderRadius: 10, borderColor: '#ccc', borderWidth: ,
+                        width: '98%'
+                    }}>
 
-                        <View style={{ margin: 8, marginTop: 0 }}>
+                        <View style={{
+                            ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black',
+                            margin: 5, fontSize: 22, marginBottom: 20
+
+                        }}>
+                            <Text style={{
+                                ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black',
+                                margin: 20, fontSize: 22, marginBottom: 10
+                            }}>
+                                {Strings.messages.StartThisShift}</Text>
+                            <View style={{ flexDirection: "row" }}>
+                                <Text style={{
+                                    ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black',
+                                    marginHorizontal: 20, fontSize: 17, marginBottom: 10
+
+                                }}>{Strings.messages.ShiftType}</Text>
+                                <Image
+                                    source={require('../../assets/icon-land.png')}
+                                    style={{
+                                        height: 25, width: 25
+                                    }}
+                                />
+                                <Text style={{
+                                    fontSize: 20,
+                                    fontFamily: 'Inter-Regular',
+                                    color: 'black',
+                                    fontWeight: '600', color: lightTheme ? '#52525C' : 'black',
+                                    marginHorizontal: 5, fontSize: 18, marginBottom: 10
+
+                                }}>{Strings.buttonLabels.UpdatePlot}</Text>
+                            </View>
                             <Text style={customModalStyles.textView(lightTheme)}>{Strings.messages.OldPlotName}</Text>
                             <CustomDropdown
                                 initItem={plotSelected}
@@ -121,8 +176,21 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
                             />
                         </View>
 
+                        <View style={{
+                            width: 33, height: 33, alignSelf: "center", alignItems: "center", paddingTop: 3, borderRadius: 38, backgroundColor: "green", shadowColor: '#000', marginBottom: -5,
+                            shadowColor: 'black',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.5, // Adjust this value
+                            elevation: 5,
+                        }}>
+                            <Icon name="arrow-down" size={26} color="white" />
+                        </View>
 
-                        <View style={{ margin: 8, marginTop: 0 }}>
+                        <View style={{
+                            ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black',
+                            margin: 5, fontSize: 22, marginBottom: 10, marginTop: 10,
+
+                        }}>
                             <Text style={customModalStyles.textView(lightTheme)}>{Strings.messages.NewPlotName}</Text>
                             <CustomDropdown
                                 initItem={newPlotSelected}
@@ -135,12 +203,20 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
                             />
                         </View>
 
-                        <View style={CustomButtonStyles.container}>
-                            <View style={CustomButtonStyles.buttonRow}>
-                                <View style={CustomButtonStyles.buttonContainer}>
+                        <View style={{ ...CustomButtonStyles.container, }}>
+                            <View style={{
+                                flexDirection: 'row',
+                                marginHorizontal: 22,
+                                marginTop: 15,
+                                marginBottom: 10,
+                                backgroundColor: "white"
+                            }}>
+                                <View style={{
+                                    ...CustomButtonStyles.buttonContainer, shadowColor: 'black'
+                                }}>
                                     <Button
                                         onPress={() => handlePlotChanges(0)}
-                                        mode="contained"
+                                        mode="elevated"
                                         buttonColor='red'
                                         labelStyle={CustomButtonStyles.buttonLabel}
                                         style={CustomButtonStyles.button}
@@ -151,7 +227,7 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
                                 <View style={CustomButtonStyles.buttonContainer}>
                                     <Button
                                         onPress={() => handlePlotChanges(1)}
-                                        mode="contained"
+                                        mode="elevated"
                                         buttonColor='#1D4ED8'
                                         labelStyle={CustomButtonStyles.buttonLabel}
                                         style={CustomButtonStyles.button}
@@ -164,7 +240,7 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
                     </View>
                 </View>
             </ScrollView>
-        </Modal>
+        </Modal >
     )
 }
 

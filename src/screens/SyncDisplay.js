@@ -164,6 +164,7 @@ const SyncDisplay = ({ navigation }) => {
 
     let uploadedSaplings = result.uploadedSaplings;
     let failures = result.failures;
+    console.log("---------failedPlotTreesMessages------", failures)
     setFailedPlotTrees(failures);
     setProgress(1);
     updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
@@ -262,6 +263,7 @@ const SyncDisplay = ({ navigation }) => {
       };
       await Utils.logException(JSON.stringify(errorLog));
     }
+
   };
 
   return (
@@ -363,12 +365,11 @@ const SyncDisplay = ({ navigation }) => {
               </Text>
             )}
             data={failedPlotTrees}
-            keyExtractor={item => item.message ? item.message : item}
+            keyExtractor={item => item?.sapling_id ? item?.sapling_id : item}
             renderItem={({ item, index }) => {
-
               return (
                 <Text style={commonStyles.text5}>
-                  {index + 1}. {item.message ? item.message : item}
+                  {index + 1}. {item?.sapling_id ? `${item.sapling_id} from ${item.old_plot} to ${item.new_plot}` : item}
                 </Text>
               );
             }}
@@ -403,6 +404,7 @@ const SyncDisplay = ({ navigation }) => {
                 {`${Strings.messages.Shift}s`}:{' '}
               </Text>
             )}
+            keyExtractor={item.id ? item.id : item}
             data={failedShifts}
             renderItem={({ item, index }) => {
               return (
