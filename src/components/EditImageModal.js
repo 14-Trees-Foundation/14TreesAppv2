@@ -81,8 +81,10 @@ function EditImageModal({ modalVisible, setModalVisible, saplingID, onFetchData 
 
 
     useEffect(() => {
-        setSaplingId(saplingID);
-        fetchDetails(saplingID);
+        if (saplingID) {
+            setSaplingId(saplingID);
+            fetchDetails(saplingID);
+        }
     }, [modalVisible]);
 
 
@@ -128,6 +130,14 @@ function EditImageModal({ modalVisible, setModalVisible, saplingID, onFetchData 
     }
 
     const onSave = async () => {
+        if (saplingid === "" || saplingid === null || plotSelected === null || (plotSelected && Object.keys(plotSelected).length === 0)) {
+            Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
+            return;
+        }
+        else if (image === null) {
+            Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.NoImage);
+            return;
+        }
 
         if (saplingID !== saplingid) {
             let existsLocally = await Utils.checkIfImageAddedAlready(saplingid);
@@ -154,61 +164,54 @@ function EditImageModal({ modalVisible, setModalVisible, saplingID, onFetchData 
             }
         }
 
-        if (saplingid === null || plotSelected === null || (plotSelected && Object.keys(plotSelected).length === 0)) {
-            Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
-            return;
-        }
-        else if (image === null) {
-            Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.NoImage);
-            return;
-        }
 
-        else {
-            try {
 
-                if (saplingID !== saplingid) {
-                    //new sapling id 
-                    if (!clickedNewImage) {
-                        const timestamp = image.timestamp;
-                        const imageName = `${saplingid}_${timestamp}.jpg`;
-                        image.name = imageName
-                    }
-                    await Utils.deleteAddTreeImagesBySaplingId(saplingID);
-                    await Utils.updateSaplingInShiftDB(saplingid, saplingID, shiftID);
+
+        try {
+
+            if (saplingID !== saplingid) {
+                //new sapling id 
+                if (!clickedNewImage) {
+                    const timestamp = image.timestamp;
+                    const imageName = `${saplingid}_${timestamp}.jpg`;
+                    image.name = imageName
                 }
-
-                const tree = {
-                    sapling_id: saplingid,
-                    lat: lat,
-                    lng: lng,
-                    user_id: userId,
-                    image: image,
-                    inActive: inActive,
-                    timestamp: new Date().toISOString()
-                };
-
-                //console.log("--------------new image for tree---------", tree);
-
-                await Utils.saveNewImage(tree);
-
-                let toastmsg = Strings.alertMessages.TreeUpdatedfirsthalf + saplingid + Strings.alertMessages.TreeUpdatedsecondhalf;
-                ToastAndroid.show(toastmsg, ToastAndroid.LONG);
-
-                setModalVisible(false);
-                setClickedNewImage(false);
-                onFetchData();
-
-            } catch (error) {
-                console.error(error);
-                const stackTrace = error.stack;
-                const errorLog = {
-                    msg: "happened while trying to save image fro tree in AddImageModal",
-                    error: JSON.stringify(error),
-                    stackTrace: stackTrace
-                }
-                await Utils.logException(JSON.stringify(errorLog));
+                await Utils.deleteAddTreeImagesBySaplingId(saplingID);
+                await Utils.updateSaplingInShiftDB(saplingid, saplingID, shiftID);
             }
-        };
+
+            const tree = {
+                sapling_id: saplingid,
+                lat: lat,
+                lng: lng,
+                user_id: userId,
+                image: image,
+                inActive: inActive,
+                timestamp: new Date().toISOString()
+            };
+
+            //console.log("--------------new image for tree---------", tree);
+
+            await Utils.saveNewImage(tree);
+
+            let toastmsg = Strings.alertMessages.TreeUpdatedfirsthalf + saplingid + Strings.alertMessages.TreeUpdatedsecondhalf;
+            ToastAndroid.show(toastmsg, ToastAndroid.LONG);
+
+            setModalVisible(false);
+            setClickedNewImage(false);
+            onFetchData();
+
+        } catch (error) {
+            console.error(error);
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: "happened while trying to save image fro tree in AddImageModal",
+                error: JSON.stringify(error),
+                stackTrace: stackTrace
+            }
+            await Utils.logException(JSON.stringify(errorLog));
+        }
+
     }
 
     if (!isFetchingDetails) {
@@ -242,7 +245,7 @@ function EditImageModal({ modalVisible, setModalVisible, saplingID, onFetchData 
                                 onChangeText={text => {
                                     setExistsInLocalDB(false);
                                     setExistsInLiveDB(true);
-                                    setSaplingId(text);
+                                    setSaplingId(text.trim());
 
                                 }}
                                 onBlur={checkIfExists}

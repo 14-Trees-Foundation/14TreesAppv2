@@ -181,7 +181,7 @@ const PlotSelectModal = ({ plotModalVisible, setPlotModalVisible, mode, onFetchD
                                 <View style={CustomButtonStyles.buttonContainer}>
                                     <Button
                                         onPress={() => handlePlotChanges(1)}
-                                        mode="elevated"
+                                        //mode="elevated"
                                         buttonColor="#1D4ED8"
                                         labelStyle={CustomButtonStyles.buttonLabel}
                                         style={{ ...CustomButtonStyles.button }}

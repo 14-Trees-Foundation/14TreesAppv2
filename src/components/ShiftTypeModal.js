@@ -66,7 +66,7 @@ export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onShif
                         </View>
                         <View style={{ alignItems: 'center', }}>
                             <View style={{
-                                margin: 5, marginBottom: 3, width: '88%', 
+                                margin: 5, marginBottom: 3, width: '90%', 
                                 //backgroundColor:"red"
                             }}>
                                 <Button
@@ -108,7 +108,7 @@ export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onShif
                             </View>
 
                             <View style={{
-                                margin: 5, marginBottom: 3, width: '88%', 
+                                margin: 5, marginBottom: 3, width: '90%', 
                             }}>
                                 <Button
                                     icon={() => (
@@ -148,7 +148,7 @@ export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onShif
                             </View>
 
                             <View style={{
-                                margin: 5, marginBottom: 3, width: '88%', 
+                                margin: 5, marginBottom: 3, width: '90%', 
                             }}>
                                 <Button
                                     icon={() => (

@@ -8,10 +8,10 @@ import { Utils } from '../services/Utils';
 import GlobalContext from '../context/GlobalContext ';
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-export const TreeRow = ({ tree, tree2, tree3, tree4, shiftID, modalMode, shiftTypeOfTrees, handleSaplingChanges, plotSelected }) => {
+export const TreeRow = ({ tree, shiftID, modalMode, shiftTypeOfTrees, handleSaplingChanges, plotSelected }) => {
     const navigation = useNavigation();
 
-   // console.log("----------shiftTypeOfTrees----------", tree)
+    console.log("----------shiftTypeOfTrees----------", tree)
 
     const { treesPlanted, setTreesPlanted, lightTheme } = useContext(GlobalContext);
 

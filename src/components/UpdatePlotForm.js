@@ -66,7 +66,7 @@ const UpdatePlotForm = ({ onFetchData, finalShiftData }) => {
 
     async function onSave() {
 
-        if (saplingid === null || plotSelected === null || newPlotSelected === null || (plotSelected && Object.keys(plotSelected).length === 0) ||
+        if (saplingid === "" || saplingid === null || plotSelected === null || newPlotSelected === null || (plotSelected && Object.keys(plotSelected).length === 0) ||
             (newPlotSelected && Object.keys(newPlotSelected).length === 0)) {
             Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
             return;
@@ -131,7 +131,7 @@ const UpdatePlotForm = ({ onFetchData, finalShiftData }) => {
                         onChangeText={text => {
                             setExistsInLocalDB(false);
                             setExistsInLiveDB(true);
-                            setSaplingId(text);
+                            setSaplingId(text.trim());
 
                         }}
                         onBlur={checkIfExists}

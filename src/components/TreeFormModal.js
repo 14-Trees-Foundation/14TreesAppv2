@@ -109,7 +109,9 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
     }
 
     const onSave = async () => {
-        if (saplingid === null || selectedTreeType === null || selectedPlot === null || (selectedTreeType && Object.keys(selectedTreeType).length === 0) || (selectedPlot && Object.keys(selectedPlot).length === 0)) {
+        //console.log("saplingid----", saplingid);
+
+        if (saplingid === "" || saplingid === null || selectedTreeType === null || selectedPlot === null || (selectedTreeType && Object.keys(selectedTreeType).length === 0) || (selectedPlot && Object.keys(selectedPlot).length === 0)) {
             Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
             return;
         }
@@ -120,7 +122,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
             Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.NoTreeLoaction);
             return;
         }
-        
+
         if (mode === treeFormModes.addTree || (mode === treeFormModes.localEdit && inSaplingId !== saplingid)) {
             let existsLocally = await Utils.checkIfSaplingExistsLocally(saplingid);
 
@@ -150,37 +152,38 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
             }
         }
 
-        else {
-            try {
-                const tree = {
-                    treeid: selectedTreeType.value,
-                    saplingid: saplingid,
-                    lat: lat,
-                    lng: lng,
-                    plotid: selectedPlot.value,
-                    user_id: userId,
-                    timestamp: new Date().toISOString()
-                };
-                console.log("final tree data----", tree);
-                setSaplingId(null);
-                setSelectedTreeType(null);
-                setShowImage(false)
-                setImages([]);
-                setlat(0);
-                setlng(0);
-                await onVerifiedSave(tree, images);
 
-            } catch (error) {
-                console.error(error);
-                const stackTrace = error.stack;
-                const errorLog = {
-                    msg: "happened while trying to save tree details in onSave() of TreeForm",
-                    error: JSON.stringify(error),
-                    stackTrace: stackTrace
-                }
-                await Utils.logException(JSON.stringify(errorLog));
+        try {
+
+            const tree = {
+                treeid: selectedTreeType.value,
+                saplingid: saplingid,
+                lat: lat,
+                lng: lng,
+                plotid: selectedPlot.value,
+                user_id: userId,
+                timestamp: new Date().toISOString()
+            };
+            console.log("final tree data----", tree);
+            setSaplingId(null);
+            setSelectedTreeType(null);
+            setShowImage(false)
+            setImages([]);
+            setlat(0);
+            setlng(0);
+            await onVerifiedSave(tree, images);
+
+        } catch (error) {
+            console.error(error);
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: "happened while trying to save tree details in onSave() of TreeForm",
+                error: JSON.stringify(error),
+                stackTrace: stackTrace
             }
-        };
+            await Utils.logException(JSON.stringify(errorLog));
+        }
+
     }
 
     return (
@@ -203,7 +206,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                 onChangeText={text => {
                     setExistsInLocalDB(false);
                     setExistsInLiveDB(false);
-                    setSaplingId(text);
+                    setSaplingId(text.trim());
 
                 }}
                 onBlur={checkIfExists}
@@ -322,7 +325,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                     <View style={CustomButtonStyles.buttonContainer}>
                         <Button
                             onPress={onSave}
-                            mode="contained"
+                            //mode="contained"
                             buttonColor='#1D4ED8'
                             labelStyle={CustomButtonStyles.buttonLabel}
                             style={CustomButtonStyles.button}

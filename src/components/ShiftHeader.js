@@ -105,7 +105,8 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
                                 style={{
                                     ...shiftHeaderStyles.plotName(lightTheme),
                                     maxWidth: '100%',
-                                    marginLeft: 29
+                                     marginLeft: 25,
+                                    marginRight: 15,
                                 }}
                                 numberOfLines={1} // Limit to a single line
                                 ellipsizeMode="tail" // Truncate at the end with ellipsis

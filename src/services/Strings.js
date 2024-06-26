@@ -113,7 +113,7 @@ export class Strings {
             Shift: "shift", //manjur
             ClickToDelete: "Click on saplings to delete the entry",
             ShiftType: "Shift type",
-            StartThisShift : "Start this Shift",
+            StartThisShift: "Start this Shift",
 
         },
         "mr": {
@@ -173,7 +173,7 @@ export class Strings {
             Shift: "शिफ्ट",
             ClickToDelete: "एंट्री हटवण्यासाठी रोपावर क्लिक करा", //manjur
             ShiftType: "शिफ्ट प्रकार",
-            StartThisShift:"ही शिफ्ट सुरू करा",
+            StartThisShift: "ही शिफ्ट सुरू करा",
         },
     });
     static alertMessages = new LocalizedStrings({
@@ -254,6 +254,7 @@ export class Strings {
             SelectPlot: "Please Select a Plot",
             SelectDifferentPlot: "Please Select different plots",
             NoPlotSelected: "No Plot Selected",
+            SamePlotSelected : "Same Plot selected",
             FinishShift: "Do you want to finish the Shift ?", //manjur,
             Synched: "Synched",
             FailedUpdateSapling: "Failed to update sapling: ",
@@ -267,7 +268,9 @@ export class Strings {
             SyncingPlotTrees: "Syncing Updated plot trees",
             SyncingImageTrees: "Syncing New image trees",
             MarkedSaplingDead: "You have marked this sapling dead.",
-            ConfirmDeleteEntry: "Do you want to delete the entry?"
+            ConfirmDeleteEntry: "Do you want to delete the entry?",
+            EmptyField : "Empty Field!",
+            EmptySaplingField : "The sapling field is empty."
 
         },
         "mr": {
@@ -347,6 +350,7 @@ export class Strings {
             SelectPlot: "कृपया एक प्लॉट निवडा",
             SelectDifferentPlot: "कृपया भिन्न भूखंड निवडा", //manjur
             NoPlotSelected: "कोणताही भूखंड निवडलेला नाही",
+            SamePlotSelected : "तोच प्लॉट निवडला",
             FinishShift: "तुम्हाला शिफ्ट पूर्ण करायची आहे का ?", //manjur
             Synched: "समक्रमित", //manjur
             FailedUpdateSapling: "रोपे अपडेट करण्यात अयशस्वी", //manjur
@@ -360,7 +364,9 @@ export class Strings {
             SyncingPlotTrees: "अपडेटेड प्लॉट झाडे सिंक करणे सुरू",
             SyncingImageTrees: "नवीन प्रतिमा झाडे सिंक करणे सुरू",
             MarkedSaplingDead: "तुम्ही हे रोपटे मृत मार्क केले आहे",
-            ConfirmDeleteEntry: "तुम्हाला एंट्री हटवायची आहे का?"
+            ConfirmDeleteEntry: "तुम्हाला एंट्री हटवायची आहे का?",
+            EmptyField : "रिकामे फील्ड!",
+            EmptySaplingField : "झाडाचे फील्ड रिकामे."
         }
     })
     static buttonLabels = new LocalizedStrings({

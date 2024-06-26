@@ -117,9 +117,9 @@ const LanguageModal = ({ langModalVisible, setLangModalVisible }) => {
                       <MCIcon name="cancel" size={30} color="white" />
                     </View>
                   )}
-                  mode="contained"
+                  //mode="contained"
                   buttonColor='red'
-                  labelStyle={{...CustomButtonStyles.buttonLabel,fontSize: 15}}
+                  labelStyle={{ ...CustomButtonStyles.buttonLabel, fontSize: 15 }}
                   style={CustomButtonStyles.button}
                   onPress={handleCancelChanges}
                 >
@@ -135,9 +135,9 @@ const LanguageModal = ({ langModalVisible, setLangModalVisible }) => {
                     </View>
                   )}
                   onPress={handleLanguageChanges}
-                  mode="contained"
+                  //mode="contained"
                   buttonColor='#059636'
-                  labelStyle={{...CustomButtonStyles.buttonLabel,fontSize: 15}}
+                  labelStyle={{ ...CustomButtonStyles.buttonLabel, fontSize: 15 }}
                   style={CustomButtonStyles.button}
                 >
                   {Strings.buttonLabels.Submit}

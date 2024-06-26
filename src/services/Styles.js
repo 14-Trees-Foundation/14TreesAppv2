@@ -770,7 +770,7 @@ export const treeFormModalStyles = StyleSheet.create({
     backgroundColor: '#969393',
     padding: 0,
     // borderColor: '#059636',
-     borderRadius: 10,
+    borderRadius: 10,
     alignItems: 'center',
     //borderWidth: 1,
     marginTop: 0,

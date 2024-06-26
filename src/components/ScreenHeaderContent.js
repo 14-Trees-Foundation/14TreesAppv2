@@ -14,8 +14,8 @@ const ScreenHeaderContent = () => {
         <View
             style={ScreenHeaderContentStyles.container}
         >
-            <View style={{ width: 40, height: 35, backgroundColor: "#37B281", marginRight: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                <Text style={{ color: "white", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+            <View style={{  height: 35, backgroundColor: "#37B281", marginRight: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                <Text style={{ color: "white", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
             </View>
             
             <TouchableOpacity

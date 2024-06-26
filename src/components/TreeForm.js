@@ -332,7 +332,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                         <View style={CustomButtonStyles.buttonContainer}>
                             <Button
                                 onPress={onSave}
-                                mode="contained"
+                                //mode="contained"
                                 buttonColor='#1D4ED8'
                                 labelStyle={CustomButtonStyles.buttonLabel}
                                 style={CustomButtonStyles.button}

@@ -628,6 +628,7 @@ export class Utils {
         newTreesList = await Promise.all(newTreesList.map(async (tree) => {
             return await Utils.formatLocalTreeToJSON(tree);
         }))
+
         return newTreesList;
     }
 
@@ -730,8 +731,14 @@ export class Utils {
 
         console.log("filtered shifts to sync", shifts);
 
+
         const failures = [];
         let shiftResponse;
+
+        if (shifts.length === 0) {
+            return { shiftDetails: null, failures: failures };
+        }
+
         for (let i = 0; i < shifts.length; i += MIN_BATCH_SIZE) {
             shiftResponse = await Utils.batchUploadShifts(shifts.slice(i, i + MIN_BATCH_SIZE));
             console.log("shiftResponse---", shiftResponse);
@@ -741,7 +748,8 @@ export class Utils {
                 onProgress(i / shifts.length);
             }
         }
-        console.log("failed shifts---", failures);
+
+        console.log("failed shifts---", failures, shiftResponse);
         await Utils.setLastSyncDateNow();
 
         // if (failures.length === 0) {
@@ -774,7 +782,7 @@ export class Utils {
             }
             await this.logException(JSON.stringify(errorLog));
         }
-
+        console.log("response after batchUploadShifts---", response);
         return { response: response, failures: failures };
     }
 

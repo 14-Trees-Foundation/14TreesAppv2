@@ -46,7 +46,7 @@ const TreesInShiftHeader = ({ item }) => {
                             numberOfLines={1}
                             ellipsizeMode="tail"
                         >
-                            Plot : {item.plotselected}
+                            {Strings.labels.Plot} : {item.plotselected}
                         </Text>
                     </View>
                     {syncUploadComplete && (
@@ -69,7 +69,7 @@ const TreesInShiftHeader = ({ item }) => {
                     <View style={{
                         flexDirection: 'column',
                         flexWrap: 'wrap',
-                        width: '60%',
+                        width: '80%',
                         padding: 6,
                         paddingLeft: 4,
                         paddingBottom: 0,

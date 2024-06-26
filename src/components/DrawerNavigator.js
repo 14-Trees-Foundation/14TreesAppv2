@@ -178,8 +178,8 @@ export const DrawerNavigator = () => {
                                     style={ScreenHeaderContentStyles.modeIcon}
                                 />}
                             </TouchableOpacity> */}
-                            <View style={{ width: 40, height: 35, marginRight: 6, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                                <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+                            <View style={{  height: 35, marginRight: 6, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                                <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
                             </View>
                         </View>
                     )
@@ -218,8 +218,8 @@ export const DrawerNavigator = () => {
                                         style={ScreenHeaderContentStyles.modeIcon}
                                     />}
                                 </TouchableOpacity>
-                                <View style={{ width: 40, height: 35, marginRight: 6, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                                    <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+                                <View style={{  height: 35, marginRight: 6, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                                    <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
                                 </View>
                             </View>
                         )

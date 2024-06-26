@@ -94,8 +94,10 @@ function EditLocalAddImage({ navigation, route }) {
 
 
     useEffect(() => {
-        setSaplingId(sapling_id);
-        fetchDetails(sapling_id);
+        if (sapling_id) {
+            setSaplingId(sapling_id);
+            fetchDetails(sapling_id);
+        }
     }, [sapling_id]);
 
 

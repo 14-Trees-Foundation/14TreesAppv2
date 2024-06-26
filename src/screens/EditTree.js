@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Button, Text, TextInput, ToastAndroid, View, BackHandler, TouchableOpacity } from 'react-native';
+import { Button, Text, TextInput, ToastAndroid, View, BackHandler, TouchableOpacity, Alert } from 'react-native';
 import { DataService } from '../services/DataService';
 import { Strings } from '../services/Strings';
 import { TreeForm, treeFormModes } from '../components/TreeForm';
@@ -18,7 +18,7 @@ const EditTreeScreen = ({ navigation }) => {
     useEffect(() => {
         const backAction = () => {
             navigation.goBack()
-            return true; 
+            return true;
         };
 
         const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
@@ -125,6 +125,15 @@ const EditTreeScreen = ({ navigation }) => {
         setDetails(detailsForTreeForm);
     }
 
+    const handlePress = async () => {
+        if (saplingid === "" || !saplingid) {
+            Alert.alert(Strings.alertMessages.EmptyField, Strings.alertMessages.EmptySaplingField);
+            return
+        }
+
+        fetchTreeDetails()
+    }
+
     if (details) {
         return (
             <TreeForm
@@ -145,12 +154,12 @@ const EditTreeScreen = ({ navigation }) => {
                     style={editRemoteTreeStyles.textInput(lightTheme)}
                     placeholder={Strings.labels.SaplingId}
                     placeholderTextColor={'#52525C'}
-                    onChangeText={(text) => setSaplingid(text)}
+                    onChangeText={(text) => setSaplingid(text.trim())}
                     value={saplingid}
                 />
 
                 <View style={{ margin: 20, marginHorizontal: 80 }}>
-                    <TouchableOpacity style={commonStyles.searchButton} onPress={() => { if (!saplingid) { Alert.alert(Strings.alertMessages.EmptyField, Strings.alertMessages.EmptySaplingField); return } fetchTreeDetails() }}>
+                    <TouchableOpacity style={commonStyles.searchButton} onPress={handlePress}>
                         <Text style={editRemoteTreeStyles.searchButton}>
                             {Strings.buttonLabels.Search}
                         </Text>

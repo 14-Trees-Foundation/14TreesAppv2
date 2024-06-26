@@ -95,7 +95,7 @@ const SyncDisplay = ({ navigation }) => {
 
 
     responseFromSyncShifts = await Utils.syncShifts(setProgress);
-
+    console.log("responseFromSyncShifts---", responseFromSyncShifts.failures, responseFromSyncShifts.shiftDetails);
     setFailedShifts(responseFromSyncShifts.failures);
 
     setProgress(1);
@@ -106,10 +106,11 @@ const SyncDisplay = ({ navigation }) => {
 
     await Utils.fetchAndStoreHelperData();
 
-    if (shiftDone) {
+    if (shiftDone && responseFromSyncShifts.shiftDetails) {
       await deleteSyncedTreesAndShifts(responseFromSyncShifts);
       await Utils.fetchAndStoreShifts();
     }
+    
   }
 
 
@@ -179,7 +180,7 @@ const SyncDisplay = ({ navigation }) => {
 
     if (
       treeCounts &&
-      treeCounts.pending.treesUpload === 0 && treeCounts.pending.plotUpload === 0 && treeCounts.pending.imagesUpload &&
+      treeCounts.pending.treesUpload === 0 && treeCounts.pending.plotUpload === 0 && treeCounts.pending.imagesUpload === 0 &&
       shiftsCount && shiftsCount.pending === 0) {
       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
       return;
@@ -404,7 +405,7 @@ const SyncDisplay = ({ navigation }) => {
                 {`${Strings.messages.Shift}s`}:{' '}
               </Text>
             )}
-            keyExtractor={item.id ? item.id : item}
+            keyExtractor={item => item.id ? item.id : item}
             data={failedShifts}
             renderItem={({ item, index }) => {
               return (

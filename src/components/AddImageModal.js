@@ -130,7 +130,7 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
 
     const onSave = async () => {
 
-        if (saplingid === null || plotSelected === null || (plotSelected && Object.keys(plotSelected).length === 0)) {
+        if (saplingid === "" || saplingid === null || plotSelected === null || (plotSelected && Object.keys(plotSelected).length === 0)) {
             Alert.alert(Strings.alertMessages.Error, Strings.alertMessages.IncompleteFields);
             return;
         }
@@ -195,7 +195,6 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
             }
             await Utils.logException(JSON.stringify(errorLog));
         }
-
     }
 
     return (
@@ -230,7 +229,7 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
                             onChangeText={text => {
                                 setExistsInLocalDB(false);
                                 setExistsInLiveDB(true);
-                                setSaplingId(text);
+                                setSaplingId(text.trim());
 
                             }}
                             onBlur={checkIfExists}
@@ -364,7 +363,7 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
                                 <View style={CustomButtonStyles.buttonContainer}>
                                     <Button
                                         onPress={onSave}
-                                        mode="contained"
+                                        //mode="contained"
                                         buttonColor='#1D4ED8'
                                         labelStyle={CustomButtonStyles.buttonLabel}
                                         style={CustomButtonStyles.button}

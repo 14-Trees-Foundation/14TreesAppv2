@@ -276,8 +276,8 @@ const App = () => {
               <View style={{
                 marginRight: 30, flexDirection: "row"
               }}>
-                <View style={{ width: 40, height: 35, marginRight: 7, marginTop: 5, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+                <View style={{  height: 35, marginRight: 7, marginTop: 5, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -304,8 +304,8 @@ const App = () => {
               <View style={{
                 marginRight: 30, flexDirection: "row"
               }}>
-                <View style={{ width: 40, height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+                <View style={{  height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -333,7 +333,7 @@ const App = () => {
               <View style={{
                 marginRight: 30, flexDirection: "row"
               }}>
-                <View style={{ width: 40, height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                <View style={{  height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
                   <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
                 </View>
                 <Text style={{
@@ -367,8 +367,8 @@ const App = () => {
               </View>
             ),
             headerRight: () => (
-              <View style={{ width: 40, height: 35, marginRight: 13, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+              <View style={{ height: 35, marginRight: 13, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
               </View>
             ),
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
@@ -386,8 +386,8 @@ const App = () => {
                 marginRight: 30, flexDirection: "row"
               }}>
 
-                <View style={{ width: 40, height: 35, marginRight: 0, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+                <View style={{ height: 35, marginRight: 0, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 4 }}>2.4.1</Text>
                 </View>
 
                 <Text style={{
@@ -441,8 +441,8 @@ const App = () => {
               <View style={{
                 marginRight: 35, flexDirection: "row"
               }}>
-                <View style={{ width: 40, height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+                <View style={{  height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -477,8 +477,8 @@ const App = () => {
               <View style={{
                 marginRight: 28, flexDirection: "row"
               }}>
-                <View style={{ width: 40, height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+                <View style={{  height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',

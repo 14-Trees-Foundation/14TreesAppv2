@@ -46,7 +46,7 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
                 }
 
                 if (plotSelected.name === newPlotSelected.name) {
-                    Alert.alert(Strings.alertMessages.NoPlotSelected, Strings.alertMessages.SelectDifferentPlot);
+                    Alert.alert(Strings.alertMessages.SamePlotSelected, Strings.alertMessages.SelectDifferentPlot);
                     return;
                 }
 
@@ -91,7 +91,7 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
             }
 
             if (plotSelected.name === newPlotSelected.name) {
-                Alert.alert(Strings.alertMessages.NoPlotSelected, Strings.alertMessages.SelectDifferentPlot);
+                Alert.alert(Strings.alertMessages.SamePlotSelected, Strings.alertMessages.SelectDifferentPlot);
                 return;
             }
 

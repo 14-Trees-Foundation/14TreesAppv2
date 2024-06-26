@@ -1204,14 +1204,14 @@ export class LocalDatabase {
 
 
     updateTreesWithChangedPlotInPlotsTable = async (old_plot, new_plot, id) => {
-
+        console.log("old---" , old_plot, "new---" , new_plot, "id---" , id);
         try {
             const results = await this.db.executeSql(`SELECT saplings,shifttype FROM ${localShiftTable} WHERE id = ?`, [id]);
             const result = results[0].rows.item(0);
             let saplingArray = JSON.parse(result?.saplings || '[]');
 
             const updatePromises = saplingArray.map(sapling => {
-                const updateQuery = `UPDATE ${updatePlotsTable} SET old_plot = ?, new_plot = ? WHERE saplingid = ?`;
+                const updateQuery = `UPDATE ${updatePlotsTable} SET old_plot = ?, new_plot = ? WHERE sapling_id = ?`;
                 return this.db.executeSql(updateQuery, [old_plot, new_plot, sapling.sapling_id]);
             });
 
@@ -1652,8 +1652,6 @@ export class LocalDatabase {
                     const query = `DELETE FROM ${localShiftTable} where shift_id = '${shift_ids[i]}'`;
                     await this.db.executeSql(query);
                 }
-
-                //should i implement the else part to delete only the uploaded trees.
             }
         } catch (error) {
             console.error(error);
