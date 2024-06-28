@@ -19,7 +19,7 @@ const TreesInShiftHeader = ({ item }) => {
                 flexDirection: 'row',
 
                 // justifyContent: 'center',
-                backgroundColor: '#EBEBEB',
+                backgroundColor: 'white',
                 opacity: 0.9,
                 borderRadius: 3,
                 marginTop: 7,
@@ -37,8 +37,8 @@ const TreesInShiftHeader = ({ item }) => {
                         <Text
                             style={{
                                 ...commonStyles.text,
-                                color: lightTheme ? '#52525C' : 'black',
-                                fontSize: 18,
+                                color: lightTheme ? '#333' : 'black',
+                                fontSize: 20,
                                 textAlign: 'left',
                                 marginLeft: 8,
 
@@ -72,35 +72,94 @@ const TreesInShiftHeader = ({ item }) => {
                         width: '80%',
                         padding: 6,
                         paddingLeft: 4,
-                        paddingBottom: 0,
-                        backgroundColor: "#EBEBEB"
+                        // backgroundColor: "#EBEBEB"
                     }}>
-                        <Text style={{
-                            fontSize: 15,
-                            fontFamily: 'Inter-Regular',
-                            color: 'black',
-                            textAlign: 'left',
-                            fontWeight: 'bold', color: lightTheme ? '#52525C' : 'black'
-                        }}>{Strings.labels.Date} : {item.timestamp}</Text>
-                        <Text style={{
+                        <View style={{ flex: 1, flexDirection: 'row', paddingBottom: 5, }}>
+                            <Text style={{
+                                fontSize: 15,
+                                fontFamily: 'Inter-Regular',
+                                color: 'black',
+                                textAlign: 'left',
+                                fontWeight: 'bold', color: lightTheme ? '#333' : 'black'
+                            }}>{Strings.labels.Date} :
+                            </Text>
 
-                            fontFamily: 'Inter-Regular',
-                            color: 'black',
-                            textAlign: 'left',
-                            fontWeight: 'bold', fontSize: 15, color: lightTheme ? '#52525C' : 'black'
-                        }}>{Strings.labels.TimeTaken} : {item.starttime} to {item.endtime}</Text>
-                        <Text style={{
-                            fontSize: 16,
-                            fontWeight: 'bold',
-                            color: lightTheme ? '#52525C' : 'black'
-                        }}>{Strings.messages.ShiftType} : {item.shifttype}
-                        </Text>
-                        <Text style={{
-                            fontSize: 22,
-                            fontWeight: 'bold',
-                            color: lightTheme ? '#52525C' : 'black'
-                        }}>{Strings.messages.trees} : {item.treesplanted}
-                        </Text>
+                            <Text style={{
+                                fontSize: 15,
+                                fontFamily: 'Inter-Regular',
+                                color: 'black',
+                                textAlign: 'left',
+                                marginLeft: 20,
+                                fontWeight: '600', color: lightTheme ? '#333' : 'black'
+                            }}>
+                                {item.timestamp}
+                            </Text>
+                        </View>
+
+                        <View style={{ flex: 1, flexDirection: 'row', paddingBottom: 5, }}>
+                            <Text style={{
+                                fontSize: 15,
+                                fontFamily: 'Inter-Regular',
+                                color: 'black',
+                                textAlign: 'left',
+                                fontWeight: 'bold', color: lightTheme ? '#333' : 'black'
+                            }}>{Strings.labels.Time} :
+                            </Text>
+
+                            <Text style={{
+                                fontSize: 15,
+                                fontFamily: 'Inter-Regular',
+                                color: 'black',
+                                textAlign: 'left',
+                                marginLeft: 20,
+                                fontWeight: '600', color: lightTheme ? '#333' : 'black'
+                            }}>
+                                {item.starttime} to {item.endtime}
+                            </Text>
+                        </View>
+
+                        <View style={{ flex: 1, flexDirection: 'row', paddingBottom: 5, }}>
+                            <Text style={{
+                                fontSize: 15,
+                                fontFamily: 'Inter-Regular',
+                                color: 'black',
+                                textAlign: 'left',
+                                fontWeight: 'bold', color: lightTheme ? '#333' : 'black'
+                            }}>{Strings.messages.ShiftType} :
+                            </Text>
+
+                            <Text style={{
+                                fontSize: 15,
+                                fontFamily: 'Inter-Regular',
+                                color: 'black',
+                                textAlign: 'left',
+                                marginLeft: 20,
+                                fontWeight: '600', color: lightTheme ? '#333' : 'black'
+                            }}>
+                                {item.shifttype}
+                            </Text>
+                        </View>
+                        <View style={{ flex: 1, flexDirection: 'row', paddingBottom: 5, }}>
+                            <Text style={{
+                                fontSize: 15,
+                                fontFamily: 'Inter-Regular',
+                                color: 'black',
+                                textAlign: 'left',
+                                fontWeight: 'bold', color: lightTheme ? '#333' : 'black'
+                            }}>{Strings.messages.Trees} :
+                            </Text>
+
+                            <Text style={{
+                                fontSize: 15,
+                                fontFamily: 'Inter-Regular',
+                                color: 'black',
+                                textAlign: 'left',
+                                marginLeft: 20,
+                                fontWeight: '600', color: lightTheme ? '#333' : 'black'
+                            }}>
+                                {item.treesplanted}
+                            </Text>
+                        </View>
 
                     </View>
 

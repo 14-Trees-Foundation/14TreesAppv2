@@ -13,6 +13,7 @@ import ShiftsCard from "../components/ShiftsCard";
 import { ShiftTypeModal } from "../components/ShiftTypeModal";
 import PlotSelectModal from "../components/PlotSelectModal";
 import UpdatePlotSelectModal from "../components/UpdatePlotSelectModal";
+import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export const shiftTypes = {
     addSapling: 0,
@@ -116,16 +117,11 @@ const Shifts = ({ navigation }) => {
 
                 (
                     <>
-                        <View style={{ flex: 1, marginLeft: 22, marginTop: 24, marginBottom: 10 }}>
+                        <View style={{ flex: 1, marginLeft: 22, marginTop: 24, marginBottom: 10, }}>
                             <Button
-                                icon={() => (
-                                    <View style={Iconstyles.buttonPosition}>
-                                        <StackedIcons
-                                            names={['plus', 'tree']}
-                                            styles={[{ opacity: 0.9, position: 'absolute' }, { opacity: 0.5, position: 'absolute' }]}
-                                        />
-                                    </View>
-                                )}
+                                // icon={() => (
+                                //     <MCIcon name="plus" size={30} color="white" />
+                                // )}
                                 mode="contained"
                                 buttonColor='#059636'
                                 onPress={() => {
@@ -134,9 +130,12 @@ const Shifts = ({ navigation }) => {
                                 }}
                                 style={{ width: "65%", borderRadius: 13 }}
                                 contentStyle={Iconstyles.buttonContent}
-                                labelStyle={Iconstyles.buttonLabel}
+                                labelStyle={{
+                                    ...Iconstyles.buttonLabel(lightTheme),
+                                     paddingTop: 16
+                                }}
                             >
-                                {Strings.buttonLabels.StartShift}
+                                + {Strings.buttonLabels.StartShift}
 
                             </Button>
                         </View>
@@ -149,7 +148,7 @@ const Shifts = ({ navigation }) => {
                                         <View style={{
                                             marginLeft: 5,
                                             padding: 3,
-                                            marginBottom: 20,
+                                            marginBottom: 15,
                                         }}>
                                             <Text style={{
                                                 fontSize: 20,
@@ -158,8 +157,7 @@ const Shifts = ({ navigation }) => {
                                                 justifyContent: 'center',
                                                 alignSelf: "flex-start",
                                                 marginLeft: 22,
-
-                                                color: '#52525C', color: lightTheme ? '#52525C' : 'black', fontWeight: !lightTheme ? "bold" : null
+                                                color: lightTheme ? '#333' : 'black', fontWeight: "bold"
                                             }}>
                                                 {Strings.messages.AllShifts} : {userName}
                                             </Text>
@@ -179,7 +177,15 @@ const Shifts = ({ navigation }) => {
                                 <View
                                 //style={{ ...commonStyles.borderedDisplay }}
                                 >
-                                    <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black', fontWeight: !lightTheme ? "bold" : null }}>
+                                    <Text style={{
+                                        fontSize: 20,
+                                        fontFamily: 'Inter-Regular',
+                                        alignContent: "flex-start",
+                                        justifyContent: 'center',
+                                        alignSelf: "flex-start",
+                                        marginLeft: 22,
+                                        color: lightTheme ? '#333' : 'black', fontWeight: "bold"
+                                    }}>
                                         {Strings.messages.NoShiftsFound} : {userName}
                                     </Text>
                                 </View>

@@ -192,7 +192,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
         <ScrollView
             keyboardShouldPersistTaps='handled'
             scrollEnabled={true}
-            style={{ ...treeFormStyles.detailsContainerOuter, marginBottom: 10, marginHorizontal: 0 }} >
+            style={{ ...treeFormStyles.detailsContainerOuter, marginBottom: 10, marginHorizontal: 0, }} >
             <View style={{ margin: 4, borderRadius: 10 }}>
 
 
@@ -252,11 +252,25 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                             }}
                         >
 
-                            {!showImage ? <View style={{ ...treeFormModalStyles.cameraIcon, justifyContent: 'center', alignItems: 'center' }}>
-                                <Image
-                                    source={require('../../assets/icon-bw-camera.png')}
-                                />
-                            </View>
+                            {!showImage ? (
+                                <View style={{ ...treeFormModalStyles.cameraIcon, }}>
+                                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', margin: 10 }}>
+                                        <Image
+                                            source={require('../../assets/icon-plus.png')} style={{ width: 30, height: 30, opacity: 0.3 }}
+                                        />
+                                    </View>
+                                    <View style={{
+                                        flex: 1, alignItems: 'center',
+                                        marginBottom: 50,
+                                        // marginTop: 30 
+                                    }}>
+                                        <Image
+                                            source={require('../../assets/icon-bw-camera.png')} style={{ width: 60, height: 60, opacity: 0.3 }}
+                                        />
+                                    </View>
+                                </View>
+
+                            )
                                 : <Image
                                     source={{ uri: `data:image/jpeg;base64,${images[images.length - 1].data}` }}
                                     style={treeFormStyles.imageExists}
@@ -293,18 +307,29 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                         setModalVisible(false);
                     }}
                 >
-                    <View style={treeFormStyles.modalContainer}>
+                    <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                         <View style={{ backgroundColor: 'white', padding: 40 }}>
-                            <View style={treeFormStyles.buttonContainer}>
-
-                                <TouchableOpacity onPress={() => pickImage(0)} style={treeFormStyles.modalButtons}>
-                                    <Text style={treeFormStyles.buttonText}> {Strings.buttonLabels.openCamera}</Text>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 10 }}>
+                                <TouchableOpacity onPress={() => pickImage(0)} style={{
+                                    backgroundColor: "#059636", padding: 6, borderRadius: 12, width: 120, alignItems: "center", height: 45, shadowColor: 'black',
+                                    shadowOpacity: 0.8,
+                                    elevation: 3,
+                                    shadowRadius: 1,
+                                    shadowOffset: { width: 1, height: 4 },
+                                }}>
+                                    <Text style={{ color: "white", fontWeight: 'bold', fontSize: 22 }}> {Strings.buttonLabels.openCamera}</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => pickImage(1)} style={treeFormStyles.modalButtons}>
-                                    <Text style={treeFormStyles.buttonText}> {Strings.buttonLabels.openGallery}</Text>
+                                <TouchableOpacity onPress={() => pickImage(1)} style={{
+                                    backgroundColor: "#059636", padding: 6, borderRadius: 12, width: 120, alignItems: "center", height: 45, shadowColor: 'black',
+                                    shadowOpacity: 0.8,
+                                    elevation: 3,
+                                    shadowRadius: 1,
+                                    shadowOffset: { width: 1, height: 4 }
+                                }}>
+                                    <Text style={{ color: "white", fontWeight: 'bold', fontSize: 22 }}> {Strings.buttonLabels.openGallery}</Text>
                                 </TouchableOpacity>
                             </View>
-                            <TouchableOpacity style={treeFormStyles.cancelModal} onPress={() => setModalVisible(false)}  >
+                            <TouchableOpacity style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }} onPress={() => setModalVisible(false)}  >
                                 <Icon name="close-circle" size={28} color="red" />
                             </TouchableOpacity>
                         </View>

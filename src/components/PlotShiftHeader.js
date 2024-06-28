@@ -8,7 +8,7 @@ import { Image, ScrollView, Text, TouchableOpacity, View, } from 'react-native';
 import { Utils } from '../services/Utils';
 import { Strings } from '../services/Strings';
 
-const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
+const PlotShiftHeader = ({ onSetTime, handleModalChanges }) => {
 
     const { treesPlanted, shiftTime, setShiftTime, plotSelected, newPlotSelected, lightTheme, playSound, setPlaySound } = useContext(GlobalContext);
 
@@ -56,201 +56,173 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
 
 
     return (
+        <View>
 
-        <View style={{
-            ...shiftHeaderStyles.outerContainer,
-
-        }}>
-            <View style={{
-                //shiftHeaderStyles.innerContainer
-                flexDirection: 'row',
-                //justifyContent: 'center',
-                alignItems: 'center',
-                //marginBottom: 10,
-                //marginLeft: 10,
-                // gap: 30
-            }}>
-                <View
+            <View style={{ flex: 1, flexDirection: 'row', marginLeft: 12, marginVertical: 5, }}>
+                <Text
                     style={{
-                        width: '30%',
+                        fontFamily: 'Inter-Regular',
+                        fontWeight: 'bold',
+                        color: lightTheme ? '#333' : 'black',
+                        margin: 8,
+                        fontSize: 18,
                     }}
                 >
+                    {Strings.messages.OldPlot} :
+                </Text>
+                {
+                    plotSelected && <TouchableOpacity
+                        style={{ width: plotSelected.name.length > 22 ? '70%' : '100%' }}
+                        onPress={() => { handleModalChanges(); }
+                        }>
+                        <Text
+                            style={{
+                                ...commonStyles.text,
+                                color: lightTheme ? '#333' : 'black',
+                                fontSize: 18,
+                                textAlign: 'left',
+                                fontWeight: "bold",
+                                marginTop: 8,
+                            }}
+                            numberOfLines={1} // Limit to a single line
+                            ellipsizeMode="tail" // Truncate at the end with ellipsis
+                        >
+                            {plotSelected.name}
+                        </Text>
+
+                    </TouchableOpacity>
+                }
+            </View>
+
+
+            <View style={{
+                //...shiftHeaderStyles.outerContainer, 
+                marginHorizontal: 18,
+                backgroundColor: '#F5F5F5',
+                padding: 10,
+                borderRadius: 10,
+                //shadowColor: '#000',
+                // shadowOffset: { width: 0, height: 2 },
+                // shadowOpacity: 0.1,
+                // shadowRadius: 8,
+                // elevation: 5,
+            }}>
+                <View style={{
+                    //shiftHeaderStyles.innerContainer
+                    flexDirection: 'row',
+                    //justifyContent: 'center',
+                    alignItems: 'center',
+                    paddingBottom: 5
+                }}>
                     <Text
                         style={{
                             fontFamily: 'Inter-Regular',
                             fontWeight: 'bold',
-                            color: lightTheme ? '#52525C' : 'black',
+                            color: lightTheme ? '#333' : 'black',
                             margin: 8,
-                            fontSize: 20,
-                            marginTop: 5,
-                        }}
-                    >
-                        {Strings.messages.OldPlot}
-                    </Text>
-                </View>
-                <View
-                    style={{
-                        width: '70%',
-
-                    }}
-                >
-                    {
-                        plotSelected && <TouchableOpacity
-                            //style={{maxWidth: '100%'}}
-                            onPress={() => { handleModalChanges(); }
-                            }>
-                            <Text
-                                style={{
-                                    ...shiftHeaderStyles.plotName(lightTheme),
-
-                                }}
-                                numberOfLines={1} // Limit to a single line
-                                ellipsizeMode="tail" // Truncate at the end with ellipsis
-                            >
-                                {plotSelected.name}
-                            </Text>
-
-                        </TouchableOpacity>
-                    }
-                </View>
-
-
-            </View>
-
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                <Icon name="arrow-down" size={15} color={lightTheme ? "#52525C" : 'black'} />
-            </View>
-
-            <View style={{
-                //shiftHeaderStyles.innerContainer
-                flexDirection: 'row',
-                //justifyContent: 'center',
-                alignItems: 'center',
-                //marginBottom: 10,
-                //marginLeft: 10,
-                // gap: 30
-            }}>
-                <View
-                    style={{
-                        width: '30%',
-                    }}
-                >
-                    <Text
-                        style={{
-                            fontFamily: 'Inter-Regular',
-                            fontWeight: 'bold',
-                            color: lightTheme ? '#52525C' : 'black',
-                            margin: 8,
-                            fontSize: 20,
+                            fontSize: 18,
                             marginTop: 5,
                         }}
                     >
                         {Strings.messages.NewPlot}
                     </Text>
+                    <View>
+                        {
+                            newPlotSelected && <TouchableOpacity
+                                style={{ width: newPlotSelected.name.length > 22 ? '90%' : '100%' }}
+                                onPress={() => { handleModalChanges(); }
+                                }>
+                                <Text
+                                    style={{
+                                        ...commonStyles.text,
+                                        color: lightTheme ? '#333' : 'black',
+                                        fontSize: 18,
+                                        textAlign: 'left',
+                                        fontWeight: "600",
+                                        marginLeft: 25,
+                                        marginRight: 15,
+                                    }}
+                                    numberOfLines={1} // Limit to a single line
+                                    ellipsizeMode="tail" // Truncate at the end with ellipsis
+                                >
+                                    {newPlotSelected.name}
+                                </Text>
+
+                            </TouchableOpacity>
+                        }
+                    </View>
                 </View>
 
-                <View
-                    style={{
-                        width: '70%',
 
-                    }}
-                >
-                    {
-                        newPlotSelected && <TouchableOpacity
 
-                            onPress={() => { handleModalChanges(); }
-                            }>
-                            <Text
-                                style={{
-                                    ...shiftHeaderStyles.plotName(lightTheme),
 
-                                }}
-                                numberOfLines={1} // Limit to a single line
-                                ellipsizeMode="tail" // Truncate at the end with ellipsis
-                            >
-                                {newPlotSelected.name}
+                <View style={{ ...shiftHeaderStyles.shiftDetailsContainer, padding: 0 }}>
+
+                    <View style={{ ...shiftHeaderStyles.shiftDetailsView, width: '60%', marginBottom: 0 }}>
+                        <View style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            paddingBottom: 5
+                        }}>
+                            <Text style={{
+                                //shiftHeaderStyles.shiftTime(lightTheme)
+                                fontFamily: 'Inter-Regular',
+                                fontWeight: 'bold',
+                                color: lightTheme ? '#333' : 'black',
+                                marginLeft: 8,
+                                fontSize: 18,
+                                //marginTop: 5,
+                            }}>
+                                {Strings.labels.StartTime}
                             </Text>
 
-                        </TouchableOpacity>
-                    }
-                </View>
+                            <Text style={{
+                                ...commonStyles.text,
+                                color: lightTheme ? '#333' : 'black',
+                                fontSize: 18,
+                                textAlign: 'left',
+                                marginRight: 0,
+                                fontWeight: "600"
+                            }}>
+                                {shiftTime}
+                            </Text>
+                        </View>
 
-
-            </View>
-
-
-            <View style={{ ...shiftHeaderStyles.shiftDetailsContainer, padding: 0 }}>
-
-                <View style={{ ...shiftHeaderStyles.shiftDetailsView, width: '60%', marginBottom: 0 }}>
-                    <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        //marginBottom: 5,
-                        //width: '60%'
-                    }}>
-                        <Text style={{
-                            //shiftHeaderStyles.shiftTime(lightTheme)
-                            fontFamily: 'Inter-Regular',
-                            fontWeight: 'bold',
-                            color: lightTheme ? '#52525C' : 'black',
-                            marginLeft: 8,
-                            fontSize: 20,
-                            //marginTop: 5,
+                        <View style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            //marginBottom: 5,
+                            //width: '60%'
                         }}>
-                             {Strings.labels.StartTime}
-                        </Text>
+                            <Text style={{
+                                //shiftHeaderStyles.shiftTime(lightTheme)
+                                fontFamily: 'Inter-Regular',
+                                fontWeight: 'bold',
+                                color: lightTheme ? '#333' : 'black',
+                                marginLeft: 8,
+                                fontSize: 18,
+                                //marginTop: 5,
+                            }}>
+                                {Strings.labels.TimeTaken}
+                            </Text>
 
-                        <Text style={{
-                            //shiftHeaderStyles.shiftTime(lightTheme)
-                            fontFamily: 'Inter-Regular',
-                            fontWeight: 'bold',
-                            color: lightTheme ? '#52525C' : 'black',
-                            //margin: 8,
-                            fontSize: 17,
-                            //marginTop: 5,
-                        }}>
-                            {shiftTime}
-                        </Text>
+
+                            <Timer onSetTime={onSetTime} />
+
+                        </View>
                     </View>
 
+
                     <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        //marginBottom: 5,
-                        //width: '60%'
+                        ...shiftHeaderStyles.treeDetailsContainer(showGradient),
+                        flex: 1,
+                        borderRadius: 10,
+                        justifyContent: "space-evenly",
+
                     }}>
-                        <Text style={{
-                            //shiftHeaderStyles.shiftTime(lightTheme)
-                            fontFamily: 'Inter-Regular',
-                            fontWeight: 'bold',
-                            color: lightTheme ? '#52525C' : 'black',
-                            marginLeft: 8,
-                            fontSize: 20,
-                            //marginTop: 5,
-                        }}>
-                            {Strings.labels.TimeTaken}
-                        </Text>
-
-                        <Timer onSetTime={onSetTime} />
-                    </View>
-                </View>
-
-
-                <View style={{
-                    ...shiftHeaderStyles.treeDetailsContainer(showGradient),
-                    //marginTop: 7,
-                    //marginLeft: 32, 
-                    //height: 70,
-                    flex: 1,
-                    borderRadius: 10,
-                }}>
-                    <View style={{ margin: 6, flex: 1, }}>
-
-                        <View
-                        //style={shiftHeaderStyles.iconContainer}
-                        >
+                        <View style={{ margin: 6, }}>
                             <Image source={require('../../assets/tree.png')}
                                 style={{
                                     marginTop: 2,
@@ -258,20 +230,20 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
                                     width: 32
                                 }}
                             />
+
+                        </View>
+                        <View >
+                            <Text style={{ ...shiftHeaderStyles.treeCount(lightTheme), marginTop: 2, marginRight: 0 }}>
+                                {treesPlanted}
+                            </Text>
                         </View>
                     </View>
-                    <View >
-                        <Text style={{ ...shiftHeaderStyles.treeCount(lightTheme), marginTop: 2, marginRight: 2 }}>
-                            {treesPlanted}
-                        </Text>
-                    </View>
                 </View>
-            </View>
 
-        </View >
-
+            </View >
+        </View>
     )
 }
 
-export default ShiftHeader;
+export default PlotShiftHeader;
 

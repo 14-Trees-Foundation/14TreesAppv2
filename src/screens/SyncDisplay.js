@@ -4,7 +4,7 @@ import { Constants, Utils } from '../services/Utils';
 import { Strings } from '../services/Strings';
 import * as Progress from 'react-native-progress';
 import { useFocusEffect } from '@react-navigation/native';
-import { commonStyles, syncButtonStyles, syncDisplayStyles } from "../services/Styles";
+import { CustomButtonStyles, commonStyles, syncButtonStyles, syncDisplayStyles } from "../services/Styles";
 import GlobalContext from '../context/GlobalContext ';
 import { Button } from 'react-native-paper';
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -110,7 +110,7 @@ const SyncDisplay = ({ navigation }) => {
       await deleteSyncedTreesAndShifts(responseFromSyncShifts);
       await Utils.fetchAndStoreShifts();
     }
-    
+
   }
 
 
@@ -278,32 +278,32 @@ const SyncDisplay = ({ navigation }) => {
         </Text>
       </View>
 
-      <View style={{ ...commonStyles.borderedDisplay, margin: 20 }}>
+      <View style={{ margin: 20 }}>
         {treeCounts && (
           <View>
             <View style={syncDisplayStyles.syncDetailsContainer}>
-              <Text style={syncDisplayStyles.syncText(lightTheme)}>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), color: '#333' }}>
                 {Strings.messages.pending}:
               </Text>
               <Text style={syncDisplayStyles.syncText(lightTheme)}>
                 {treeCounts.pending.treesUpload + treeCounts.pending.plotUpload + treeCounts.pending.imagesUpload > 0 ? '❗' : '✅'}
               </Text>
-              <Text style={syncDisplayStyles.syncText(lightTheme)}>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), color: '#333' }}>
                 {Strings.messages.synced}: {treeCounts.uploaded}
               </Text>
             </View>
 
             <View style={{ margin: 0, paddingLeft: 27 }}>
-              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium" }}>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4, paddingTop: 3 }}>
                 {Strings.messages.pendingTrees}: {treeCounts?.pending.treesUpload}
               </Text>
-              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium" }}>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
                 {Strings.messages.pendingImages}: {treeCounts?.pending.imagesUpload}
               </Text>
-              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium" }}>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
                 {Strings.messages.pendingPlotTrees}: {treeCounts?.pending.plotUpload}
               </Text>
-              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium" }}>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
                 {Strings.screenNames.Shifts}: {shiftsCount?.pending}
               </Text>
             </View>
@@ -316,16 +316,16 @@ const SyncDisplay = ({ navigation }) => {
             icon={() => (
               <MCIcon name="wifi-sync" size={30} color="white" />
             )}
-            mode="contained"
+            mode={!lightTheme ? "elevated" : "contained"}
             buttonColor='#059636'
             onPress={commenceUpload}
-            contentStyle={syncDisplayStyles.buttonContent}
-            labelStyle={syncDisplayStyles.buttonLabel}
+            labelStyle={{ ...CustomButtonStyles.buttonLabel, paddingTop: 9, }}
+            style={CustomButtonStyles.button}
           >
             {Strings.buttonLabels.SyncData}
           </Button>
-
         </View>
+
         {showProgress && (
           <View style={syncDisplayStyles.progressBar}>
             <Text style={syncDisplayStyles.progressBarText(lightTheme)}>

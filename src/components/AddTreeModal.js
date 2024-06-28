@@ -72,7 +72,7 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
     }
 
     const fetchTreeDetails = async (saplingId) => {
-      
+
         if (saplingId === null || saplingId === undefined) {
             ToastAndroid.show(`${Strings.alertMessages.UnableToFetch} ${saplingId} `, ToastAndroid.LONG);
             setModalVisible(false)
@@ -150,11 +150,11 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
                 animationType="slide"
                 transparent={true}
                 visible={
-                    modalVisible 
+                    modalVisible
                 }
                 onRequestClose={handleDetailsChanges}
             >
-                <ScrollView keyboardShouldPersistTaps="handled" style={{...customModalStyles.centeredView, marginTop: 180}}>
+                <ScrollView keyboardShouldPersistTaps="handled" style={{ ...customModalStyles.centeredView, marginTop: 180 }}>
                     <View style={customModalStyles.modalView}>
 
                         <TreeFormModal
@@ -173,9 +173,9 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
                 animationType="slide"
                 transparent={true}
                 visible={
-                    modalVisible 
+                    modalVisible
                 }
-                onRequestClose={handleDetailsChanges} 
+                onRequestClose={handleDetailsChanges}
             >
 
                 <View style={customModalStyles.loadingView}>
@@ -185,6 +185,7 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
             </Modal>
         );
     }
+
 
 };
 

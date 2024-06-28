@@ -147,7 +147,7 @@ const AddTreeShift = ({ navigation }) => {
 
                     <Button
                         icon={() => (
-                            <MCIcon name="plus" size={30} color="white" />
+                            <MCIcon name="plus" size={25} color="white" />
                         )}
                         mode="contained"
                         buttonColor='#059636'
@@ -156,7 +156,7 @@ const AddTreeShift = ({ navigation }) => {
                             setModalVisible(true);
                             setSaplingID(null);
                         }}
-                        labelStyle={CustomButtonStyles.buttonLabel}
+                        labelStyle={{...CustomButtonStyles.buttonLabel,paddingTop: 8,}}
                         style={CustomButtonStyles.button}
                     >
                         {Strings.buttonLabels.AddNewTree}
@@ -168,7 +168,7 @@ const AddTreeShift = ({ navigation }) => {
                     <View style={{ ...shiftStyles.buttonRowInner, marginRight: 5 }}>
                         <Button
                             icon={() => (
-                                <MCIcon name="wifi-sync" size={30} color="white" />
+                                <MCIcon name="wifi-sync" size={22} color="white" />
                             )}
                             mode="contained"
                             buttonColor='#059636'
@@ -223,8 +223,10 @@ const AddTreeShift = ({ navigation }) => {
     } else {
         return (
             <ScrollView keyboardShouldPersistTaps='handled' style={shiftStyles.scrollView}>
-
-                <View style={shiftStyles.container}>
+                {/* <View style={{marginHorizontal:20,marginVertical:10,marginTop:24}}>
+                    <Text style={{fontFamily:"Inter",fontSize:22,fontWeight:'bold',color:"black"}}>{Strings.labels.AddAShift}</Text>
+                </View> */}
+                <View style={{...shiftStyles.container,paddingTop:0}}>
                     <ShiftHeader
                         onSetTime={(seconds) => {
                             finalRef.current.seconds = seconds;
@@ -265,7 +267,7 @@ const AddTreeShift = ({ navigation }) => {
                                         <View
                                         //style={commonStyles.borderedDisplay}
                                         >
-                                            <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black', }}>
+                                            <Text style={{ ...commonStyles.text5, color: lightTheme ? '#333' : 'black', }}>
                                                 {Strings.messages.NoTreesFound}
                                             </Text>
                                         </View>

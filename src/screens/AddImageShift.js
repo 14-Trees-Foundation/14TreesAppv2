@@ -142,10 +142,10 @@ const AddImageShift = ({ route, navigation }) => {
 
                     <Button
                         icon={() => (
-                            <MCIcon name="plus" size={30} color="white" />
+                            <MCIcon name="plus" size={25} color="white" />
                         )}
 
-                        mode="contained"
+                        //mode="contained"
                         buttonColor='#059636'
                         onPress={() => {
                             setMode(addTreeImageModes.addImage);
@@ -163,7 +163,7 @@ const AddImageShift = ({ route, navigation }) => {
                     <View style={{ ...shiftStyles.buttonRowInner, marginRight: 5 }}>
                         <Button
                             icon={() => (
-                                <MCIcon name="wifi-sync" size={30} color="white" />
+                                <MCIcon name="wifi-sync" size={22} color="white" />
                             )}
                             mode="contained"
                             buttonColor='#059636'
@@ -247,7 +247,7 @@ const AddImageShift = ({ route, navigation }) => {
         return (
             <ScrollView keyboardShouldPersistTaps='handled' style={shiftStyles.scrollView}>
 
-                <View style={shiftStyles.container}>
+                <View style={{...shiftStyles.container, marginTop: 20}}>
                     <ShiftHeader
                         onSetTime={(seconds) => {
                             finalRef.current.seconds = seconds;
@@ -296,7 +296,7 @@ const AddImageShift = ({ route, navigation }) => {
                                         <View
                                         //style={commonStyles.borderedDisplay}
                                         >
-                                            <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black', }}>
+                                            <Text style={{ ...commonStyles.text5, color: lightTheme ? '#333' : 'black', }}>
                                                 {Strings.messages.NoTreesWithAddedImage}
                                             </Text>
                                         </View>

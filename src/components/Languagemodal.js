@@ -109,40 +109,38 @@ const LanguageModal = ({ langModalVisible, setLangModalVisible }) => {
           </View>
 
           <View style={languageModalStyles.btns}>
-            <View style={CustomButtonStyles.buttonRow}>
-              <View style={CustomButtonStyles.buttonContainer}>
-                <Button
-                  icon={() => (
-                    <View style={Iconstyles.buttonContent}>
-                      <MCIcon name="cancel" size={30} color="white" />
-                    </View>
-                  )}
-                  //mode="contained"
-                  buttonColor='red'
-                  labelStyle={{ ...CustomButtonStyles.buttonLabel, fontSize: 15 }}
-                  style={CustomButtonStyles.button}
-                  onPress={handleCancelChanges}
-                >
-                  {Strings.buttonLabels.cancel}
-                </Button>
+            <View style={CustomButtonStyles.buttonContainer}>
+              <Button
+                // icon={() => (
+                //   <View style={Iconstyles.buttonContent}>
+                //     <MCIcon name="cancel" size={30} color="white" />
+                //   </View>
+                // )}
+                //mode="contained"
+                buttonColor='red'
+                labelStyle={{ ...CustomButtonStyles.buttonLabel, fontSize: 18 , paddingTop: 3 }}
+                style={CustomButtonStyles.button}
+                onPress={handleCancelChanges}
+              >
+                {Strings.buttonLabels.cancel}
+              </Button>
 
-              </View>
-              <View style={CustomButtonStyles.buttonContainer}>
-                <Button
-                  icon={() => (
-                    <View style={Iconstyles.buttonContent}>
-                      <MCIcon name="check" size={30} color="white" />
-                    </View>
-                  )}
-                  onPress={handleLanguageChanges}
-                  //mode="contained"
-                  buttonColor='#059636'
-                  labelStyle={{ ...CustomButtonStyles.buttonLabel, fontSize: 15 }}
-                  style={CustomButtonStyles.button}
-                >
-                  {Strings.buttonLabels.Submit}
-                </Button>
-              </View>
+            </View>
+            <View style={CustomButtonStyles.buttonContainer}>
+              <Button
+                // icon={() => (
+                //   <View style={Iconstyles.buttonContent}>
+                //     <MCIcon name="check" size={30} color="white" />
+                //   </View>
+                // )}
+                onPress={handleLanguageChanges}
+                //mode="contained"
+                buttonColor='#059636'
+                labelStyle={{ ...CustomButtonStyles.buttonLabel, fontSize: 18, paddingTop: 3 }}
+                style={CustomButtonStyles.button}
+              >
+                {Strings.buttonLabels.Submit}
+              </Button>
             </View>
           </View>
         </View>

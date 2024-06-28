@@ -25,7 +25,7 @@ const ScreenHeaderContent = () => {
                     setLightTheme(!lightTheme);
                 }}
             >
-                {toggleMode ? <Image
+                {!toggleMode ? <Image
                     source={require('../../assets/icon-brightness-on.png')}
                     style={ScreenHeaderContentStyles.modeIcon}
                 /> : <Image

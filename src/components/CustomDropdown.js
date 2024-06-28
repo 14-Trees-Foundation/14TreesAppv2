@@ -8,8 +8,9 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
     const [filteredOptions, setFilteredOptions] = useState(items);
     const [selectedItem, setSelectedItem] = useState({ value: -1, name: "" });
     const [clearButton, setClearButton] = useState(true);
+    const [isFocused,setIsFocused] = useState("")
 
-    const {  lightTheme } = useContext(GlobalContext);
+    const { lightTheme } = useContext(GlobalContext);
 
     useEffect(() => {
         if (initItem) {
@@ -56,14 +57,6 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
                     borderWidth: 0.2,
                     //margin: 5,
                     padding: 10,
-                    //borderRadius: 5,
-                    // shadowColor: 'black',
-                    // elevation: 3,
-                    // shadowOffset: {
-                    //     width: 50,
-                    //     height: 50,
-                    // },
-                    // shadowOpacity: 1,
                 }}
                 onPress={(e) => {
                     selectItem(item);
@@ -82,14 +75,15 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
 
     return (
 
-        <View style={{ backgroundColor: "white" }}>
+        <View style={{ backgroundColor: "white"}}>
             <TextInput
                 style={{
-                    height: 50,
+                    height: 54,
                     fontFamily: 'Inter-Regular',
+                    fontStyle: "italic",
                     width: '93%',
                     borderWidth: 2,
-                    borderColor: "#ccc",
+                    borderColor: !isFocused?"#ccc":"black",
                     shadowColor: '#000',
                     shadowOffset: {
                         width: 0,
@@ -100,26 +94,27 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
                     padding: 10,
                     marginBottom: 6,
                     paddingBottom: 12,
-                    color: '#52525C', // Change font color here
+                    color: '#333', // Change font color here
                     //fontWeight: 'bold',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    //fontStyle: "italic", 
                     alignSelf: 'center', fontSize: 15,
-                    shadowColor: '#000',
-                    shadowOffset: {
-                        width: 0,
-                        height: 2,
-                    },
+                    shadowColor: 'black',
+                    shadowOpacity: 0.8,
+                    elevation: 3,
+                    shadowRadius: 1,
+                    shadowOffset: { width: 1, height: 4 },
                     borderRadius: 10,
-                    color: lightTheme ? '#52525C' : 'black',
+                    color: lightTheme ? '#333' : 'black',
                     fontWeight: initItem ? 'bold' : 'normal',
+                    
                 }}
                 defaultValue={selectedItem ? (selectedItem.value === -1 ? '' : selectedItem.name) : ''}
                 placeholder={label}
                 placeholderTextColor={'black'}
                 onChangeText={updateFilteredOptions}
-                onFocus={(e) => { setOptionsVisible(true) }}
+                onFocus={(e) => { setOptionsVisible(true) ;setIsFocused(true)}}
+                onBlur={() => {setIsFocused(false)}}
             />
 
             {clearButton && selectedItem && selectedItem.value !== -1 && (

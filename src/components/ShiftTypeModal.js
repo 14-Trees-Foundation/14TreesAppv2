@@ -60,7 +60,7 @@ export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onShif
                             <Text style={{
                                 fontSize: lightTheme ? 20 : 23,
                                 fontFamily: 'Inter-Regular',
-                                fontWeight: lightTheme ? '700' : "bold", color: lightTheme ? '#52525C' : 'black',
+                                fontWeight: lightTheme ? '700' : "bold", color: lightTheme ? '#333' : 'black',
                                 margin: 20, marginBottom: 10
                             }}>{Strings.buttonLabels.EnterShiftType}</Text>
                         </View>
@@ -100,7 +100,7 @@ export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onShif
                                         //marginBottom: 2,
                                         gap: 22
                                     }}
-                                    labelStyle={Iconstyles.buttonLabel}
+                                    labelStyle={Iconstyles.shiftTypeButtonLabel}
                                 >
                                     {Strings.buttonLabels.UploadTree}
 
@@ -140,7 +140,7 @@ export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onShif
                                         //marginBottom: 2,
                                         gap: 22
                                     }}
-                                    labelStyle={Iconstyles.buttonLabel}
+                                    labelStyle={Iconstyles.shiftTypeButtonLabel}
                                 >
                                     {Strings.buttonLabels.AddImage}
 
@@ -180,7 +180,7 @@ export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onShif
                                         //marginBottom: 2,
                                         gap: 22
                                     }}
-                                    labelStyle={Iconstyles.buttonLabel}
+                                    labelStyle={Iconstyles.shiftTypeButtonLabel}
                                 >
                                     {Strings.buttonLabels.UpdatePlot}
 
@@ -194,7 +194,7 @@ export const ShiftTypeModal = ({ shiftModalVisible, setShiftModalVisible, onShif
                                     buttonColor='#333'
                                     onPress={() => setShiftModalVisible(false)}
                                     contentStyle={Iconstyles.cancelButtonContent}
-                                    labelStyle={Iconstyles.cancelButtonLabel}
+                                    labelStyle={{...Iconstyles.cancelButtonLabel, fontWeight: 'bold'}}
                                     style={{ borderRadius: 9 }}
                                 >
                                     {Strings.buttonLabels.cancel}

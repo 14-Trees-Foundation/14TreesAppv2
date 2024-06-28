@@ -232,7 +232,7 @@ function EditLocalAddImage({ navigation, route }) {
     if (!isFetchingDetails) {
 
         return (
-            <ScrollView keyboardShouldPersistTaps='handled' scrollEnabled={true} style={{ flex: 1, borderRadius: 10 }}>
+            <ScrollView keyboardShouldPersistTaps='handled' scrollEnabled={true} style={{ flex: 1, borderRadius: 10, backgroundColor: "white" }}>
                 <View
                     keyboardShouldPersistTaps='handled'
                     scrollEnabled={true}
@@ -286,11 +286,23 @@ function EditLocalAddImage({ navigation, route }) {
                                     }}>
 
                                     {!showImage ? (
-                                        <View style={{ ...treeFormModalStyles.cameraIcon, justifyContent: 'center', alignItems: 'center' }}>
-                                            <Image
-                                                source={require('../../assets/icon-bw-camera.png')}
-                                            />
+                                        <View style={{ ...treeFormModalStyles.cameraIcon }}>
+                                            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', margin: 10 }}>
+                                                <Image
+                                                    source={require('../../assets/icon-plus.png')} style={{ width: 30, height: 30, opacity: 0.3 }}
+                                                />
+                                            </View>
+                                            <View style={{
+                                                flex: 1, alignItems: 'center',
+                                                marginBottom: 50,
+                                                // marginTop: 30 
+                                            }}>
+                                                <Image
+                                                    source={require('../../assets/icon-bw-camera.png')} style={{ width: 60, height: 60, opacity: 0.3 }}
+                                                />
+                                            </View>
                                         </View>
+
                                     ) : (
 
                                         <Image
@@ -331,11 +343,23 @@ function EditLocalAddImage({ navigation, route }) {
                             <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                                 <View style={{ backgroundColor: 'white', padding: 40 }}>
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 10 }}>
-                                        <TouchableOpacity onPress={() => pickImage(0)} style={{ backgroundColor: "green", padding: 10, }}>
-                                            <Text style={{ color: "white", fontWeight: 'bold', fontSize: 15 }}> {Strings.buttonLabels.openCamera}</Text>
+                                        <TouchableOpacity onPress={() => pickImage(0)} style={{
+                                            backgroundColor: "#059636", padding: 6, borderRadius: 12, width: 120, alignItems: "center", height: 45, shadowColor: 'black',
+                                            shadowOpacity: 0.8,
+                                            elevation: 3,
+                                            shadowRadius: 1,
+                                            shadowOffset: { width: 1, height: 4 },
+                                        }}>
+                                            <Text style={{ color: "white", fontWeight: 'bold', fontSize: 22 }}> {Strings.buttonLabels.openCamera}</Text>
                                         </TouchableOpacity>
-                                        <TouchableOpacity onPress={() => pickImage(1)} style={{ backgroundColor: "green", padding: 10, }}>
-                                            <Text style={{ color: "white", fontWeight: 'bold', fontSize: 15 }}> {Strings.buttonLabels.openGallery}</Text>
+                                        <TouchableOpacity onPress={() => pickImage(1)} style={{
+                                            backgroundColor: "#059636", padding: 6, borderRadius: 12, width: 120, alignItems: "center", height: 45, shadowColor: 'black',
+                                            shadowOpacity: 0.8,
+                                            elevation: 3,
+                                            shadowRadius: 1,
+                                            shadowOffset: { width: 1, height: 4 }
+                                        }}>
+                                            <Text style={{ color: "white", fontWeight: 'bold', fontSize: 22 }}> {Strings.buttonLabels.openGallery}</Text>
                                         </TouchableOpacity>
                                     </View>
                                     <TouchableOpacity style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }} onPress={() => setGalleryModalVisible(false)}  >
@@ -353,7 +377,7 @@ function EditLocalAddImage({ navigation, route }) {
                             onSetLng={item => setlng(item)}
                         />
 
-                        <View style={CustomButtonStyles.container}>
+                        <View style={{...CustomButtonStyles.container, marginTop: 15}}>
                             <View style={CustomButtonStyles.buttonRow}>
                                 <View style={CustomButtonStyles.buttonContainer}>
                                     <Button
@@ -372,7 +396,7 @@ function EditLocalAddImage({ navigation, route }) {
                                 <View style={CustomButtonStyles.buttonContainer}>
                                     <Button
                                         onPress={onSave}
-                                        mode="contained"
+                                        // mode="contained"
                                         buttonColor='#1D4ED8'
                                         labelStyle={CustomButtonStyles.buttonLabel}
                                         style={CustomButtonStyles.button}

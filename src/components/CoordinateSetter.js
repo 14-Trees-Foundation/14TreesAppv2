@@ -1,5 +1,5 @@
 import Geolocation from "@react-native-community/geolocation"
-import { Text, View, Alert, ToastAndroid, StyleSheet, TouchableOpacity } from "react-native";
+import { Text, View, Alert, ToastAndroid, Image, TouchableOpacity } from "react-native";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Strings } from "../services/Strings";
 import { Utils } from "../services/Utils";
@@ -93,17 +93,28 @@ export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng }) => {
     const CoordinatesDisplay = ({ latitude, longitude, title }) => {
 
         return (
-            <View style = {coordinateSetterStyles.coordinatesView}>
-                <Text style={{...coordinateSetterStyles.coordinatesText(lightTheme),fontWeight: 'bold',fontSize: 18}}>
-                    {title}:
-                </Text>
+            <View style={{
+                marginTop: 15, borderRadius: 12, padding: 8, flexDirection: 'column', backgroundColor: '#e8e9ea',
+                width: 200,
+            }}>
+
+                <View style={{ flexDirection: "row", width: "100%" }}>
+                    <Text style={{ ...coordinateSetterStyles.coordinatesText(lightTheme), fontWeight: 'bold', fontSize: 18 }}>
+                        {title}:
+                    </Text>
+                    <View style={{flex: 1, flexDirection: "row", width: "100%", justifyContent: 'flex-end' }}>
+                        <Image source={require('../../assets/icon-plus.png')} style={{ width: 30, height: 30, opacity: 0.3 }}
+                        />
+                    </View>
+                </View>
+
                 <Text
-                    style={coordinateSetterStyles.coordinatesText(lightTheme)}
+                    style={{ ...coordinateSetterStyles.coordinatesText(lightTheme), fontSize: 16, fontWeight: "600" }}
                 >
                     Latitude: {getReadableCoordinate(latitude)}
                 </Text>
                 <Text
-                    style={coordinateSetterStyles.coordinatesText(lightTheme)}
+                    style={{ ...coordinateSetterStyles.coordinatesText(lightTheme), fontSize: 16, fontWeight: "600" }}
                 >
                     Longitude: {getReadableCoordinate(longitude)}
                 </Text>
@@ -112,8 +123,8 @@ export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng }) => {
     }
 
     return (
-        <View style={{ flexDirection: 'column'}}>
-            <View style= {coordinateSetterStyles.innerContainer}>
+        <View style={{ flexDirection: 'column' }}>
+            <View style={coordinateSetterStyles.innerContainer}>
                 <TouchableOpacity style={{ flexDirection: 'column' }}
                     onPress={() => requestLocation(onSetLat, onSetLng, setLat, setLng)}
                 >

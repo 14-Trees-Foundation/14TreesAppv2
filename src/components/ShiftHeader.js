@@ -59,32 +59,30 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
 
         <View style={{
             //...shiftHeaderStyles.outerContainer, 
-            marginHorizontal: 10,
+            marginHorizontal: 15,
             backgroundColor: '#F5F5F5',
             padding: 10,
             borderRadius: 10,
             shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 8,
-            elevation: 5,
+            // shadowOffset: { width: 0, height: 2 },
+            // shadowOpacity: 0.1,
+            // shadowRadius: 8,
+            // elevation: 5,
         }}>
             <View style={{
                 //shiftHeaderStyles.innerContainer
                 flexDirection: 'row',
                 //justifyContent: 'center',
                 alignItems: 'center',
-                //marginBottom: 10,
-                //marginLeft: 10,
-                // gap: 30
+                paddingBottom: 5
             }}>
                 <Text
                     style={{
                         fontFamily: 'Inter-Regular',
                         fontWeight: 'bold',
-                        color: lightTheme ? '#52525C' : 'black',
+                        color: lightTheme ? '#333' : 'black',
                         margin: 8,
-                        fontSize: 20,
+                        fontSize: 18,
                         marginTop: 5,
                     }}
                 >
@@ -98,15 +96,19 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
                 >
                     {
                         plotSelected && <TouchableOpacity
-                            //style={{maxWidth: '100%'}}
+                        style={{ width: plotSelected.name.length > 22 ? '92%' : '100%' }}
                             onPress={() => { handleModalChanges(); }
                             }>
                             <Text
                                 style={{
-                                    ...shiftHeaderStyles.plotName(lightTheme),
-                                    maxWidth: '100%',
-                                     marginLeft: 25,
+                                    ...commonStyles.text,
+                                    color: lightTheme ? '#333' : 'black',
+                                    fontSize: 18,
+                                    textAlign: 'left',
+                                    fontWeight: "600",
+                                    marginLeft: 25,
                                     marginRight: 15,
+                                    paddingBottom: 5
                                 }}
                                 numberOfLines={1} // Limit to a single line
                                 ellipsizeMode="tail" // Truncate at the end with ellipsis
@@ -129,29 +131,27 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
                         flexDirection: 'row',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        //marginBottom: 5,
-                        //width: '60%'
+                        paddingBottom: 5
                     }}>
                         <Text style={{
                             //shiftHeaderStyles.shiftTime(lightTheme)
                             fontFamily: 'Inter-Regular',
                             fontWeight: 'bold',
-                            color: lightTheme ? '#52525C' : 'black',
+                            color: lightTheme ? '#333' : 'black',
                             marginLeft: 8,
-                            fontSize: 20,
+                            fontSize: 18,
                             //marginTop: 5,
                         }}>
                             {Strings.labels.StartTime}
                         </Text>
 
                         <Text style={{
-                            //shiftHeaderStyles.shiftTime(lightTheme)
-                            fontFamily: 'Inter-Regular',
-                            fontWeight: 'bold',
-                            color: lightTheme ? '#52525C' : 'black',
-                            //margin: 8,
-                            fontSize: 17,
-                            //marginTop: 5,
+                            ...commonStyles.text,
+                            color: lightTheme ? '#333' : 'black',
+                            fontSize: 18,
+                            textAlign: 'left',
+                            marginRight: 0,
+                            fontWeight: "600"
                         }}>
                             {shiftTime}
                         </Text>
@@ -168,53 +168,40 @@ const ShiftHeader = ({ onSetTime, handleModalChanges }) => {
                             //shiftHeaderStyles.shiftTime(lightTheme)
                             fontFamily: 'Inter-Regular',
                             fontWeight: 'bold',
-                            color: lightTheme ? '#52525C' : 'black',
+                            color: lightTheme ? '#333' : 'black',
                             marginLeft: 8,
-                            fontSize: 20,
+                            fontSize: 18,
                             //marginTop: 5,
                         }}>
                             {Strings.labels.TimeTaken}
                         </Text>
 
-                        <Text style={{
-                            //shiftHeaderStyles.shiftTime(lightTheme)
-                            fontFamily: 'Inter-Regular',
-                            fontWeight: 'bold',
-                            color: lightTheme ? '#52525C' : 'black',
-                            //margin: 8,
-                            fontSize: 17,
-                            //marginTop: 5,
-                        }}>
-                            <Timer onSetTime={onSetTime} />
-                        </Text>
+
+                        <Timer onSetTime={onSetTime} />
+
                     </View>
                 </View>
 
 
                 <View style={{
                     ...shiftHeaderStyles.treeDetailsContainer(showGradient),
-                    //marginTop: 7,
-                    //marginLeft: 32, 
-                    //height: 70,
                     flex: 1,
                     borderRadius: 10,
-                }}>
-                    <View style={{ margin: 6, flex: 1, }}>
+                    justifyContent: "space-evenly",
 
-                        <View
-                        //style={shiftHeaderStyles.iconContainer}
-                        >
-                            <Image source={require('../../assets/tree.png')}
-                                style={{
-                                    marginTop: 2,
-                                    height: 32,
-                                    width: 32
-                                }}
-                            />
-                        </View>
+                }}>
+                    <View style={{ margin: 6,  }}>
+                        <Image source={require('../../assets/tree.png')}
+                            style={{
+                                marginTop: 2,
+                                height: 32,
+                                width: 32
+                            }}
+                        />
+
                     </View>
                     <View >
-                        <Text style={{ ...shiftHeaderStyles.treeCount(lightTheme), marginTop: 2, marginRight: 2 }}>
+                        <Text style={{ ...shiftHeaderStyles.treeCount(lightTheme), marginTop: 2, marginRight: 0 }}>
                             {treesPlanted}
                         </Text>
                     </View>

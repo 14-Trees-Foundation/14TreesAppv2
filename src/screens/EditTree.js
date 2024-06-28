@@ -153,7 +153,7 @@ const EditTreeScreen = ({ navigation }) => {
                 <TextInput
                     style={editRemoteTreeStyles.textInput(lightTheme)}
                     placeholder={Strings.labels.SaplingId}
-                    placeholderTextColor={'#52525C'}
+                    placeholderTextColor={'#333'}
                     onChangeText={(text) => setSaplingid(text.trim())}
                     value={saplingid}
                 />

@@ -14,7 +14,7 @@ export class Strings {
             VerifyUsers: "Verify Users",
             EditTree: "Edit Tree",
             EditLocalTree: "Edit Local Tree",
-            EditLocalAddImage: "Edit Local Add Images",
+            EditLocalAddImage: "Edit Local Image",
             LogIn: 'Log In',
             DrawerScreen: 'Homescreen',
             startScreen: 'start',
@@ -70,7 +70,7 @@ export class Strings {
             failedToUpload: "Could not upload",
             failedToUpdate: "Could not update plot for",
             couldNotAdd: "Could not add images for",
-            trees: "Trees",
+            trees: "trees",
             // add tree
             Location: "Tree Location",
             CapturedAt: "Captured At",
@@ -93,6 +93,7 @@ export class Strings {
             ShiftNo: "Shift ID",
             Type: "Type",
             Plot: "Plot",
+            Trees: 'Trees',
             OldPlot: "Old Plot",
             NewPlot: "New Plot",
             Synced: "Synced",
@@ -105,8 +106,8 @@ export class Strings {
             //Edit tree
             EnterSaplingId: " Enter the Sapling ID",
             EnterPlotName: "Select the Plot",
-            OldPlotName: "Select old Plot",
-            NewPlotName: "Select new Plot",
+            OldPlotName: "Select Old Plot",
+            NewPlotName: "Select New Plot",
             //general:
             logoutConfirm: "Do you want to log out?",
             PlotName: "Plot Name",
@@ -131,6 +132,7 @@ export class Strings {
             failedToUpload: "अपलोड करू शकलो नाही",
             failedToUpdate: "साठी प्लॉट अपडेट करू शकलो नाही",
             couldNotAdd: "साठी प्रतिमा जोडू शकलो नाही",
+            Trees: "झाडे",
             trees: "झाडे",
             // add tree
             Location: "स्थान",
@@ -396,8 +398,8 @@ export class Strings {
             drag: "Drag",
             hideAll: "Hide All",
             showAll: "Show All",
-            openGallery: "OPEN GALLERY",
-            openCamera: "OPEN CAMERA",
+            openGallery: "Gallery",
+            openCamera: "Camera",
             // local data view
             DeleteSyncedTrees: "Delete Synced Trees",
             Filters: "Filters",
@@ -425,26 +427,26 @@ export class Strings {
             UpdateSapling: "सॅपलिंग अपडेट करा",
             StartShift: "शिफ्ट सुरू करा",
             Shifts: "शिफ्ट",
-            FetchHelperData: "मदतकारी डेटा तयार करा",
+            FetchHelperData: "मदतकारी डेटा",
             fetchPlotSaplingData: "प्लॉट-सॅपलिंग डेटा मिळवा",
             SelectLanguage: "भाषा/Language",
 
             //shifttypes
             UploadTree: "वृक्ष अपलोड", //manjur
             //UpdateImage: "प्रतिमा अद्यतनित करा", //manjur
-            UpdatePlot: "सॅपलिंग प्लॉट अपडेट करा",
+            UpdatePlot: "सॅपलिंग प्लॉट अपडेट",
             EnterShiftType: "शिफ्ट प्रकार प्रविष्ट करा",
 
             // add tree
             ClickPhoto: "फोटो घ्या",
-            Submit: "सबमिट करा",
+            Submit: "सबमिट",
             gps: "जीपीएस",
             edit: "सुधारणे",
             drag: "ड्रॅग करा",
             hideAll: "सर्व लपवा",
             showAll: "सगळं दाखवा",
-            openGallery: "गॅलरी उघडा",
-            openCamera: "कॅमेरा उघडा",
+            openGallery: "गॅलरी",
+            openCamera: "कॅमेरा",
             // local data view
             DeleteSyncedTrees: "सिंक केलेले झाडे हटवा",
             Filters: "फिल्टर",
@@ -483,6 +485,8 @@ export class Strings {
             StartTime: 'Start Time',
             EndTime: 'End Time',
             TimeTaken: 'Timer',
+            AddAShift : 'Add a tree to this shift',
+            Time: 'Time',
         },
         "mr": {
             //add tree
@@ -501,6 +505,8 @@ export class Strings {
             StartTime: 'प्रारंभ वेळ',
             EndTime: 'समाप्ती वेळ',
             TimeTaken: 'वेळ',
+            Time: 'वेळ',
+            AddAShift: 'या शिफ्टमध्ये एक झाड जोडा'
         }
     })
     static english = 'en';

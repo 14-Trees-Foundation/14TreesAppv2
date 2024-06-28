@@ -30,7 +30,7 @@ const UpdatePlotShift = ({ navigation }) => {
     finalRef.current.shiftTime = shiftTime;
     finalRef.current.treesPlanted = treesPlanted;
     finalRef.current.plotselected = plotSelected ? plotSelected.name : null;
-    
+
     useEffect(() => {
         const backAction = () => {
             Alert.alert(
@@ -144,9 +144,9 @@ const UpdatePlotShift = ({ navigation }) => {
                         <View style={{ ...shiftStyles.buttonRowInner, marginRight: 5 }}>
                             <Button
                                 icon={() => (
-                                    <MCIcon name="wifi-sync" size={30} color="white" />
+                                    <MCIcon name="wifi-sync" size={22} color="white" />
                                 )}
-                                mode="contained"
+                                mode="elevated"
                                 buttonColor='#059636'
                                 onPress={() => {
                                     navigation.navigate(
@@ -163,7 +163,7 @@ const UpdatePlotShift = ({ navigation }) => {
 
                         <View style={{ width: '50%', marginLeft: 5 }}>
                             <Button
-                                mode="contained"
+                                mode="elevated"
                                 buttonColor='#059636'
                                 onPress={saveShiftToDB}
                                 labelStyle={CustomButtonStyles.buttonLabel}
@@ -222,8 +222,8 @@ const UpdatePlotShift = ({ navigation }) => {
                 </View>
 
 
-                <View style={{ ...shiftStyles.buttonContainerOuter, marginBottom: 12 }}>
-                    <View style={{ ...shiftStyles.buttonContainerInner, marginTop: 2, marginBottom: 2 }}>
+                <View style={{ ...shiftStyles.buttonContainerOuter, marginTop:0 }}>
+                    <View style={{ ...shiftStyles.buttonContainerInner, marginTop: 0, marginBottom: 0, marginHorizontal: 0 }}>
                         <View style={{ ...shiftStyles.treeListContainer }}>
 
                             <FlatList
@@ -233,7 +233,7 @@ const UpdatePlotShift = ({ navigation }) => {
                                     <View
                                     //style={commonStyles.borderedDisplay}
                                     >
-                                        <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black', }}>
+                                        <Text style={{ ...commonStyles.text5, color: lightTheme ? '#333' : 'black', }}>
                                             {Strings.messages.NoTreesFound}
                                         </Text>
                                     </View>
@@ -242,7 +242,7 @@ const UpdatePlotShift = ({ navigation }) => {
                                     <View
                                     //style={commonStyles.borderedDisplay}
                                     >
-                                        <Text style={{ ...commonStyles.text5, color: lightTheme ? '#52525C' : 'black' }}>
+                                        <Text style={{ ...commonStyles.text5, color: lightTheme ? '#333' : 'black',marginBottom: 4 }}>
                                             {Strings.messages.ClickToDelete}
                                         </Text>
                                     </View>

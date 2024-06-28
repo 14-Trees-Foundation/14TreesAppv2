@@ -276,12 +276,12 @@ const App = () => {
               <View style={{
                 marginRight: 30, flexDirection: "row"
               }}>
-                <View style={{  height: 35, marginRight: 7, marginTop: 5, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                <View style={{ height: 35, marginRight: 7, marginTop: 5, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
-                  color: lightTheme ? '#52525C' : 'black',
+                  color: lightTheme ? '#333' : 'black',
                   fontSize: 18,
                   fontWeight: 'bold',
                   padding: 10,
@@ -304,12 +304,12 @@ const App = () => {
               <View style={{
                 marginRight: 30, flexDirection: "row"
               }}>
-                <View style={{  height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                <View style={{ height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
-                  color: lightTheme ? '#52525C' : 'black',
+                  color: lightTheme ? '#333' : 'black',
                   fontSize: 18,
                   fontWeight: 'bold',
                   padding: 15,
@@ -333,12 +333,12 @@ const App = () => {
               <View style={{
                 marginRight: 30, flexDirection: "row"
               }}>
-                <View style={{  height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4</Text>
+                <View style={{ height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
-                  color: lightTheme ? '#52525C' : 'black',
+                  color: lightTheme ? '#333' : 'black',
                   fontSize: 18,
                   fontWeight: 'bold',
                   padding: 15,
@@ -368,7 +368,7 @@ const App = () => {
             ),
             headerRight: () => (
               <View style={{ height: 35, marginRight: 13, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
               </View>
             ),
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
@@ -383,22 +383,20 @@ const App = () => {
           options={{
             headerRight: () => (
               <View style={{
-                marginRight: 30, flexDirection: "row"
+                marginRight: 35, flexDirection: "row"
               }}>
-
-                <View style={{ height: 35, marginRight: 0, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 4 }}>2.4.1</Text>
+                <View style={{ height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
                 </View>
-
-                <Text style={{
+                {/* <Text style={{
                   fontFamily: 'Inter-Regular',
-                  color: lightTheme ? '#52525C' : 'black',
+                  color: lightTheme ? '#333' : 'black',
                   fontSize: 18,
                   fontWeight: 'bold',
-                  padding: 15,
+                  padding: 8,
                 }}>
                   {userName}
-                </Text>
+                </Text> */}
               </View>
             ),
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
@@ -441,18 +439,18 @@ const App = () => {
               <View style={{
                 marginRight: 35, flexDirection: "row"
               }}>
-                <View style={{  height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                <View style={{ height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
                 </View>
-                <Text style={{
+                {/* <Text style={{
                   fontFamily: 'Inter-Regular',
-                  color: lightTheme ? '#52525C' : 'black',
+                  color: lightTheme ? '#333' : 'black',
                   fontSize: 18,
                   fontWeight: 'bold',
                   padding: 8,
                 }}>
                   {userName}
-                </Text>
+                </Text> */}
               </View>
             ),
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
@@ -464,31 +462,32 @@ const App = () => {
           name={Strings.screenNames.getString('EditLocalAddImage', Strings.english)}
           component={EditLocalAddImage}
           options={{
-            headerLeft: () => (
-              <View style={{ marginLeft: 5 }}>
-                <TouchableOpacity onPress={() => {
-                  stackNavRef.current.goBack() // Go back when the button is pressed
-                }}>
-                  <Icon name="arrow-back" size={24} color="black" />
-                </TouchableOpacity>
-              </View>
-            ),
+            // headerLeft: () => (
+            //   <View style={{ marginLeft: 5 }}>
+            //     <TouchableOpacity onPress={() => {
+            //       stackNavRef.current.goBack() // Go back when the button is pressed
+            //     }}>
+            //       <Icon name="arrow-back" size={24} color="black" />
+            //     </TouchableOpacity>
+            //   </View>
+            // ),
             headerRight: () => (
               <View style={{
-                marginRight: 28, flexDirection: "row"
+                marginRight: 35, flexDirection: "row"
               }}>
-                <View style={{  height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                <View
+                  style={{ height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
                 </View>
-                <Text style={{
+                {/* <Text style={{
                   fontFamily: 'Inter-Regular',
-                  color: lightTheme ? '#52525C' : 'black',
+                  color: lightTheme ? '#333' : 'black',
                   fontSize: 18,
                   fontWeight: 'bold',
                   padding: 8,
                 }}>
                   {userName}
-                </Text>
+                </Text> */}
               </View>
             ),
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,

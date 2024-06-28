@@ -135,13 +135,16 @@ export const commonStyles = StyleSheet.create({
   },
   headerTitleStyleDark: {
     fontFamily: 'Inter-Regular',
+    fontSize: 19,
     color: '#000',
-    fontWeight: '700'
+    fontWeight: 'bold',
   },
   headerTitleStyleLight: {
     fontFamily: 'Inter-Regular',
-    color: '#113160',
-    fontWeight: '700'
+    fontSize: 19,
+    color: '#333', //'#113160'
+    fontWeight: 'bold',
+
   },
 
   logOutButton: {
@@ -251,7 +254,7 @@ export const commonStyles = StyleSheet.create({
     alignContent: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
-    color: '#52525C',
+    color: '#333',
   },
   textX: {
     fontSize: 17,
@@ -286,7 +289,7 @@ export const commonStyles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
     padding: 10,
-    color: '#52525C', // Change font color here
+    color: '#333', // Change font color here
     fontSize: 18,
     //fontWeight: 'bold',
     alignItems: 'center',
@@ -334,8 +337,8 @@ export const commonStyles = StyleSheet.create({
 
 export const Iconstyles = StyleSheet.create({
   buttonLanguage: {
-    height: 55,  // Adjust the height as needed
-    marginBottom: 2,
+    height: 58,  // Adjust the height as needed
+    //marginBottom: 2,
     gap: 42,
   },
   buttonContent: {
@@ -343,14 +346,21 @@ export const Iconstyles = StyleSheet.create({
     alignItems: 'center',
     height: 55,  // Adjust the height as needed
     //marginBottom: 2,
-    gap: 42
+    gap: 10
   },
-  buttonLabel: {
+  buttonLabel: (lightTheme) => ({
     fontFamily: 'Inter-Regular',
-    fontSize: 24,
+    fontSize: lightTheme ? 24 : 28,
     marginLeft: 8,  // Adjust the spacing between the icon and text as needed
-    fontWeight: '800',
-    paddingTop: 12
+    fontWeight: lightTheme ? '800' : "bold",
+    paddingTop: 14
+  }),
+  shiftTypeButtonLabel: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 22,
+    marginLeft: 8,  // Adjust the spacing between the icon and text as needed
+    fontWeight: "bold",
+    paddingTop: 7
   },
   buttonPosition: {
     paddingBottom: 28,
@@ -390,9 +400,9 @@ export const CustomButtonStyles = StyleSheet.create({
   buttonLabel: {
     fontFamily: 'Inter-Regular',
     color: 'white',
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    paddingTop: 5,
+    paddingTop: 8,
   },
   button: {
     height: 50,
@@ -415,7 +425,7 @@ export const CustomButtonStyles = StyleSheet.create({
 export const coordinateSetterStyles = StyleSheet.create({
   coordinatesView: { marginTop: 15, borderRadius: 12, padding: 8, flexDirection: 'column', backgroundColor: '#e8e9ea' },
   coordinatesText: (lightTheme) => ({
-    ...commonStyles.text3, color: lightTheme ? '#52525C' : 'black',
+    ...commonStyles.text3, color: lightTheme ? '#333' : 'black',
     fontFamily: 'Inter-Regular',
     marginTop: 0
   }),
@@ -426,7 +436,7 @@ export const customDropdownStyles = StyleSheet.create({
   textInput: (lightTheme, initItem) => ({
     fontSize: 15,
     borderRadius: 13,
-    color: lightTheme ? '#52525C' : 'black',
+    color: lightTheme ? '#333' : 'black',
     fontWeight: initItem ? 'bold' : 'normal',
   }),
   clearButton: {
@@ -464,7 +474,7 @@ export const customModalStyles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,.2)',
   },
   textView: (lightTheme) => ({
-    ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black',
+    ...commonStyles.textSync, color: lightTheme ? '#333' : 'black',
     margin: 20, fontSize: 20, marginBottom: 10
 
   }),
@@ -616,7 +626,7 @@ export const shiftHeaderStyles = StyleSheet.create({
   plotText: (lightTheme) => ({
     fontFamily: 'Inter-Regular',
     fontWeight: 'bold',
-    color: lightTheme ? '#52525C' : 'black',
+    color: lightTheme ? '#333' : 'black',
     margin: 8,
     fontSize: 18,
     marginTop: 1,
@@ -624,7 +634,7 @@ export const shiftHeaderStyles = StyleSheet.create({
   plotName: (lightTheme) => ({
     fontFamily: 'Inter-Regular',
     fontWeight: 'bold',
-    color: lightTheme ? '#52525C' : 'black',
+    color: lightTheme ? '#333' : 'black',
     margin: 8,
     fontSize: 18,
     //opacity: 0.5,
@@ -640,7 +650,7 @@ export const shiftHeaderStyles = StyleSheet.create({
   },
   shiftTime: (lightTheme) => ({
     fontSize: 18,
-    color: lightTheme ? '#52525C' : 'black',
+    color: lightTheme ? '#333' : 'black',
     fontFamily: 'Inter-Regular',
     fontWeight: '700',
     margin: 8,
@@ -650,23 +660,24 @@ export const shiftHeaderStyles = StyleSheet.create({
   treeDetailsContainer: (showGradient) => ({ ...commonStyles.secondView, backgroundColor: showGradient ? 'lightgreen' : 'white', marginRight: 20, marginLeft: 22, width: '30%', borderWidth: 1, borderColor: "#5CC17B", }),
   iconContainer: { backgroundColor: 'green', borderRadius: 70, padding: 10, margin: 2 },
   treeCount: (lightTheme) => ({
-    color: lightTheme ? '#52525C' : 'black',
+    color: lightTheme ? '#333' : 'black',
     fontSize: 18, fontWeight: 'bold', padding: 10, textAlign: 'center'
   })
 })
 
 export const treeFormStyles = StyleSheet.create({
   detailsContainerOuter: {
-    marginTop: 10,
+    padding: 6, 
+    marginTop: 0 ,
     //marginHorizontal: 10,
     backgroundColor: 'white',
-    padding: 10,
+    
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 8,
+    // elevation: 5,
   },
   plotSapling: {
     ...commonStyles.text4,
@@ -679,7 +690,7 @@ export const treeFormStyles = StyleSheet.create({
   },
   textInput: (lightTheme, saplingid) => ({
     ...commonStyles.txtInput,
-    color: lightTheme ? '#52525C' : 'black',
+    color: lightTheme ? '#333' : 'black',
     fontSize: 15,
     borderRadius: 13,
     fontWeight: saplingid ? '800' : 'normal',
@@ -747,15 +758,15 @@ export const treeFormModalStyles = StyleSheet.create({
     width: '98%',
     backgroundColor: '#F5F5F5',
     //marginHorizontal: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 8,
+    // elevation: 5,
   },
 
   saplingIdInput: (lightTheme, saplingid) => ({
-    color: lightTheme ? '#52525C' : 'black',
+    color: lightTheme ? '#333' : 'black',
     fontSize: 15,
     borderRadius: 13,
     fontWeight: saplingid ? '800' : 'normal',
@@ -823,36 +834,44 @@ export const aboutStyles = StyleSheet.create({
 
 export const editRemoteTreeStyles = StyleSheet.create({
   outerView: { backgroundColor: '#f5f5f5' },
-  headingText: (lightTheme) => ({ ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black', margin: 20, fontSize: 20 }),
-  textInput: (lightTheme) => ({ ...commonStyles.txtInput, color: lightTheme ? '#52525C' : 'black', fontSize: 15, borderRadius: 13, width: '85%' }),
+  headingText: (lightTheme) => ({ ...commonStyles.textSync, color: lightTheme ? '#333' : 'black', margin: 20, fontSize: 20 }),
+  textInput: (lightTheme) => ({ ...commonStyles.txtInput, color: lightTheme ? '#333' : 'black', fontSize: 15, borderRadius: 13, width: '85%',fontStyle: 'italic' }),
   searchButton: { fontFamily: 'Inter-Regular', fontWeight: 'bold', color: 'white', fontSize: 20, marginTop: 3 }
 })
 
 export const homeStyles = StyleSheet.create({
   button: lightTheme => ({
-    width: 'auto',
+    width: 188,
     marginBottom: 2,
     marginTop: 25,
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 82,
     borderRadius: 50,
+
+    // shadowStyle: {
+    //   shadowColor: '#333',
+    //   shadowOffset: { width: 0, height: 4 },
+    //   shadowOpacity: 0.3,
+    //   shadowRadius: 2,
+    //   elevation: 5,
+
     shadowOffset: {
       width: 0,
-      height: 0.5,
+      height: 5,
     },
-    shadowRadius: 1,
-    elevation: 3,
+    shadowRadius: 2,
+    elevation: 5,
 
-    backgroundColor: lightTheme ? '#e5e7ea' : 'lightgrey',
+    backgroundColor:  '#F3F4F6',
     borderColor: lightTheme ? '' : 'black',
     borderWidth: lightTheme ? 0 : 1,
-    shadowColor: lightTheme ? '#52525c' : 'black', // Shadow color
-    shadowOpacity: lightTheme ? 0.3 : 1,
+    shadowColor: lightTheme ? '#333' : '#333', // Shadow color
+    shadowOpacity: lightTheme ? 0.3 : 0.3,
   }),
   buttonText: lightTheme => ({
     fontFamily: 'Inter-Regular',
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: '700',
     color: lightTheme ? '#113160' : 'black',
     textAlign: 'center',
@@ -874,7 +893,7 @@ export const loginStyles = StyleSheet.create({
   },
   textInput: (lightTheme, phoneNumber) => ({
     ...commonStyles.txtInput,
-    color: lightTheme ? '#52525C' : 'black',
+    color: lightTheme ? '#333' : 'black',
     fontSize: 15,
     borderRadius: 13,
     fontWeight: phoneNumber ? 'bold' : 'normal',
@@ -904,26 +923,27 @@ export const splashScreenStyles = StyleSheet.create({
 export const syncDisplayStyles = StyleSheet.create({
   lastSyncedText: lightTheme => ({
     ...commonStyles.textSync,
-    color: lightTheme ? '#52525C' : 'black',
+    color: lightTheme ? '#333' : 'black',
     margin: 20,
   }),
   lastSyncedStatus: lightTheme => ({
     ...commonStyles.borderText,
     marginHorizontal: 20,
-    color: lightTheme ? '#52525C' : 'black',
+    color: lightTheme ? '#333' : 'black',
     padding: 5,
     textAlign: 'center',
-    fontWeight: '500',
+    fontWeight: '400',
+    fontSize: !lightTheme ? 20 : 16
   }),
 
   syncDetailsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    margin: 3,
+    margin: 0,
   },
   syncText: (lightTheme) => ({
     ...commonStyles.textSync,
-    color: lightTheme ? '#52525C' : 'black',
+    color: lightTheme ? '#333' : 'black',
 
   }),
   progressBar: {
@@ -934,10 +954,10 @@ export const syncDisplayStyles = StyleSheet.create({
   },
   progressBarText: (lightTheme) => ({
     ...commonStyles.text5,
-    color: lightTheme ? '#52525C' : 'black',
+    color: lightTheme ? '#333' : 'black',
   }),
   buttonWifiContainer: {
-    marginHorizontal: 40, marginTop: 25, marginBottom: 10
+    marginHorizontal: 65, marginTop: 25, marginBottom: 10
   },
   buttonContent: {
     flexDirection: 'row',
@@ -978,7 +998,7 @@ export const shiftsStyles = StyleSheet.create({
   text: lightTheme => ({
     ...commonStyles.text,
     fontSize: 14,
-    color: lightTheme ? '#52525C' : 'black',
+    color: lightTheme ? '#333' : 'black',
   }),
   icon: {
     marginLeft: 5,
@@ -1052,7 +1072,7 @@ export const ShiftsCardStyles = StyleSheet.create({
   },
   plotSelectedText: (lightTheme) => ({
     ...commonStyles.text,
-    color: lightTheme ? '#52525C' : 'black',
+    color: lightTheme ? '#333' : 'black',
     fontSize: 18,
     textAlign: 'left',
     marginLeft: 8,
@@ -1159,7 +1179,8 @@ export const shiftStyles = StyleSheet.create({
     marginTop: 10
   },
   buttonContainerInner: {
-    margin: 5, marginBottom: 10
+    margin: 5, 
+    marginBottom: 10
   },
   buttonRow: {
     flexDirection: 'row',
@@ -1179,7 +1200,7 @@ export const shiftStyles = StyleSheet.create({
     marginTop: 10
   },
   treeListContainer: {
-    margin: 2,
+    //margin: 2,
     borderColor: '#5DB075',
     borderRadius: 5,
     flexDirection: 'row',

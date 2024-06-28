@@ -35,7 +35,14 @@ const Timer = ({ onSetTime }) => {
 
     return (
         <View style={commonStyles.container}>
-            <Text style={{ ...commonStyles.timerText, color: lightTheme ? '#52525C' : 'black' }}>
+            <Text style={{
+                ...commonStyles.text,
+                color: lightTheme ? '#333' : 'black',
+                fontSize: 18,
+                textAlign: 'left',
+                marginLeft: 10,
+                fontWeight: "600"
+            }}>
                 {`( ${formatTime(seconds)} )`}
             </Text>
         </View>

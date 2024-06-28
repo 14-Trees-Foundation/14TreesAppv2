@@ -116,7 +116,7 @@ const UpdatePlotForm = ({ onFetchData, finalShiftData }) => {
     }
 
     return (
-        <View style={shiftStyles.buttonContainerOuter}>
+        <View style={{...shiftStyles.buttonContainerOuter,marginTop: 0, }}>
             <View style={{ ...shiftStyles.buttonContainerInner, marginTop: 0, marginBottom: 2 }}>
                 <View style={{ marginLeft: 12, marginTop: 3, flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
@@ -124,7 +124,7 @@ const UpdatePlotForm = ({ onFetchData, finalShiftData }) => {
                         style={[
                             commonStyles.txtInput,
                             treeFormModalStyles.saplingIdInput(lightTheme, saplingid),
-                            { flex: 1, marginRight: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderRightWidth: 0 } // Adjust margin as needed
+                            { flex: 1, marginRight: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderRightWidth: 0, fontStyle: 'italic' } // Adjust margin as needed
                         ]}
                         placeholder={Strings.labels.SaplingId}
                         placeholderTextColor={'black'}
@@ -152,7 +152,13 @@ const UpdatePlotForm = ({ onFetchData, finalShiftData }) => {
                                 alignItems: 'center', // centers the text horizontally
                                 backgroundColor: '#1D4ED8',
                                 height: 50,
-                                marginRight: 4
+                                marginRight: 4,
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 2 },
+                                shadowOpacity: 0.3,
+                                shadowRadius: 4,
+                                // Elevation for Android
+                                elevation: 5,
                             }
                         ]}
                     >

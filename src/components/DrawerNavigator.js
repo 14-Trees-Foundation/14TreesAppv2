@@ -17,6 +17,16 @@ import ScreenHeaderContent from './ScreenHeaderContent';
 import { Button } from 'react-native-paper';
 const Drawer = createDrawerNavigator();
 
+const CustomDrawerToggleButton = ({ navigation }) => (
+    <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
+        <Image
+            source={require('../../assets/icon-hamburger.png')}
+            style={{ width: 35, height: 35, marginLeft: 10, marginLeft:15}} // Adjust size and margin as needed
+            resizeMode="contain"
+            aspectRatio={720 / 960}
+        />
+    </TouchableOpacity>
+);
 
 const fillInUserDetails = async (setIsAdmin, setUserDetails) => {
     let storedUserDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
@@ -41,7 +51,7 @@ const logout = async navigationRef => {
 };
 
 const DrawerContent = (props) => {
-  
+
     let { isAdmin, userDetails } = props;
 
     return (
@@ -92,7 +102,7 @@ export const DrawerNavigator = () => {
     const navigationRef = stackNavRef;
     const [userDetails, setUserDetails] = useState(null);
     const [toggleMode, setToggleMode] = useState(false); //dark by default
-    const { langChanged, lightTheme,setLightTheme } = useContext(GlobalContext);
+    const { langChanged, lightTheme, setLightTheme } = useContext(GlobalContext);
 
     useEffect(() => {
 
@@ -127,7 +137,20 @@ export const DrawerNavigator = () => {
                     navigationRef={navigationRef}
                     {...props}
                 />
-            )}>
+            )}
+            screenOptions={({ navigation }) => ({
+                headerLeft: () => <CustomDrawerToggleButton navigation={navigation} />,
+                headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+                headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+                headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                drawerActiveBackgroundColor: '#F1FAEE',
+                drawerActiveTintColor: 'blue',
+                drawerStyle: {
+                    backgroundColor: '#f0f3f7',
+                    fontFamily: 'Inter-Regular'
+                }
+            })}
+        >
             <Drawer.Screen
                 name={Strings.screenNames.getString('HomePage', Strings.english)}
                 component={HomeScreen}
@@ -135,32 +158,32 @@ export const DrawerNavigator = () => {
                     headerRight: () => (
                         <ScreenHeaderContent />
                     ),
-                    headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
-                    headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
-                    headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
                     title: Strings.screenNames.HomePage,
-                    drawerActiveBackgroundColor: '#F1FAEE',
-                    drawerActiveTintColor: 'blue',
-                    drawerStyle: {
-                        backgroundColor: '#f0f3f7',
-                        fontFamily: 'Inter-Regular'
-                    }
+                    // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+                    // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+                    // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                    // drawerActiveBackgroundColor: '#F1FAEE',
+                    // drawerActiveTintColor: 'blue',
+                    // drawerStyle: {
+                    //     backgroundColor: '#f0f3f7',
+                    //     fontFamily: 'Inter-Regular'
+                    // }
                 }}
             />
             <Drawer.Screen
                 name={Strings.screenNames.getString('Shifts', Strings.english)}
                 component={Shifts}
                 options={{
-                    headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
-                    headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
-                    headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                    // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+                    // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+                    // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                    // drawerActiveBackgroundColor: '#F1FAEE',
+                    // drawerActiveTintColor: 'blue',
+                    // drawerStyle: {
+                    //     backgroundColor: '#f0f3f7',
+                    //     fontFamily: 'Inter-Regular'
+                    // },
                     title: Strings.screenNames.Shifts,
-                    drawerActiveBackgroundColor: '#F1FAEE',
-                    drawerActiveTintColor: 'blue',
-                    drawerStyle: {
-                        backgroundColor: '#f0f3f7',
-                        fontFamily: 'Inter-Regular'
-                    },
                     headerRight: () => (
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 10 }}>
                             {/* <TouchableOpacity
@@ -178,8 +201,8 @@ export const DrawerNavigator = () => {
                                     style={ScreenHeaderContentStyles.modeIcon}
                                 />}
                             </TouchableOpacity> */}
-                            <View style={{  height: 35, marginRight: 6, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                                <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                            <View style={{ height: 35, marginRight: 6, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                                <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
                             </View>
                         </View>
                     )
@@ -191,16 +214,16 @@ export const DrawerNavigator = () => {
                     name={Strings.screenNames.getString('EditTree', Strings.english)}
                     component={EditTreeScreen}
                     options={{
-                        headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
-                        headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
-                        headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                        // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+                        // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+                        // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                        // drawerActiveBackgroundColor: '#F1FAEE',
+                        // drawerActiveTintColor: 'blue',
+                        // drawerStyle: {
+                        //     backgroundColor: '#f0f3f7',
+                        //     fontFamily: 'Inter-Regular'
+                        // },
                         title: Strings.screenNames.EditTree,
-                        drawerActiveBackgroundColor: '#F1FAEE',
-                        drawerActiveTintColor: 'blue',
-                        drawerStyle: {
-                            backgroundColor: '#f0f3f7',
-                            fontFamily: 'Inter-Regular'
-                        },
                         headerRight: () => (
                             <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 10 }}>
                                 <TouchableOpacity
@@ -218,8 +241,8 @@ export const DrawerNavigator = () => {
                                         style={ScreenHeaderContentStyles.modeIcon}
                                     />}
                                 </TouchableOpacity>
-                                <View style={{  height: 35, marginRight: 6, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                                    <Text style={{ color: "black", fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                                <View style={{ height: 35, marginRight: 6, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
+                                    <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
                                 </View>
                             </View>
                         )
@@ -231,16 +254,16 @@ export const DrawerNavigator = () => {
                     name={Strings.screenNames.getString('VerifyUsers', Strings.english)}
                     component={VerifyusersScreen}
                     options={{
-                        headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
-                        headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
-                        headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
                         title: Strings.screenNames.VerifyUsers,
-                        drawerActiveBackgroundColor: '#F1FAEE',
-                        drawerActiveTintColor: 'blue',
-                        drawerStyle: {
-                            backgroundColor: '#f0f3f7',
-                            fontFamily: 'Inter-Regular'
-                        }
+                        // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+                        // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+                        // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                        // drawerActiveBackgroundColor: '#F1FAEE',
+                        // drawerActiveTintColor: 'blue',
+                        // drawerStyle: {
+                        //     backgroundColor: '#f0f3f7',
+                        //     fontFamily: 'Inter-Regular'
+                        // }
                     }}
                 />
             )}
@@ -248,16 +271,16 @@ export const DrawerNavigator = () => {
                 name={Strings.screenNames.getString('AppInfo', Strings.english)}
                 component={About}
                 options={{
-                    headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
-                    headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
-                    headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
                     title: Strings.screenNames.AppInfo,
-                    drawerActiveBackgroundColor: '#F1FAEE',
-                    drawerActiveTintColor: 'blue',
-                    drawerStyle: {
-                        backgroundColor: '#f0f3f7',
-                        fontFamily: 'Inter-Regular'
-                    }
+                    // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+                    // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+                    // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                    // drawerActiveBackgroundColor: '#F1FAEE',
+                    // drawerActiveTintColor: 'blue',
+                    // drawerStyle: {
+                    //     backgroundColor: '#f0f3f7',
+                    //     fontFamily: 'Inter-Regular'
+                    // }
                 }}
             />
         </Drawer.Navigator >

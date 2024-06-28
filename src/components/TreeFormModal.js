@@ -191,16 +191,18 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
             keyboardShouldPersistTaps='handled'
             scrollEnabled={true}
             style={{
-                ...treeFormModalStyles.container,
-                backgroundColor: 'white',
+                ...treeFormModalStyles.container, marginTop: 10, backgroundColor: "white"
+
             }}>
 
             <TextInput
                 defaultValue={saplingid}
-                style={[
-                    commonStyles.txtInput,
-                    treeFormModalStyles.saplingIdInput(lightTheme, saplingid),
-                ]}
+                style={{
+                    ...commonStyles.txtInput,
+                    ...treeFormModalStyles.saplingIdInput(lightTheme, saplingid), fontStyle: "italic", height: 54, borderRadius: 10
+                }
+
+                }
                 placeholder={Strings.labels.SaplingId}
                 placeholderTextColor={'black'}
                 onChangeText={text => {
@@ -232,17 +234,28 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
             />
 
 
-            <View style={{ ...treeFormModalStyles.imageContainer, marginTop: 5 }}>
+            <View style={{ ...treeFormModalStyles.imageContainer, marginTop: 9 }}>
                 <TouchableOpacity
                     style={{ ...treeFormModalStyles.imagePicker }}
                     onPress={() => {
                         setGalleryModalVisible(true);
                     }}>
                     {!showImage ? (
-                        <View style={{ ...treeFormModalStyles.cameraIcon, justifyContent: 'center', alignItems: 'center' }}>
-                            <Image
-                                source={require('../../assets/icon-bw-camera.png')}
-                            />
+                        <View style={{ ...treeFormModalStyles.cameraIcon, }}>
+                            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', margin: 10 }}>
+                                <Image
+                                    source={require('../../assets/icon-plus.png')} style={{ width: 30, height: 30, opacity: 0.3 }}
+                                />
+                            </View>
+                            <View style={{
+                                flex: 1, alignItems: 'center',
+                                marginBottom: 50,
+                                // marginTop: 30 
+                            }}>
+                                <Image
+                                    source={require('../../assets/icon-bw-camera.png')} style={{ width: 60, height: 60, opacity: 0.3 }}
+                                />
+                            </View>
                         </View>
 
                     ) : (
@@ -283,12 +296,23 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                 <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <View style={{ backgroundColor: 'white', padding: 40 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 10 }}>
-
-                            <TouchableOpacity onPress={() => pickImage(0)} style={{ backgroundColor: "green", padding: 10, }}>
-                                <Text style={{ color: "white", fontWeight: 'bold', fontSize: 15 }}> {Strings.buttonLabels.openCamera}</Text>
+                            <TouchableOpacity onPress={() => pickImage(0)} style={{
+                                backgroundColor: "#059636", padding: 6, borderRadius: 12, width: 120, alignItems: "center", height: 45, shadowColor: 'black',
+                                shadowOpacity: 0.8,
+                                elevation: 3,
+                                shadowRadius: 1,
+                                shadowOffset: { width: 1, height: 4 },
+                            }}>
+                                <Text style={{ color: "white", fontWeight: 'bold', fontSize: 22 }}> {Strings.buttonLabels.openCamera}</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => pickImage(1)} style={{ backgroundColor: "green", padding: 10, }}>
-                                <Text style={{ color: "white", fontWeight: 'bold', fontSize: 15 }}> {Strings.buttonLabels.openGallery}</Text>
+                            <TouchableOpacity onPress={() => pickImage(1)} style={{
+                                backgroundColor: "#059636", padding: 6, borderRadius: 12, width: 120, alignItems: "center", height: 45, shadowColor: 'black',
+                                shadowOpacity: 0.8,
+                                elevation: 3,
+                                shadowRadius: 1,
+                                shadowOffset: { width: 1, height: 4 }
+                            }}>
+                                <Text style={{ color: "white", fontWeight: 'bold', fontSize: 22 }}> {Strings.buttonLabels.openGallery}</Text>
                             </TouchableOpacity>
                         </View>
                         <TouchableOpacity style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }} onPress={() => setGalleryModalVisible(false)}  >

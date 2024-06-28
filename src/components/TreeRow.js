@@ -189,6 +189,7 @@ export const TreeRow = ({ tree, shiftID, modalMode, shiftTypeOfTrees, handleSapl
             paddingHorizontal: 7,
             paddingVertical: 4,
             borderRadius: 6,
+            marginHorizontal: !modalMode ? 12 : null
         }}>
 
             <Image

@@ -63,16 +63,13 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={{ backgroundColor: 'white', height: '100%' }}>
-      <View style={{ margin: 10 }}>
+      <View style={{ flex: 1, flexDirection: "column", justifyContent: 'center', alignItems: 'center', paddingBottom: 10, marginTop: 20 }}>
         <TouchableOpacity
           style={{
             ...homeStyles.button(lightTheme),
-            backgroundColor: lightTheme ? dataUptoDate
-              ? '#e5e7ea'
-              : '#cccccc'
-              : dataUptoDate
-                ? 'lightgrey'
-                : '#999999',
+            width: 170,
+            backgroundColor: dataUptoDate ? '#F3F4F6' : '#cccccc',
+            // padding:10
           }}
           onPress={() =>
             navigation.navigate(
@@ -101,21 +98,21 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
         <TouchableOpacity
-          style={homeStyles.button(lightTheme)}
+           style={{...homeStyles.button(lightTheme),width: 170,}}
           onPress={fetchHelperDataAndShifts}>
           <View style={{ padding: 20, alignItems: 'center' }}>
             <Image
               source={require('../../assets/icon-fetch-data.png')}
               style={homeStyles.imageSpecs}
             />
-            <Text style={homeStyles.buttonText(lightTheme)}>
+            <Text style={{...homeStyles.buttonText(lightTheme) ,marginTop: 5}}>
               {Strings.buttonLabels.FetchHelperData}
             </Text>
           </View>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={homeStyles.button(lightTheme)}
+          style={{...homeStyles.button(lightTheme),width: 170,}}
           onPress={() =>
             navigation.navigate(
               Strings.screenNames.getString('SyncDisplay', Strings.english),

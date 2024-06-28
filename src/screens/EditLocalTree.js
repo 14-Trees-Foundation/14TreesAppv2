@@ -95,7 +95,7 @@ export const EditLocalTree = ({ navigation, route }) => {
 
     if (details) {
         return (
-            <ScrollView keyboardShouldPersistTaps='handled' style={{ flex: 1 }}>
+            <ScrollView keyboardShouldPersistTaps='handled' style={{ flex: 1 ,backgroundColor:"white"}}>
                 <TreeForm
                     mode={treeFormModes.localEdit}
                     treeData={details}

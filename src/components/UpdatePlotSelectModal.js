@@ -112,7 +112,7 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
             }
             onRequestClose={() => handlePlotChanges(0)}
         >
-            <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ ...customModalStyles.plotSelectScrollView, marginTop: mode === treeFormModes.plotChange ? 205 : 80 }}>
+            <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ ...customModalStyles.plotSelectScrollView, marginTop: mode === treeFormModes.plotChange ? 205 : 60 }}>
                 <View style={{
                     height: '100%',
                     backgroundColor: 'white',
@@ -134,18 +134,18 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
                     }}>
 
                         <View style={{
-                            ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black',
+                            ...commonStyles.textSync, color: lightTheme ? '#333' : 'black',
                             margin: 5, fontSize: 22, marginBottom: 20
 
                         }}>
                             <Text style={{
-                                ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black',
+                                ...commonStyles.textSync, color: lightTheme ? '#333' : 'black',
                                 margin: 20, fontSize: 22, marginBottom: 10
                             }}>
                                 {Strings.messages.StartThisShift}</Text>
                             <View style={{ flexDirection: "row" }}>
                                 <Text style={{
-                                    ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black',
+                                    ...commonStyles.textSync, color: lightTheme ? '#333' : 'black',
                                     marginHorizontal: 20, fontSize: 17, marginBottom: 10
 
                                 }}>{Strings.messages.ShiftType}</Text>
@@ -159,7 +159,7 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
                                     fontSize: 20,
                                     fontFamily: 'Inter-Regular',
                                     color: 'black',
-                                    fontWeight: '600', color: lightTheme ? '#52525C' : 'black',
+                                    fontWeight: '600', color: lightTheme ? '#333' : 'black',
                                     marginHorizontal: 5, fontSize: 18, marginBottom: 10
 
                                 }}>{Strings.buttonLabels.UpdatePlot}</Text>
@@ -187,7 +187,7 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
                         </View>
 
                         <View style={{
-                            ...commonStyles.textSync, color: lightTheme ? '#52525C' : 'black',
+                            ...commonStyles.textSync, color: lightTheme ? '#333' : 'black',
                             margin: 5, fontSize: 22, marginBottom: 10, marginTop: 10,
 
                         }}>
@@ -227,7 +227,7 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
                                 <View style={CustomButtonStyles.buttonContainer}>
                                     <Button
                                         onPress={() => handlePlotChanges(1)}
-                                        mode="elevated"
+                                        // mode="elevated"
                                         buttonColor='#1D4ED8'
                                         labelStyle={CustomButtonStyles.buttonLabel}
                                         style={CustomButtonStyles.button}
