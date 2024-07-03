@@ -2,7 +2,7 @@ import { ToastAndroid } from "react-native";
 import { UserClient } from "../api/users";
 import { LocalDatabase } from "../db/db"
 
-const uploadUsersData = async () => {
+export const uploadUsersData = async () => {
 
     const dbClient = new LocalDatabase();
     const apiClient = new UserClient();

@@ -1,4 +1,4 @@
-import { View, BackHandler, FlatList, Text, ScrollView } from "react-native";
+import { View, BackHandler, ScrollView } from "react-native";
 import { Strings } from '../services/Strings';
 import React, { useContext, useEffect, useState } from "react";
 import { shiftsStyles } from "../services/Styles";
@@ -6,6 +6,7 @@ import GlobalContext from "../context/GlobalContext ";
 import { Button } from 'react-native-paper';
 import { Iconstyles } from "../services/Styles";
 import AddUser from "../components/user/AddUser";
+import { UserClient } from "../services/api/users";
 
 const Users = ({ navigation }) => {
 
@@ -20,11 +21,14 @@ const Users = ({ navigation }) => {
         };
 
         const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-
         return () => backHandler.remove();
-
-
     }, []);
+
+    const apiClient = new UserClient();
+    
+    const handleSubmit = (data) => {
+        apiClient.createUser(data)
+    }
 
     return (
         <ScrollView keyboardShouldPersistTaps='handled' style={shiftsStyles.scrollView}>
@@ -36,21 +40,20 @@ const Users = ({ navigation }) => {
                     onPress={() => {
                         setIsAddModalVisible(true); 
                     }}
-                    style={{ width: "65%", borderRadius: 13 }}
+                    style={{ width: "63%", borderRadius: 20 }}
                     contentStyle={Iconstyles.buttonContent}
                     labelStyle={{
                         ...Iconstyles.buttonLabel(lightTheme),
-                        paddingTop: 16
                     }}
                 >
-                    + {Strings.buttonLabels.AddUser}
+                    {Strings.buttonLabels.AddUser}
 
                 </Button>
             </View>
             <AddUser
                 isOpen={isAddModalVisible}
                 handleClose={() => { setIsAddModalVisible(false) }}
-                handleSubmit={(data) => { console.log(data) }}
+                handleSubmit={handleSubmit}
             />
         </ScrollView >
     )

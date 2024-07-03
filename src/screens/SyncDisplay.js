@@ -8,8 +8,10 @@ import { CustomButtonStyles, commonStyles, syncButtonStyles, syncDisplayStyles }
 import GlobalContext from '../context/GlobalContext ';
 import { Button } from 'react-native-paper';
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { LocalDatabase } from '../services/db/db';
+import { uploadUsersData } from '../services/sync/users';
 
-const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount) => {
+const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setUsersCount) => {
   const lsdate = await Utils.getLastSyncDate();
   if (lsdate) {
     setSyncDate(Utils.getReadableDate(lsdate));
@@ -23,6 +25,10 @@ const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount) => {
   const shiftsCount = await Utils.getShiftsCounts();
   setShiftsCount(shiftsCount);
   console.log('setting counts: ', counts, "setting shifts count: ", shiftsCount);
+
+  const localDb = new LocalDatabase();
+  const count = await localDb.users?.countLocalUsers(false);
+  setUsersCount(count);
 }
 
 const getReadableProgress = (progress) => {
@@ -39,6 +45,7 @@ const SyncDisplay = ({ navigation }) => {
   const [failedImagesTrees, setFailedImagesTrees] = useState([]);
   const [failedPlotTrees, setFailedPlotTrees] = useState([]);
   const [shiftsCount, setShiftsCount] = useState(null);
+  const [usersCount, setUsersCount] = useState(0);
   const { lightTheme, shiftID, shiftDone } = useContext(GlobalContext);
 
   useEffect(() => {
@@ -54,7 +61,7 @@ const SyncDisplay = ({ navigation }) => {
 
 
   useFocusEffect(useCallback(() => {
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount);
     console.log('sync date updated', shiftID)
   }, []))
 
@@ -265,6 +272,19 @@ const SyncDisplay = ({ navigation }) => {
       await Utils.logException(JSON.stringify(errorLog));
     }
 
+    try {
+      await uploadUsersData();
+    } catch (error) {
+      console.log('unable to sync users---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync users(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
+
   };
 
   return (
@@ -305,6 +325,9 @@ const SyncDisplay = ({ navigation }) => {
               </Text>
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
                 {Strings.screenNames.Shifts}: {shiftsCount?.pending}
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                {Strings.messages.NewUsers}: {usersCount}
               </Text>
             </View>
           </View>

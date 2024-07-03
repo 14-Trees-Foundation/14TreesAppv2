@@ -118,6 +118,9 @@ export class Strings {
             ShiftType: "Shift type",
             StartThisShift: "Start this Shift",
 
+            // users
+            NewUsers: "New Users",
+
         },
         "mr": {
             SignIn: "साइन इन करा",
@@ -178,6 +181,9 @@ export class Strings {
             ClickToDelete: "एंट्री हटवण्यासाठी रोपावर क्लिक करा", //manjur
             ShiftType: "शिफ्ट प्रकार",
             StartThisShift: "ही शिफ्ट सुरू करा",
+
+            // users
+            NewUsers: "नवीन वापरकर्ते",
         },
     });
     static alertMessages = new LocalizedStrings({

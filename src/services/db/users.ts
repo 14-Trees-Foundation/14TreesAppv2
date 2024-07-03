@@ -21,7 +21,7 @@ export class UsersData {
                     phone TEXT NOT NULL,
                     email TEXT NOT NULL,
                     birth_date TEXT NULL,
-                    is_uploaded INTEGER DEFAULT 0 CHECK (is_active IN (0, 1)),
+                    is_uploaded INTEGER DEFAULT 0 CHECK (is_uploaded IN (0, 1)),
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL
                 );`;
@@ -49,6 +49,15 @@ export class UsersData {
         }
 
         return users;
+    }
+
+    countLocalUsers = async (isUploaded?: boolean): Promise<number> => {
+        const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
+        const query = `SELECT COUNT(*) as count FROM ${localUsersTableName}
+            WHERE ${isUploaded !== undefined ? whereCondition : "1==1"};`
+
+        const [results] = await this.db.executeSql(query)
+        return results.rows.item(0)?.count ?? 0;
     }
 
     createLocalUser = async (data: CreateUserRequest) => {

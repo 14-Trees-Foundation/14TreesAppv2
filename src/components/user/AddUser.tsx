@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Text, TextInput, View, Modal, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, TextInput, View, Modal, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { CreateUserRequest } from '../../model/user';
 
 interface AddUserInputProps {
@@ -25,9 +25,34 @@ export const AddUser: React.FC<AddUserInputProps> = ({ isOpen, handleClose, hand
         });
     }
 
-    const handleFormSubmit = () => {
-        console.log(formData);
-    }
+    const validatePhone = (phone: string) => {
+        const phoneRegex = /^[0-9]{10}$/;
+        return phoneRegex.test(phone);
+      };
+    
+      const validateEmail = (email: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+      };
+    
+      const handleFormSubmit = () => {
+        if (!validatePhone(formData.phone)) {
+          Alert.alert('Invalid phone number. It should be 10 digits.');
+          return;
+        }
+        if (!validateEmail(formData.email)) {
+          Alert.alert('Invalid email format.');
+          return;
+        }
+    
+        handleClose();
+        handleSubmit({
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            birth_date: formData.birth_date,
+        });
+      };
 
     return (
         <Modal visible={isOpen}>

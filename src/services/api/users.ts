@@ -7,7 +7,7 @@ export class UserClient {
     private api: AxiosInstance;
     
     constructor() {
-        const baseURL = 'https://api.14trees.org/api/users';
+        const baseURL = 'https://dev-api.14trees.org/api/users';
         this.api = axios.create({
           baseURL: baseURL,
         });
