@@ -27,6 +27,7 @@ export class Strings {
             SyncDisplay: "Sync Data", //manjur
             LoadingScreen: 'Load',
             UpdateSaplingsPlot: "UpdateSaplingsPlot",
+            UsersPage: "Users",
         },
         "mr": {
             HomePage: "मुख्य पृष्ठ",
@@ -49,7 +50,8 @@ export class Strings {
             PlotSelect: "प्लॉट निवडा", //manjur
             SyncDisplay: "सिंक डेटा",
             LoadingScreen: 'लोड',
-            UpdateSaplingsPlot: "झाडाचा प्लॉट अपडेट करा"
+            UpdateSaplingsPlot: "झाडाचा प्लॉट अपडेट करा",
+            UsersPage: "वापरकर्ते",
         }
     })
 
@@ -416,7 +418,10 @@ export class Strings {
             logOut: 'Log out',
             login: "Log in",
             Done: "End Shift", //manjur
-            Continue: "Continue" //manjur
+            Continue: "Continue", //manjur
+
+            // Users
+            AddUser: "Add User",
         },
         "mr": {
             // home
@@ -463,7 +468,10 @@ export class Strings {
             logOut: 'बाहेर पडणे',
             login: "लॉगिन",
             Done: "शिफ्ट संपली", //manjur
-            Continue: 'सुरू'//manjur
+            Continue: 'सुरू', //manjur
+
+            // Users
+            AddUser: "वापरकर्ता जोडा",
         }
     })
     static labels = new LocalizedStrings({
