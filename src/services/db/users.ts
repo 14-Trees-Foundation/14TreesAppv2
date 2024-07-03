@@ -41,7 +41,7 @@ export class UsersData {
         const users: User[] = []
         const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
         const query = `SELECT * FROM ${localUsersTableName}
-            WHERE ${isUploaded !== undefined ? whereCondition : "1==1"} OFFSET ${offset} LIMIT ${limit};`
+            WHERE ${isUploaded !== undefined ? whereCondition : "1==1"} LIMIT ${limit} OFFSET ${offset};`
 
         const [results] = await this.db.executeSql(query)
         for (let index = 0; index < results.rows.length; index++) {
@@ -63,7 +63,7 @@ export class UsersData {
     createLocalUser = async (data: CreateUserRequest) => {
         const query = `
             INSERT INTO ${localUsersTableName}
-            (name, email, phone, email, created_at, updated_at)
+            (name, email, phone, birth_date, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?)
         `
 
@@ -79,5 +79,9 @@ export class UsersData {
         console.log(JSON.stringify(results))
     }
 
+    updateLocalUserUploadStatus = async (id: number) => {
+        const query = `UPDATE ${localUsersTableName} SET is_uploaded = 1 WHERE id = ${id};`
+        await this.db.executeSql(query)
+    }
 }
 

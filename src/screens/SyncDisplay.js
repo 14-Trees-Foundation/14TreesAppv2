@@ -188,7 +188,7 @@ const SyncDisplay = ({ navigation }) => {
     if (
       treeCounts &&
       treeCounts.pending.treesUpload === 0 && treeCounts.pending.plotUpload === 0 && treeCounts.pending.imagesUpload === 0 &&
-      shiftsCount && shiftsCount.pending === 0) {
+      shiftsCount && shiftsCount.pending === 0 && usersCount === 0) {
       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
       return;
     }

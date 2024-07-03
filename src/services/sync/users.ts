@@ -16,6 +16,7 @@ export const uploadUsersData = async () => {
         for (const user of users ) {
             const resp = await apiClient.createUser(user);
             if (!resp) console.log(user);
+            else await dbClient.users.updateLocalUserUploadStatus(user.id);
         }
     } catch (error: any) {
         console.error("sync::uploadUsersData:", error.message, error.stack)

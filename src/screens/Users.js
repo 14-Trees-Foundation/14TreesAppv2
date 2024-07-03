@@ -7,6 +7,7 @@ import { Button } from 'react-native-paper';
 import { Iconstyles } from "../services/Styles";
 import AddUser from "../components/user/AddUser";
 import { UserClient } from "../services/api/users";
+import { LocalDatabase } from "../services/db/db";
 
 const Users = ({ navigation }) => {
 
@@ -25,9 +26,11 @@ const Users = ({ navigation }) => {
     }, []);
 
     const apiClient = new UserClient();
+    const localClient = new LocalDatabase();
     
     const handleSubmit = (data) => {
-        apiClient.createUser(data)
+        // apiClient.createUser(data)
+        localClient.users.createLocalUser(data);
     }
 
     return (
