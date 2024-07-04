@@ -1,19 +1,27 @@
-import { View, BackHandler, ScrollView } from "react-native";
-import { Strings } from '../services/Strings';
+import { View, Button, BackHandler, ScrollView, SafeAreaView, StyleSheet, TextInput } from "react-native";
+import Modal from "react-native-modal";
 import React, { useContext, useEffect, useState } from "react";
-import { shiftsStyles } from "../services/Styles";
 import GlobalContext from "../context/GlobalContext ";
-import { Button } from 'react-native-paper';
-import { Iconstyles } from "../services/Styles";
-import AddUser from "../components/user/AddUser";
 import { UserClient } from "../services/api/users";
 import { LocalDatabase } from "../services/db/db";
+import UserFormModal from "../components/user/UserFormModal";
+import UserCard from "../components/user/UserCard";
+import UserInfo from "../components/user/UserInfo";
+import { TouchableOpacity } from "react-native";
 
 const Users = ({ navigation }) => {
 
     const { lightTheme } = useContext(GlobalContext);
+    const [isFormVisible, setIsFormVisible] = useState(false);
+    const [isInfoModalVisible, setInfoModalVisible] = useState(false);
+    const [changeMode, setChangeModel] = useState('add');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [page, setPage] = useState(0);
+    const [users, setUsers] = useState([]);
 
-    const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+    const apiClient = new UserClient();
+    const localClient = new LocalDatabase();
 
     useEffect(() => {
         const backAction = () => {
@@ -25,42 +33,132 @@ const Users = ({ navigation }) => {
         return () => backHandler.remove();
     }, []);
 
-    const apiClient = new UserClient();
-    const localClient = new LocalDatabase();
-    
+    useEffect(() => {
+        setTimeout(async() => {
+            let resp = await apiClient.getUsers(page*10, 10);
+            if (page != 0) setUsers([...users, ...resp.results]);
+            else setUsers(resp.results)
+        }, 1000)
+    }, [page])
+
+    useEffect(() => {
+        if (searchQuery.length < 3) return;
+        setTimeout(async() => {
+            let users = await apiClient.searchUsers(searchQuery);
+            setUsers(users);
+        }, 1000)
+    }, [searchQuery])
+
     const handleSubmit = (data) => {
         // apiClient.createUser(data)
         localClient.users.createLocalUser(data);
     }
 
+    const handleSave = (data) => {
+        setTimeout(async() => {
+            if (changeMode === 'add') await apiClient.createUser(data);
+            else await apiClient.updateUser(data);
+
+            setPage(0);
+        }, 1000)
+
+    };
+
+    const handleDelete = () => {
+        if (selectedUser) {
+            setTimeout(async() => {
+                await apiClient.deleteUser(selectedUser);
+                setPage(0);
+            }, 1000)
+        }
+    }
+
+    const filteredUsers = users.filter(user =>
+        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
-        <ScrollView keyboardShouldPersistTaps='handled' style={shiftsStyles.scrollView}>
-
-            <View style={{ flex: 1, marginLeft: 22, marginTop: 24, marginBottom: 10, }}>
-                <Button
-                    mode="contained"
-                    buttonColor='#059636'
-                    onPress={() => {
-                        setIsAddModalVisible(true); 
-                    }}
-                    style={{ width: "63%", borderRadius: 20 }}
-                    contentStyle={Iconstyles.buttonContent}
-                    labelStyle={{
-                        ...Iconstyles.buttonLabel(lightTheme),
-                    }}
-                >
-                    {Strings.buttonLabels.AddUser}
-
-                </Button>
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.header}>
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                />
+                <View style={styles.buttonAdd}>
+                    <Button title="Add" onPress={() => {
+                        setIsFormVisible(true);
+                        setChangeModel('add');
+                    }} />
+                </View>
             </View>
-            <AddUser
-                isOpen={isAddModalVisible}
-                handleClose={() => { setIsAddModalVisible(false) }}
-                handleSubmit={handleSubmit}
+            <ScrollView contentContainerStyle={styles.scrollView} >
+                {filteredUsers.map((user, index) => (
+                    <TouchableOpacity style={{ width: '100%' }} key={index} onPress={() => {
+                        setSelectedUser(user);
+                        setInfoModalVisible(true);
+                    }}>
+                        <UserCard user={user} />
+                    </TouchableOpacity>
+                ))}
+            </ScrollView>
+
+            <UserFormModal
+                mode={changeMode}
+                isVisible={isFormVisible}
+                onClose={() => setIsFormVisible(false)}
+                onSave={handleSave}
+                user={selectedUser}
             />
-        </ScrollView >
-    )
-}
+            
+            { selectedUser && <UserInfo
+                isVisible={isInfoModalVisible}
+                onClose={() => { setInfoModalVisible(false) }}
+                onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
+                onDelete={handleDelete}
+                user={selectedUser}
+            />}
+        </SafeAreaView>
+    );
+};
+
+const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+        height: 80,
+    },
+    searchInput: {
+        flex: 1,
+        width: '80%',
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        padding: 10,
+        marginRight: 10,
+    },
+    buttonAdd: {
+        width: '20%',
+        height: '100%',
+        justifyContent: 'center'
+    },
+    scrollView: {
+        flexGrow: 1,
+        padding: 5,
+        alignItems: 'center',
+    },
+    modal: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: 0,
+    },
+});
 
 export default Users;
 

@@ -22,12 +22,5 @@ export class LocalDatabase {
         this.users = new UsersData(dbConnection);
         this.users.createTables();
     }
-
-    getDBConnection = async () => {
-        if (!this.db) {
-            return await openDatabase({ name: 'tree.db', location: 'default' });
-        }
-        return this.db;
-    };
 }
 

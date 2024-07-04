@@ -52,7 +52,7 @@ export class UserClient {
 
     async deleteUser(data: User): Promise<number> {
         try {
-            await this.api.delete<any>(`/users/${data.id}`);
+            await this.api.delete<any>(`/${data.id}`);
             return data.id;
         } catch (error: any) {
             return handleApiError("UserClient::deleteUser:", error)
