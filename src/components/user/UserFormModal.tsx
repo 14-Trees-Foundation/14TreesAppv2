@@ -22,7 +22,7 @@ const UserFormModal: React.FC<UserFormModalInputProps> = ({ mode, isVisible, onC
 
     useEffect(() => {
         if (user) {
-            const date = new Date(user.birth_date);
+            const date = user.birth_date ? new Date(user.birth_date) : new Date();
             setName(user.name);
             setEmail(user.email);
             setPhone(user.phone);

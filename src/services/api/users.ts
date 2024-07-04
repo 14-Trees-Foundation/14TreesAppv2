@@ -51,6 +51,7 @@ export class UserClient {
     }
 
     async deleteUser(data: User): Promise<number> {
+        if (!data.id) throw new Error('User id required to delete user!')
         try {
             await this.api.delete<any>(`/${data.id}`);
             return data.id;

@@ -20,7 +20,7 @@ export class LocalDatabase {
     constructor() {
         this.db = dbConnection;
         this.users = new UsersData(dbConnection);
-        this.users.createTables();
+        this.users.createTable();
     }
 }
 
