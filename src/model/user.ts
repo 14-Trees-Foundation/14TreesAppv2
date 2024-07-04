@@ -1,10 +1,13 @@
 
 export type User = {
-    id: number,
+    local_id: number,
+    id?: number,
     name: string,
     phone: string,
     email: string,
-    birth_date: Date,
+    birth_date?: Date,
+    is_uploaded: 0 | 1,
+    change_type: 'none' | 'add' | 'edit' | 'delete',
     created_at: Date,
     updated_at: Date
 }
