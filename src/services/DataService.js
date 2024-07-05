@@ -49,8 +49,8 @@ export class DataService {
 
   static productionHostName = 'https://api.14trees.org';
   static hostName = 'http://10.0.2.2:8088';
-  static phoneHostName = "http://192.168.1.14:8008";
-  static serverBase = `${this.productionHostName}/api/appv2`;
+  static phoneHostName = "http://192.168.1.5:8088";
+  static serverBase = `${this.phoneHostName}/api/appv2`;
 
   static async loginUser(userDataPayload) {
     const url = `${DataService.serverBase}/login`;
@@ -62,11 +62,11 @@ export class DataService {
     return result;
   }
 
-  static async fetchHelperData(user_id, lasthash, onDownloadProgress = undefined) {
+  static async fetchHelperData(userId, lastHash, onDownloadProgress = undefined) {
     const url = `${DataService.serverBase}/fetchHelperData`;
     return await axios.post(url, {
-      userId: user_id,
-      lastHash: lasthash
+      user_id: userId,
+      last_ash: lastHash
     }, {
       onDownloadProgress,
     });

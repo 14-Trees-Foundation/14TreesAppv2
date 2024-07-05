@@ -95,19 +95,17 @@ const LoginScreen = ({ navigation }) => {
         console.log("logs from local db: ", logData);
       }
 
-      if (response.user.adminID) {
-        await AsyncStorage.setItem(Constants.adminIdKey, response.user.adminID);
-        const admin_id = await AsyncStorage.getItem(Constants.adminIdKey);
-        console.log('adminId stored from async: ', admin_id);
-        console.log('adminId : ', response.user.adminID);
+      if (response.user.roles) {
+        if (response.user.roles.includes('admin')) await AsyncStorage.setItem(Constants.userRole, 'admin');
+        if (response.user.roles.includes('treelogging')) await AsyncStorage.setItem(Constants.userRole, 'treelogging');
       } else {
         console.log('adminId not stored');
       }
 
       try {
-        await AsyncStorage.setItem(Constants.userIdKey, response.user._id);
-        console.log('userId stored: ', response.user._id);
-        await AsyncStorage.setItem(Constants.phoneNumber, response.user.phone.toString());
+        await AsyncStorage.setItem(Constants.userIdKey, response.user.id.toString());
+        console.log('userId stored: ', response.user.id);
+        await AsyncStorage.setItem(Constants.phoneNumber, response.user.phone);
         response.data = { ...response.user, image: '' };
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
         console.log('userDetails stored');

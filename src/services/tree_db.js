@@ -1237,6 +1237,7 @@ export class LocalDatabase {
         try {
             // create table if not exists
             const query = `CREATE TABLE IF NOT EXISTS ${treetypeName}(
+            id INTEGER NULL,
             name TEXT NOT NULL,
             value TEXT NOT NULL PRIMARY KEY
         );`;

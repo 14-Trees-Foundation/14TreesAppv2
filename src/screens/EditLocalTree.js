@@ -21,7 +21,7 @@ const fetchTreeDetails = async (saplingId, setDetails, navigation, shiftID) => {
         return;
     }
 
-    if (treeDetails.type_id && treeDetails.plot_id && treeDetails.images && treeDetails.coordinates[0] && treeDetails.coordinates[1] && treeDetails.user_id) {
+    if (treeDetaifetchTreeDetailsls.type_id && treeDetails.plot_id && treeDetails.images && treeDetails.coordinates[0] && treeDetails.coordinates[1] && treeDetails.user_id) {
         const detailsForTreeForm = { ...Constants.treeFormTemplateData };
         const treeType = await Utils.treeTypeFromID(treeDetails.type_id);
         const plot = await Utils.plotFromPlotID(treeDetails.plot_id);

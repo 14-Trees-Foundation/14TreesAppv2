@@ -322,10 +322,10 @@ export class Utils {
         if (data) {
             console.log("---------------------------New Data-------------")
 
-            await Utils.storeTreeTypes(data['treeTypes']);
+            await Utils.storeTreeTypes(data['plant_types']);
             await Utils.storePlots(data['plots']);
-            console.log("data['saplings'] :", data['saplings'].length)
-            await Utils.storeTrees(data['saplings'])
+            console.log("data['sapling_ids'] :", data['sapling_ids'].length)
+            await Utils.storeTrees(data['sapling_ids'])
             await AsyncStorage.setItem(Constants.lastHashKey, newHash);
             // ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
             // setstatus(data updated)
@@ -457,15 +457,16 @@ export class Utils {
     }
 
 
-    static async storeTreeTypes(treeTypes) {
+    static async storeTreeTypes(plantTypes) {
         // console.log(treeTypes[0])
-        const treeTypesInLocalDBFormat = treeTypes.map((treeType) => {
-            if (treeType.name) {
-                treeType.name = treeType.name.replace("'", "''");
+        const treeTypesInLocalDBFormat = plantTypes.map((plantType) => {
+            if (plantType.name) {
+                plantType.name = plantType.name.replace("'", "''");
             }
             return {
-                name: treeType.name,
-                tree_id: treeType.tree_id
+                name: plantType.name,
+                plant_type_id: plantType.plant_type_id,
+                id: plantType.id,
             }
         })
         let failure = false;
@@ -1408,6 +1409,7 @@ export class Utils {
 
 export class Constants {
     static userIdKey = 'userid';
+    static userRole = 'user_role';
     static userDetailsKey = 'userobj';
     static adminIdKey = 'adminid';
     static phoneNumber = 'phoneNo';
