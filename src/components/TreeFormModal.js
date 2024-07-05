@@ -156,11 +156,11 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
         try {
 
             const tree = {
-                treeid: selectedTreeType.value,
-                saplingid: saplingid,
+                plant_type_id: selectedTreeType.id,
+                sapling_id: saplingid,
                 lat: lat,
                 lng: lng,
-                plotid: selectedPlot.value,
+                plot_id: selectedPlot.id,
                 user_id: userId,
                 timestamp: new Date().toISOString()
             };

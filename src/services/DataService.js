@@ -48,9 +48,10 @@ axios.interceptors.response.use(function (response) {
 export class DataService {
 
   static productionHostName = 'https://api.14trees.org';
+  static devHostName = 'https://dev-api.14trees.org';
   static hostName = 'http://10.0.2.2:8088';
   static phoneHostName = "http://192.168.1.5:8088";
-  static serverBase = `${this.phoneHostName}/api/appv2`;
+  static serverBase = `${this.devHostName}/api/appv2`;
 
   static async loginUser(userDataPayload) {
     const url = `${DataService.serverBase}/login`;
@@ -73,10 +74,11 @@ export class DataService {
 
   }
 
-  static async fetchShifts(user_id) {
+  static async fetchShifts(userId, lastHash) {
     const url = `${DataService.serverBase}/fetchShifts`;
     return await axios.post(url, {
-      userId: user_id,
+      user_id: userId,
+      last_hash: lastHash,
     });
 
   }

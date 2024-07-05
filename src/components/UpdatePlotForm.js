@@ -29,13 +29,13 @@ const UpdatePlotForm = ({ onFetchData, finalShiftData }) => {
         const shiftData = {
             id: shiftID,
             user_id: user_id,
-            plotselected: finalShiftData.current.plotselected,
-            starttime: finalShiftData.current.shiftTime,
-            endtime: endtime,
-            shiftended: 0,
-            shiftuploadcomplete: 0,
-            timetaken: timetaken,
-            treesplanted: finalShiftData.current.treesPlanted,
+            plot_selected: finalShiftData.current.plotselected,
+            start_time: finalShiftData.current.shiftTime,
+            end_time: endtime,
+            shift_ended: 0,
+            shift_upload_complete: 0,
+            time_taken: timetaken,
+            trees_planted: finalShiftData.current.treesPlanted,
             sapling: sapling
         }
 
@@ -98,8 +98,8 @@ const UpdatePlotForm = ({ onFetchData, finalShiftData }) => {
 
         const treeData = {
             sapling_id: saplingid,
-            new_plot: newPlotSelected.value,
-            old_plot: plotSelected.value,
+            new_plot: newPlotSelected.id,
+            old_plot: plotSelected.id,
             user_id: await Utils.getUserId(),
             uploaded: 0,
             timestamp: new Date().toISOString()

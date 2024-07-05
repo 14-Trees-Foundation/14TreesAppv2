@@ -93,13 +93,13 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
         const shiftData = {
             id: shiftID,
             user_id: user_id,
-            plotselected: finalShiftData.current.plotselected,
-            starttime: finalShiftData.current.shiftTime,
-            endtime: endtime,
-            shiftended: 0,
-            shiftuploadcomplete: 0,
-            timetaken: timetaken,
-            treesplanted: finalShiftData.current.treesPlanted,
+            plot_selected: finalShiftData.current.plotselected,
+            start_time: finalShiftData.current.shiftTime,
+            end_time: endtime,
+            shift_ended: 0,
+            shift_upload_complete: 0,
+            time_taken: timetaken,
+            trees_planted: finalShiftData.current.treesPlanted,
             sapling: sapling
         }
 

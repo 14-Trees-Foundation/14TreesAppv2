@@ -6,7 +6,7 @@ import DeviceInfo from 'react-native-device-info';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const treeTableName = 'tree'; //for local trees
-const treetypeName = 'treetype';
+const treetypeName = 'plant_type';
 const plotName = 'plot';
 const previousShiftTableName = 'previousShifts'; //live shift
 const saplingsTableName = 'saplings'; //for live trees
@@ -25,56 +25,69 @@ export class LocalDatabase {
 
     getDBConnection = async () => {
         if (!this.db) {
-            this.db = await openDatabase({ name: 'tree.db', location: 'default' });
+            this.db = await openDatabase({ name: 'new_tree.db', location: 'default' });
         }
         return this.db;
     };
 
-    deleteTable = async () => {
-        const query = `drop table ${treeTableName}`;
-        await this.db.executeSql(query);
+    deleteTables = async () => {
+        const deleteTable = async (tableName) => {
+            const query = `drop table ${tableName}`;
+            await this.db.executeSql(query);
 
+            console.log("Delete", tableName);
+        }
+
+        deleteTable(treetypeName);
+        deleteTable(plotName);
+        deleteTable(previousShiftTableName);
+        deleteTable(treeTableName);
+        deleteTable(saplingsTableName);
+        deleteTable(localShiftTable);
+        deleteTable(updatePlotsTable);
+        deleteTable(newImageTable);
+        deleteTable('logs_table');
+        deleteTable('sapling_images');
     };
 
     createTreesTable = async () => {
         try {
             const query = `CREATE TABLE IF NOT EXISTS ${treeTableName}(
-            treeid TEXT NOT NULL,
-            saplingid TEXT NOT NULL PRIMARY KEY,
-            lat TEXT,
-            lng TEXT,
-            plotid TEXT NOT NULL,
-            uploaded INTEGER NOT NULL,
-            user_id TEXT NOT NULL,
-            timestamp TEXT NOT NULL
-        );`;
+                plant_type_id INTEGER NOT NULL,
+                sapling_id TEXT NOT NULL PRIMARY KEY,
+                lat TEXT,
+                lng TEXT,
+                plot_id INTEGER NOT NULL,
+                uploaded INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                timestamp TEXT NOT NULL
+            );`;
 
 
             // multiple images for a sapling
-
             const query2 = `CREATE TABLE IF NOT EXISTS sapling_images(
-            saplingid TEXT NOT NULL,
-            image TEXT NOT NULL,
-            imageid TEXT NOT NULL PRIMARY KEY,
-            remark TEXT,
-            timestamp TEXT NOT NULL,
-            Foreign Key (saplingid) references ${treeTableName}(saplingid)
-        );`;
+                sapling_id TEXT NOT NULL,
+                image TEXT NOT NULL,
+                image_id TEXT NOT NULL PRIMARY KEY,
+                remark TEXT,
+                timestamp TEXT NOT NULL,
+                Foreign Key (sapling_id) references ${treeTableName}(sapling_id)
+            );`;
 
             //id represents shifts no on local db.
             const query3 = `
             CREATE TABLE IF NOT EXISTS ${localShiftTable} (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                shift_id TEXT,
-                shifttype TEXT,
-                user_id TEXT NOT NULL,
-                shiftended INTEGER NOT NULL,
-                shiftuploadcomplete INTEGER NOT NULL,
-                plotselected TEXT NOT NULL,
-                starttime TEXT NOT NULL,
-                endtime TEXT NOT NULL,
-                timetaken TEXT NOT NULL,
-                treesplanted TEXT NOT NULL,
+                shift_id INTEGER,
+                shift_type TEXT,
+                user_id INTEGER NOT NULL,
+                shift_ended INTEGER NOT NULL,
+                shift_upload_complete INTEGER NOT NULL,
+                plot_selected TEXT NOT NULL,
+                start_time TEXT NOT NULL,
+                end_time TEXT NOT NULL,
+                time_taken TEXT NOT NULL,
+                trees_planted INTEGER NOT NULL,
                 timestamp TEXT NOT NULL,
                 saplings TEXT
             )`
@@ -82,9 +95,9 @@ export class LocalDatabase {
             const query4 = `
             CREATE TABLE IF NOT EXISTS ${updatePlotsTable} (
                 sapling_id TEXT NOT NULL,
-                new_plot TEXT NOT NULL,
-                old_plot TEXT NOT NULL,
-                user_id TEXT TEXT NOT NULL,
+                new_plot INTEGER NOT NULL,
+                old_plot INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
                 uploaded INTEGER NOT NULL,
                 timestamp TEXT NOT NULL
             )
@@ -108,7 +121,7 @@ export class LocalDatabase {
                 user_id TEXT NOT NULL,
                 sapling_id TEXT NOT NULL PRIMARY KEY,
                 image TEXT,
-                imageid TEXT,
+                image_id TEXT,
                 remark TEXT,  
                 uploaded INTEGER NOT NULL,
                 inActive INTEGER NOT NULL,
@@ -131,17 +144,17 @@ export class LocalDatabase {
         try {
             const shiftTableQuery = `
             CREATE TABLE IF NOT EXISTS ${previousShiftTableName} (
-                shift_id TEXT NOT NULL PRIMARY KEY,
-                shifttype TEXT,
-                user_id TEXT NOT NULL,
-                plotselected TEXT NOT NULL,
-                starttime TEXT NOT NULL,
-                endtime TEXT NOT NULL,
-                timetaken TEXT NOT NULL,
-                treesplanted TEXT NOT NULL,
+                shift_id INTEGER NOT NULL PRIMARY KEY,
+                shift_type TEXT,
+                user_id INTEGER NOT NULL,
+                plot_selected TEXT NOT NULL,
+                start_time TEXT NOT NULL,
+                end_time TEXT NOT NULL,
+                time_taken TEXT NOT NULL,
+                trees_planted INTEGER NOT NULL,
                 timestamp TEXT NOT NULL,
-                shiftended INTEGER NOT NULL,
-                shiftuploadcomplete INTEGER NOT NULL,
+                shift_ended INTEGER NOT NULL,
+                shift_upload_complete INTEGER NOT NULL,
                 saplings TEXT      
                )`;
 
@@ -159,9 +172,9 @@ export class LocalDatabase {
         try {
             const query = `
                 CREATE TABLE IF NOT EXISTS logs_table(
-                    userid TEXT,
-                    deviceinfo TEXT,
-                    phoneinfo TEXT,
+                    user_id INTEGER,
+                    device_info TEXT,
+                    phone_info TEXT,
                     logs TEXT NOT NULL,
                     timestamp TEXT NOT NULL
                 )
@@ -176,16 +189,17 @@ export class LocalDatabase {
 
     logExceptionLocalDB = async (logs) => {
         try {
-            const phoneinfo = await DeviceInfo.getPhoneNumber() || await AsyncStorage.getItem(Constants.phoneNumber);
-            const deviceManufacter = await DeviceInfo.getManufacturer();
+            const phoneInfo = await DeviceInfo.getPhoneNumber() || await AsyncStorage.getItem(Constants.phoneNumber);
+            const deviceManufacture = await DeviceInfo.getManufacturer();
             const deviceName = await DeviceInfo.getDeviceName();
-            const deviceinfo = deviceManufacter + "" + deviceName;
+            const deviceInfo = deviceManufacture + "" + deviceName;
             const timestamp = new Date().toISOString();
-            const userid = await AsyncStorage.getItem(Constants.userIdKey);
+            let userId = await AsyncStorage.getItem(Constants.userIdKey);
+            userId = parseInt(userId);
             const [results] = await this.db.executeSql(`
             SELECT * FROM logs_table 
-            WHERE deviceinfo = ? AND phoneinfo = ? AND logs = ?`,
-                [deviceinfo, phoneinfo, logs]
+            WHERE device_info = ? AND phone_info = ? AND logs = ?`,
+                [deviceInfo, phoneInfo, logs]
             );
 
             const existingLogs = results.rows.raw();
@@ -197,11 +211,11 @@ export class LocalDatabase {
                 return;
             }
 
-            const query = `
-        INSERT INTO logs_table (userid, deviceinfo, phoneinfo, logs, timestamp) 
-        VALUES (?, ?, ?, ?, ?)`;
+            const query = 
+                `INSERT INTO logs_table (user_id, device_info, phone_info, logs, timestamp) 
+                VALUES (?, ?, ?, ?, ?)`;
 
-            await this.db.executeSql(query, [userid, deviceinfo, phoneinfo, logs, timestamp]);
+            await this.db.executeSql(query, [userId, deviceInfo, phoneInfo, logs, timestamp]);
 
         } catch (error) {
             console.error("error inserting logs to log_table", error);
@@ -266,7 +280,7 @@ export class LocalDatabase {
         try {
             const shiftData = [];
 
-            const query = `SELECT * FROM ${localShiftTable} WHERE shiftuploadcomplete=${uploaded}`;
+            const query = `SELECT * FROM ${localShiftTable} WHERE shift_upload_complete=${uploaded}`;
             const results = await this.db.executeSql(query);
 
             for (let index = 0; index < results.length; index++) {
@@ -321,10 +335,10 @@ export class LocalDatabase {
     //localShiftTable saplings
     getSaplingsLocalShiftDB = async (id) => {
         try {
-            const results = await this.db.executeSql(`SELECT saplings,shifttype FROM ${localShiftTable} WHERE id = ?`, [id]);
+            const results = await this.db.executeSql(`SELECT saplings,shift_type FROM ${localShiftTable} WHERE id = ?`, [id]);
             const result = results[0].rows.item(0);
             let saplingArray = JSON.parse(result?.saplings || '[]');
-            let shiftType = result?.shifttype || null
+            let shiftType = result?.shift_type || null
             //console.log("sapling for local shift ", id, " ", saplingArray);
 
             return { saplingArray, shiftType };
@@ -346,7 +360,7 @@ export class LocalDatabase {
         try {
             const trees = [];
             const results = await this.db.executeSql(
-                `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng, uploaded, timestamp FROM ${treeTableName}`,
+                `SELECT sapling_id, plant_type_id, plot_id, user_id, lat,lng, uploaded, timestamp FROM ${treeTableName}`,
             );
             results.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {
@@ -373,7 +387,7 @@ export class LocalDatabase {
         try {
 
             const trees = [];
-            const queryString = `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng, uploaded FROM ${treeTableName} WHERE sapling_id = ?`
+            const queryString = `SELECT sapling_id, plant_type_id, plot_id, user_id, lat,lng, uploaded FROM ${treeTableName} WHERE sapling_id = ?`
             const results = await this.db.executeSql(
                 queryString, [saplingId]
             );
@@ -432,7 +446,7 @@ export class LocalDatabase {
         try {
             const trees = [];
             const results = await this.db.executeSql(
-                `SELECT saplingid as sapling_id, treeid as type_id, plotid as plot_id, user_id, lat,lng, timestamp FROM ${treeTableName} where uploaded=${uploaded}`,
+                `SELECT sapling_id, plant_type_id, plot_id, user_id, lat,lng, timestamp FROM ${treeTableName} where uploaded=${uploaded}`,
             );
             results.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {
@@ -498,11 +512,11 @@ export class LocalDatabase {
 
     }
 
-    getTreeImages = async (saplingid) => {
+    getTreeImages = async (saplingId) => {
         try {
-            const treesimgs = [];
+            const treesImgs = [];
             const results = await this.db.executeSql(
-                `SELECT imageid as name, image as data,remark,timestamp as captureTimestamp FROM sapling_images where saplingid='${saplingid}'`,
+                `SELECT image_id as name, image as data,remark,timestamp as captureTimestamp FROM sapling_images where sapling_id='${saplingId}'`,
             );
             results.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {
@@ -514,10 +528,10 @@ export class LocalDatabase {
                             capturetimestamp: result.rows.item(index).captureTimestamp,
                         },
                     };
-                    treesimgs.push(image);
+                    treesImgs.push(image);
                 }
             });
-            return treesimgs;
+            return treesImgs;
         } catch (error) {
             console.error(error);
             Alert.alert(Strings.alertMessages.getString('FailedGetTreeImages', Strings.english));
@@ -561,7 +575,7 @@ export class LocalDatabase {
         try {
             const trees = [];
             const results = await this.db.executeSql(
-                `SELECT user_id,sapling_id,image,imageid,remark,uploaded,inActive,lat,lng,timestamp FROM ${newImageTable}`
+                `SELECT user_id,sapling_id,image,image_id,remark,uploaded,inActive,lat,lng,timestamp FROM ${newImageTable}`
 
             );
             results.forEach(result => {
@@ -589,7 +603,7 @@ export class LocalDatabase {
         try {
             const trees = [];
             const results = await this.db.executeSql(
-                `SELECT user_id,sapling_id,image,imageid,remark,lat,lng,timestamp,uploaded,inActive FROM ${newImageTable} WHERE uploaded='${uploaded}'`
+                `SELECT user_id,sapling_id,image,image_id,remark,lat,lng,timestamp,uploaded,inActive FROM ${newImageTable} WHERE uploaded='${uploaded}'`
 
             );
             //console.log("--------------results----------",results)
@@ -753,46 +767,46 @@ export class LocalDatabase {
                     let saplingArray = JSON.parse(result.saplings || '[]');
                     saplingArray.push(shiftData.sapling);
                     const updateQuery = `UPDATE ${localShiftTable} 
-                     SET plotselected = ?, 
-                         starttime = ?, 
-                         shiftended = ?, 
-                         shiftuploadcomplete = ?, 
-                         endtime = ?, 
-                         timetaken = ?, 
-                         treesplanted = ?, 
+                     SET plot_selected = ?, 
+                         start_time = ?, 
+                         shift_ended = ?, 
+                         shift_upload_complete = ?, 
+                         end_time = ?, 
+                         time_taken = ?, 
+                         trees_planted = ?, 
                          saplings = ? 
                      WHERE id = ?`;
 
                     await this.db.executeSql(updateQuery, [
-                        shiftData.plotselected,
-                        shiftData.starttime,
-                        shiftData.shiftended,
-                        shiftData.shiftuploadcomplete,
-                        shiftData.endtime,
-                        shiftData.timetaken,
-                        shiftData.treesplanted,
+                        shiftData.plot_selected,
+                        shiftData.start_time,
+                        shiftData.shift_ended,
+                        shiftData.shift_upload_complete,
+                        shiftData.end_time,
+                        shiftData.time_taken,
+                        shiftData.trees_planted,
                         JSON.stringify(saplingArray),
                         shiftData.id
                     ]);
                 } else {
                     const updateQuery = `UPDATE ${localShiftTable} 
-                     SET plotselected = ?, 
-                         starttime = ?, 
-                         shiftended = ?, 
-                         shiftuploadcomplete = ?, 
-                         endtime = ?, 
-                         timetaken = ?, 
-                         treesplanted = ? 
+                     SET plot_selected = ?, 
+                         start_time = ?, 
+                         shift_ended = ?, 
+                         shift_upload_complete = ?, 
+                         end_time = ?, 
+                         time_taken = ?, 
+                         trees_planted = ? 
                      WHERE id = ?`;
 
                     await this.db.executeSql(updateQuery, [
-                        shiftData.plotselected,
-                        shiftData.starttime,
-                        shiftData.shiftended,
-                        shiftData.shiftuploadcomplete,
-                        shiftData.endtime,
-                        shiftData.timetaken,
-                        shiftData.treesplanted,
+                        shiftData.plot_selected,
+                        shiftData.start_time,
+                        shiftData.shift_ended,
+                        shiftData.shift_upload_complete,
+                        shiftData.end_time,
+                        shiftData.time_taken,
+                        shiftData.trees_planted,
                         shiftData.id
                     ]);
                 }
@@ -801,26 +815,26 @@ export class LocalDatabase {
 
 
             } else {
-                console.log("shift does not exist, inserting row");
+                console.log("shift does not exist, inserting row", shiftData);
 
                 const dateString = new Date(); // Current timestamp
                 let timestamp = dateString.toISOString().split('T')[0];
                 timestamp = timestamp.split('-').reverse().join('-');
 
                 const insertQuery = `INSERT INTO ${localShiftTable} 
-                     (shifttype, user_id, shiftended, shiftuploadcomplete, plotselected, starttime, endtime, timetaken, treesplanted, timestamp) 
+                     (shift_type, user_id, shift_ended, shift_upload_complete, plot_selected, start_time, end_time, time_taken, trees_planted, timestamp) 
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
                 await this.db.executeSql(insertQuery, [
-                    shiftData.shifttype,
+                    shiftData.shift_type,
                     shiftData.user_id,
-                    shiftData.shiftended,
-                    shiftData.shiftuploadcomplete,
-                    shiftData.plotselected,
-                    shiftData.starttime,
-                    shiftData.endtime,
-                    shiftData.timetaken,
-                    shiftData.treesplanted,
+                    shiftData.shift_ended,
+                    shiftData.shift_upload_complete,
+                    shiftData.plot_selected,
+                    shiftData.start_time,
+                    shiftData.end_time,
+                    shiftData.time_taken,
+                    shiftData.trees_planted,
                     timestamp
                 ]);
 
@@ -847,10 +861,10 @@ export class LocalDatabase {
         try {
             console.log("sapling got--", sapling_id, id);
 
-            const query = `SELECT saplings,treesplanted FROM ${localShiftTable} WHERE id = ?`;
+            const query = `SELECT saplings,trees_planted FROM ${localShiftTable} WHERE id = ?`;
             const result = await this.db.executeSql(query, [id]);
             let saplings = result[0].rows.item(0).saplings;
-            let treesPlanted = result[0].rows.item(0).treesplanted;
+            let treesPlanted = result[0].rows.item(0).trees_planted;
             treesPlanted = Number(treesPlanted) - 1;
 
             saplings = JSON.parse(saplings);
@@ -860,7 +874,7 @@ export class LocalDatabase {
             console.log("updated saplings before delete----", saplings, treesPlanted);
 
             const updateQuery = `UPDATE ${localShiftTable} 
-                SET  saplings = ?, treesplanted = ?
+                SET  saplings = ?, trees_planted = ?
                 WHERE id = ?`;
 
             await this.db.executeSql(updateQuery, [JSON.stringify(saplings), treesPlanted, id]);
@@ -937,7 +951,7 @@ export class LocalDatabase {
 
             const insertQuery = `
             INSERT OR REPLACE INTO ${newImageTable} 
-            (user_id, sapling_id, image, imageid, remark, uploaded, inActive, lat, lng, timestamp) 
+            (user_id, sapling_id, image, image_id, remark, uploaded, inActive, lat, lng, timestamp) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `;
 
@@ -971,8 +985,8 @@ export class LocalDatabase {
         //console.log('insterting tree---', tree);
         try {
             const insertQuery =
-                `INSERT OR REPLACE INTO ${treeTableName}(treeid, saplingid, lat, lng, plotid, uploaded, user_id, timestamp ) values` +
-                `('${tree.treeid}', '${tree.saplingid}', '${tree.lat}', '${tree.lng}', '${tree.plotid}', ${uploaded}, '${tree.user_id}', '${tree.timestamp}')`;
+                `INSERT OR REPLACE INTO ${treeTableName}(plant_type_id, sapling_id, lat, lng, plot_id, uploaded, user_id, timestamp ) values` +
+                `('${tree.plant_type_id}', '${tree.sapling_id}', '${tree.lat}', '${tree.lng}', '${tree.plot_id}', ${uploaded}, '${tree.user_id}', '${tree.timestamp}')`;
 
             return this.db.executeSql(insertQuery);
         } catch (error) {
@@ -1012,7 +1026,7 @@ export class LocalDatabase {
                 //here we don't have id
                 // Find the saplings array from the table which contains that sapling_id
 
-                const selectQuery = `SELECT id, saplings FROM ${localShiftTable} WHERE shifttype="updatePlot"`;
+                const selectQuery = `SELECT id, saplings FROM ${localShiftTable} WHERE shift_type="updatePlot"`;
                 const result = await this.db.executeSql(selectQuery);
 
                 for (let i = 0; i < result[0].rows.length; i++) {
@@ -1058,7 +1072,7 @@ export class LocalDatabase {
     }
 
     deleteTreeImages = async (saplingId) => {
-        const deleteQuery = `DELETE FROM sapling_images where saplingid = ?`;
+        const deleteQuery = `DELETE FROM sapling_images where sapling_id = ?`;
         await this.db.executeSql(deleteQuery, [saplingId]);
         return;
     }
@@ -1069,11 +1083,11 @@ export class LocalDatabase {
         console.log("deleted sapling newImageTable----", saplingId);
     }
 
-    saveTreeImages = async (treeimage) => {
+    saveTreeImages = async (treeImage) => {
         try {
             const insertQuery =
-                `INSERT OR REPLACE INTO sapling_images(saplingid, image, imageid, remark, timestamp) values` +
-                `('${treeimage.saplingid}', '${treeimage.image}', '${treeimage.imageid}', '${treeimage.remark.replace("'", "''")}', '${treeimage.timestamp}')`;
+                `INSERT OR REPLACE INTO sapling_images(sapling_id, image, image_id, remark, timestamp) values` +
+                `('${treeImage.sapling_id}', '${treeImage.image}', '${treeImage.image_id}', '${treeImage.remark.replace("'", "''")}', '${treeImage.timestamp}')`;
 
             return this.db.executeSql(insertQuery);
         } catch (error) {
@@ -1088,7 +1102,7 @@ export class LocalDatabase {
     };
 
     updateUpload = async (id) => {
-        const updateQuery = `update ${treeTableName} set uploaded=1 where saplingid = '${id}'`;
+        const updateQuery = `update ${treeTableName} set uploaded=1 where sapling_id = '${id}'`;
         await this.db.executeSql(updateQuery);
     };
 
@@ -1100,9 +1114,9 @@ export class LocalDatabase {
     updateShiftUpload = async (id, shift_id, uploadedSaplings) => {
         try {
 
-            const query = `SELECT shiftended, saplings FROM ${localShiftTable} WHERE id = ?`;
+            const query = `SELECT shift_ended, saplings FROM ${localShiftTable} WHERE id = ?`;
             const result = await this.db.executeSql(query, [id]);
-            const shiftended = result[0].rows.item(0).shiftended;
+            const shiftEnded = result[0].rows.item(0).shift_ended;
             let saplings = result[0].rows.item(0).saplings;
 
             //console.log("shiftended---", shiftended, "saplings got--", saplings);
@@ -1121,10 +1135,10 @@ export class LocalDatabase {
 
             let updateQuery = null;
             //console.log("---------------uploadedSaplings.length------------------", uploadedSaplings, uploadedSaplings.length, "-------------------saplings.length----------------", saplings, saplings.length)
-            if (shiftended === 1 && saplings.length === uploadedSaplings.length) {
+            if (shiftEnded === 1 && saplings.length === uploadedSaplings.length) {
                 updateQuery =
                     `UPDATE ${localShiftTable} 
-                 SET shift_id = ?, shiftuploadcomplete = 1, saplings = ?
+                 SET shift_id = ?, shift_upload_complete = 1, saplings = ?
                  WHERE id = ?`
 
                 await this.db.executeSql(updateQuery, [shift_id, JSON.stringify(saplings), id]);
@@ -1154,7 +1168,7 @@ export class LocalDatabase {
 
     changeShiftPlot = async (plotName, shiftID) => {
         try {
-            const updateQuery = `UPDATE ${localShiftTable} SET plotselected = ? WHERE id = ?`;
+            const updateQuery = `UPDATE ${localShiftTable} SET plot_selected = ? WHERE id = ?`;
             return this.db.executeSql(updateQuery, [plotName, shiftID]);
         }
         catch (error) {
@@ -1176,12 +1190,12 @@ export class LocalDatabase {
         //console.log("shift id updateTreesWithChangedPlot---", id);
 
         try {
-            const results = await this.db.executeSql(`SELECT saplings,shifttype FROM ${localShiftTable} WHERE id = ?`, [id]);
+            const results = await this.db.executeSql(`SELECT saplings,shift_type FROM ${localShiftTable} WHERE id = ?`, [id]);
             const result = results[0].rows.item(0);
             let saplingArray = JSON.parse(result?.saplings || '[]');
 
             const updatePromises = saplingArray.map(sapling => {
-                const updateQuery = `UPDATE ${treeTableName} SET plotid = ? WHERE saplingid = ?`;
+                const updateQuery = `UPDATE ${treeTableName} SET plot_id = ? WHERE sapling_id = ?`;
                 return this.db.executeSql(updateQuery, [plot_id, sapling.sapling_id]);
             });
 
@@ -1206,7 +1220,7 @@ export class LocalDatabase {
     updateTreesWithChangedPlotInPlotsTable = async (old_plot, new_plot, id) => {
         console.log("old---" , old_plot, "new---" , new_plot, "id---" , id);
         try {
-            const results = await this.db.executeSql(`SELECT saplings,shifttype FROM ${localShiftTable} WHERE id = ?`, [id]);
+            const results = await this.db.executeSql(`SELECT saplings,shift_type FROM ${localShiftTable} WHERE id = ?`, [id]);
             const result = results[0].rows.item(0);
             let saplingArray = JSON.parse(result?.saplings || '[]');
 
@@ -1242,6 +1256,7 @@ export class LocalDatabase {
             value TEXT NOT NULL PRIMARY KEY
         );`;
             await this.db.executeSql(query);
+            console.log("tree type created")
         } catch (error) {
             console.log("error creating tree types table---", error);
         }
@@ -1251,9 +1266,9 @@ export class LocalDatabase {
     updateTreeTypeTbl = async (tree) => {
         try {
             const insertQuery =
-                `INSERT OR REPLACE INTO ${treetypeName}(name, value) values` +
-                `('${tree.name}', '${tree.tree_id}')`;
-            return this.db.executeSql(insertQuery);
+                `INSERT OR REPLACE INTO ${treetypeName}(id, name, value) values` +
+                `(${tree.id}, '${tree.name}', '${tree.plant_type_id}')`;
+            return await this.db.executeSql(insertQuery);
         } catch (error) {
             const stackTrace = error.stack;
             const errorLog = {
@@ -1292,7 +1307,7 @@ export class LocalDatabase {
     }
 
     getTreeTypesUsedByLocalTrees = async () => {
-        const selectQuery = `SELECT * FROM ${treetypeName} WHERE value IN (SELECT treeid FROM ${treeTableName})`;
+        const selectQuery = `SELECT * FROM ${treetypeName} WHERE value IN (SELECT plant_type_id FROM ${treeTableName})`;
         const treeNames = [];
 
         try {
@@ -1319,7 +1334,7 @@ export class LocalDatabase {
     };
 
     getPlotNamesUsedByLocalTrees = async () => {
-        const selectQuery = `SELECT * FROM ${plotName} WHERE value IN (SELECT plotid FROM ${treeTableName})`;
+        const selectQuery = `SELECT * FROM ${plotName} WHERE value IN (SELECT plot_id FROM ${treeTableName})`;
         const plotNames = [];
 
         try {
@@ -1350,7 +1365,7 @@ export class LocalDatabase {
     getSaplingIds = async () => {
         const saplings = [];
         try {
-            let res = await this.db.executeSql(`SELECT saplingid as name FROM ${treeTableName}`);
+            let res = await this.db.executeSql(`SELECT sapling_id as name FROM ${treeTableName}`);
             res.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {
                     saplings.push(result.rows.item(index));
@@ -1401,6 +1416,7 @@ export class LocalDatabase {
         try {
             // create table if not exists
             const query = `CREATE TABLE IF NOT EXISTS ${plotName}(
+            id INTEGER NULL,
             name TEXT NOT NULL,
             value TEXT NOT NULL PRIMARY KEY
           );`;
@@ -1414,8 +1430,8 @@ export class LocalDatabase {
 
     updatePlotTbl = async (plot) => {
         const insertQuery =
-            `INSERT OR REPLACE INTO ${plotName}(name, value) values` +
-            `('${plot.name}', '${plot.plot_id}')`;
+            `INSERT OR REPLACE INTO ${plotName}(id, name, value) values` +
+            `(${plot.id}, '${plot.name}', '${plot.plot_id}')`;
         return this.db.executeSql(insertQuery);
     };
 
@@ -1453,7 +1469,7 @@ export class LocalDatabase {
         try {
             const insertShiftsQuery = `
             INSERT OR REPLACE INTO ${previousShiftTableName} (
-                endtime, shift_id, shifttype, plotselected, starttime, timestamp, timetaken, treesplanted, user_id, shiftended, shiftuploadcomplete, saplings 
+                end_time, shift_id, shift_type, plot_selected, start_time, timestamp, time_taken, trees_planted, user_id, shift_ended, shift_upload_complete, saplings 
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
             await this.db.executeSql(insertShiftsQuery, [
@@ -1466,8 +1482,8 @@ export class LocalDatabase {
                 shift.time_taken,
                 shift.trees_planted,
                 shift.user_id,
-                shift.shiftended,
-                shift.shiftuploadcomplete,
+                shift.shift_ended,
+                shift.shift_upload_complete,
                 JSON.stringify(shift.saplings)
             ]);
 
@@ -1511,12 +1527,12 @@ export class LocalDatabase {
 
         try {
             const results = await this.db.executeSql(
-                `SELECT saplings,shifttype FROM ${previousShiftTableName} WHERE shift_id = ?`, [id]
+                `SELECT saplings,shift_type FROM ${previousShiftTableName} WHERE shift_id = ?`, [id]
             );
 
             const result = results[0].rows.item(0);
             let saplingArray = JSON.parse(result?.saplings || '[]');
-            let shiftType = result?.shifttype || null
+            let shiftType = result?.shift_type || null
             //console.log("sapling for local shift ", id, " ", saplingArray);
 
             return { saplingArray, shiftType };
@@ -1594,8 +1610,8 @@ export class LocalDatabase {
         try {
             // create table if not exists
             const query = `CREATE TABLE IF NOT EXISTS sapling_plot(
-            plotid TEXT NOT NULL,
-            saplingid TEXT NOT NULL PRIMARY KEY,
+            plot_id INTEGER NOT NULL,
+            sapling_id TEXT NOT NULL PRIMARY KEY,
             lat FLOAT(10,7) NOT NULL,
             lng FLOAT(10,7) NOT NULL
           );`;
@@ -1611,10 +1627,10 @@ export class LocalDatabase {
     //check manjur
     storePlotSaplings = async (plot_id, saplings) => {
         let insertQuery =
-            `INSERT OR REPLACE INTO sapling_plot(plotid,saplingid ,lat, lng) VALUES`
+            `INSERT OR REPLACE INTO sapling_plot(plot_id,sapling_id ,lat, lng) VALUES`
         for (let i = 0; i < saplings.length; i++) {
             const sapling = saplings[i];
-            insertQuery = insertQuery + `('${plot_id}','${sapling[0]}','${sapling[1]}','${sapling[2]}')`;
+            insertQuery = insertQuery + `(${plot_id},'${sapling[0]}','${sapling[1]}','${sapling[2]}')`;
             if (i != saplings.length - 1) {
                 insertQuery = insertQuery + ",";
             }
@@ -1686,7 +1702,7 @@ export class LocalDatabase {
     checkIfSaplingExistsLocally = async sapling => {
         try {
             let res1 = await this.db.executeSql(
-                `SELECT * FROM ${treeTableName} WHERE saplingid='${sapling}'`,
+                `SELECT * FROM ${treeTableName} WHERE sapling_id='${sapling}'`,
             );
             const rowCount = res1[0].rows.length;
             // Check if the sapling exists

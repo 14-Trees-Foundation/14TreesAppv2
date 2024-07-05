@@ -21,9 +21,9 @@ const fetchTreeDetails = async (saplingId, setDetails, navigation, shiftID) => {
         return;
     }
 
-    if (treeDetaifetchTreeDetailsls.type_id && treeDetails.plot_id && treeDetails.images && treeDetails.coordinates[0] && treeDetails.coordinates[1] && treeDetails.user_id) {
+    if (treeDetaifetchTreeDetailsls.plant_type_id && treeDetails.plot_id && treeDetails.images && treeDetails.coordinates[0] && treeDetails.coordinates[1] && treeDetails.user_id) {
         const detailsForTreeForm = { ...Constants.treeFormTemplateData };
-        const treeType = await Utils.treeTypeFromID(treeDetails.type_id);
+        const treeType = await Utils.treeTypeFromID(treeDetails.plant_type_id);
         const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
         detailsForTreeForm.inImages = treeDetails.images;
         detailsForTreeForm.inLat = 0;
@@ -49,7 +49,7 @@ const fetchTreeDetails = async (saplingId, setDetails, navigation, shiftID) => {
 
 export const EditLocalTree = ({ navigation, route }) => {
     const { sapling_id, shiftID } = route.params;
-    const [saplingid, setSaplingid] = useState(sapling_id);
+    const [saplingId, setSaplingId] = useState(sapling_id);
     const [details, setDetails] = useState(null);
 
     console.log("sapling id and shiftID in edit local tree---", sapling_id, shiftID);
@@ -68,25 +68,25 @@ export const EditLocalTree = ({ navigation, route }) => {
     }, [])
 
     useEffect(() => {
-        setSaplingid(sapling_id);
+        setSaplingId(sapling_id);
     }, [sapling_id]);
 
     useEffect(() => {
         setDetails(null);
-        fetchTreeDetails(saplingid, setDetails, navigation, shiftID);
-    }, [saplingid])
+        fetchTreeDetails(saplingId, setDetails, navigation, shiftID);
+    }, [saplingId])
 
     const updateDetails = async (tree, images) => {
         //console.log("tree received----- ",tree);
         //console.log("images received----- ",images);
         console.log("updating the tree inside local edit tree----");
-        if (tree.saplingid !== details.inSaplingId) {
+        if (tree.sapling_id !== details.inSaplingId) {
             //delete tree by sapling ID
             await Utils.deleteTreeAndImages(details.inSaplingId);
             //change sapling id in shift table also...
-            await Utils.updateSaplingInShiftDB(tree.saplingid, details.inSaplingId, shiftID);
+            await Utils.updateSaplingInShiftDB(tree.sapling_id, details.inSaplingId, shiftID);
         }
-        await Utils.deleteTreeImages(tree.saplingid);
+        await Utils.deleteTreeImages(tree.sapling_id);
         await Utils.saveTreeAndImagesToLocalDB(tree, images);
         navigation.goBack(); //so that the user sees the latest changed sapling id
         let toastmsg = Strings.alertMessages.TreeUpdatedfirsthalf + saplingid + Strings.alertMessages.TreeUpdatedsecondhalf;

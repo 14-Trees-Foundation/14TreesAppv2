@@ -65,9 +65,9 @@ export const TreeRow = ({ tree, shiftID, modalMode, shiftTypeOfTrees, handleSapl
         }
     };
 
-    const handleDeleteItem = async (saplingid) => {
-        await Utils.deleteSaplingUpdatePlotDB(saplingid);
-        await Utils.deleteSaplingInShiftDB(saplingid, shiftID);
+    const handleDeleteItem = async (saplingId) => {
+        await Utils.deleteSaplingUpdatePlotDB(saplingId);
+        await Utils.deleteSaplingInShiftDB(saplingId, shiftID);
         handleSaplingChanges();
         setTreesPlanted(treesPlanted - 1);
     }

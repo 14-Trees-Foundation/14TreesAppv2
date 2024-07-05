@@ -107,13 +107,13 @@ const UpdatePlotShift = ({ navigation }) => {
             const shiftData = {
                 id: shiftID,
                 user_id: user_id,
-                plotselected: finalRef.current.plotselected,
-                starttime: finalRef.current.shiftTime,
-                endtime: endtime,
-                shiftended: 1, //made it 1
-                shiftuploadcomplete: uploadedShift ? 1 : 0,
-                timetaken: timetaken,
-                treesplanted: finalRef.current.treesPlanted,
+                plot_selected: finalRef.current.plotselected,
+                start_time: finalRef.current.shiftTime,
+                end_time: endtime,
+                shift_ended: 1, //made it 1
+                shift_upload_complete: uploadedShift ? 1 : 0,
+                time_taken: timetaken,
+                trees_planted: finalRef.current.treesPlanted,
             }
 
             console.log("final shift data---", shiftData);

@@ -160,19 +160,17 @@ const App = () => {
         return false;
       }
 
-      if (response.user.adminID) {
-        await AsyncStorage.setItem(Constants.adminIdKey, response.user.adminID);
-        const admin_id = await AsyncStorage.getItem(Constants.adminIdKey);
-        console.log('adminId stored from async: ', admin_id);
-        console.log('adminId : ', response.user.adminID);
+      if (response.user.roles) {
+        if (response.user.roles.includes('admin')) await AsyncStorage.setItem(Constants.userRole, 'admin');
+        if (response.user.roles.includes('treelogging')) await AsyncStorage.setItem(Constants.userRole, 'treelogging');
       } else {
         console.log('adminId not stored');
       }
 
       try {
 
-        await AsyncStorage.setItem(Constants.userIdKey, response.user._id);
-        console.log('userId stored: ', response.user._id);
+        await AsyncStorage.setItem(Constants.userIdKey, response.user.id.toString());
+        console.log('userId stored: ', response.user.id.toString());
         response.data = { ...response.user, image: '' };
         //console.log("response data modified: ", response.data);
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
