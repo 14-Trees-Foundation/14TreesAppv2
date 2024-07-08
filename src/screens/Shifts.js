@@ -163,7 +163,7 @@ const Shifts = ({ navigation }) => {
                                             </Text>
                                         </View>
                                     )}
-                                    keyExtractor={(item) => item.id ? item.id.toString() : item.shift_id.toString()}
+                                    keyExtractor={(item) => item.id ? item.id.toString() : item.shift_id.toString() + item.user_id}
                                     data={finalList}
                                     scrollEnabled={false}
                                     renderItem={({ item }) => {

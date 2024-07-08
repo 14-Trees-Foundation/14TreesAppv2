@@ -280,7 +280,7 @@ export class LocalDatabase {
         try {
             const shiftData = [];
 
-            const query = `SELECT * FROM ${localShiftTable} WHERE shift_upload_complete=${uploaded}`;
+            const query = `SELECT * FROM ${localShiftTable} WHERE shift_upload_complete=${uploaded} ORDER BY id DESC;`;
             const results = await this.db.executeSql(query);
 
             for (let index = 0; index < results.length; index++) {
@@ -312,7 +312,7 @@ export class LocalDatabase {
 
     getAllShiftID = async () => {
         try {
-            const query = `SELECT * FROM ${localShiftTable}`;
+            const query = `SELECT * FROM ${localShiftTable} ORDER BY id DESC;`;
             const [results] = await this.db.executeSql(query);
             return results.rows.raw();
         } catch (error) {
@@ -518,6 +518,7 @@ export class LocalDatabase {
             const results = await this.db.executeSql(
                 `SELECT image_id as name, image as data,remark,timestamp as captureTimestamp FROM sapling_images where sapling_id='${saplingId}'`,
             );
+            console.log("Images ---", JSON.stringify(results))
             results.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {
                     const image = {
@@ -1026,7 +1027,7 @@ export class LocalDatabase {
                 //here we don't have id
                 // Find the saplings array from the table which contains that sapling_id
 
-                const selectQuery = `SELECT id, saplings FROM ${localShiftTable} WHERE shift_type="updatePlot"`;
+                const selectQuery = `SELECT id, saplings FROM ${localShiftTable} WHERE shift_type="updatePlot" ORDER BY id DESC;`;
                 const result = await this.db.executeSql(selectQuery);
 
                 for (let i = 0; i < result[0].rows.length; i++) {
@@ -1088,7 +1089,6 @@ export class LocalDatabase {
             const insertQuery =
                 `INSERT OR REPLACE INTO sapling_images(sapling_id, image, image_id, remark, timestamp) values` +
                 `('${treeImage.sapling_id}', '${treeImage.image}', '${treeImage.image_id}', '${treeImage.remark.replace("'", "''")}', '${treeImage.timestamp}')`;
-
             return this.db.executeSql(insertQuery);
         } catch (error) {
             const stackTrace = error.stack;
@@ -1496,8 +1496,8 @@ export class LocalDatabase {
     getAllShiftsLive = async () => {
         const liveShifts = [];
         try {
-            let res = await this.db.executeSql(
-                `SELECT * FROM ${previousShiftTableName}`,
+            let res = await this.db.executeSql( 
+                `SELECT * FROM ${previousShiftTableName} ORDER BY shift_id DESC;`,
             );
             //console.log("------------res.rows----- ",res.rows.item[0])
 

@@ -2,7 +2,8 @@ import axios from 'axios';
 import { Buffer } from "buffer";
 import { ToastAndroid } from 'react-native';
 import { Strings } from './Strings';
-import { Utils } from './Utils';
+import { Constants, Utils } from './Utils';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 axios.interceptors.response.use(function (response) {
   return response;
@@ -51,34 +52,42 @@ export class DataService {
   static devHostName = 'https://dev-api.14trees.org';
   static hostName = 'http://10.0.2.2:8088';
   static phoneHostName = "http://192.168.1.5:8088";
-  static serverBase = `${this.devHostName}/api/appv2`;
+  static serverBase = `${this.phoneHostName}/api/appv2`;
 
   static async loginUser(userDataPayload) {
     const url = `${DataService.serverBase}/login`;
     console.log("url: ", url);
     console.log("userdata payload: ", userDataPayload);
     let result = await axios.post(url, userDataPayload);
-    // result = JSON.parse(result);
-    //console.log("result: ", result);
     return result;
   }
 
   static async fetchHelperData(userId, lastHash, onDownloadProgress = undefined) {
+    const token = await AsyncStorage.getItem(Constants.authToken);
     const url = `${DataService.serverBase}/fetchHelperData`;
     return await axios.post(url, {
       user_id: userId,
       last_ash: lastHash
     }, {
+      headers: {
+        'x-access-token': token
+      },
       onDownloadProgress,
     });
 
   }
 
   static async fetchShifts(userId, lastHash) {
+    const token = await AsyncStorage.getItem(Constants.authToken);
     const url = `${DataService.serverBase}/fetchShifts`;
     return await axios.post(url, {
       user_id: userId,
       last_hash: lastHash,
+    },
+    {
+      headers: {
+        'x-access-token': token
+      },
     });
 
   }

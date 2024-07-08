@@ -1,17 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Alert, Platform, RootTagContext, TouchableOpacity } from 'react-native';
-import { PERMISSIONS, request } from 'react-native-permissions';
+import { PERMISSIONS } from 'react-native-permissions';
 import { DrawerNavigator } from './components/DrawerNavigator';
 import LoadingScreen from './screens/LoadingScreen';
 import LoginScreen from './screens/Login';
 import { Strings } from './services/Strings';
 import { Constants, Utils } from './services/Utils';
 import { checkMultiplePermissions } from './services/check_permissions';
-import DeviceInfo from 'react-native-device-info';
-import { DataService } from './services/DataService';
 import { commonStyles } from './services/Styles';
 import GlobalContext from './context/GlobalContext ';
 import AddTreeShift from './screens/AddTreeShift';
@@ -117,93 +115,13 @@ const App = () => {
   const checkSignInStatus = async () => {
     console.log('app roottag app.js1: ')
     try {
-
-      let phoneNumber;
-
-      try {
-        phoneNumber = await DeviceInfo.getPhoneNumber();
-      } catch (error) {
-        const stackTrace = error.stack;
-
-        const errorLog = {
-          msg: "happened while trying to auto login when user starts the app inside app.js",
-          error: JSON.stringify(error),
-          stackTrace: stackTrace
-        }
-
-        await Utils.logException(JSON.stringify(errorLog));
-      }
-
-
-      const userDataPayload = {
-        phone: phoneNumber,
-      }
-
-      if (!phoneNumber) {
-        // User is not signed in, navigate to LoginScreen
-        stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
-        return false;
-      }
-
-      const isSignedIn = await DataService.loginUser(userDataPayload);
-
-      if (!isSignedIn) {
-        stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
-        return false;
-      }
-
-      const response = isSignedIn.data;
-      console.log("response data inside app.js: ", response);
-
-      if (response.success === false) {  // User is not signed in, navigate to LoginScreen
-        stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
-        return false;
-      }
-
-      if (response.user.roles) {
-        if (response.user.roles.includes('admin')) await AsyncStorage.setItem(Constants.userRole, 'admin');
-        if (response.user.roles.includes('treelogging')) await AsyncStorage.setItem(Constants.userRole, 'treelogging');
-      } else {
-        console.log('adminId not stored');
-      }
-
-      try {
-
-        await AsyncStorage.setItem(Constants.userIdKey, response.user.id.toString());
-        console.log('userId stored: ', response.user.id.toString());
-        response.data = { ...response.user, image: '' };
-        //console.log("response data modified: ", response.data);
-        await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
-        console.log('userDetails stored');
-
-        let userKeyDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
-        if (userKeyDetails) {
-          userKeyDetails = JSON.parse(userKeyDetails);
-          let name = userKeyDetails.name;
-          if (name) {
-            const firstName = name.split(' ')[0];
-            console.log("user name in app.js and header---- ", firstName);
-            setUserName(firstName);
-          }
-        }
-      } catch (error) {
-        console.log('Error storing userId', error);
-        const stackTrace = error.stack;
-        const errorLog = {
-          msg: "happened while trying to store userId during auto login inside app.js",
-          error: JSON.stringify(error),
-          stackTrace: stackTrace
-        }
-        await Utils.logException(JSON.stringify(errorLog));
-      }
-
-      return true;
-
+      const token = await AsyncStorage.getItem(Constants.authToken)
+      return token && token !== ''
     } catch (error) {
       console.error('Error checking sign-in status:', error);
       const stackTrace = error.stack;
       const errorLog = {
-        msg: "happened while trying to auto login inside app.js",
+        msg: "happened while login status in side app.js",
         error: JSON.stringify(error),
         stackTrace: stackTrace
       }

@@ -146,7 +146,7 @@ export class Utils {
         for (let index = 0; index < images.length; index++) {
             //console.log("image while adding tree: ", images[index].data)
             const element = {
-                sapling_id: tree.saplingid,
+                sapling_id: tree.sapling_id,
                 image: images[index].data,
                 image_id: images[index].name,
                 remark: images[index].meta.remark,
@@ -1104,6 +1104,7 @@ export class Utils {
         var final = [];
         for (let index = 0; index < res.length; index++) {
             let tree = await Utils.formatLocalTreeToJSON(res[index]);
+            console.log(tree);
             final.push(tree);
         }
         return final;
@@ -1118,6 +1119,8 @@ export class Utils {
             element.lng = 0;
         }
         //console.log(element.lat, element.lng);
+        const userDetailsStr = await AsyncStorage.getItem(Constants.userDetailsKey)
+        const userDetails = JSON.parse(userDetailsStr);
         let images = await this.localdb.getTreeImages(element.sapling_id);
 
         const tree = {
@@ -1125,6 +1128,7 @@ export class Utils {
             plant_type_id: element.plant_type_id,
             plot_id: element.plot_id,
             coordinates: [element.lat, element.lng],
+            planted_by: userDetails.name,
             images: images,
             // shiftID: element.shiftID,
             uploaded: (element.uploaded === 1),
@@ -1421,6 +1425,7 @@ export class Utils {
 export class Constants {
     static userIdKey = 'userid';
     static userRole = 'user_role';
+    static authToken = 'token';
     static userDetailsKey = 'userobj';
     static adminIdKey = 'adminid';
     static phoneNumber = 'phoneNo';
