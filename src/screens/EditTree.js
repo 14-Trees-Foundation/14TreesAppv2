@@ -8,7 +8,7 @@ import { commonStyles, editRemoteTreeStyles } from "../services/Styles";
 import GlobalContext from '../context/GlobalContext ';
 
 const EditTreeScreen = ({ navigation }) => {
-    const [saplingid, setSaplingid] = useState(null);
+    const [saplingId, setSaplingId] = useState(null);
     const [details, setDetails] = useState(null);
     const [newImages, setNewImages] = useState([]);
     const [deletedImages, setDeletedImages] = useState([]);
@@ -40,18 +40,17 @@ const EditTreeScreen = ({ navigation }) => {
                 coordinates: [0, 0]
             },
             sapling_id: "",
-            image: details.inImages.map((image) => image.name),
-            tree_id: "",//tree type id.
+            image: details.inImage.name,
+            plant_type_id: "",//tree type id.
             plot_id: "",//plot id
         };
-        const adminID = await Utils.getAdminId();
 
         saplingData.location.coordinates = [
             tree.lat, tree.lng
         ];
-        saplingData.sapling_id = tree.saplingid;
-        saplingData.plot_id = tree.plotid;
-        saplingData.tree_id = tree.treeid;//tree type.
+        saplingData.sapling_id = tree.sapling_id;
+        saplingData.plot_id = tree.plot_id;
+        saplingData.plant_type_id = tree.plant_type_id;//tree type.
 
         for (let image of images) {
             let newImageIndex = newImages.findIndex((item) => item.name === image.name);
@@ -64,19 +63,19 @@ const EditTreeScreen = ({ navigation }) => {
         let newImagesArr = newImages.slice(-1);
 
         const requestData = {
-            data: saplingData,
-            newImages: newImagesArr,
-            deletedImages: deletedImages,
+            tree: saplingData,
+            new_image: newImagesArr.length !== 0 ? newImagesArr[0] : null,
+            delete_image: deletedImages,
         }
 
         console.log("new images: ", newImagesArr.length, "deleted images: ", deletedImages.length);
         console.log("tree details from edit----", requestData.data);
 
         console.log("new last images: ", newImages[newImages.length - 1]);
-        const response = await DataService.updateSapling(adminID, requestData);
+        const response = await DataService.updateSapling(requestData);
 
         if (!response) {
-            let toastmsg = Strings.alertMessages.FailedUpdateSapling + saplingid + Strings.alertMessages.ContactExpert;
+            let toastmsg = Strings.alertMessages.FailedUpdateSapling + saplingId + Strings.alertMessages.ContactExpert;
             ToastAndroid.show(toastmsg, ToastAndroid.LONG);
             return;
         }
@@ -86,31 +85,27 @@ const EditTreeScreen = ({ navigation }) => {
         setDetails(null);
         setNewImages([]);
         setDeletedImages([]);
-        setSaplingid(null);
+        setSaplingId(null);
     }
 
     const fetchTreeDetails = async () => {
         // console.log('fetching tree details');
-        const adminID = await Utils.getAdminId();
-        console.log(adminID)
         setDetails(null);
         setNewImages([]);
         setDeletedImages([]);
 
-        const treeDetails = await DataService.fetchTreeDetails(saplingid, adminID);
+        const treeDetails = await DataService.fetchTreeDetails(saplingId);
         if (!treeDetails) {
-            ToastAndroid.show(`${Strings.alertMessages.UnableToFetch} ${saplingid} `, ToastAndroid.LONG);
+            ToastAndroid.show(`${Strings.alertMessages.UnableToFetch} ${saplingId} `, ToastAndroid.LONG);
             return;
         }
 
         const detailsForTreeForm = { ...Constants.treeFormTemplateData };
-        const treeType = await Utils.treeTypeFromID(treeDetails.tree_id);
+        const treeType = await Utils.treeTypeFromID(treeDetails.plant_type_id);
         const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
-        detailsForTreeForm.inImages = treeDetails.image;//TODO: server should return:
+        detailsForTreeForm.inImage = treeDetails.image;//TODO: server should return:
 
-        for (let image of detailsForTreeForm.inImages) {
-            image.data = await DataService.fileURLToBase64(image.name);
-        }
+        if (treeDetails.image?.name) image.data = await DataService.fileURLToBase64(treeDetails.image.name);
 
         detailsForTreeForm.inLat = 0;
         detailsForTreeForm.inLng = 0;
@@ -126,7 +121,7 @@ const EditTreeScreen = ({ navigation }) => {
     }
 
     const handlePress = async () => {
-        if (saplingid === "" || !saplingid) {
+        if (saplingId === "" || !saplingId) {
             Alert.alert(Strings.alertMessages.EmptyField, Strings.alertMessages.EmptySaplingField);
             return
         }
@@ -154,8 +149,8 @@ const EditTreeScreen = ({ navigation }) => {
                     style={editRemoteTreeStyles.textInput(lightTheme)}
                     placeholder={Strings.labels.SaplingId}
                     placeholderTextColor={'#333'}
-                    onChangeText={(text) => setSaplingid(text.trim())}
-                    value={saplingid}
+                    onChangeText={(text) => setSaplingId(text.trim())}
+                    value={saplingId}
                 />
 
                 <View style={{ margin: 20, marginHorizontal: 80 }}>

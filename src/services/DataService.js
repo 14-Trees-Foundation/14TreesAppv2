@@ -119,9 +119,10 @@ export class DataService {
     });
   }
 
-  static async updateSapling(adminID, sapling) {
+  static async updateSapling(sapling) {
+    const token =  await AsyncStorage.getItem(Constants.authToken);
     const url = `${DataService.serverBase}/updateSapling`;
-    return await axios.post(url, { adminID: adminID, sapling: sapling });
+    return await axios.post(url, sapling, { headers: { 'x-access-token': token } });
   }
   static async uploadLogs(logs) {
     const url = `${DataService.serverBase}/uploadLogs`;
@@ -170,11 +171,16 @@ export class DataService {
     return;
   }
 
-  static async fetchTreeDetails(saplingID, adminID) {
+  static async fetchTreeDetails(saplingId) {
+    const token = await AsyncStorage.getItem(Constants.authToken);
     const url = `${DataService.serverBase}/getSapling`
     const response = await axios.post(url, {
-      adminID: adminID,
-      saplingID: saplingID
+      sapling_id: saplingId
+    },
+    {
+      headers: {
+        'x-access-token': token
+      }
     })
     //console.log("response from fetchTreeDetails:- ", response);
     if (response) {
