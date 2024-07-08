@@ -20,6 +20,8 @@ export class UsersData {
                 phone TEXT NOT NULL,
                 email TEXT NOT NULL,
                 birth_date TEXT NULL,
+                pin TEXT NULL,
+                roles TEXT NULL,
                 is_uploaded INTEGER DEFAULT 0 CHECK (is_uploaded IN (0, 1)),
                 change_type TEXT DEFAULT 'none' CHECK (change_type IN ('none', 'add', 'edit', 'delete')),
                 created_at TEXT NOT NULL,
@@ -33,11 +35,17 @@ export class UsersData {
         }
     };
 
+    deleteTable = async () => {
+        const query = `drop table ${usersTableName};`;
+        await this.db.executeSql(query);
+        console.log("Users table deleted")
+    }
+
     getLocalUsers = async (offset: number = 0, limit: number = 10, isUploaded?: boolean) => {
         const users: User[] = []
         const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
         const query = `SELECT * FROM ${usersTableName}
-            WHERE change_type != 'delete' ${isUploaded !== undefined ? 'AND' + whereCondition : ""} LIMIT ${limit} OFFSET ${offset};`
+            WHERE change_type != 'delete' ${isUploaded !== undefined ? 'AND' + whereCondition : ""} ORDER BY local_id DESC LIMIT ${limit} OFFSET ${offset};`
 
         const [results] = await this.db.executeSql(query)
         for (let index = 0; index < results.rows.length; index++) {
@@ -47,13 +55,21 @@ export class UsersData {
         return users;
     }
 
-    countLocalUsers = async (isUploaded?: boolean): Promise<number> => {
+    countLocalUsers = async (isUploaded?: boolean): Promise<any> => {
         const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
-        const query = `SELECT COUNT(*) as count FROM ${usersTableName}
-            WHERE ${isUploaded !== undefined ? whereCondition : "1==1"};`
+        const query = `SELECT change_type, COUNT(*) as count FROM ${usersTableName}
+            WHERE ${isUploaded !== undefined ? whereCondition : "1==1"} GROUP BY change_type;`
 
         const [results] = await this.db.executeSql(query)
-        return results.rows.item(0)?.count ?? 0;
+        let response: any = {}
+        for (let i = 0; i < results.rows.length; i++) {
+            const row = results.rows.item(i);
+            response = {
+                ...response,
+                [row.change_type]: row.count,
+            }
+        }
+        return response;
     }
 
     createLocalUser = async (data: CreateUserRequest) => {
@@ -78,7 +94,7 @@ export class UsersData {
     updateLocalUser = async (data: User) => {
         const now = new Date().toISOString();
         let changeType = 'edit';
-        const birthDate = data.birth_date?.toISOString() ?? null;
+        const birthDate = data.birth_date ?? null;
         const [response] = await this.db.executeSql(
             `SELECT * FROM ${usersTableName} WHERE local_id = ?;`
             [data.local_id]
@@ -91,32 +107,39 @@ export class UsersData {
             }
         }
 
-        await this.db.executeSql(
-            `UPDATE ${usersTableName}
-            SET
-                name = ?,
-                phone = ?,
-                email = ?,
-                birth_date = ?,
-                is_uploaded = 0,
-                change_type = ?,
-                updated_at = ?
-            WHERE local_id = ?;`,
-            [data.name, data.phone, data.email, changeType, birthDate, now, data.local_id]
-        )
+        try {
+            await this.db.executeSql(
+                `UPDATE ${usersTableName}
+                SET
+                    name = ?,
+                    phone = ?,
+                    email = ?,
+                    change_type = ?,
+                    birth_date = ?,
+                    is_uploaded = 0,
+                    updated_at = ?
+                WHERE local_id = ?;`,
+                [data.name, data.phone, data.email, changeType, birthDate, now, data.local_id]
+            )
+        } catch(err: any) {
+            console.log(err);
+        }
     }
 
     upsertLiveUserIntoLocalDb = async (data: User) => {
+        console.log("1");
         if (!data.id) return;
-        const birthDate = data.birth_date?.toISOString() ?? null;
+        const birthDate = data.birth_date ?? null;
+        console.log("2", data.id);
 
         const [response] = await this.db.executeSql(
             `SELECT * FROM ${usersTableName} WHERE id = ?;`
             [data.id]
         )
-
+        console.log("3");
         if (response.rows.length === 0) {
             // insert live user
+            console.log('insert')
             await this.db.executeSql(
                 `INSERT INTO ${usersTableName}
                 (id, name, email, phone, birth_date, created_at, updated_at, is_uploaded)
@@ -125,6 +148,7 @@ export class UsersData {
             )
         } else {
             // update user
+            console.log('update')
             await this.db.executeSql(
                 `UPDATE ${usersTableName}
                 SET

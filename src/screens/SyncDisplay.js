@@ -26,9 +26,9 @@ const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setU
   setShiftsCount(shiftsCount);
   console.log('setting counts: ', counts, "setting shifts count: ", shiftsCount);
 
-  const localDb = new LocalDatabase();
-  const count = await localDb.users?.countLocalUsers(false);
-  setUsersCount(count);
+  const localDb = await LocalDatabase.authenticate();;
+  const resp = await localDb.users.countLocalUsers(false);
+  setUsersCount(resp.add);
 }
 
 const getReadableProgress = (progress) => {

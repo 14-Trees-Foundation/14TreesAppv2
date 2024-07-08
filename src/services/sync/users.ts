@@ -1,10 +1,28 @@
 import { ToastAndroid } from "react-native";
 import { UserClient } from "../api/users";
-import { LocalDatabase } from "../db/db"
+import { LocalDatabase } from "../db/db";
+
+// TODO: Implement the api call in backend to fetch the changes only
+export const fetchAndStoreUsers = async () => {
+    // fetch data from the backend
+    const apiClient = new UserClient();
+    const response = await apiClient.getUsers(0, 1);
+    const users = response.results;
+    console.log("--------------Users-----------------", users);
+    // upload users in local db
+    const localDb = await LocalDatabase.authenticate();
+    await localDb.users.deleteTable();
+    await localDb.users.createTable();
+    for (const user of users) {
+        await localDb.users.upsertLiveUserIntoLocalDb(user);
+        console.log("Users done");
+    }
+    console.log("Users done");
+}
 
 export const uploadUsersData = async () => {
 
-    const dbClient = new LocalDatabase();
+    const dbClient = await LocalDatabase.authenticate();;
     const apiClient = new UserClient();
     
     if (!dbClient.users) {
@@ -16,7 +34,7 @@ export const uploadUsersData = async () => {
         for (const user of users ) {
             const resp = await apiClient.createUser(user);
             if (!resp) console.log(user);
-            else await dbClient.users.updateLocalUserUploadStatus(user.id);
+            else await dbClient.users.updateLocalUserUploadStatus(user.local_id);
         }
     } catch (error: any) {
         console.error("sync::uploadUsersData:", error.message, error.stack)

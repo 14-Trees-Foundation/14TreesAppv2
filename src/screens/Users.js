@@ -1,5 +1,4 @@
 import { View, Button, BackHandler, ScrollView, SafeAreaView, StyleSheet, TextInput } from "react-native";
-import Modal from "react-native-modal";
 import React, { useContext, useEffect, useState } from "react";
 import GlobalContext from "../context/GlobalContext ";
 import { UserClient } from "../services/api/users";
@@ -21,7 +20,8 @@ const Users = ({ navigation }) => {
     const [users, setUsers] = useState([]);
 
     const apiClient = new UserClient();
-    const localClient = new LocalDatabase();
+    let localClient;
+    LocalDatabase.authenticate().then((client) => { localClient = client; });
 
     useEffect(() => {
         const backAction = () => {
@@ -35,9 +35,10 @@ const Users = ({ navigation }) => {
 
     useEffect(() => {
         setTimeout(async() => {
-            let resp = await apiClient.getUsers(page*10, 10);
-            if (page != 0) setUsers([...users, ...resp.results]);
-            else setUsers(resp.results)
+            let resp = await localClient.users.getLocalUsers(page*10, 10);
+            if (page != 0) setUsers([...users, ...resp]);
+            else setUsers(resp)
+            console.log(resp);
         }, 1000)
     }, [page])
 
@@ -49,15 +50,10 @@ const Users = ({ navigation }) => {
         }, 1000)
     }, [searchQuery])
 
-    const handleSubmit = (data) => {
-        // apiClient.createUser(data)
-        localClient.users.createLocalUser(data);
-    }
-
     const handleSave = (data) => {
         setTimeout(async() => {
-            if (changeMode === 'add') await apiClient.createUser(data);
-            else await apiClient.updateUser(data);
+            if (changeMode === 'add') await localClient.users.createLocalUser(data);
+            else await localClient.users.updateLocalUser(data);
 
             setPage(0);
         }, 1000)
@@ -67,7 +63,7 @@ const Users = ({ navigation }) => {
     const handleDelete = () => {
         if (selectedUser) {
             setTimeout(async() => {
-                await apiClient.deleteUser(selectedUser);
+                await localClient.users.deleteLocalUser(selectedUser);
                 setPage(0);
             }, 1000)
         }

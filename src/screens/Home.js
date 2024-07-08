@@ -5,6 +5,8 @@ import { Utils } from '../services/Utils';
 import GlobalContext from '../context/GlobalContext ';
 import { useFocusEffect } from '@react-navigation/native';
 import { homeStyles } from '../services/Styles';
+import { LocalDatabase } from '../services/db/db';
+import { fetchAndStoreUsers } from '../services/sync/users';
 
 const HomeScreen = ({ navigation }) => {
   const { langChanged, lightTheme } = useContext(GlobalContext);
@@ -19,6 +21,7 @@ const HomeScreen = ({ navigation }) => {
     }
 
     const helperDataStatus = await Utils.fetchAndStoreHelperData();
+    await fetchAndStoreUsers();
 
     if (helperDataStatus.helperDataUptoDate) {
       setDataUptoDate(true);

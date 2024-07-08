@@ -278,6 +278,7 @@ export class Utils {
     }
 
     static async createLocalTablesIfNeeded() {
+        // await this.localdb.deleteTables();
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
         await this.localdb.createSaplingTbl();

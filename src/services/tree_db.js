@@ -30,11 +30,28 @@ export class LocalDatabase {
         return this.db;
     };
 
-    deleteTable = async () => {
-        const query = `drop table ${treeTableName}`;
+    deleteTable = async (tableName) => {
+        const query = `drop table ${tableName}`;
         await this.db.executeSql(query);
-
     };
+
+    deleteTables = async () => {
+        await AsyncStorage.multiRemove([
+            Constants.hashForPlotSaplingsKey,
+            Constants.lastHashKey,
+            Constants.lastHashForShifts
+        ])
+        await this.deleteTable(treeTableName);
+        await this.deleteTable('sapling_images');
+        await this.deleteTable(localShiftTable);
+        await this.deleteTable(updatePlotsTable);
+        await this.deleteTable(treetypeName);
+        await this.deleteTable(plotName);
+        await this.deleteTable(previousShiftTableName);
+        await this.deleteTable(saplingsTableName);
+        await this.deleteTable('users');
+        await this.deleteTable('logs_table');
+    }
 
     createTreesTable = async () => {
         try {
