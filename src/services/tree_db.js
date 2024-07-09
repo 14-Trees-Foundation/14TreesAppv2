@@ -60,6 +60,7 @@ export class LocalDatabase {
                 plot_id INTEGER NOT NULL,
                 uploaded INTEGER NOT NULL,
                 user_id INTEGER NOT NULL,
+                tree_status TEXT CHECK (tree_status IN ('alive', 'dead', 'lost')) NOT NULL DEFAULT 'alive',
                 timestamp TEXT NOT NULL
             );`;
 
@@ -360,7 +361,7 @@ export class LocalDatabase {
         try {
             const trees = [];
             const results = await this.db.executeSql(
-                `SELECT sapling_id, plant_type_id, plot_id, user_id, lat,lng, uploaded, timestamp FROM ${treeTableName}`,
+                `SELECT sapling_id, plant_type_id, plot_id, user_id, lat,lng, uploaded, tree_status, timestamp FROM ${treeTableName}`,
             );
             results.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {
@@ -387,7 +388,7 @@ export class LocalDatabase {
         try {
 
             const trees = [];
-            const queryString = `SELECT sapling_id, plant_type_id, plot_id, user_id, lat,lng, uploaded FROM ${treeTableName} WHERE sapling_id = ?`
+            const queryString = `SELECT sapling_id, plant_type_id, plot_id, user_id, lat,lng, tree_status, uploaded FROM ${treeTableName} WHERE sapling_id = ?`
             const results = await this.db.executeSql(
                 queryString, [saplingId]
             );
@@ -446,7 +447,7 @@ export class LocalDatabase {
         try {
             const trees = [];
             const results = await this.db.executeSql(
-                `SELECT sapling_id, plant_type_id, plot_id, user_id, lat,lng, timestamp FROM ${treeTableName} where uploaded=${uploaded}`,
+                `SELECT sapling_id, plant_type_id, plot_id, user_id, lat,lng, tree_status, timestamp FROM ${treeTableName} where uploaded=${uploaded}`,
             );
             results.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {
@@ -986,8 +987,8 @@ export class LocalDatabase {
         //console.log('insterting tree---', tree);
         try {
             const insertQuery =
-                `INSERT OR REPLACE INTO ${treeTableName}(plant_type_id, sapling_id, lat, lng, plot_id, uploaded, user_id, timestamp ) values` +
-                `('${tree.plant_type_id}', '${tree.sapling_id}', '${tree.lat}', '${tree.lng}', '${tree.plot_id}', ${uploaded}, '${tree.user_id}', '${tree.timestamp}')`;
+                `INSERT OR REPLACE INTO ${treeTableName}(plant_type_id, sapling_id, lat, lng, plot_id, uploaded, user_id, tree_status, timestamp ) values` +
+                `('${tree.plant_type_id}', '${tree.sapling_id}', '${tree.lat}', '${tree.lng}', '${tree.plot_id}', ${uploaded}, '${tree.user_id}', '${tree.tree_status}', '${tree.timestamp}')`;
 
             return this.db.executeSql(insertQuery);
         } catch (error) {
@@ -1067,7 +1068,7 @@ export class LocalDatabase {
 
     // save tree images
     deleteTree = async (saplingId) => {
-        const deleteQuery = `DELETE FROM ${treeTableName} where saplingid = ?`;
+        const deleteQuery = `DELETE FROM ${treeTableName} where sapling_id = ?`;
         await this.db.executeSql(deleteQuery, [saplingId]);
         return;
     }

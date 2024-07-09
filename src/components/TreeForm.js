@@ -19,15 +19,14 @@ export const treeFormModes = {
 
 export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage, onDeleteImage }) => {
 
-    const { inSaplingId, inLng, inLat, inImages, inTreeType, inPlot, inUserId } = treeData;
-
+    const { inSaplingId, inLng, inLat, inImage, inTreeType, inPlot, inUserId, inTreeStatus } = treeData;
 
     const [saplingId, setSaplingId] = useState(inSaplingId);
     const [lat, setlat] = useState(inLat);
     const [lng, setlng] = useState(inLng);
 
     // array of images
-    const [images, setImages] = useState(inImages);
+    const [images, setImages] = useState([inImage]);
     const [showImage, setShowImage] = useState(false);
 
     const [treeItems, setTreeItems] = useState([]);
@@ -39,6 +38,13 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     const [modalVisible, setModalVisible] = useState(false);
     const [disableButton, setDisableButton] = useState(true);
 
+    const treeStatusList = [
+        { value: 'alive', name: 'Alive' },
+        { value: 'dead', name: 'Dead' },
+        { value: 'lost', name: 'Lost' },
+    ];
+    const [treeStatus, setTreeStatus] = useState( treeStatusList.find((item) => item.value === inTreeStatus) || treeStatusList[0]);
+
     const { lightTheme } = useContext(GlobalContext);
 
     useEffect(() => {
@@ -48,13 +54,13 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     useEffect(() => {
 
         if (mode === treeFormModes.localEdit) {
-            if (treeData.inImages.length > 0) {
+            if (treeData.inImage) {
                 setShowImage(true);
             }
         }
 
         if (mode === treeFormModes.remoteEdit) {
-            if (treeData.inImages.length === 0) {
+            if (!treeData.inImage) {
                 setDisableButton(false);
             } else {
                 setShowImage(true);
@@ -163,6 +169,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     lng: lng,
                     plot_id: selectedPlot.id,
                     user_id: inUserId,
+                    tree_status: treeStatus.value,
                     timestamp: new Date().toISOString()
                 };
                 console.log("final tree data----", tree);
@@ -234,6 +241,12 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     onSelectItem={setSelectedPlot}
 
                 />}
+                <CustomDropdown
+                    initItem={treeStatus}
+                    items={treeStatusList}
+                    label={Strings.labels.SelectTreeStatus}
+                    onSelectItem={setTreeStatus}
+                />
 
                 <View style={treeFormStyles.imageContainer}>
 

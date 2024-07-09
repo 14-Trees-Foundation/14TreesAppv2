@@ -43,6 +43,7 @@ const EditTreeScreen = ({ navigation }) => {
             image: details.inImage.name,
             plant_type_id: "",//tree type id.
             plot_id: "",//plot id
+            tree_status: "alive" // alive / dead / lost
         };
 
         saplingData.location.coordinates = [
@@ -51,6 +52,7 @@ const EditTreeScreen = ({ navigation }) => {
         saplingData.sapling_id = tree.sapling_id;
         saplingData.plot_id = tree.plot_id;
         saplingData.plant_type_id = tree.plant_type_id;//tree type.
+        saplingData.tree_status = tree.tree_status;//tree type.
 
         for (let image of images) {
             let newImageIndex = newImages.findIndex((item) => item.name === image.name);
@@ -69,7 +71,7 @@ const EditTreeScreen = ({ navigation }) => {
         }
 
         console.log("new images: ", newImagesArr.length, "deleted images: ", deletedImages.length);
-        console.log("tree details from edit----", requestData.data);
+        console.log("tree details from edit----", requestData.tree);
 
         console.log("new last images: ", newImages[newImages.length - 1]);
         const response = await DataService.updateSapling(requestData);
@@ -103,9 +105,10 @@ const EditTreeScreen = ({ navigation }) => {
         const detailsForTreeForm = { ...Constants.treeFormTemplateData };
         const treeType = await Utils.treeTypeFromID(treeDetails.plant_type_id);
         const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
-        detailsForTreeForm.inImage = treeDetails.image;//TODO: server should return:
 
-        if (treeDetails.image?.name) image.data = await DataService.fileURLToBase64(treeDetails.image.name);
+        console.log(treeDetails.image)
+        if (treeDetails.image?.name) treeDetails.image.data = await DataService.fileURLToBase64(treeDetails.image.name);
+        detailsForTreeForm.inImage = treeDetails.image;//TODO: server should return:
 
         detailsForTreeForm.inLat = 0;
         detailsForTreeForm.inLng = 0;
@@ -117,6 +120,7 @@ const EditTreeScreen = ({ navigation }) => {
         detailsForTreeForm.inTreeType = treeType;
         detailsForTreeForm.inPlot = plot;
         detailsForTreeForm.inUserId = treeDetails.user_id;
+        detailsForTreeForm.inTreeStatus = treeDetails.tree_status;
         setDetails(detailsForTreeForm);
     }
 

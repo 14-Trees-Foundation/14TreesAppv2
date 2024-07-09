@@ -473,6 +473,7 @@ export class Strings {
             SaplingId: "Sapling ID",
             SelectTreeType: "Select Tree Type",
             SelectPlot: "Select Plot",
+            SelectTreeStatus: "Select Tree Status",
             //local data view
             UploadStatus: "Upload Status",
             TreeType: "Tree Type",
@@ -493,6 +494,7 @@ export class Strings {
             SaplingId: "रोपाची संख्या",
             SelectTreeType: "झाडाचा प्रकार निवडा",
             SelectPlot: "प्लॉट निवडा",
+            SelectTreeStatus: "झाडाची स्थिती निवडा",
             //local data view
             UploadStatus: "अपलोड स्थिती",
             TreeType: "झाडाचा प्रकार",

@@ -1133,6 +1133,7 @@ export class Utils {
             // shiftID: element.shiftID,
             uploaded: (element.uploaded === 1),
             //sequenceNo: element.sequenceNo,
+            tree_status: element.tree_status,
             timestamp: element.timestamp
         };
         if (element.uploaded !== undefined) {
@@ -1434,7 +1435,7 @@ export class Constants {
     static hashForPlotSaplingsKey = 'hashForPlotSaplings';
     static appRootTagKey = 'rootTag';
     static syncDateKey = 'date';
-    static treeFormTemplateData = { inSaplingId: null, inLat: 0, inLng: 0, inImages: [], inPlot: null, inTreeType: null, inUserId: '' }
+    static treeFormTemplateData = { inSaplingId: null, inLat: 0, inLng: 0, inImage: null, inPlot: null, inTreeType: null, inUserId: 0, inTreeStatus: 'alive' }
     static selectedLangKey = 'LANG';
     static selectedTheme = 'DARK';
     static logoImage() {

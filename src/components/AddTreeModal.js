@@ -92,7 +92,7 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
             const detailsForTreeForm = { ...Constants.treeFormTemplateData };
             const treeType = await Utils.treeTypeFromID(treeDetails.plant_type_id);
             const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
-            detailsForTreeForm.inImages = treeDetails.images;
+            detailsForTreeForm.inImage = treeDetails.images[0] || null;
             detailsForTreeForm.inLat = 0;
             detailsForTreeForm.inLng = 0;
             detailsForTreeForm.inLat = Number.parseFloat(treeDetails.coordinates[0]);
@@ -101,6 +101,7 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
             detailsForTreeForm.inTreeType = treeType;
             detailsForTreeForm.inPlot = plot;
             detailsForTreeForm.inUserId = treeDetails.user_id;
+            detailsForTreeForm.inTreeStatus = treeDetails.tree_status;
 
             setDetails(detailsForTreeForm);
         } else {

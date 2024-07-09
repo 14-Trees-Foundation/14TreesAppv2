@@ -25,7 +25,8 @@ const fetchTreeDetails = async (saplingId, setDetails, navigation, shiftID) => {
         const detailsForTreeForm = { ...Constants.treeFormTemplateData };
         const treeType = await Utils.treeTypeFromID(treeDetails.plant_type_id);
         const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
-        detailsForTreeForm.inImages = treeDetails.images;
+        console.log(treeDetails)
+        detailsForTreeForm.inImage = treeDetails.images[0] || null;
         detailsForTreeForm.inLat = 0;
         detailsForTreeForm.inLng = 0;
         detailsForTreeForm.inLat = Number.parseFloat(treeDetails.coordinates[0]);
@@ -34,7 +35,7 @@ const fetchTreeDetails = async (saplingId, setDetails, navigation, shiftID) => {
         detailsForTreeForm.inTreeType = treeType;
         detailsForTreeForm.inPlot = plot;
         detailsForTreeForm.inUserId = treeDetails.user_id;
-
+        console.log(detailsForTreeForm)
         setDetails(detailsForTreeForm);
     } else {
         //delete the tree and show toast message to user

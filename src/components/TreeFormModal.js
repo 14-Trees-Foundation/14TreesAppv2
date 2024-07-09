@@ -12,12 +12,12 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
 
-    const { inSaplingId, inLng, inLat, inImages, inTreeType, inPlot, inUserId } = treeData;
+    const { inSaplingId, inLng, inLat, inImage, inTreeType, inPlot, inUserId, inTreeStatus } = treeData;
     const [saplingid, setSaplingId] = useState(inSaplingId);
     const [lat, setlat] = useState(inLat);
     const [lng, setlng] = useState(inLng);
     // array of images
-    const [images, setImages] = useState(inImages);
+    const [images, setImages] = useState([inImage]);
     const [showImage, setShowImage] = useState(false);
 
     const [treeItems, setTreeItems] = useState([]);
@@ -28,6 +28,13 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
     const [existsInLiveDB, setExistsInLiveDB] = useState(false);
     const [galleryModalVisible, setGalleryModalVisible] = useState(false);
 
+    const treeStatusList = [
+        { value: 'alive', name: 'Alive' },
+        { value: 'dead', name: 'Dead' },
+        { value: 'lost', name: 'Lost' },
+    ];
+    const [treeStatus, setTreeStatus] = useState( treeStatusList.find((item) => item.value === inTreeStatus) || treeStatusList[0]);
+
     const { lightTheme } = useContext(GlobalContext);
 
     useEffect(() => {
@@ -36,7 +43,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
 
     useEffect(() => {
         if (mode === treeFormModes.localEdit) {
-            if (treeData.inImages.length > 0) {
+            if (treeData.inImage) {
                 setShowImage(true);
             }
         }
@@ -162,6 +169,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                 lng: lng,
                 plot_id: selectedPlot.id,
                 user_id: userId,
+                tree_status: treeStatus.value,
                 timestamp: new Date().toISOString()
             };
             console.log("final tree data----", tree);
@@ -231,6 +239,12 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                 items={treeItems}
                 label={Strings.labels.SelectTreeType}
                 onSelectItem={setSelectedTreeType}
+            />
+            <CustomDropdown
+                initItem={treeStatus}
+                items={treeStatusList}
+                label={Strings.labels.SelectTreeStatus}
+                onSelectItem={setTreeStatus}
             />
 
 
