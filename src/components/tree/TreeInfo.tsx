@@ -7,77 +7,75 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { useState } from 'react';
 import { Tree } from '../../model/tree';
 
-// interface UserInfoInputProps {
-//     isVisible: boolean
-//     user: User
-//     onClose: () => void
-//     onEdit: () => void
-//     onDelete: () => void
-// }
+interface TreeInfoInputProps {
+    isVisible: boolean
+    tree: Tree
+    onClose: () => void
+    onEdit: () => void
+    onDelete: () => void
+}
 
-// export const UserInfo: React.FC<UserInfoInputProps> = ({ isVisible, user, onClose, onDelete, onEdit }) => {
+export const TreeInfo: React.FC<TreeInfoInputProps> = ({ isVisible, tree, onClose, onDelete, onEdit }) => {
 
-//     const [isDelete, setIsDelete] = useState(false);
+    const [isDelete, setIsDelete] = useState(false);
 
-//     return (
-//         <Modal
-//             isVisible={isVisible}
-//             onBackdropPress={onClose}
-//             backdropColor="black"
-//             backdropOpacity={0.5}
-//         >
-//             <View style={styles.container}>
-//                 <View style={styles.header}>
-//                     <Text style={styles.title}>User Information</Text>
-//                     <TouchableOpacity style={styles.icons} onPress={() => { onClose(); onEdit(); }}>
-//                         <Icon name="edit" size={24} color="green" />
-//                     </TouchableOpacity>
-//                     <TouchableOpacity style={styles.icons} onPress={ () => { setIsDelete(true) }}>
-//                         <Icon name="trash" size={24} color="red" />
-//                     </TouchableOpacity>
-//                 </View>
-//                 <Text style={styles.label}>Name:</Text>
-//                 <Text style={styles.value}>{user.name}</Text>
-//                 <Text style={styles.label}>Email:</Text>
-//                 <Text style={styles.value}>{user.email}</Text>
-//                 <Text style={styles.label}>Contact No.:</Text>
-//                 <Text style={styles.value}>{user.phone}</Text>
-//                 <Text style={styles.label}>Date of Birth:</Text>
-//                 <Text style={styles.value}>{moment(user.birth_date).format('MMMM D, YYYY')}</Text>
-//                 <Text style={styles.label}>Last Updated:</Text>
-//                 <Text style={styles.value}>{moment(user.updated_at).format('MMMM D, YYYY HH:mm')}</Text>
-//                 <Button style={styles.closeButton} onPress={onClose} >
-//                     Close
-//                 </Button>
-//             </View>
+    return (
+        <Modal
+            isVisible={isVisible}
+            onBackdropPress={onClose}
+            backdropColor="black"
+            backdropOpacity={0.5}
+        >
+            <View style={styles.container}>
+                <View style={styles.header}>
+                    <Text style={styles.title}>Tree Information</Text>
+                    <TouchableOpacity style={styles.icons} onPress={() => { onClose(); onEdit(); }}>
+                        <Icon name="edit" size={24} color="green" />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.icons} onPress={ () => { setIsDelete(true) }}>
+                        <Icon name="trash" size={24} color="red" />
+                    </TouchableOpacity>
+                </View>
+                <Text style={styles.label}>Sapling Id:</Text>
+                <Text style={styles.value}>{tree.sapling_id}</Text>
+                <Text style={styles.label}>Tree Type:</Text>
+                <Text style={styles.value}>{tree.tree_type}</Text>
+                <Text style={styles.label}>Location</Text>
+                <Text style={styles.value}>{tree.tree_location}</Text>
+               
+                
+                <Button style={styles.closeButton} onPress={onClose} >
+                    Close
+                </Button>
+            </View>
 
-//             <Modal
-//                 isVisible={isDelete}
-//                 onBackdropPress={() => { setIsDelete(false); }}
-//                 backdropColor="black"
-//                 backdropOpacity={0.5}
-//             >
-//                 <View style={styles.container}>
-//                     <Text style={styles.deleteTitle}>Delete user "{user.name}"?</Text>
-//                     <View style={{ flexDirection: 'row' }}>
-//                         <Button style={styles.cancelButton} onPress={() => { setIsDelete(false);}} >
-//                             Cancel
-//                         </Button>
-//                         <Button style={styles.deleteButton} onPress={() => {
-//                             onClose();
-//                             setIsDelete(false);
-//                             onDelete();
-//                         }} >
-//                             Delete
-//                         </Button>
-//                     </View>
-//                 </View>
-//             </Modal>
-//         </Modal>
+            <Modal
+                isVisible={isDelete}
+                onBackdropPress={() => { setIsDelete(false); }}
+                backdropColor="black"
+                backdropOpacity={0.5}
+            >
+                <View style={styles.container}>
+                    <Text style={styles.deleteTitle}>Delete tree "{tree.sapling_id}"?</Text>
+                    <View style={{ flexDirection: 'row' }}>
+                        <Button style={styles.cancelButton} onPress={() => { setIsDelete(false);}} >
+                            Cancel
+                        </Button>
+                        <Button style={styles.deleteButton} onPress={() => {
+                            onClose();
+                            setIsDelete(false);
+                            onDelete();
+                        }} >
+                            Delete
+                        </Button>
+                    </View>
+                </View>
+            </Modal>
+        </Modal>
 
         
-//     )
-// }
+    )
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -139,4 +137,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default UserInfo;
+export default TreeInfo;

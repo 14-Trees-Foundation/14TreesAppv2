@@ -1,4 +1,4 @@
-// UserEditModal.js
+// TreeEditModal.js
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
@@ -10,44 +10,44 @@ interface TreeFormModalInputProps {
     isVisible: boolean,
     onClose: () => void,
     onSave: (data: Tree | CreateTreeRequest) => void
-    user?: User
+    tree?: Tree
 }
 
 const TreeFormModal: React.FC<TreeFormModalInputProps> = ({ mode, isVisible, onClose, onSave, tree }) => {
-    const date = new Date();
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
-    const [birthDate, setBirthDate] = useState(date);
+   
+    const [sapling_id, setsapling_id] = useState('');
+    const [tree_type, settree_type] = useState('');
+    const [image, setimage] = useState('');
+    const [tree_location, settree_location] = useState("");
 
-    // useEffect(() => {
-    //     if (user) {
-    //         const date = user.birth_date ? new Date(user.birth_date) : new Date();
-    //         setName(user.name);
-    //         setEmail(user.email);
-    //         setPhone(user.phone);
-    //         setBirthDate(date);
-    //     }
-    // }, [user])
+    useEffect(() => {
+        if (tree) {
+           
+            setsapling_id(tree.sapling_id);
+            settree_type(tree.tree_type);
+            setimage(tree.image);
+            settree_location(tree.tree_location);
+        }
+    }, [tree])
 
-    // const handleSubmit = () => {
-    //     onClose();
-    //     console.log(birthDate)
-    //     let data: User | CreateUserRequest = {
-    //         name: name,
-    //         email: email,
-    //         phone: phone,
-    //         birth_date: birthDate?.toISOString() ?? '',
-    //     }
+    const handleSubmit = () => {
+        onClose();
+        console.log(birthDate)
+        let data: Tree | CreateTreeRequest = {
+            sapling_id: sapling_id,
+            tree_type: tree_type,
+            image: image,
+            tree_location: tree_location,
+        }
 
-    //     if (user) {
-    //         data = {
-    //             ...user,
-    //             ...data
-    //         }
-    //     }
-    //     onSave(data);
-    // }
+        if (tree) {
+            data = {
+                ...tree,
+                ...data
+            }
+        }
+        onSave(data);
+    }
      return (
         <Modal
             isVisible={isVisible}
@@ -57,26 +57,26 @@ const TreeFormModal: React.FC<TreeFormModalInputProps> = ({ mode, isVisible, onC
             onBackdropPress={onClose}
         >
             <View style={styles.modalContainer}>
-                <Text style={styles.title}> {mode === 'add' ? 'Add' : 'Edit'} User Information</Text>
+                <Text style={styles.title}> {mode === 'add' ? 'Add' : 'Edit'} Tree Information</Text>
 
                 <TextInput
                     style={styles.input}
-                    value={name}
-                    onChangeText={setName}
-                    placeholder="Name"
+                    value={sapling_id}
+                    onChangeText={setsapling_id}
+                    placeholder="Sapling Id"
                 />
                 <TextInput
                     style={styles.input}
-                    value={email}
-                    onChangeText={setEmail}
-                    placeholder="Email"
-                    keyboardType="email-address"
+                    value={tree_type}
+                    onChangeText={settree_type}
+                    placeholder="Tree Type"
+                    keyboardType=""
                 />
                 <TextInput
                     style={styles.input}
-                    value={phone}
-                    onChangeText={setPhone}
-                    placeholder="Phone"
+                    value={image}
+                    onChangeText={setimage}
+                    placeholder="Image"
                     keyboardType="phone-pad"
                 />
 

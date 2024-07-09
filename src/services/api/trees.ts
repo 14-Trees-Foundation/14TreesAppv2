@@ -3,11 +3,11 @@ import { FilterItem, PaginatedResponse } from "../../model/common"
 import { Tree } from "../../model/tree"
 import { handleApiError } from "./handleError";
 
-export class UserClient {
+export class TreeClient {
     private api: AxiosInstance;
     
     constructor() {
-        const baseURL = 'https://dev-api.14trees.org/api/users';
+        const baseURL = 'https://dev-api.14trees.org/api/trees';
         this.api = axios.create({
           baseURL: baseURL,
         });
@@ -19,7 +19,7 @@ export class UserClient {
             const response = await this.api.post<PaginatedResponse<Tree>>(url, { filters: filters });
             return response.data;
         } catch (error: any) {
-            return handleApiError("UserClient::getUsers:", error)
+            return handleApiError("TreeClient::getTrees:", error)
         }
     }
 
@@ -28,7 +28,7 @@ export class UserClient {
             const response = await this.api.get<Tree[]>(`/${searchStr}`);
             return response.data;
         } catch (error: any) {
-            return handleApiError("UserClient::searchUsers:", error)
+            return handleApiError("TreeClient::searchTrees:", error)
         }
     }
 
@@ -37,7 +37,7 @@ export class UserClient {
             const response = await this.api.post<Tree>(`/`, data);
             return response.data;
         } catch (error: any) {
-            return handleApiError("UserClient::createUser:", error)
+            return handleApiError("TreeClient::createTree:", error)
         }
     }
 
@@ -46,17 +46,17 @@ export class UserClient {
             const response = await this.api.put<Tree>(`/${data.id}`, data);
             return response.data;
         } catch (error: any) {
-            return handleApiError("UserClient::updateUser:", error)
+            return handleApiError("TreeClient::updateTree:", error)
         }
     }
 
     async deleteTree(data: Tree): Promise<number> {
-        if (!data.id) throw new Error('User id required to delete user!')
+        if (!data.id) throw new Error('Tree id required to delete !')
         try {
             await this.api.delete<any>(`/${data.id}`);
             return data.id;
         } catch (error: any) {
-            return handleApiError("UserClient::deleteUser:", error)
+            return handleApiError("TreeClient::deleteTree:", error)
         }
     }
 }

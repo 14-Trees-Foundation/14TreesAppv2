@@ -16,6 +16,7 @@ import Shifts from "../screens/Shifts";
 import ScreenHeaderContent from './ScreenHeaderContent';
 import { Button } from 'react-native-paper';
 import Users from '../screens/Users';
+import Trees from '../screens/Tree';
 const Drawer = createDrawerNavigator();
 
 const CustomDrawerToggleButton = ({ navigation }) => (

@@ -1,11 +1,9 @@
 import { View, Button, BackHandler, ScrollView, SafeAreaView, StyleSheet, TextInput } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import GlobalContext from "../context/GlobalContext ";
-// import { UserClient } from "../services/api/users";
+
 import { LocalDatabase } from "../services/db/db";
-// import UserFormModal from "../components/user/UserFormModal";
-// import UserCard from "../components/user/UserCard";
-// import UserInfo from "../components/user/UserInfo";
+
 import { TouchableOpacity } from "react-native";
 
 const Trees = ({ navigation }) => {
@@ -15,11 +13,11 @@ const Trees = ({ navigation }) => {
     const [isInfoModalVisible, setInfoModalVisible] = useState(false);
     const [changeMode, setChangeModel] = useState('add');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedTree, setSelectedTree] = useState(null);
     const [page, setPage] = useState(0);
-    const [users, setUsers] = useState([]);
+    const [trees, setTrees] = useState([]);
 
-    const apiClient = new UserClient();
+    const apiClient = new TreeClient();
     let localClient;
     LocalDatabase.authenticate().then((client) => { localClient = client; });
 
@@ -35,9 +33,9 @@ const Trees = ({ navigation }) => {
 
     useEffect(() => {
         setTimeout(async () => {
-            let resp = await localClient.users.getLocalUsers(page * 10, 10);
-            if (page != 0) setUsers([...users, ...resp]);
-            else setUsers(resp)
+            let resp = await localClient.trees.getTrees(page * 10, 10);
+            if (page != 0) setTrees([...trees, ...resp]);
+            else setTrees(resp)
             console.log(resp);
         }, 1000)
     }, [page])
@@ -45,15 +43,15 @@ const Trees = ({ navigation }) => {
     useEffect(() => {
         if (searchQuery.length < 3) return;
         setTimeout(async () => {
-            let users = await apiClient.searchUsers(searchQuery);
-            setUsers(users);
+            let trees = await apiClient.searchTrees(searchQuery);
+            setTrees(trees);
         }, 1000)
     }, [searchQuery])
 
     const handleSave = (data) => {
         setTimeout(async () => {
-            if (changeMode === 'add') await localClient.users.createLocalUser(data);
-            else await localClient.users.updateLocalUser(data);
+            if (changeMode === 'add') await localClient.trees.createTree(data);
+            else await localClient.trees.updateTree(data);
 
             setPage(0);
         }, 1000)
@@ -63,16 +61,16 @@ const Trees = ({ navigation }) => {
     const handleDelete = () => {
         if (selectedUser) {
             setTimeout(async () => {
-                await localClient.users.deleteLocalUser(selectedUser);
+                await localClient.trees.deleteTree(selectedTree);
                 setPage(0);
             }, 1000)
         }
     }
 
-    const filteredUsers = users.filter(user =>
-        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // const filteredTrees = trees.filter(tree =>
+    //     user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    //     user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    // );
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -93,28 +91,28 @@ const Trees = ({ navigation }) => {
             <ScrollView contentContainerStyle={styles.scrollView} >
                 {filteredUsers.map((user, index) => (
                     <TouchableOpacity style={{ width: '100%' }} key={index} onPress={() => {
-                        setSelectedUser(user);
+                        setSelectedTree(trees);
                         setInfoModalVisible(true);
                     }}>
-                        <UserCard user={user} />
+                        <TreeCard tree={trees} />
                     </TouchableOpacity>
                 ))}
             </ScrollView>
 
-            <UserFormModal
+            <TreeFormModal
                 mode={changeMode}
                 isVisible={isFormVisible}
                 onClose={() => setIsFormVisible(false)}
                 onSave={handleSave}
-                user={selectedUser}
+                tree={selectedTree}
             />
 
-            {selectedUser && <UserInfo
+            {selectedTree && <TreeInfo
                 isVisible={isInfoModalVisible}
                 onClose={() => { setInfoModalVisible(false) }}
                 onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
                 onDelete={handleDelete}
-                user={selectedUser}
+                tree={selectedTree}
             />}
         </SafeAreaView>
     );
@@ -156,5 +154,5 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Users;
+export default Trees;
 

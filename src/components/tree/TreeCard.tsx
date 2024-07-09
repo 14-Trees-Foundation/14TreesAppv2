@@ -1,21 +1,21 @@
-// UserCard.js
+// TreeCard.js
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Tree } from '../../model/tree';
 
-// interface UserCardInputProps {
-//     user: User
-// }
+
 
 interface TreeCardInputProps {
   tree: Tree
 }
 
-const TreeCard: React.FC<TreeCardInputProps> = ({ user }) => {
+const TreeCard: React.FC<TreeCardInputProps> = ({ tree }) => {
   return (
     <View style={styles.card}>
-      <Text style={styles.name}>{user.name}</Text>
-      <Text style={styles.email}>{user.email}</Text>
+      <Text style={styles.sapling_id}>{tree.sapling_id}</Text>
+      <Text style={styles.tree_type}>{tree.tree_type}</Text>
+      <Text style={styles.image}>{tree.image}</Text>
+      <Text style={styles.tree_location}>{tree.tree_type}</Text>
     </View>
   );
 };
@@ -33,15 +33,19 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
-  name: {
+  sapling_id: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
   },
-  email: {
+  tree_type: {
+    fontSize: 16,
+    color: '#555',
+  },
+  tree_location: {
     fontSize: 16,
     color: '#555',
   },
 });
 
-export default UserCard;
+export default TreeCard;
