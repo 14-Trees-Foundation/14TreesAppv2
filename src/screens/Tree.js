@@ -3,7 +3,9 @@ import React, { useContext, useEffect, useState } from "react";
 import GlobalContext from "../context/GlobalContext ";
 
 import { LocalDatabase } from "../services/db/db";
-
+import TreeFormModal from "../components/tree/TreeFormModal";
+import TreeCard from "../components/tree/TreeCard";
+import TreeInfo from "../components/tree/TreeInfo";
 import { TouchableOpacity } from "react-native";
 
 const Trees = ({ navigation }) => {

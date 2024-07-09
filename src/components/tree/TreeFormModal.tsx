@@ -32,7 +32,7 @@ const TreeFormModal: React.FC<TreeFormModalInputProps> = ({ mode, isVisible, onC
 
     const handleSubmit = () => {
         onClose();
-        console.log(birthDate)
+        
         let data: Tree | CreateTreeRequest = {
             sapling_id: sapling_id,
             tree_type: tree_type,

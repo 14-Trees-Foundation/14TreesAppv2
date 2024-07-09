@@ -14,8 +14,7 @@ const TreeCard: React.FC<TreeCardInputProps> = ({ tree }) => {
     <View style={styles.card}>
       <Text style={styles.sapling_id}>{tree.sapling_id}</Text>
       <Text style={styles.tree_type}>{tree.tree_type}</Text>
-      <Text style={styles.image}>{tree.image}</Text>
-      <Text style={styles.tree_location}>{tree.tree_type}</Text>
+      
     </View>
   );
 };
