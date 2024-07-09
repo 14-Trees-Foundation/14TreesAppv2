@@ -190,6 +190,25 @@ export const DrawerNavigator = () => {
                     // }
                 }}
             />
+              <Drawer.Screen
+                name={Strings.screenNames.getString('TreesPage', Strings.english)}
+                component={Trees}
+                options={{
+                    headerRight: () => (
+                        <ScreenHeaderContent />
+                    ),
+                    title: Strings.screenNames.TreesPage,
+                    // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+                    // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+                    // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                    // drawerActiveBackgroundColor: '#F1FAEE',
+                    // drawerActiveTintColor: 'blue',
+                    // drawerStyle: {
+                    //     backgroundColor: '#f0f3f7',
+                    //     fontFamily: 'Inter-Regular'
+                    // }
+                }}
+            />
             <Drawer.Screen
                 name={Strings.screenNames.getString('Shifts', Strings.english)}
                 component={Shifts}
