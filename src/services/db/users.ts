@@ -127,28 +127,23 @@ export class UsersData {
     }
 
     upsertLiveUserIntoLocalDb = async (data: User) => {
-        console.log("1");
         if (!data.id) return;
         const birthDate = data.birth_date ?? null;
-        console.log("2", data.id);
 
         const [response] = await this.db.executeSql(
-            `SELECT * FROM ${usersTableName} WHERE id = ?;`
+            `SELECT * FROM ${usersTableName} WHERE id = ?;`,
             [data.id]
         )
-        console.log("3");
         if (response.rows.length === 0) {
             // insert live user
-            console.log('insert')
             await this.db.executeSql(
                 `INSERT INTO ${usersTableName}
                 (id, name, email, phone, birth_date, created_at, updated_at, is_uploaded)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                [data.id, data.name, data.email, data.phone, birthDate, data.created_at.toISOString(), data.updated_at.toISOString(), 1]
+                [data.id, data.name, data.email, data.phone, birthDate, data.created_at, data.updated_at, 1]
             )
         } else {
             // update user
-            console.log('update')
             await this.db.executeSql(
                 `UPDATE ${usersTableName}
                 SET

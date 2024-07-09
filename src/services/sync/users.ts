@@ -8,16 +8,11 @@ export const fetchAndStoreUsers = async () => {
     const apiClient = new UserClient();
     const response = await apiClient.getUsers(0, 1);
     const users = response.results;
-    console.log("--------------Users-----------------", users);
     // upload users in local db
     const localDb = await LocalDatabase.authenticate();
-    await localDb.users.deleteTable();
-    await localDb.users.createTable();
     for (const user of users) {
         await localDb.users.upsertLiveUserIntoLocalDb(user);
-        console.log("Users done");
     }
-    console.log("Users done");
 }
 
 export const uploadUsersData = async () => {

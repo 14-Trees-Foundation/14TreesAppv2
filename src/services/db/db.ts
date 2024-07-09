@@ -12,11 +12,9 @@ const getDBConnection = async () => {
 };
 
 export class LocalDatabase {
-    private db: SQLiteDatabase;
     public users: UsersData;
 
     constructor(dbConnection: SQLiteDatabase) {
-        this.db = dbConnection;
         this.users = new UsersData(dbConnection);
     }
 
