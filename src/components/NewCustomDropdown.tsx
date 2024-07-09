@@ -1,43 +1,50 @@
-import { View, Text, TouchableOpacity, FlatList, TextInput, StyleSheet, Keyboard, Pressable, ScrollView } from 'react-native'
+import { View, Text, TouchableOpacity, FlatList, TextInput, Keyboard } from 'react-native'
 import { useState, useEffect, useContext } from 'react';
 import { commonStyles, customDropdownStyles } from '../services/Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 import GlobalContext from '../context/GlobalContext ';
 
-export const CustomDropdown = ({ items, onSelectItem, initItem, label }) => {
-    const [filteredOptions, setFilteredOptions] = useState(items);
-    const [selectedItem, setSelectedItem] = useState({ value: -1, name: "" });
+interface CustomDropdownInputProps<T> {
+    label: string,
+    options: T[],
+    value: T,
+    onChange: (data: T | null) => void,
+    valueGetter: (data: T) => string
+    keyGetter: (data: T) => any
+};
+
+export function NewCustomDropdown<T>({ label, options, value, onChange, valueGetter, keyGetter }: CustomDropdownInputProps<T>) {
+    const [filteredOptions, setFilteredOptions] = useState(options);
+    const [selectedItem, setSelectedItem] = useState<T | null>(null);
     const [clearButton, setClearButton] = useState(true);
-    const [isFocused,setIsFocused] = useState("")
+    const [isFocused,setIsFocused] = useState(false)
 
     const { lightTheme } = useContext(GlobalContext);
 
     useEffect(() => {
-        if (initItem) {
-            setSelectedItem(initItem);
-        } else {
-            setSelectedItem({ name: '', value: -1 });
+        if (value) {
+            setSelectedItem(value);
         }
 
-        if (initItem === null) {
+        if (value === null) {
             setClearButton(false);
         }
 
-    }, [initItem])
+    }, [value])
 
-    const updateFilteredOptions = (text) => {
+    const updateFilteredOptions = (text: string) => {
         if (text.length > 0) {
-            setFilteredOptions(items.filter((option) => option.name.toLowerCase().includes(text.toLowerCase())))
+            setFilteredOptions(options.filter((option) => valueGetter(option).toLowerCase().includes(text.toLowerCase())))
         }
         else {
-            setFilteredOptions(items);
+            setFilteredOptions(options);
         }
     }
     const [optionsVisible, setOptionsVisible] = useState(false);
 
-    const selectItem = (item) => {
+    const selectItem = (item: T) => {
         Keyboard.dismiss();
-        onSelectItem(item);
+        onChange(item);
         setOptionsVisible(false);
         setSelectedItem(item);
         setClearButton(true);
@@ -47,11 +54,9 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, label }) => {
         return (
             <TouchableOpacity
                 style={{
-                    fontFamily: 'Inter-Regular',
                     flexDirection: 'row',
                     alignContent: 'center',
                     alignItems: 'center',
-                    fontSize: 40,
                     borderColor: '#B8B8B8',
                     // backgroundColor: 'white',
                     borderWidth: 0.2,
@@ -69,8 +74,8 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, label }) => {
     }
 
     const clearSelection = () => {
-        setSelectedItem({ name: '', value: -1 });
-        onSelectItem(null);
+        setSelectedItem(null);
+        onChange(null);
     };
 
     return (
@@ -84,16 +89,16 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, label }) => {
                     width: '93%',
                     borderWidth: 2,
                     borderColor: !isFocused?"#ccc":"black",
-                    shadowColor: '#000',
-                    shadowOffset: {
-                        width: 0,
-                        height: 2,
-                    },
+                    // shadowColor: '#000',
+                    // shadowOffset: {
+                    //     width: 0,
+                    //     height: 2,
+                    // },
                     backgroundColor: 'white',
                     padding: 10,
                     marginBottom: 10,
                     paddingBottom: 12,
-                    color: '#333', // Change font color here
+                    // color: '#333', // Change font color here
                     //fontWeight: 'bold',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -105,10 +110,10 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, label }) => {
                     shadowOffset: { width: 1, height: 4 },
                     borderRadius: 10,
                     color: lightTheme ? '#333' : 'black',
-                    fontWeight: initItem ? 'bold' : 'normal',
+                    fontWeight: value ? 'bold' : 'normal',
                     
                 }}
-                defaultValue={selectedItem ? (selectedItem.value === -1 ? '' : selectedItem.name) : ''}
+                defaultValue={selectedItem ? valueGetter(selectedItem) : ''}
                 placeholder={label}
                 placeholderTextColor={'black'}
                 onChangeText={updateFilteredOptions}
@@ -116,7 +121,7 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, label }) => {
                 onBlur={() => {setIsFocused(false)}}
             />
 
-            {clearButton && selectedItem && selectedItem.value !== -1 && (
+            {clearButton && selectedItem && (
                 <TouchableOpacity style={customDropdownStyles.clearButton}
                     onPress={clearSelection}  >
                     <Icon name="close-circle" size={25} color="red" />
@@ -127,7 +132,7 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, label }) => {
                 data={filteredOptions}
                 renderItem={renderOption}
                 keyboardShouldPersistTaps="handled"
-                keyExtractor={(item) => item.value}
+                keyExtractor={(item) => keyGetter(item)}
                 scrollEnabled={false}
                 style={{ marginLeft: 13, width: "93%", borderColor: "#B8B8B8", borderWidth: 0, borderRadius: 10, backgroundColor: "white" }}
             />
