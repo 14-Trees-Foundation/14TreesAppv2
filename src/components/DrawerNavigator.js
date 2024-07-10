@@ -16,6 +16,7 @@ import Shifts from "../screens/Shifts";
 import ScreenHeaderContent from './ScreenHeaderContent';
 import { Button } from 'react-native-paper';
 import Users from '../screens/Users';
+import Sites from '../screens/Sites';
 const Drawer = createDrawerNavigator();
 
 const CustomDrawerToggleButton = ({ navigation }) => (
@@ -102,6 +103,7 @@ export const DrawerNavigator = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const navigationRef = stackNavRef;
     const [userDetails, setUserDetails] = useState(null);
+    const [siteDetails, setSiteDetails] = useState(null);
     const [toggleMode, setToggleMode] = useState(false); //dark by default
     const { langChanged, lightTheme, setLightTheme } = useContext(GlobalContext);
 
@@ -179,6 +181,25 @@ export const DrawerNavigator = () => {
                         <ScreenHeaderContent />
                     ),
                     title: Strings.screenNames.UsersPage,
+                    // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+                    // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+                    // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                    // drawerActiveBackgroundColor: '#F1FAEE',
+                    // drawerActiveTintColor: 'blue',
+                    // drawerStyle: {
+                    //     backgroundColor: '#f0f3f7',
+                    //     fontFamily: 'Inter-Regular'
+                    // }
+                }}
+            />
+            <Drawer.Screen
+                name={Strings.screenNames.getString('SitesPage', Strings.english)}
+                component={Sites}
+                options={{
+                    headerRight: () => (
+                        <ScreenHeaderContent />
+                    ),
+                    title: Strings.screenNames.SitesPage,
                     // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
                     // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
                     // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
