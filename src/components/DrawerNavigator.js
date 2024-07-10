@@ -15,7 +15,7 @@ import About from '../screens/About';
 import Shifts from "../screens/Shifts";
 import ScreenHeaderContent from './ScreenHeaderContent';
 import { Button } from 'react-native-paper';
-import { TreeForm } from './NewTreeForm';
+import Trees from '../screens/Trees';
 const Drawer = createDrawerNavigator();
 
 const CustomDrawerToggleButton = ({ navigation }) => (
@@ -172,13 +172,13 @@ export const DrawerNavigator = () => {
                 }}
             />
             <Drawer.Screen
-                name={'Test'}
-                component={TreeForm}
+                name={Strings.screenNames.getString('TreesPage', Strings.english)}
+                component={Trees}
                 options={{
                     headerRight: () => (
                         <ScreenHeaderContent />
                     ),
-                    title: 'Test',
+                    title: Strings.screenNames.TreesPage,
                     // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
                     // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
                     // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,

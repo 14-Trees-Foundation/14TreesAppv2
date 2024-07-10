@@ -9,6 +9,7 @@ import ImageResizer from "react-native-image-resizer";
 import RNFS from 'react-native-fs';
 import ReactNativeForegroundService from '@supersami/rn-foreground-service';
 import { shiftTypes } from "../screens/Shifts";
+import { DaoClient } from "./db/dao";
 const MIN_BATCH_SIZE = 5
 
 const shiftTypesObject = {
@@ -28,6 +29,7 @@ export class Utils {
     static async getLocalTreeTypesAndPlots() {
         let treeTypes = await this.localdb.getAllTreeTypes();
         let plots = await this.localdb.getAllPlots();
+
         return { treeTypes, plots };
     }
 
@@ -286,6 +288,8 @@ export class Utils {
         //     Constants.appRootTagKey,
         //     Constants.syncDateKey,
         // ])
+        const daoClient = await DaoClient.authenticate();
+        await daoClient.trees.createTable();
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
         await this.localdb.createSaplingTbl();
@@ -1444,6 +1448,9 @@ export class Constants {
     static placeholderImage() {
         return require('../../assets/icon-profile.png');
     }
+
+    // helpers data
+    static lastTreesFetchedAt = 'last_trees_fetched_at'
 }
 
 export const getImageSourceObject = (src) => {

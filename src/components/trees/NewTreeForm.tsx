@@ -1,39 +1,39 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { ScrollView, Text, TextInput, View } from 'react-native';
-import { Strings } from "../services/Strings";
-import { Utils } from "../services/Utils";
-import { CoordinateSetter } from "./CoordinateSetter";
-import { CustomDropdown } from "./CustomDropdown";
-import { CustomButtonStyles, treeFormStyles } from "../services/Styles";
-import GlobalContext from '../context/GlobalContext ';
+import { ScrollView, Text, TextInput, ToastAndroid, View } from 'react-native';
+import { Strings } from "../../services/Strings";
+import { Constants, Utils } from "../../services/Utils";
+import { CoordinateSetter } from "../CoordinateSetter";
+import { CustomDropdown } from "../CustomDropdown";
+import { CustomButtonStyles, treeFormStyles } from "../../services/Styles";
+import GlobalContext from '../../context/GlobalContext ';
 import { Button } from 'react-native-paper';
-import { DataService } from '../services/DataService';
-import { ImageContainer } from './ImageContainer';
-import { NewCustomDropdown } from './NewCustomDropdown';
+import { DataService } from '../../services/DataService';
+import { ImageContainer } from '../ImageContainer';
+import { NewCustomDropdown } from '../NewCustomDropdown';
+import { CreateTreeRequest, Tree } from '../../model/tree';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface TreeFormInputProps {
-    tree: any,
+    tree: Tree | null,
     changeMode: 'add' | 'edit',
-    onSubmit: (data: any) => void,
+    onSubmit: (data: Tree | CreateTreeRequest) => void,
     onCancel: () => void,
 }
 
 export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCancel, onSubmit }) => {
 
-    const [saplingId, setSaplingId] = useState('12345');
+    const [saplingId, setSaplingId] = useState('');
     const [lat, setlat] = useState(0);
     const [lng, setlng] = useState(0);
 
     const [image, setImage] = useState<any>(null);
-    const [showImage, setShowImage] = useState(false);
 
     const [plantTypes, setPlantTypes] = useState<any[]>([]);
     const [plots, setPlots] = useState<any[]>([]);
 
-    const [selectedPlantType, setSelectedPlantType] = useState(null);
-    const [selectedPlot, setSelectedPlot] = useState(null);
-
-    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedPlantType, setSelectedPlantType] = useState<any>(null);
+    const [selectedPlot, setSelectedPlot] = useState<any>(null);
+    const [userDetails, setUserDetails] = useState<any>(null);
 
     const treeStatusList = [
         { value: 'alive', name: 'Alive' },
@@ -51,14 +51,21 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     useEffect(() => {
         if (tree) {
             setSaplingId(tree.sapling_id);
-            setlat(tree.location.coordinates[1]);
-            setlng(tree.location.coordinates[0]);
+            if (tree.location) {
+                try {
+                    let location = JSON.parse(tree.location)
+                    if (location.coordinates && location.coordinates.length === 2) {
+                        setlat(location.coordinates[0]);
+                        setlng(location.coordinates[1]);
+                    }
+                } catch(err) {
+                    console.log(err);
+                }
+            }
             setTreeStatus(treeStatusList.find((item) => item.value === tree.tree_status) || treeStatusList[0]);
     
             if (tree.image) {
                 fetchImageData(tree.image);
-            } else {
-                setShowImage(false);
             }
         }
     }, [tree])
@@ -66,7 +73,6 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     const fetchImageData = async (imageUrl: string) => {
         const data = await DataService.fileURLToBase64(imageUrl);
         setImage({ name: imageUrl, data: data });
-        setShowImage(true);
     }
 
     useEffect(() => {
@@ -83,39 +89,64 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
         }
     }, [tree, plots])
 
-    const loadDataCallback = useCallback(async () => {
-        console.log('fetching data');
-        try {
-            let { treeTypes, plots } = await Utils.getLocalTreeTypesAndPlots();
-            if (treeTypes) setPlantTypes(treeTypes);
-            if (plots) setPlots(plots);
-        } catch (error: any) {
-            console.error(error);
-            const stackTrace = error.stack;
-            const errorLog = {
-                msg: 'happened while trying to fetch tree details from local db(loadDataCallback())',
-                error: JSON.stringify(error),
-                stackTrace: stackTrace,
-            };
-
-            await Utils.logException(JSON.stringify(errorLog));
-        }
-    }, []);
-
     useEffect(() => {
-        loadDataCallback();
+        setTimeout(async () => {
+            try {
+                const userData = await AsyncStorage.getItem(Constants.userDetailsKey)
+                if (userData) setUserDetails(JSON.parse(userData));
+                let { treeTypes, plots } = await Utils.getLocalTreeTypesAndPlots();
+                if (treeTypes) setPlantTypes(treeTypes);
+                if (plots) setPlots(plots);
+            } catch (error: any) {
+                console.error(error);
+                const stackTrace = error.stack;
+                const errorLog = {
+                    msg: 'happened while trying to fetch tree details from local db(loadDataCallback())',
+                    error: JSON.stringify(error),
+                    stackTrace: stackTrace,
+                };
+    
+                await Utils.logException(JSON.stringify(errorLog));
+            }
+        }, 1000);
     }, []);
+
+    const handleSubmit = () => {
+        if (!selectedPlantType || !selectedPlot) {
+            ToastAndroid.show("Please Select Plant type and plot", ToastAndroid.SHORT)
+            return;
+        }
+
+        let location = {
+            type: 'Point',
+            coordinates: [lat, lng]
+        }
+        const data = {
+            sapling_id: saplingId,
+            plant_type_id: selectedPlantType.id,
+            plot_id: selectedPlot.id,
+            planted_by: userDetails?.name,
+            tree_status: treeStatus.value
+        }
+
+        if (changeMode === 'add') onSubmit({ ...data, location: JSON.stringify(location)  } as CreateTreeRequest)
+        else if (tree) {
+            let newChanges = { ...tree, ...data, location: JSON.stringify(location) }
+            onSubmit(newChanges as Tree)
+        } 
+
+        onCancel()
+    }
 
     return (
-        <View>
-            <Text style={treeFormStyles.plotSapling}> Sapling: {saplingId} </Text>
+        <View style={{ marginBottom: 20, height: "90%" }}>
+            <Text style={treeFormStyles.plotSapling}> { changeMode === 'add' ? 'Add Tree' : 'Edit Sapling: ' + saplingId } </Text>
             <ScrollView
                 keyboardShouldPersistTaps='handled'
                 scrollEnabled={true}
-                style={{ ...treeFormStyles.detailsContainerOuter, marginBottom: 90, marginHorizontal: 0, }} >
+                style={{ ...treeFormStyles.detailsContainerOuter, marginBottom: 10, marginHorizontal: 0, }} >
                 <View style={{ margin: 4, borderRadius: 10 }}>
 
-                    
                     <View style={{ marginTop: 15 }}>
                         <Text style={ treeFormStyles.inputLabel }>Sapling Id:</Text>
                         <TextInput
@@ -168,12 +199,12 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
                     <View>
                         <Text style={ treeFormStyles.inputLabel }>Tree Image:</Text>
-                        <ImageContainer />
+                        <ImageContainer image={image} />
                     </View>
 
                     <View>
                         <Text style={ treeFormStyles.inputLabel }>User with Card:</Text>
-                        <ImageContainer />
+                        <ImageContainer image={image}/>
                     </View>
 
                     <View>
@@ -190,7 +221,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
                     <View>
                         <Text style={ treeFormStyles.inputLabel }>User Tree Image:</Text>
-                        <ImageContainer />
+                        <ImageContainer image={image}/>
                     </View>
 
 
@@ -211,8 +242,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                             </View>
                             <View style={CustomButtonStyles.buttonContainer}>
                                 <Button
-                                    onPress={() => {}}
-                                    //mode="contained"
+                                    onPress={handleSubmit}
                                     buttonColor='#1D4ED8'
                                     labelStyle={CustomButtonStyles.buttonLabel}
                                     style={CustomButtonStyles.button}

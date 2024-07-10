@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useContext, useEffect } from 'react';
-import { Alert, Platform, RootTagContext, TouchableOpacity } from 'react-native';
+import { Alert, Platform, RootTagContext, TouchableOpacity, SafeAreaView } from 'react-native';
 import { PERMISSIONS } from 'react-native-permissions';
 import { DrawerNavigator } from './components/DrawerNavigator';
 import LoadingScreen from './screens/LoadingScreen';
@@ -413,7 +413,6 @@ const App = () => {
           }} />
       </Stack.Navigator>
     </NavigationContainer>
-
   )
 };
 

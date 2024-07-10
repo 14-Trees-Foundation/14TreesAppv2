@@ -8,6 +8,7 @@ export class Strings {
     static screenNames = new LocalizedStrings({
         "en": {
             HomePage: "Home",
+            TreesPage: "Trees",
             AddTreeShift: "Add Tree",
             LocalDataView: "Local Data",
             LocalDataNavigator: "LocalDataNavigator",
@@ -30,6 +31,7 @@ export class Strings {
         },
         "mr": {
             HomePage: "मुख्य पृष्ठ",
+            TreesPage: "झाडे",
             AddTreeShift: "नवीन झाड जोडा",
             LocalDataView: "लोकल डेटा",
             LocalDataNavigator: "LocalDataNavigator",

@@ -73,7 +73,7 @@ export const ImageContainer: React.FC<ImageContainerInputProps> = ({ image, sapl
                             />
                         }
 
-                        {imageObj?.data && <TouchableOpacity style={treeFormStyles.imageDelete} onPress={() => {}}>
+                        {imageObj?.data && <TouchableOpacity style={treeFormStyles.imageDelete} onPress={() => {setImage(null)}}>
                             <Image
                                 source={require('../../assets/icondelete.png')} // Replace with your delete icon image
                                 style={treeFormStyles.deleteIcon} // Adjust the icon dimensions and margin
