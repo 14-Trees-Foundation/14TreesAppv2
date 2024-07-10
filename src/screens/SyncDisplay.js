@@ -10,6 +10,7 @@ import { Button } from 'react-native-paper';
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { LocalDatabase } from '../services/db/db';
 import { uploadUsersData } from '../services/sync/users';
+import { uploadTreeData} from '../services/sync/trees';
 
 const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setUsersCount) => {
   const lsdate = await Utils.getLastSyncDate();

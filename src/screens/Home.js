@@ -7,6 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { homeStyles } from '../services/Styles';
 import { LocalDatabase } from '../services/db/db';
 import { fetchAndStoreUsers } from '../services/sync/users';
+import { fetchAndStoreTrees } from '../services/sync/trees';
 
 const HomeScreen = ({ navigation }) => {
   const { langChanged, lightTheme } = useContext(GlobalContext);
@@ -22,6 +23,7 @@ const HomeScreen = ({ navigation }) => {
 
     const helperDataStatus = await Utils.fetchAndStoreHelperData();
     await fetchAndStoreUsers();
+    await fetchAndStoreTrees();
 
     if (helperDataStatus.helperDataUptoDate) {
       setDataUptoDate(true);
@@ -101,21 +103,21 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
         <TouchableOpacity
-           style={{...homeStyles.button(lightTheme),width: 170,}}
+          style={{ ...homeStyles.button(lightTheme), width: 170, }}
           onPress={fetchHelperDataAndShifts}>
           <View style={{ padding: 20, alignItems: 'center' }}>
             <Image
               source={require('../../assets/icon-fetch-data.png')}
               style={homeStyles.imageSpecs}
             />
-            <Text style={{...homeStyles.buttonText(lightTheme) ,marginTop: 5}}>
+            <Text style={{ ...homeStyles.buttonText(lightTheme), marginTop: 5 }}>
               {Strings.buttonLabels.FetchHelperData}
             </Text>
           </View>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={{...homeStyles.button(lightTheme),width: 170,}}
+          style={{ ...homeStyles.button(lightTheme), width: 170, }}
           onPress={() =>
             navigation.navigate(
               Strings.screenNames.getString('SyncDisplay', Strings.english),

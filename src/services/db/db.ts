@@ -1,6 +1,8 @@
 import { SQLiteDatabase, enablePromise, openDatabase } from 'react-native-sqlite-storage';
 import { UsersData } from './users';
 
+
+
 enablePromise(true);
 
 let dbConnection: SQLiteDatabase;
@@ -22,4 +24,6 @@ export class LocalDatabase {
         const connection = await getDBConnection();
         return new LocalDatabase(connection);
     }
+
+   
 }
