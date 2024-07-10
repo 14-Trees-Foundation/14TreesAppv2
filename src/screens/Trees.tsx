@@ -17,6 +17,7 @@ interface TreesInputProps {
 const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
 
     const { lightTheme } = useContext(GlobalContext);
+    const [stateChange, setStateChange] = useState(0);
     const [isFormVisible, setIsFormVisible] = useState(false);
     const [isInfoModalVisible, setInfoModalVisible] = useState(false);
     const [changeMode, setChangeModel] = useState<'add' | 'edit'>('add');
@@ -50,21 +51,22 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     }, [])
 
     useEffect(() => {
+        if (searchQuery.length !== 0) return;
         setTimeout(async () => {
             let resp = await localClient.trees.getTrees(page * 10, 10);
             if (page != 0) setTrees([...trees, ...resp]);
             else setTrees(resp)
 
         }, 1000)
-    }, [page])
+    }, [page, searchQuery, stateChange])
 
     useEffect(() => {
-        if (searchQuery.length < 3) return;
+        if (searchQuery.length < 1) return;
         setTimeout(async () => {
             let trees = await localClient.trees.searchTrees(searchQuery, 0, 20);
             setTrees(trees);
         }, 1000)
-    }, [searchQuery])
+    }, [searchQuery, stateChange])
 
     const handleSave = (data: Tree | CreateTreeRequest) => {
         setTimeout(async () => {
@@ -76,7 +78,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                 await localClient.trees.updateTree(data)
             };
 
-            setPage(0);
+            setStateChange(stateChange + 1);
         }, 1000)
 
     };
@@ -85,7 +87,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
         if (selectedTree) {
             setTimeout(async () => {
                 await localClient.trees.deleteTree(selectedTree.local_id);
-                setPage(0);
+                setStateChange(stateChange + 1);
             }, 1000)
         }
     }
