@@ -85,7 +85,6 @@ export function NewCustomDropdown<T>({ label, options, value, onChange, valueGet
                 style={{
                     height: 54,
                     fontFamily: 'Inter-Regular',
-                    fontStyle: "italic",
                     width: '93%',
                     borderWidth: 2,
                     borderColor: !isFocused?"#ccc":"black",

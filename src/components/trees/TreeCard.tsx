@@ -37,14 +37,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
+    color: 'black'
   },
   sub_fields: {
     fontSize: 16,
-    color: '#555',
+    color: 'black',
   },
   tree_location: {
     fontSize: 16,
-    color: '#555',
+    color: 'black',
   },
 });
 

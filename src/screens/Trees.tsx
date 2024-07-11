@@ -1,5 +1,5 @@
 import { View, Button, BackHandler, ScrollView, SafeAreaView, StyleSheet, TextInput } from "react-native";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import GlobalContext from "../context/GlobalContext ";
 
 import { DaoClient } from "../services/db/dao";
@@ -9,6 +9,7 @@ import TreeInfo from "../components/trees/TreeInfo";
 import { TouchableOpacity } from "react-native";
 import { CreateTreeRequest, Tree } from "../model/tree";
 import { Utils } from "../services/Utils";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface TreesInputProps {
     navigation: any
@@ -30,6 +31,15 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
 
     let localClient: DaoClient;
     DaoClient.authenticate().then((client) => { localClient = client; });
+
+    useFocusEffect(
+        useCallback(() => {
+          setIsFormVisible(false);
+    
+          return () => {
+          };
+        }, [])
+    );
 
     useEffect(() => {
         const backAction = () => {
@@ -104,6 +114,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                 <View style={styles.buttonAdd}>
                     <Button title="Add" onPress={() => {
                         setIsFormVisible(true);
+                        setSelectedTree(null);
                         setChangeModel('add');
                     }} />
                 </View>
@@ -161,6 +172,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         marginRight: 10,
+        color: 'black'
     },
     buttonAdd: {
         width: '20%',
