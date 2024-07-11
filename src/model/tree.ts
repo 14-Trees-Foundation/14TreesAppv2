@@ -40,6 +40,8 @@ export type CreateTreeRequest = {
     };
     planted_by: string;
     tree_status: 'alive' | 'dead' | 'lost';
+    assigned_at: string | null;
+    assigned_to: number | null;
 }
 
 export type TreeHelperDataResponse = {

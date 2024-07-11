@@ -476,6 +476,7 @@ export class Strings {
             SelectTreeType: "Select Tree Type",
             SelectPlot: "Select Plot",
             SelectTreeStatus: "Select Tree Status",
+            SelectUser: "Select User",
             //local data view
             UploadStatus: "Upload Status",
             TreeType: "Tree Type",
@@ -497,6 +498,7 @@ export class Strings {
             SelectTreeType: "झाडाचा प्रकार निवडा",
             SelectPlot: "प्लॉट निवडा",
             SelectTreeStatus: "झाडाची स्थिती निवडा",
+            SelectUser: "वापरकर्ता निवडा",
             //local data view
             UploadStatus: "अपलोड स्थिती",
             TreeType: "झाडाचा प्रकार",

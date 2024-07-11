@@ -6,6 +6,7 @@ import GlobalContext from '../context/GlobalContext ';
 import { useFocusEffect } from '@react-navigation/native';
 import { homeStyles } from '../services/Styles';
 import { fetchAndStoreTrees } from '../services/sync/tree';
+import { fetchAndStoreUsers } from '../services/sync/users';
 
 const HomeScreen = ({ navigation }) => {
   const { langChanged, lightTheme } = useContext(GlobalContext);
@@ -20,6 +21,9 @@ const HomeScreen = ({ navigation }) => {
     }
 
     const helperDataStatus = await Utils.fetchAndStoreHelperData();
+
+    await fetchAndStoreTrees();
+    await fetchAndStoreUsers();
 
     if (helperDataStatus.helperDataUptoDate) {
       setDataUptoDate(true);
@@ -36,7 +40,6 @@ const HomeScreen = ({ navigation }) => {
     await fetchHelperDataAndShifts();
     await Utils.fetchAndStoreShifts();
     await Utils.checkShiftsComplete();
-    await fetchAndStoreTrees();
   };
 
   useEffect(() => {

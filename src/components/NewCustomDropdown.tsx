@@ -9,15 +9,17 @@ interface CustomDropdownInputProps<T> {
     options: T[],
     value: T,
     onChange: (data: T | null) => void,
-    valueGetter: (data: T) => string
-    keyGetter: (data: T) => any
+    valueGetter: (data: T) => string,
+    keyGetter: (data: T) => any,
+    onSearch?: (str: string) => void,
 };
 
-export function NewCustomDropdown<T>({ label, options, value, onChange, valueGetter, keyGetter }: CustomDropdownInputProps<T>) {
+export function NewCustomDropdown<T>({ label, options, value, onChange, valueGetter, keyGetter, onSearch }: CustomDropdownInputProps<T>) {
     const [filteredOptions, setFilteredOptions] = useState(options);
     const [selectedItem, setSelectedItem] = useState<T | null>(null);
     const [clearButton, setClearButton] = useState(true);
     const [isFocused,setIsFocused] = useState(false)
+    const [searchTxt, setSearchTxt] = useState('')
 
     const { lightTheme } = useContext(GlobalContext);
 
@@ -32,13 +34,19 @@ export function NewCustomDropdown<T>({ label, options, value, onChange, valueGet
 
     }, [value])
 
-    const updateFilteredOptions = (text: string) => {
-        if (text.length > 0) {
-            setFilteredOptions(options.filter((option) => valueGetter(option).toLowerCase().includes(text.toLowerCase())))
-        }
-        else {
-            setFilteredOptions(options);
-        }
+    useEffect(() => {
+        setFilteredOptions(options);
+    }, [options])
+
+    useEffect(() => {
+        if (searchTxt.length === 0) setFilteredOptions(options);
+        if (onSearch === undefined) setFilteredOptions(options.filter((option) => valueGetter(option).toLowerCase().includes(searchTxt.toLowerCase())));
+        else onSearch(searchTxt);
+    }, [searchTxt])
+
+    const handleSearch = (text: string) => {
+        setSearchTxt(text);
+        setSelectedItem(null);
     }
     const [optionsVisible, setOptionsVisible] = useState(false);
 
@@ -47,6 +55,7 @@ export function NewCustomDropdown<T>({ label, options, value, onChange, valueGet
         onChange(item);
         setOptionsVisible(false);
         setSelectedItem(item);
+        setSearchTxt('');
         setClearButton(true);
     }
 
@@ -68,7 +77,7 @@ export function NewCustomDropdown<T>({ label, options, value, onChange, valueGet
                 }}
 
             >
-                <Text style={{ ...commonStyles.dropdownOptionsContent }}>{item.name}</Text>
+                <Text style={{ ...commonStyles.dropdownOptionsContent }}>{valueGetter(item)}</Text>
             </TouchableOpacity>
         );
     }
@@ -112,10 +121,10 @@ export function NewCustomDropdown<T>({ label, options, value, onChange, valueGet
                     fontWeight: value ? 'bold' : 'normal',
                     
                 }}
-                defaultValue={selectedItem ? valueGetter(selectedItem) : ''}
+                value={selectedItem ? valueGetter(selectedItem) : searchTxt}
                 placeholder={label}
                 placeholderTextColor={'black'}
-                onChangeText={updateFilteredOptions}
+                onChangeText={handleSearch}
                 onFocus={(e) => { setOptionsVisible(true) ;setIsFocused(true)}}
                 onBlur={() => {setIsFocused(false)}}
             />

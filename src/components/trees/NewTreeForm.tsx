@@ -12,6 +12,8 @@ import { ImageContainer } from '../ImageContainer';
 import { NewCustomDropdown } from '../NewCustomDropdown';
 import { CreateTreeRequest, Tree } from '../../model/tree';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { User } from '../../model/user';
+import { DaoClient } from '../../services/db/dao';
 
 interface TreeFormInputProps {
     tree: Tree | null,
@@ -30,6 +32,8 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
     const [plantTypes, setPlantTypes] = useState<any[]>([]);
     const [plots, setPlots] = useState<any[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
+    const [assignedTo, setAssignedTo] = useState<User | null>(null);
 
     const [selectedPlantType, setSelectedPlantType] = useState<any>(null);
     const [selectedPlot, setSelectedPlot] = useState<any>(null);
@@ -111,6 +115,16 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
         }, 1000);
     }, []);
 
+    const handleUserSearch = (txt: string) => {
+        if (txt.length > 0) {
+            setTimeout(async () => {
+                const daoClient = await DaoClient.authenticate();
+                const users = await daoClient.users.searchUsers(txt, 0, 20)
+                setUsers(users)
+            }, 100)
+        }
+    }
+
     const handleSubmit = () => {
         if (!selectedPlantType || !selectedPlot) {
             ToastAndroid.show("Please Select Plant type and plot", ToastAndroid.SHORT)
@@ -121,12 +135,16 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
             type: 'Point',
             coordinates: [lat, lng]
         }
+
+        console.log(userDetails);
         const data = {
             sapling_id: saplingId,
             plant_type_id: selectedPlantType.id,
             plot_id: selectedPlot.id,
             planted_by: userDetails?.name,
-            tree_status: treeStatus.value
+            tree_status: treeStatus.value,
+            assigned_to: assignedTo ? assignedTo.id : null,
+            assigned_at: assignedTo ? new Date().toISOString() : null,
         }
 
         if (changeMode === 'add') onSubmit({ ...data, location: JSON.stringify(location)  } as CreateTreeRequest)
@@ -210,12 +228,13 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                     <View>
                         <Text style={ treeFormStyles.inputLabel }>Assigned To:</Text>
                         <NewCustomDropdown
-                            value={treeStatus}
-                            options={treeStatusList}
-                            label={Strings.labels.SelectTreeStatus}
-                            onChange={(data) => { data && setTreeStatus(data); }}
-                            valueGetter={(data) => data.value}
-                            keyGetter={(data) => data.name}
+                            value={assignedTo}
+                            options={users}
+                            label={Strings.labels.SelectUser}
+                            onChange={(data) => { setAssignedTo(data); }}
+                            valueGetter={(data) => `${data?.name} (${data?.email})`}
+                            keyGetter={(data) => `${data?.local_id}`}
+                            onSearch={handleUserSearch}
                         />
                     </View>
 

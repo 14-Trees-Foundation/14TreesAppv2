@@ -80,6 +80,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
 
     const handleSave = (data: Tree | CreateTreeRequest) => {
         setTimeout(async () => {
+            console.log(data)
             if (changeMode === 'add') {
                 data = JSON.parse(JSON.stringify(data)) as CreateTreeRequest;
                 await localClient.trees.createTree(data)

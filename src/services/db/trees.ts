@@ -96,8 +96,8 @@ export class TreesDao {
         // TODO: Image storage
         const query = `
             INSERT INTO ${this.tableName}
-            (sapling_id, plant_type_id, plot_id, location, tree_status, change_type, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, 'add', ?, ?)
+            (sapling_id, plant_type_id, plot_id, location, tree_status, planted_by, assigned_to, assigned_at , change_type, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'add', ?, ?)
         `
 
         const timeStamp = new Date().toISOString();
@@ -107,6 +107,9 @@ export class TreesDao {
             data.plot_id,
             data.location,
             data.tree_status,
+            data.planted_by,
+            data.assigned_to,
+            data.assigned_at,
             timeStamp,
             timeStamp
         ]);
@@ -123,8 +126,8 @@ export class TreesDao {
         )
 
         if (response.rows.length === 1) {
-            const existingUser = response.rows.item(0) as Tree;
-            if (existingUser.change_type === 'add') {
+            const existingTree = response.rows.item(0) as Tree;
+            if (existingTree.change_type === 'add') {
                 changeType = 'add'
             }
         }
@@ -165,7 +168,7 @@ export class TreesDao {
         if (response.rows.length === 0) {
             // insert live tree
             await this.db.executeSql(
-                `INSERT INTO trees (
+                `INSERT INTO ${this.tableName} (
                     id,
                     sapling_id,
                     plant_type_id,
@@ -203,7 +206,7 @@ export class TreesDao {
                 ]
             )
         } else {
-            // update user
+            // update tree
             await this.db.executeSql(
                 `UPDATE ${this.tableName}
                 SET

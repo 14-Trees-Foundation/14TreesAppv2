@@ -290,6 +290,7 @@ export class Utils {
         // ])
         const daoClient = await DaoClient.authenticate();
         await daoClient.trees.createTable();
+        await daoClient.users.createTable();
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
         await this.localdb.createSaplingTbl();
@@ -1451,6 +1452,7 @@ export class Constants {
 
     // helpers data
     static lastTreesFetchedAt = 'last_trees_fetched_at'
+    static lastUsersFetchedAt = 'last_users_fetched_at'
 }
 
 export const getImageSourceObject = (src) => {
