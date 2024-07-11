@@ -34,7 +34,7 @@ export type CreateTreeRequest = {
     plant_type_id: number;
     plot_id: number;
     location: string; // { type: 'Point', coordinates: number[] }
-    image: {
+    tree_image: {
         name: string,
         data: string,
     };

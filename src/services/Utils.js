@@ -291,6 +291,7 @@ export class Utils {
         const daoClient = await DaoClient.authenticate();
         await daoClient.trees.createTable();
         await daoClient.users.createTable();
+        await daoClient.treeImages.createTable();
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
         await this.localdb.createSaplingTbl();

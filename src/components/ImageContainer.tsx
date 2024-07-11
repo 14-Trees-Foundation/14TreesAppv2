@@ -8,29 +8,27 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { Strings } from "../services/Strings";
 
 interface ImageContainerInputProps {
-    saplingId?: string,
     image?: {
         name: string,
         data: string
-    }
+    },
+    onChange: (data: any) => void
 }
 
-export const ImageContainer: React.FC<ImageContainerInputProps> = ({ image, saplingId }) => {
+export const ImageContainer: React.FC<ImageContainerInputProps> = ({ image, onChange }) => {
 
     const [ modalVisible, setModalVisible ] = useState(false);
-    const [ imageObj, setImage ] = useState<any>(image);
-
-    useEffect(() => {
-        setImage(image);
-    }, [image])
 
     const pickImage = async (selectionId: number) => {
         setModalVisible(false);
         Utils.startTask();
         let newImage = await Utils.getImage(true, selectionId);
-        if (newImage === undefined) return;
-        newImage = await Utils.formatImageForSapling(newImage, saplingId);
-        setImage(newImage);
+        if (!newImage) return;
+        const image = {
+            name: `${newImage?.meta.capturetimestamp}.jpg`,
+            data: newImage.data
+        }
+        onChange(image);
         Utils.stopTask();
     };
 
@@ -49,7 +47,7 @@ export const ImageContainer: React.FC<ImageContainerInputProps> = ({ image, sapl
                         }}
                     >
 
-                        {!imageObj?.data ? (
+                        {!image?.data ? (
                             <View style={{ ...treeFormModalStyles.cameraIcon, }}>
                                 <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', margin: 10 }}>
                                     <Image
@@ -68,12 +66,12 @@ export const ImageContainer: React.FC<ImageContainerInputProps> = ({ image, sapl
                             </View>
                         )
                             : <Image
-                                source={{ uri: `data:image/jpeg;base64,${imageObj.data}` }}
+                                source={{ uri: `data:image/jpeg;base64,${image.data}` }}
                                 style={{...treeFormStyles.imageExists}}
                             />
                         }
 
-                        {imageObj?.data && <TouchableOpacity style={treeFormStyles.imageDelete} onPress={() => {setImage(null)}}>
+                        {image?.data && <TouchableOpacity style={treeFormStyles.imageDelete} onPress={() => {onChange(null)}}>
                             <Image
                                 source={require('../../assets/icondelete.png')} // Replace with your delete icon image
                                 style={treeFormStyles.deleteIcon} // Adjust the icon dimensions and margin

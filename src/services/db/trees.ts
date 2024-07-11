@@ -93,7 +93,6 @@ export class TreesDao {
     }
 
     createTree = async (data: CreateTreeRequest) => {
-        // TODO: Image storage
         const query = `
             INSERT INTO ${this.tableName}
             (sapling_id, plant_type_id, plot_id, location, tree_status, planted_by, assigned_to, assigned_at , change_type, created_at, updated_at)
@@ -101,7 +100,7 @@ export class TreesDao {
         `
 
         const timeStamp = new Date().toISOString();
-        const [results] = await this.db.executeSql(query, [
+        await this.db.executeSql(query, [
             data.sapling_id, 
             data.plant_type_id,
             data.plot_id,
@@ -113,7 +112,6 @@ export class TreesDao {
             timeStamp,
             timeStamp
         ]);
-        console.log(JSON.stringify(results))
     }
 
     updateTree = async (data: Tree) => {

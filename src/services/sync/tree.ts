@@ -4,6 +4,7 @@ import { DaoClient } from "../db/dao";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Constants } from "../Utils";
 import { Tree } from "../../model/tree";
+import { TreeImage } from "../../model/tree_image";
 
 export const fetchAndStoreTrees = async () => {
     // fetch data from the backend
@@ -32,46 +33,62 @@ export const fetchAndStoreTrees = async () => {
 export const uploadTreesData = async () => {
     const daoClient = await DaoClient.authenticate();
     const trees = await daoClient.trees.getTrees(0, -1, undefined, true);
+    const images = await daoClient.treeImages.getTreeImages('tree_image', false)
 
     const newTrees = trees.filter(tree => tree.change_type === 'add');
     const editedTrees = trees.filter(tree => tree.change_type === 'edit');
     const deletedTrees = trees.filter(tree => tree.change_type === 'delete');
-    console.log(deletedTrees)
+
     await uploadDeletedTreesData(deletedTrees);
     deletedTrees.forEach(async (tree) => {
         await daoClient.trees.deleteLocalTree(tree.local_id);
     })
 
-    await uploadEditedTreesData(editedTrees);
+    await uploadEditedTreesData(editedTrees, images);
     editedTrees.forEach(async (tree) => {
         await daoClient.trees.updateTreeUploadStatus(tree.local_id);
     })
 
-    await uploadNewTreesData(newTrees);
+    await uploadNewTreesData(newTrees, images);
     newTrees.forEach(async (tree) => {
         await daoClient.trees.deleteLocalTree(tree.local_id);
     })
+
+    for (let image of images) {
+        await daoClient.treeImages.markImageUploaded(image.local_id);
+    }
+    await daoClient.treeImages.deleteUploadedImages();
 }
 
-export const uploadNewTreesData = async (trees: Tree[]) => {
+export const uploadNewTreesData = async (trees: Tree[], images: TreeImage[]) => {
     let apiClient = new ApiClient()
     let data = trees.map(tree => {
         const location = tree.location ? JSON.parse(tree.location) : { coordinates: [0, 0] };
-        return { ...tree, coordinates: location.coordinates}
+        let treeReq: any = { ...tree, coordinates: location.coordinates}
+
+        const image = images.find(image => image.sapling_id === tree.sapling_id)
+        if (image) treeReq = { ...treeReq, images: [{ name: image.name, data: image.data }] }
+        return treeReq
     })
+
     for (let i = 0; i < data.length; i += 5) {
         await apiClient.trees.uploadTrees(data.slice(i, i + 5));
     }
 }
 
-export const uploadEditedTreesData = async (trees: Tree[]) => {
+export const uploadEditedTreesData = async (trees: Tree[], images: TreeImage[]) => {
     let apiClient = new ApiClient()
     let data = trees.map(tree => {
         const location = tree.location ? JSON.parse(tree.location) : null;
-        return { ...tree, location: location}
+        let treeReq: any = { tree: {...tree, location: location} }
+
+        const image = images.find(image => image.sapling_id === tree.sapling_id)
+        if (image) treeReq = { ...treeReq, new_image: { name: image.name, data: image.data } }
+        return treeReq
     })
+
     for (let i = 0; i < data.length; i++) {
-        await apiClient.trees.updateTree({ tree: data[i] });
+        await apiClient.trees.updateTree(data[i]);
     }
 }
 

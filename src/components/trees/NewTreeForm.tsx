@@ -18,7 +18,7 @@ import { DaoClient } from '../../services/db/dao';
 interface TreeFormInputProps {
     tree: Tree | null,
     changeMode: 'add' | 'edit',
-    onSubmit: (data: Tree | CreateTreeRequest) => void,
+    onSubmit: (data: Tree | CreateTreeRequest, image?: any) => void,
     onCancel: () => void,
 }
 
@@ -29,6 +29,8 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     const [lng, setlng] = useState(0);
 
     const [image, setImage] = useState<any>(null);
+    const [userTreeImage, setUserTreeImage] = useState<any>(null);
+    const [userCardImage, setUserCardImage] = useState<any>(null);
 
     const [plantTypes, setPlantTypes] = useState<any[]>([]);
     const [plots, setPlots] = useState<any[]>([]);
@@ -67,10 +69,21 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                 }
             }
             setTreeStatus(treeStatusList.find((item) => item.value === tree.tree_status) || treeStatusList[0]);
-    
+
             if (tree.image) {
                 fetchImageData(tree.image);
+            } else {
+                setTimeout(async () => {
+                    const daoClient = await DaoClient.authenticate();
+                    const resp = await daoClient.treeImages.getTreeImagesForSaplingId(tree.sapling_id);
+                    if (resp) {
+                        setImage(resp.tree_image);
+                        setUserTreeImage(resp.user_tree_image);
+                        setUserCardImage(resp.user_card_image);
+                    }
+                })
             }
+
         }
     }, [tree])
 
@@ -92,6 +105,17 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
             setSelectedPlot(plot)
         }
     }, [tree, plots])
+
+    useEffect(() => {
+        if (assignedTo) return;
+        setTimeout( async () => {
+                if (tree && tree.assigned_to) {
+                const daoClient = await DaoClient.authenticate();
+                const user = await daoClient.users.getUserByLiveId(tree.assigned_to)
+                setAssignedTo(user)
+            }
+        }, 100)
+    }, [tree, users])
 
     useEffect(() => {
         setTimeout(async () => {
@@ -136,7 +160,6 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
             coordinates: [lat, lng]
         }
 
-        console.log(userDetails);
         const data = {
             sapling_id: saplingId,
             plant_type_id: selectedPlantType.id,
@@ -147,10 +170,14 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
             assigned_at: assignedTo ? new Date().toISOString() : null,
         }
 
-        if (changeMode === 'add') onSubmit({ ...data, location: JSON.stringify(location)  } as CreateTreeRequest)
+        if (changeMode === 'add') {
+            let changes = { ...data, location: JSON.stringify(location)  } as CreateTreeRequest;
+            if (image) changes.tree_image = { name: image.name, data: image.data }
+            onSubmit(changes, image)
+        }
         else if (tree) {
             let newChanges = { ...tree, ...data, location: JSON.stringify(location) }
-            onSubmit(newChanges as Tree)
+            onSubmit(newChanges as Tree, image)
         } 
 
         onCancel()
@@ -217,13 +244,13 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
                     <View>
                         <Text style={ treeFormStyles.inputLabel }>Tree Image:</Text>
-                        <ImageContainer image={image} />
+                        <ImageContainer image={image} onChange={image => { setImage(image) }}/>
                     </View>
 
-                    <View>
+                    {/* <View>
                         <Text style={ treeFormStyles.inputLabel }>User with Card:</Text>
-                        <ImageContainer image={image}/>
-                    </View>
+                        <ImageContainer image={userCardImage} onChange={image => { setUserCardImage(image) }}/>
+                    </View> */}
 
                     <View>
                         <Text style={ treeFormStyles.inputLabel }>Assigned To:</Text>
@@ -238,10 +265,10 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                         />
                     </View>
 
-                    <View>
+                    {/* <View>
                         <Text style={ treeFormStyles.inputLabel }>User Tree Image:</Text>
-                        <ImageContainer image={image}/>
-                    </View>
+                        <ImageContainer image={userTreeImage} onChange={image => { setUserTreeImage(image) }}/>
+                    </View> */}
 
 
                     <View style={CustomButtonStyles.container}>

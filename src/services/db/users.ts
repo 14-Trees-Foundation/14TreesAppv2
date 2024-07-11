@@ -263,4 +263,14 @@ export class UsersDao {
         return users;
     }
 
+    getUserByLiveId = async (id: number) => {
+        const query =  `
+            SELECT * FROM ${this.tableName} 
+            WHERE id = ?;
+        `
+        const [results] = await this.db.executeSql(query, [id]);
+        if (results.rows.length === 1) return results.rows.item(0) as User;
+        return null;
+    }
+
 };

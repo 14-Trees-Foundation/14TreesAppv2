@@ -35,7 +35,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     useFocusEffect(
         useCallback(() => {
           setIsFormVisible(false);
-    
+          setStateChange(stateChange + 1);
           return () => {
           };
         }, [])
@@ -78,9 +78,9 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
         }, 1000)
     }, [searchQuery, stateChange])
 
-    const handleSave = (data: Tree | CreateTreeRequest) => {
+    const handleSave = (data: Tree | CreateTreeRequest, image?: any) => {
         setTimeout(async () => {
-            console.log(data)
+
             if (changeMode === 'add') {
                 data = JSON.parse(JSON.stringify(data)) as CreateTreeRequest;
                 await localClient.trees.createTree(data)
@@ -88,6 +88,17 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                 data = JSON.parse(JSON.stringify(data)) as Tree;
                 await localClient.trees.updateTree(data)
             };
+
+            if (image) {
+                await localClient.treeImages.upsertTreeImage({ 
+                    name: image.name, 
+                    data: image.data,
+                    sapling_id: data.sapling_id,
+                    type: 'tree_image',
+                    is_active: null,
+                    user_id: null,
+                })
+            }
 
             setStateChange(stateChange + 1);
         }, 1000)
