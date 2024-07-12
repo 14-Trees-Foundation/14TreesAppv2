@@ -229,7 +229,8 @@ export const DrawerNavigator = () => {
                 }}
             />
 
-            {isAdmin && (
+            {/* Hidden Screen */}
+            {isAdmin && false && (
                 <Drawer.Screen
                     name={Strings.screenNames.getString('EditTree', Strings.english)}
                     component={EditTreeScreen}
@@ -269,7 +270,9 @@ export const DrawerNavigator = () => {
                     }}
                 />
             )}
-            {isAdmin && (
+
+            {/* Hidden Screen */}
+            {isAdmin && false && (
                 <Drawer.Screen
                     name={Strings.screenNames.getString('VerifyUsers', Strings.english)}
                     component={VerifyusersScreen}

@@ -119,7 +119,6 @@ export const commonStyles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     color: 'black',
     textAlign: 'center',
-    fontWeight: 'bold',
     fontSize: 20,
   },
   defaultButtonTextStyle: {
@@ -443,6 +442,7 @@ export const customDropdownStyles = StyleSheet.create({
     top: 14,
     right: 29,
     zIndex: 1,
+    opacity: 0.7,
   },
 });
 
@@ -687,12 +687,12 @@ export const treeFormStyles = StyleSheet.create({
     marginTop: 25,
     fontWeight: '300',
   },
-  textInput: (lightTheme, saplingId) => ({
+  textInput: (lightTheme) => ({
     ...commonStyles.txtInput,
     color: lightTheme ? '#333' : 'black',
     fontSize: 15,
     borderRadius: 13,
-    fontWeight: saplingId ? '800' : 'normal',
+    fontWeight: 'normal',
   }),
   inputLabel: {
     ...commonStyles.text4,

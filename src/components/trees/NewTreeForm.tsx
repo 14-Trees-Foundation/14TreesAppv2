@@ -184,19 +184,19 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     }
 
     return (
-        <View style={{ marginBottom: 20, height: "90%" }}>
+        <View style={{ height: "97%" }}>
             <Text style={treeFormStyles.plotSapling}> { changeMode === 'add' ? 'Add Tree' : 'Edit Sapling: ' + saplingId } </Text>
             <ScrollView
                 keyboardShouldPersistTaps='handled'
                 scrollEnabled={true}
-                style={{ ...treeFormStyles.detailsContainerOuter, marginBottom: 10, marginHorizontal: 0, }} >
+                style={{ ...treeFormStyles.detailsContainerOuter, marginHorizontal: 0, }} >
                 <View style={{ margin: 4, borderRadius: 10 }}>
 
                     <View style={{ marginTop: 15 }}>
                         <Text style={ treeFormStyles.inputLabel }>Sapling Id:</Text>
                         <TextInput
                             defaultValue={saplingId}
-                            style={treeFormStyles.textInput(lightTheme, saplingId)}
+                            style={treeFormStyles.textInput(lightTheme)}
                             placeholder={Strings.labels.SaplingId}
                             placeholderTextColor={'black'}
                             onChangeText={(text) => { setSaplingId(text) }}
@@ -205,31 +205,42 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
                     <View>
                         <Text style={ treeFormStyles.inputLabel }>Plant Type:</Text>
-                        <CustomDropdown
-                            initItem={selectedPlantType}
-                            items={plantTypes}
-                            label={Strings.labels.SelectTreeType}
-                            onSelectItem={setSelectedPlantType}
-                        />
+                        <View style={{ paddingLeft: 12, alignItems: 'center', width: '96%' }}>
+                            <NewCustomDropdown
+                                value={selectedPlantType}
+                                options={plantTypes}
+                                label={Strings.labels.SelectTreeType}
+                                onChange={(data) => { data && setSelectedPlantType(data); }}
+                                valueGetter={(data) => data.name}
+                                keyGetter={(data) => data.value}
+                            />
+                        </View>
                     </View>
                     <View>
                         <Text style={ treeFormStyles.inputLabel }>Plot:</Text>
-                        <CustomDropdown
-                            initItem={selectedPlot}
-                            items={plots}
-                            label={Strings.labels.SelectPlot}
-                            onSelectItem={setSelectedPlot}
-
-                        />
+                        <View style={{ paddingLeft: 12, alignItems: 'center', width: '96%' }}>
+                            <NewCustomDropdown
+                                value={selectedPlot}
+                                options={plots}
+                                label={Strings.labels.SelectPlot}
+                                onChange={(data) => { data && setSelectedPlot(data); }}
+                                valueGetter={(data) => data.name}
+                                keyGetter={(data) => data.value}
+                            />
+                        </View>
                     </View>
                     <View>
                         <Text style={ treeFormStyles.inputLabel }>Tree Status:</Text>
-                        <CustomDropdown
-                            initItem={treeStatus}
-                            items={treeStatusList}
-                            label={Strings.labels.SelectTreeStatus}
-                            onSelectItem={setTreeStatus}
-                        />
+                        <View style={{ paddingLeft: 12, alignItems: 'center', width: '96%' }}>
+                            <NewCustomDropdown
+                                value={treeStatus}
+                                options={treeStatusList}
+                                label={Strings.labels.SelectTreeStatus}
+                                onChange={(data) => { data && setTreeStatus(data); }}
+                                valueGetter={(data) => data.name}
+                                keyGetter={(data) => data.value}
+                            />
+                        </View>
                     </View>
 
                     <View style={{ width: '100%', marginTop: 0 }}>
@@ -254,15 +265,17 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
                     <View>
                         <Text style={ treeFormStyles.inputLabel }>Assigned To:</Text>
-                        <NewCustomDropdown
-                            value={assignedTo}
-                            options={users}
-                            label={Strings.labels.SelectUser}
-                            onChange={(data) => { setAssignedTo(data); }}
-                            valueGetter={(data) => `${data?.name} (${data?.email})`}
-                            keyGetter={(data) => `${data?.local_id}`}
-                            onSearch={handleUserSearch}
-                        />
+                        <View style={{ paddingLeft: 12, alignItems: 'center', width: '96%' }}>
+                            <NewCustomDropdown
+                                value={assignedTo}
+                                options={users}
+                                label={Strings.labels.SelectUser}
+                                onChange={(data) => { setAssignedTo(data); }}
+                                valueGetter={(data) => `${data?.name} (${data?.email})`}
+                                keyGetter={(data) => `${data?.local_id}`}
+                                onSearch={handleUserSearch}
+                            />
+                        </View>
                     </View>
 
                     {/* <View>

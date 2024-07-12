@@ -57,11 +57,13 @@ export class TreesDao {
 
 
     // Data manipulation operations
-    getTrees = async (offset: number = 0, limit: number = 10, isUploaded?: boolean, isDeleted: boolean = false) => {
+    getTrees = async (offset: number = 0, limit: number = 10, isUploaded?: boolean, isDeleted: boolean = false, plotId?: number) => {
         const trees: Tree[] = []
         const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
         const query = `SELECT * FROM ${this.tableName}
-            WHERE 1=1 ${isDeleted ? '' : ` AND change_type != 'delete'`} ${isUploaded !== undefined ? 'AND ' + whereCondition : ""}
+            WHERE 1=1 ${isDeleted ? '' : ` AND change_type != 'delete'`} 
+            ${isUploaded !== undefined ? 'AND ' + whereCondition : ""}
+            ${plotId !== undefined ? `AND plot_id = ${plotId}` : ""}
             ORDER BY local_id DESC 
             ${limit < 0 ? '' : `LIMIT ${limit} OFFSET ${offset}`};
         `
@@ -306,11 +308,12 @@ export class TreesDao {
         return tree_ids;
     }
 
-    searchTrees = async (searchStr: string, offset: number, limit: number) => {
+    searchTrees = async (searchStr: string, offset: number, limit: number, plotId?: number) => {
         let trees: Tree[] = [];
         const query =  `
             SELECT * FROM ${this.tableName} 
             WHERE change_type != 'delete' AND sapling_id LIKE ?
+            ${plotId !== undefined ? `AND plot_id = ${plotId}` : ''}
             ORDER BY updated_at DESC
             LIMIT ? OFFSET ?;
         `

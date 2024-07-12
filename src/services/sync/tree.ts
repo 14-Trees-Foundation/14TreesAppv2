@@ -12,22 +12,28 @@ export const fetchAndStoreTrees = async () => {
     const daoClient = await DaoClient.authenticate();
 
     const treeIds = await daoClient.trees.getLiveTreeIds()
-    const timestamp = await AsyncStorage.getItem(Constants.lastTreesFetchedAt) || '2024-07-08T00:00:00Z'
+    const timestamp = await AsyncStorage.getItem(Constants.lastTreesFetchedAt) || '2020-01-01T00:00:00Z'
 
-    const response = await apiClient.trees.fetchChanges(timestamp, treeIds)
-    const trees = response.trees;
+    try {
+        const now = new Date().toISOString();
+        const response = await apiClient.trees.fetchChanges(timestamp, treeIds)
+        const trees = response.trees;
+        
+        // upload trees in local db
+        for (const tree of trees) {
+            tree.location = tree.location ? JSON.stringify(tree.location) : null;
+            await daoClient.trees.upsertLiveTreeIntoLocalDb(tree);
+        }
     
-    // upload trees in local db
-    for (const tree of trees) {
-        tree.location = tree.location ? JSON.stringify(tree.location) : null;
-        await daoClient.trees.upsertLiveTreeIntoLocalDb(tree);
+        // delete trees in local db
+        for (const treeId of response.deleted_tree_ids) {
+            await daoClient.trees.deleteLiveTreeFromLocalDb(treeId);
+        }
+        await AsyncStorage.setItem(Constants.lastTreesFetchedAt, now);
+        console.log('Trees fetch Done')
+    } catch(err: any) {
+        console.log('Inside fetchAndStoreTrees:', err)
     }
-
-    // delete trees in local db
-    for (const treeId of response.deleted_tree_ids) {
-        await daoClient.trees.deleteLiveTreeFromLocalDb(treeId);
-    }
-    console.log('Done')
 }
 
 export const uploadTreesData = async () => {

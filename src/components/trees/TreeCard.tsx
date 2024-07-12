@@ -23,7 +23,7 @@ const TreeCard: React.FC<TreeCardInputProps> = ({ tree, plantTypeName, plotName 
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#dff0d8', // Light green color
-    width: '95%',
+    width: '100%',
     padding: 10,
     marginTop: 10,
     borderRadius: 10,

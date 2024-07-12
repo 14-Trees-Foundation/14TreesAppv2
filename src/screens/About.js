@@ -21,7 +21,7 @@ const About = ({ navigation }) => {
                 style={aboutStyles.appName}>
                 Sapling Upload App
             </Text>
-            <Text style={aboutStyles.text}>Version 2.4.1</Text>
+            <Text style={aboutStyles.text}>Version 2.4.2</Text>
             <View>
                 <Image
                     source={require('../../assets/logo.png')}

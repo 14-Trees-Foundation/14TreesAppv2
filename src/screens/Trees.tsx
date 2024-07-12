@@ -1,4 +1,4 @@
-import { View, Button, BackHandler, ScrollView, SafeAreaView, StyleSheet, TextInput } from "react-native";
+import { View, Button, BackHandler, ScrollView, SafeAreaView, StyleSheet, TextInput, Text } from "react-native";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import GlobalContext from "../context/GlobalContext ";
 
@@ -10,6 +10,8 @@ import { TouchableOpacity } from "react-native";
 import { CreateTreeRequest, Tree } from "../model/tree";
 import { Utils } from "../services/Utils";
 import { useFocusEffect } from "@react-navigation/native";
+import { NewCustomDropdown } from "../components/NewCustomDropdown";
+import { Strings } from "../services/Strings";
 
 interface TreesInputProps {
     navigation: any
@@ -28,6 +30,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     const [trees, setTrees] = useState<Tree[]>([]);
     const [plantTypes, setPlantTypes] = useState<any[]>([]);
     const [plots, setPlots] = useState<any[]>([]);
+    const [selectedPlot, setSelectedPlot] = useState<any>(null);
 
     let localClient: DaoClient;
     DaoClient.authenticate().then((client) => { localClient = client; });
@@ -63,20 +66,20 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     useEffect(() => {
         if (searchQuery.length !== 0) return;
         setTimeout(async () => {
-            let resp = await localClient.trees.getTrees(page * 10, 10);
+            let resp = await localClient.trees.getTrees(page * 10, 10, undefined, false, selectedPlot?.id);
             if (page != 0) setTrees([...trees, ...resp]);
             else setTrees(resp)
 
         }, 1000)
-    }, [page, searchQuery, stateChange])
+    }, [page, searchQuery, stateChange, selectedPlot])
 
     useEffect(() => {
         if (searchQuery.length < 1) return;
         setTimeout(async () => {
-            let trees = await localClient.trees.searchTrees(searchQuery, 0, 20);
+            let trees = await localClient.trees.searchTrees(searchQuery, 0, 20, selectedPlot?.id);
             setTrees(trees);
         }, 1000)
-    }, [searchQuery, stateChange])
+    }, [searchQuery, stateChange, selectedPlot])
 
     const handleSave = (data: Tree | CreateTreeRequest, image?: any) => {
         setTimeout(async () => {
@@ -116,7 +119,21 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <View style={styles.header}>
+            {!isFormVisible && <View style={{ height: 'auto', alignItems: 'center', width: "96%"}}>
+                <View style={{ width: '100%', alignItems: 'flex-start', marginBottom: 5, marginTop: 15}}>
+                    <Text>Selected Plot:</Text>
+                </View>
+                    <NewCustomDropdown 
+                        label={Strings.labels.SelectPlot}
+                        options={plots}
+                        value={selectedPlot}
+                        onChange={setSelectedPlot}
+                        valueGetter={(data) => data.name}
+                        keyGetter={(data) => data.id}
+                        scrollable={true}
+                    />
+            </View>}
+            {!isFormVisible && <View style={styles.header}>
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Search"
@@ -130,10 +147,10 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                         setChangeModel('add');
                     }} />
                 </View>
-            </View>
-            <ScrollView contentContainerStyle={styles.scrollView} >
+            </View>}
+            {!isFormVisible && <ScrollView style={styles.scrollView} >
                 {trees.map((tree, index) => (
-                    <TouchableOpacity style={{ width: '100%' }} key={index} onPress={() => {
+                    <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.5} key={index} onPress={() => {
                         setSelectedTree(tree);
                         setInfoModalVisible(true);
                     }}>
@@ -144,7 +161,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                         />
                     </TouchableOpacity>
                 ))}
-            </ScrollView>
+            </ScrollView>}
 
             {isFormVisible && <TreeForm
                 changeMode={changeMode}
@@ -169,12 +186,13 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
+        alignItems: 'center'
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 10,
-        height: 80,
+        height: 50,
+        width: '95%'
     },
     searchInput: {
         flex: 1,
@@ -182,7 +200,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: 5,
-        padding: 10,
         marginRight: 10,
         color: 'black'
     },
@@ -192,9 +209,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     scrollView: {
-        flexGrow: 1,
-        padding: 5,
-        alignItems: 'center',
+        flex: 1,
+        width: '95%'
     },
     modal: {
         justifyContent: 'center',
