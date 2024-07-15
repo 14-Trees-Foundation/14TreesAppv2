@@ -11,24 +11,35 @@ export const fetchAndStoreTrees = async () => {
     const apiClient = new ApiClient();
     const daoClient = await DaoClient.authenticate();
 
-    const treeIds = await daoClient.trees.getLiveTreeIds()
+    let treeIds = await daoClient.trees.getLiveTreeIds()
     const timestamp = await AsyncStorage.getItem(Constants.lastTreesFetchedAt) || '2020-01-01T00:00:00Z'
 
     try {
         const now = new Date().toISOString();
-        const response = await apiClient.trees.fetchChanges(timestamp, treeIds)
-        const trees = response.trees;
+
+        let offset: number = 0;
+        while (true) {
+            const response = await apiClient.trees.fetchChanges(timestamp, treeIds, offset)
+            const trees = response.trees;
+            
+            // upload trees in local db
+            for (const tree of trees) {
+                tree.location = tree.location ? JSON.stringify(tree.location) : null;
+                tree.tags = tree.tags ? JSON.stringify(tree.tags) : null;
+                tree.memory_images = tree.memory_images ? JSON.stringify(tree.memory_images) : null;
+                await daoClient.trees.upsertLiveTreeIntoLocalDb(tree);
+            }
         
-        // upload trees in local db
-        for (const tree of trees) {
-            tree.location = tree.location ? JSON.stringify(tree.location) : null;
-            await daoClient.trees.upsertLiveTreeIntoLocalDb(tree);
+            // delete trees in local db
+            for (const treeId of response.deleted_tree_ids) {
+                await daoClient.trees.deleteLiveTreeFromLocalDb(treeId);
+            }
+
+            treeIds = []
+            offset += trees.length;
+            if (offset >= response.total) break;
         }
-    
-        // delete trees in local db
-        for (const treeId of response.deleted_tree_ids) {
-            await daoClient.trees.deleteLiveTreeFromLocalDb(treeId);
-        }
+
         await AsyncStorage.setItem(Constants.lastTreesFetchedAt, now);
         console.log('Trees fetch Done')
     } catch(err: any) {

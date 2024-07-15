@@ -121,7 +121,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
         <SafeAreaView style={styles.safeArea}>
             {!isFormVisible && <View style={{ height: 'auto', alignItems: 'center', width: "96%"}}>
                 <View style={{ width: '100%', alignItems: 'flex-start', marginBottom: 5, marginTop: 15}}>
-                    <Text>Selected Plot:</Text>
+                    <Text style={{ color: 'black' }}>Selected Plot:</Text>
                 </View>
                     <NewCustomDropdown 
                         label={Strings.labels.SelectPlot}
@@ -137,6 +137,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Search"
+                    placeholderTextColor={'black'}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                 />
@@ -198,7 +199,7 @@ const styles = StyleSheet.create({
         flex: 1,
         width: '80%',
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: 'black',
         borderRadius: 5,
         marginRight: 10,
         color: 'black'

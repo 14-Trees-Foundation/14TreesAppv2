@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Text, Image, View, BackHandler, StyleSheet } from 'react-native';
 import { aboutStyles } from '../services/Styles';
+import { APP_VERSION } from '../constants/constants';
 
 const About = ({ navigation }) => {
 
@@ -19,9 +20,9 @@ const About = ({ navigation }) => {
             style={aboutStyles.outerView}>
             <Text
                 style={aboutStyles.appName}>
-                Sapling Upload App
+                14Trees Onsite App
             </Text>
-            <Text style={aboutStyles.text}>Version 2.4.2</Text>
+            <Text style={aboutStyles.text}>Version {APP_VERSION}</Text>
             <View>
                 <Image
                     source={require('../../assets/logo.png')}

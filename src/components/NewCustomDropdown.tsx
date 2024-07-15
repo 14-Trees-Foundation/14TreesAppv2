@@ -100,31 +100,6 @@ export function NewCustomDropdown<T>({ label, options, value, onChange, valueGet
         onChange(null);
     };
 
-    const ListHeader = () => (
-        <View style={{
-            flexDirection: 'row',
-            alignContent: 'center',
-            alignItems: 'center',
-            borderColor: '#B8B8B8',
-            borderWidth: 0.2,
-            padding: 10,
-        }}>
-          <Text style={commonStyles.dropdownOptionsContent}>List Header</Text>
-        </View>
-      );
-      
-      const ListFooter = () => (
-        <View style={{
-            flexDirection: 'row',
-            alignContent: 'center',
-            alignItems: 'center',
-            borderColor: '#B8B8B8',
-            borderWidth: 0.2,
-            padding: 10,
-        }}>
-          <Text style={commonStyles.dropdownOptionsContent}>List Footer</Text>
-        </View>
-      );
 
     return (
 

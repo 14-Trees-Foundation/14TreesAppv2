@@ -45,6 +45,7 @@ export type CreateTreeRequest = {
 }
 
 export type TreeHelperDataResponse = {
+    total: number,
     trees: Tree[],
     deleted_tree_ids: number[]
 }
