@@ -302,7 +302,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                     </View>
 
 
-                    <View style={{ width: '100%', marginTop: 0 }}>
+                    <View style={{ width: '100%', marginTop: 15 }}>
                         <CoordinateSetter
                             inLat={lat}
                             inLng={lng}
@@ -370,7 +370,8 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                         <View style={CustomButtonStyles.buttonContainer}>
                             <Button
                                 onPress={onSave}
-                                //mode="contained"
+                                disabled={!selectedPlot || !selectedTreeType || !lat || !treeStatus || images.length === 0}
+                                mode="contained"
                                 buttonColor='#1D4ED8'
                                 labelStyle={CustomButtonStyles.buttonLabel}
                                 style={CustomButtonStyles.button}

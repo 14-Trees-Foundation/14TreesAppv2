@@ -355,12 +355,14 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
                             </View>
                         </Modal>
 
-                        {!checked && <CoordinateSetter
-                            inLat={lat}
-                            inLng={lng}
-                            onSetLat={item => setlat(item)}
-                            onSetLng={item => setlng(item)}
-                        />
+                        {!checked && <View style={{marginTop: 15}}>
+                            <CoordinateSetter
+                                inLat={lat}
+                                inLng={lng}
+                                onSetLat={item => setlat(item)}
+                                onSetLng={item => setlng(item)}
+                            />
+                            </View>
                         }
 
                         <View style={CustomButtonStyles.container}>
@@ -383,7 +385,8 @@ const AddImageModal = ({ modalVisible, setModalVisible, finalShiftData, onFetchD
                                 <View style={CustomButtonStyles.buttonContainer}>
                                     <Button
                                         onPress={onSave}
-                                        //mode="contained"
+                                        mode="contained"
+                                        disabled={saplingid === '' || (!checked && (image === null || !lat))}
                                         buttonColor='#1D4ED8'
                                         labelStyle={CustomButtonStyles.buttonLabel}
                                         style={CustomButtonStyles.button}

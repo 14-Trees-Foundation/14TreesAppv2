@@ -172,7 +172,7 @@ export const DrawerNavigator = () => {
                     // }
                 }}
             />
-            <Drawer.Screen
+            {/* <Drawer.Screen
                 name={Strings.screenNames.getString('TreesPage', Strings.english)}
                 component={Trees}
                 options={{
@@ -190,7 +190,7 @@ export const DrawerNavigator = () => {
                     //     fontFamily: 'Inter-Regular'
                     // }
                 }}
-            />
+            /> */}
             <Drawer.Screen
                 name={Strings.screenNames.getString('Shifts', Strings.english)}
                 component={Shifts}
@@ -230,8 +230,7 @@ export const DrawerNavigator = () => {
                 }}
             />
 
-            {/* Hidden Screen */}
-            {isAdmin && false && (
+            {isAdmin && (
                 <Drawer.Screen
                     name={Strings.screenNames.getString('EditTree', Strings.english)}
                     component={EditTreeScreen}

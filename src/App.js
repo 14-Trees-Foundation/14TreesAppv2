@@ -194,7 +194,7 @@ const App = () => {
                 marginRight: 30, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 7, marginTop: 5, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>APP_VERSION</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -222,7 +222,7 @@ const App = () => {
                 marginRight: 30, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>APP_VERSION</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -251,7 +251,7 @@ const App = () => {
                 marginRight: 30, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>APP_VERSION</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -285,7 +285,7 @@ const App = () => {
             ),
             headerRight: () => (
               <View style={{ height: 35, marginRight: 13, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>APP_VERSION</Text>
+                <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
               </View>
             ),
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
@@ -303,7 +303,7 @@ const App = () => {
                 marginRight: 35, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>APP_VERSION</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 {/* <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -357,7 +357,7 @@ const App = () => {
                 marginRight: 35, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>APP_VERSION</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 {/* <Text style={{
                   fontFamily: 'Inter-Regular',

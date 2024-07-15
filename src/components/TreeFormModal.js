@@ -240,12 +240,12 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                 label={Strings.labels.SelectTreeType}
                 onSelectItem={setSelectedTreeType}
             />
-            <CustomDropdown
+            {mode === treeFormModes.addTree && <CustomDropdown
                 initItem={treeStatus}
                 items={treeStatusList}
                 label={Strings.labels.SelectTreeStatus}
                 onSelectItem={setTreeStatus}
-            />
+            />}
 
 
             <View style={{ ...treeFormModalStyles.imageContainer, marginTop: 9 }}>
@@ -337,12 +337,14 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                 </View>
             </Modal>
 
-            <CoordinateSetter
-                inLat={lat}
-                inLng={lng}
-                onSetLat={item => setlat(item)}
-                onSetLng={item => setlng(item)}
-            />
+            <View style={{ marginTop: 15 }}>
+                <CoordinateSetter
+                    inLat={lat}
+                    inLng={lng}
+                    onSetLat={item => setlat(item)}
+                    onSetLng={item => setlng(item)}
+                />
+            </View>
 
             <View style={CustomButtonStyles.container}>
                 <View style={CustomButtonStyles.buttonRow}>
@@ -363,7 +365,8 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                     <View style={CustomButtonStyles.buttonContainer}>
                         <Button
                             onPress={onSave}
-                            //mode="contained"
+                            disabled={!selectedPlot || !lat || !selectedTreeType || saplingid === '' || images.length === 0}
+                            mode="contained"
                             buttonColor='#1D4ED8'
                             labelStyle={CustomButtonStyles.buttonLabel}
                             style={CustomButtonStyles.button}
