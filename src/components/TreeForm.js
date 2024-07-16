@@ -370,7 +370,7 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
                         <View style={CustomButtonStyles.buttonContainer}>
                             <Button
                                 onPress={onSave}
-                                disabled={!selectedPlot || !selectedTreeType || !lat || !treeStatus || images.length === 0}
+                                disabled={!selectedPlot || !selectedTreeType || !lat || !treeStatus || !showImage}
                                 mode="contained"
                                 buttonColor='#1D4ED8'
                                 labelStyle={CustomButtonStyles.buttonLabel}

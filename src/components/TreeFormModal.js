@@ -240,7 +240,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                 label={Strings.labels.SelectTreeType}
                 onSelectItem={setSelectedTreeType}
             />
-            {mode === treeFormModes.addTree && <CustomDropdown
+            {mode !== treeFormModes.addTree && <CustomDropdown
                 initItem={treeStatus}
                 items={treeStatusList}
                 label={Strings.labels.SelectTreeStatus}
@@ -365,7 +365,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                     <View style={CustomButtonStyles.buttonContainer}>
                         <Button
                             onPress={onSave}
-                            disabled={!selectedPlot || !lat || !selectedTreeType || saplingid === '' || images.length === 0}
+                            disabled={!selectedPlot || !lat || !selectedTreeType || saplingid === '' || !showImage}
                             mode="contained"
                             buttonColor='#1D4ED8'
                             labelStyle={CustomButtonStyles.buttonLabel}
