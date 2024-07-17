@@ -1,37 +1,82 @@
-import { ToastAndroid } from "react-native";
-import { UserClient } from "../api/users";
-import { LocalDatabase } from "../db/db";
 
-// TODO: Implement the api call in backend to fetch the changes only
+import { ApiClient } from "../api/api";
+import { DaoClient } from "../db/dao";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Constants } from "../Utils";
+import { User } from "../../model/user";
+
 export const fetchAndStoreUsers = async () => {
     // fetch data from the backend
-    const apiClient = new UserClient();
-    const response = await apiClient.getUsers(0, 1);
-    const users = response.results;
-    // upload users in local db
-    const localDb = await LocalDatabase.authenticate();
-    for (const user of users) {
-        await localDb.users.upsertLiveUserIntoLocalDb(user);
+    const apiClient = new ApiClient();
+    const daoClient = await DaoClient.authenticate();
+
+    const userIds = await daoClient.users.getLiveUserIds()
+    const timestamp = await AsyncStorage.getItem(Constants.lastUsersFetchedAt) || '2020-01-01T00:00:00Z'
+
+    try {
+        const now = new Date().toISOString();
+        const response = await apiClient.users.fetchChanges(timestamp, userIds)
+        const users = response.users;
+
+        // upload users in local db
+        for (const user of users) {
+            user.roles = user.roles ? (user.roles as any).join(',') : '';
+            await daoClient.users.upsertLiveUserIntoLocalDb(user);
+        }
+
+        // delete users in local db
+        for (const userId of response.deleted_user_ids) {
+            await daoClient.users.deleteLiveUserFromLocalDb(userId);
+        }
+        await AsyncStorage.setItem(Constants.lastUsersFetchedAt, now);
+        console.log('Users fetch Done!')
+    } catch(err: any) {
+        console.log('Inside fetchAndStoreUsers:', err)
     }
 }
 
 export const uploadUsersData = async () => {
+    const daoClient = await DaoClient.authenticate();
+    const users = await daoClient.users.getUsers(0, -1, undefined, true);
 
-    const dbClient = await LocalDatabase.authenticate();;
-    const apiClient = new UserClient();
-    
-    if (!dbClient.users) {
-        ToastAndroid.show("Something went wrong. please try again letter", 10);
-        return;
+    const newUsers = users.filter(user => user.change_type === 'add');
+    const editedUsers = users.filter(user => user.change_type === 'edit');
+    const deletedUsers = users.filter(user => user.change_type === 'delete');
+
+    await uploadDeletedUsersData(deletedUsers);
+    deletedUsers.forEach(async (user) => {
+        await daoClient.users.deleteLocalUser(user.local_id);
+    })
+
+    await uploadEditedUsersData(editedUsers);
+    editedUsers.forEach(async (user) => {
+        await daoClient.users.updateUserUploadStatus(user.local_id);
+    })
+
+    await uploadNewUsersData(newUsers);
+    newUsers.forEach(async (user) => {
+        await daoClient.users.deleteLocalUser(user.local_id);
+    })
+
+}
+
+export const uploadNewUsersData = async (users: User[]) => {
+    let apiClient = new ApiClient()
+    for (let i = 0; i < users.length; i++) {
+        await apiClient.users.createUser(users[i]);
     }
-    try {
-        const users = await dbClient.users.getLocalUsers(0, -1, false);
-        for (const user of users ) {
-            const resp = await apiClient.createUser(user);
-            if (!resp) console.log(user);
-            else await dbClient.users.updateLocalUserUploadStatus(user.local_id);
-        }
-    } catch (error: any) {
-        console.error("sync::uploadUsersData:", error.message, error.stack)
+}
+
+export const uploadEditedUsersData = async (users: User[]) => {
+    let apiClient = new ApiClient()
+    for (let i = 0; i < users.length; i++) {
+        await apiClient.users.updateUser(users[i]);
+    }
+}
+
+export const uploadDeletedUsersData = async (users: User[]) => {
+    let apiClient = new ApiClient()
+    for (let i = 0; i < users.length; i++) {
+        await apiClient.users.deleteUser(users[i]);
     }
 }

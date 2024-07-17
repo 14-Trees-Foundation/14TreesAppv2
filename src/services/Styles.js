@@ -281,7 +281,7 @@ export const commonStyles = StyleSheet.create({
   txtInput: {
     height: 50,
     fontFamily: 'Inter-Regular',
-    width: '93%',
+    width: '100%',
     borderWidth: 2,
     borderColor: '#ccc',
     borderRadius: 5,

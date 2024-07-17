@@ -1,25 +1,26 @@
+
 import { SQLiteDatabase, enablePromise, openDatabase } from 'react-native-sqlite-storage';
-import { UsersData } from './users';
+import { UsersDao } from './users';
 
 enablePromise(true);
 
 let dbConnection: SQLiteDatabase;
 const getDBConnection = async () => {
     if (!dbConnection) {
-        dbConnection = await openDatabase({ name: 'tree.db', location: 'default' });
+        dbConnection = await openDatabase({ name: '14trees.db', location: 'default' });
     }
     return dbConnection;
 };
 
-export class LocalDatabase {
-    public users: UsersData;
+export class DaoClient {
+    public users: UsersDao;
 
     constructor(dbConnection: SQLiteDatabase) {
-        this.users = new UsersData(dbConnection);
+        this.users = new UsersDao(dbConnection);
     }
 
     static async authenticate() {
         const connection = await getDBConnection();
-        return new LocalDatabase(connection);
+        return new DaoClient(connection);
     }
 }

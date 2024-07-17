@@ -35,7 +35,7 @@ const fillInUserDetails = async (setIsAdmin, setUserDetails) => {
     if (storedUserDetails) {
         storedUserDetails = JSON.parse(storedUserDetails);
         setUserDetails(storedUserDetails);
-        if (storedUserDetails.adminID) {
+        if (storedUserDetails.roles.includes('admin')) {
             setIsAdmin(true);
         } else {
             setIsAdmin(false);
