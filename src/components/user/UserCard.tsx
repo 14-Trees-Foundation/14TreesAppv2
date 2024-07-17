@@ -33,10 +33,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
+    color: 'black',
   },
   email: {
     fontSize: 16,
-    color: '#555',
+    color: 'black',
   },
 });
 

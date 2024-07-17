@@ -2,7 +2,8 @@ import axios from 'axios';
 import { Buffer } from "buffer";
 import { ToastAndroid } from 'react-native';
 import { Strings } from './Strings';
-import { Utils } from './Utils';
+import { Constants, Utils } from './Utils';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 axios.interceptors.response.use(function (response) {
   return response;
@@ -47,7 +48,7 @@ axios.interceptors.response.use(function (response) {
 
 export class DataService {
 
-  static productionHostName = 'https://api.14trees.org';
+  static productionHostName = 'https://dev-api.14trees.org';
   static hostName = 'http://10.0.2.2:8088';
   static phoneHostName = "http://192.168.1.14:8008";
   static serverBase = `${this.productionHostName}/api/appv2`;
@@ -63,11 +64,15 @@ export class DataService {
   }
 
   static async fetchHelperData(user_id, lasthash, onDownloadProgress = undefined) {
+    const token = await AsyncStorage.getItem(Constants.authToken);
     const url = `${DataService.serverBase}/fetchHelperData`;
     return await axios.post(url, {
       userId: user_id,
       lastHash: lasthash
     }, {
+      headers: {
+        'x-access-token': token
+      },
       onDownloadProgress,
     });
 
@@ -82,10 +87,15 @@ export class DataService {
   }
 
   static async fetchPlotSaplings(user_id, lasthash) {
+    const token = await AsyncStorage.getItem(Constants.authToken);
     const url = `${DataService.serverBase}/fetchPlotSaplings`;
     return await axios.post(url, {
       userId: user_id,
       lastHash: lasthash
+    },{
+      headers: {
+        'x-access-token': token
+      },
     });
   }
 
@@ -109,8 +119,9 @@ export class DataService {
   }
 
   static async updateSapling(adminID, sapling) {
+    const token = await AsyncStorage.getItem(Constants.authToken);
     const url = `${DataService.serverBase}/updateSapling`;
-    return await axios.post(url, { adminID: adminID, sapling: sapling });
+    return await axios.post(url, { adminID: adminID, sapling: sapling }, { headers: { 'x-access-token': token }});
   }
   static async uploadLogs(logs) {
     const url = `${DataService.serverBase}/uploadLogs`;
@@ -160,11 +171,12 @@ export class DataService {
   }
 
   static async fetchTreeDetails(saplingID, adminID) {
+    const token = await AsyncStorage.getItem(Constants.authToken);
     const url = `${DataService.serverBase}/getSapling`
     const response = await axios.post(url, {
       adminID: adminID,
       saplingID: saplingID
-    })
+    }, { headers: { 'x-access-token': token }})
     //console.log("response from fetchTreeDetails:- ", response);
     if (response) {
       return response.data;

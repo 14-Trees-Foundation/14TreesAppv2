@@ -98,26 +98,31 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginTop: 5,
         marginBottom: 1,
+        color: 'black'
     },
     value: {
         fontWeight: 'normal',
+        color: 'black'
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 20,
-        width: '100%'
+        width: '100%',
+        color: 'black'
     },
     title: {
         flex: 1,
         fontSize: 20,
         fontWeight: 'bold',
         textAlign: 'left',
+        color: 'black'
     },
     deleteTitle: {
         fontSize: 20,
         fontWeight: 'bold',
         textAlign: 'left',
+        color: 'black',
         marginBottom: 10,
     },
     icons: {
@@ -127,15 +132,18 @@ const styles = StyleSheet.create({
     },
     closeButton: {
         marginTop: 20,
-        backgroundColor: "#55cf5f"
+        backgroundColor: "#55cf5f",
+        color: 'black'
     },
     cancelButton: { 
         backgroundColor: '#f9f9f9',
         borderRadius: 5,
+        color: 'black'
     },
     deleteButton: {
         backgroundColor: '#e82a2a',
-        borderRadius: 5
+        borderRadius: 5,
+        color: 'black'
     }
 });
 
