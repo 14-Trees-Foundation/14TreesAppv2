@@ -68,14 +68,14 @@ const UserForm: React.FC<UserFormInputProps> = ({ user, changeMode, onCancel, on
     }
 
     return (
-        <View style={{ height: "97%" }}>
+        <View style={{ height: "97%", width: '100%', flexGrow: 1 }}>
             <Text style={treeFormStyles.plotSapling}> { changeMode === 'add' ? 'Add User' : 'Edit User' } </Text>
             <ScrollView
                 keyboardShouldPersistTaps='handled'
                 scrollEnabled={true}
                 style={{ ...treeFormStyles.detailsContainerOuter, marginHorizontal: 0, }} >
                 <View style={{ margin: 4, borderRadius: 10 }}>
-                    <View style={{ marginTop: 15 }}>
+                    <View style={{ marginTop: 15, flexGrow: 1 }}>
                         <Text style={ treeFormStyles.inputLabel }>Enter full name:</Text>
                         <TextInput
                             defaultValue={name}
@@ -86,9 +86,9 @@ const UserForm: React.FC<UserFormInputProps> = ({ user, changeMode, onCancel, on
                         />
                     </View>
 
-                    <View>
+                    <View >
                         <Text style={ treeFormStyles.inputLabel }>Enter email address:</Text>
-                        <View style={{ paddingLeft: 12, alignItems: 'center', width: '96%' }}>
+                        <View style={{ flexGrow: 1 }}>
                             <TextInput
                                 defaultValue={email}
                                 style={treeFormStyles.textInput(lightTheme)}
@@ -100,7 +100,7 @@ const UserForm: React.FC<UserFormInputProps> = ({ user, changeMode, onCancel, on
                     </View>
                     <View>
                         <Text style={ treeFormStyles.inputLabel }>Enter mobile number:</Text>
-                        <View style={{ paddingLeft: 12, alignItems: 'center', width: '96%' }}>
+                        <View style={{ flexGrow: 1 }}>
                             <TextInput
                                 defaultValue={phone}
                                 style={treeFormStyles.textInput(lightTheme)}

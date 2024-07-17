@@ -9,6 +9,7 @@ import ImageResizer from "react-native-image-resizer";
 import RNFS from 'react-native-fs';
 import ReactNativeForegroundService from '@supersami/rn-foreground-service';
 import { shiftTypes } from "../screens/Shifts";
+import { DaoClient } from "./db/dao";
 const MIN_BATCH_SIZE = 5
 
 const shiftTypesObject = {
@@ -279,6 +280,9 @@ export class Utils {
 
     static async createLocalTablesIfNeeded() {
         // await this.localdb.deleteTables();
+        const daoClient = await DaoClient.authenticate();
+        daoClient.users.deleteTable();
+        daoClient.users.createTable();
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
         await this.localdb.createSaplingTbl();
@@ -322,11 +326,10 @@ export class Utils {
         }
         if (data) {
             console.log("---------------------------New Data-------------")
-
-            await Utils.storeTreeTypes(data['treeTypes']);
+            await Utils.storeTreeTypes(data['plant_types']);
             await Utils.storePlots(data['plots']);
-            console.log("data['saplings'] :", data['saplings'].length)
-            await Utils.storeTrees(data['saplings'])
+            console.log("data['saplings'] :", data['sapling_ids'].length)
+            await Utils.storeTrees(data['sapling_ids'])
             await AsyncStorage.setItem(Constants.lastHashKey, newHash);
             // ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
             // setstatus(data updated)

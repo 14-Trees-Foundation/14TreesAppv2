@@ -79,9 +79,14 @@ export class DataService {
   }
 
   static async fetchShifts(user_id) {
+    const token = await AsyncStorage.getItem(Constants.authToken);
     const url = `${DataService.serverBase}/fetchShifts`;
     return await axios.post(url, {
       userId: user_id,
+    }, {
+      headers: {
+        'x-access-token': token
+      },
     });
 
   }
