@@ -1,19 +1,24 @@
 // SiteEditModal.js
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { useContext, useEffect, useState  , React} from 'react';
+import { ScrollView ,View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
+import { Strings } from "../../services/Strings";
+import { CustomButtonStyles, treeFormStyles } from "../../services/Styles";
 import RCTDateTimePicker from '@react-native-community/datetimepicker';
+import GlobalContext from '../../context/GlobalContext ';
+import { Button } from 'react-native-paper';
 import { CreateSiteRequest, Sites } from '../../model/sites';
 
-interface SiteFormModalInputProps {
+interface SiteFormInputProps {
+    site: Sites | null,
     mode: 'edit' | 'add'
     isVisible: boolean,
     onClose: () => void,
     onSave: (data: Sites | CreateSiteRequest) => void
-    site?: Sites
+   
 }
 
-const SiteFormModal: React.FC<SiteFormModalInputProps> = ({ mode, isVisible, onClose, onSave, site }) => {
+const SiteForm: React.FC<SiteFormInputProps> = ({ site, changeMode, onCancel, onSubmit }) => {
     const date = new Date();
     const [name_marathi, setNameMarathi] = useState('');
     const [name_english, setNameEnglish] = useState('');
@@ -29,20 +34,20 @@ const SiteFormModal: React.FC<SiteFormModalInputProps> = ({ mode, isVisible, onC
     }, [site])
 
     const handleSubmit = () => {
-        onClose();
-        let data: Sites | CreateSiteRequest = {
+        
+        let data = {
             name_english: name_english,
             name_marathi: name_marathi,
            
         }
 
-        if (site) {
-            data = {
-                ...site,
-                ...data
-            }
+        if (changeMode === 'add') {
+            const newSite = { ...data } as CreateSiteRequest;
+            onSubmit(newSite)
+        } else if (site) {
+            let newChanges = { ...site, ...data } as Sites;
+            onSubmit(newChanges)
         }
-        onSave(data);
     }
      return (
         <Modal
@@ -131,4 +136,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default SiteFormModal;
+export default SiteForm;

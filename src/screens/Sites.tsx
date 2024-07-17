@@ -1,16 +1,27 @@
-import { View, Button, BackHandler, ScrollView, SafeAreaView, StyleSheet, TextInput } from "react-native";
-import React, { useContext, useEffect, useState } from "react";
+import { View, Button, BackHandler, ScrollView, SafeAreaView, StyleSheet, TextInput, Text } from "react-native";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import GlobalContext from "../context/GlobalContext ";
+
+import { DaoClient } from "../services/db/dao";
 import { SitesClient } from "../services/api/sites";
 import { LocalDatabase } from "../services/db/db";
-import SiteFormModal from "../components/sites/SitesFormModal";
+import SiteForm from "../components/sites/SitesForm";
 import SiteCard from "../components/sites/SitesCard";
 import SiteInfo from "../components/sites/SitesInfo";
+import { CreateSiteRequest, Sites } from "../model/sites";
 import { TouchableOpacity } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
-const Sites = ({ navigation }) => {
+
+interface SitesInputProps {
+    navigation: any
+}
+
+
+const Site: React.FC<SitesInputProps> = ({ navigation })  => {
 
     const { lightTheme } = useContext(GlobalContext);
+    const [stateChange, setStateChange] = useState(0);
     const [isFormVisible, setIsFormVisible] = useState(false);
     const [isInfoModalVisible, setInfoModalVisible] = useState(false);
     const [changeMode, setChangeModel] = useState('add');
@@ -19,9 +30,18 @@ const Sites = ({ navigation }) => {
     const [page, setPage] = useState(0);
     const [site, setSite] = useState([]);
 
-    const apiClient = new SitesClient();
-    let localClient;
-    LocalDatabase.authenticate().then((client) => { localClient = client; });
+    let daoClient: DaoClient;
+    DaoClient.authenticate().then((client) => { daoClient = client; });
+
+   
+    useFocusEffect(
+        useCallback(() => {
+          setIsFormVisible(false);
+          setStateChange(stateChange + 1);
+          return () => {
+          };
+        }, [])
+    );
 
     useEffect(() => {
         const backAction = () => {
@@ -33,45 +53,42 @@ const Sites = ({ navigation }) => {
         return () => backHandler.remove();
     }, []);
 
-    useEffect(() => {
-        setTimeout(async() => {
-            let resp = await localClient.users.getLocalUsers(page*10, 10);
-            if (page != 0) setUsers([...users, ...resp]);
-            else setUsers(resp)
-            console.log(resp);
-        }, 1000)
-    }, [page])
+    // useEffect(() => {
+    //     if (searchQuery.length < 1) return;
+    //     setTimeout(async () => {
+    //         let sites = await daoClient.sites.searchSi(searchQuery, 0, 20);
+    //         setSite(sites);
+    //     }, 1000)
+    // }, [searchQuery, stateChange])
 
-    useEffect(() => {
-        if (searchQuery.length < 3) return;
-        setTimeout(async() => {
-            let users = await apiClient.searchUsers(searchQuery);
-            setUsers(users);
-        }, 1000)
-    }, [searchQuery])
+    
 
-    const handleSave = (data) => {
+    const handleSave = (data: Sites | CreateSiteRequest) => {
         setTimeout(async() => {
-            if (changeMode === 'add') await localClient.users.createLocalUser(data);
-            else await localClient.users.updateLocalUser(data);
+            if (changeMode === 'add') {
+                let request = JSON.parse(JSON.stringify(data)) as CreateSiteRequest;
+                await daoClient.sites.createSite(request)
+            } else {
+                let request = JSON.parse(JSON.stringify(data)) as Sites;
+                await daoClient.sites.updateSite(request)
+            };
 
-            setPage(0);
         }, 1000)
 
     };
 
     const handleDelete = () => {
-        if (selectedUser) {
+        if (selectedSite) {
             setTimeout(async() => {
-                await localClient.users.deleteLocalUser(selectedUser);
+                await daoClient.sites.deleteSite(selectedSite.local_id);
                 setPage(0);
             }, 1000)
         }
     }
 
-    const filteredUsers = users.filter(user =>
-        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredSites = site.filter(site =>
+        site.name_english.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        site.name_marathi.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
@@ -101,7 +118,7 @@ const Sites = ({ navigation }) => {
                 ))}
             </ScrollView>
 
-            <SiteFormModal
+            <SiteForm
                 mode={changeMode}
                 isVisible={isFormVisible}
                 onClose={() => setIsFormVisible(false)}

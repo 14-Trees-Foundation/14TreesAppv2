@@ -3,25 +3,24 @@ import { CreateSiteRequest, Sites } from '../../model/sites';
 
 const sitesTableName = 'sites'
 
-export class SitessData {
+export class SitesDao {
     private db: SQLiteDatabase;
+    private tableName: string = 'sites';
 
     constructor(db: SQLiteDatabase) {
         this.db = db;
     };
 
+
     // Create necessary tables
     createTable = async () => {
         try {
-            const query = `CREATE TABLE IF NOT EXISTS ${sitesTableName}(
+            const query = `CREATE TABLE IF NOT EXISTS ${this.tableName}(
                 local_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 id INTEGER NULL,
-                name TEXT NOT NULL,
-                phone TEXT NOT NULL,
-                email TEXT NOT NULL,
-                birth_date TEXT NULL,
-                pin TEXT NULL,
-                roles TEXT NULL,
+                name_english TEXT NOT NULL,
+                name_marathi TEXT NOT NULL,
+                
                 is_uploaded INTEGER DEFAULT 0 CHECK (is_uploaded IN (0, 1)),
                 change_type TEXT DEFAULT 'none' CHECK (change_type IN ('none', 'add', 'edit', 'delete')),
                 created_at TEXT NOT NULL,
@@ -36,16 +35,20 @@ export class SitessData {
     };
 
     deleteTable = async () => {
-        const query = `drop table ${sitesTableName};`;
+        const query = `drop table ${this.tableName};`;
         await this.db.executeSql(query);
         console.log("Sites table deleted")
     }
 
-    getSites = async (offset: number = 0, limit: number = 10, isUploaded?: boolean) => {
+    // Data manipulation operations
+    getSites = async (offset: number = 0, limit: number = 10, isUploaded?: boolean ,isDeleted: boolean = false) => {
         const site: Sites[] = []
         const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
-        const query = `SELECT * FROM ${sitesTableName}
-            WHERE change_type != 'delete' ${isUploaded !== undefined ? 'AND' + whereCondition : ""} ORDER BY local_id DESC LIMIT ${limit} OFFSET ${offset};`
+        const query = `SELECT * FROM ${this.tableName}
+            WHERE 1=1 ${isDeleted ? '' : ` AND change_type != 'delete'`} ${isUploaded !== undefined ? 'AND ' + whereCondition : ""}
+            ORDER BY local_id DESC 
+            ${limit < 0 ? '' : `LIMIT ${limit} OFFSET ${offset}`};
+        `
 
         const [results] = await this.db.executeSql(query)
         for (let index = 0; index < results.rows.length; index++) {
@@ -56,10 +59,28 @@ export class SitessData {
     }
 
 
+    // countSitesByChangeTye = async (isUploaded?: boolean): Promise<any> => {
+    //     const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
+    //     const query = `SELECT change_type, COUNT(*) as count FROM ${this.tableName}
+    //         WHERE ${isUploaded !== undefined ? whereCondition : "1==1"} GROUP BY change_type;`
+
+    //     const [results] = await this.db.executeSql(query)
+    //     let response: any = {}
+    //     for (let i = 0; i < results.rows.length; i++) {
+    //         const row = results.rows.item(i);
+    //         response = {
+    //             ...response,
+    //             [row.change_type]: row.count,
+    //         }
+    //     }
+
+    //     return response;
+    // }
+
 
     createSite = async (data: CreateSiteRequest) => {
         const query = `
-            INSERT INTO ${sitesTableName}
+            INSERT INTO ${this.tableName}
             ( name_marathi,
               name_english,
               owner,
@@ -103,8 +124,8 @@ export class SitessData {
         let changeType = 'edit';
         
         const [response] = await this.db.executeSql(
-            `SELECT * FROM ${sitesTableName} WHERE id = ?;`
-            [data.id]
+            `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
+            [data.local_id]
         )
 
         if (response.rows.length === 1) {
@@ -116,7 +137,7 @@ export class SitessData {
 
         try {
             await this.db.executeSql(
-                `UPDATE ${sitesTableName}
+                `UPDATE ${this.tableName}
                 SET
                     name_english = ?,
                     name_marathi = ?,
@@ -130,6 +151,7 @@ export class SitessData {
                     area_acres=?,
                     length_km=?,
                     consent_letter=?,
+                    is_uploaded = 0,
                     grove_type=?,
                     consent_document_link=?,
                     is_uploaded = 0,
@@ -147,6 +169,9 @@ export class SitessData {
                   data.length_km,
                   data.consent_letter,
                   data.grove_type,
+                  changeType, 
+                  now, 
+                  data.local_id,
                   data.consent_document_link,]
             )
         } catch(err: any) {
@@ -158,30 +183,47 @@ export class SitessData {
 
     deleteSite = async (id: number) => {
         const [response] = await this.db.executeSql(
-            `SELECT * FROM ${sitesTableName} WHERE id = ?;`
+            `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
             [id]
         )
 
-        // locally added user: HARD DELETE
+        // locally added Site: HARD DELETE
         if (response.rows.length === 1) {
-            const existingSite = response.rows.item(0) as Site;
+            const existingSite = response.rows.item(0) as Sites;
             if (existingSite.change_type === 'add') {
                 await this.db.executeSql(
-                    `DELETE FROM ${sitesTableName} WHERE id = ?;`
+                    `DELETE FROM ${this.tableName} WHERE local_id = ?;`,
+                    [id]
+                )
+            } else {
+                // Live Site
+                await this.db.executeSql(
+                    `UPDATE ${this.tableName}
+                    SET
+                        is_uploaded = 0,
+                        change_type = 'delete'
+                    WHERE local_id = ?;`,
                     [id]
                 )
             }
         }
 
-        // Live user
-        await this.db.executeSql(
-            `UPDATE users
-            SET
-                is_uploaded = 0,
-                change_type = 'delete'
-            WHERE local_id = ?;`,
-            [id]
-        )
+    }
+
+
+    updateSiteUploadStatus = async (id: number) => {
+        const query = `UPDATE ${this.tableName} SET is_uploaded = 1, change_type = 'none' WHERE local_id = ${id};`
+        await this.db.executeSql(query)
+    }
+
+    getSiteByLiveId = async (id: number) => {
+        const query =  `
+            SELECT * FROM ${this.tableName} 
+            WHERE id = ?;
+        `
+        const [results] = await this.db.executeSql(query, [id]);
+        if (results.rows.length === 1) return results.rows.item(0) as Sites;
+        return null;
     }
 
  

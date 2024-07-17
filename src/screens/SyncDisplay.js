@@ -10,7 +10,7 @@ import { Button } from 'react-native-paper';
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { DaoClient } from '../services/db/dao';
 
-const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setUsersCount) => {
+const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setUsersCount ,setSitesCount) => {
   const lsdate = await Utils.getLastSyncDate();
   if (lsdate) {
     setSyncDate(Utils.getReadableDate(lsdate));
@@ -28,6 +28,7 @@ const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setU
   const localDb = await DaoClient.authenticate();;
   const resp = await localDb.users.countUsersByChangeTye(false);
   setUsersCount(resp);
+  setSitesCount(resp);
 }
 
 const getReadableProgress = (progress) => {
@@ -45,6 +46,8 @@ const SyncDisplay = ({ navigation }) => {
   const [failedPlotTrees, setFailedPlotTrees] = useState([]);
   const [shiftsCount, setShiftsCount] = useState(null);
   const [usersCount, setUsersCount] = useState(null);
+  const [sitesCount, setSitesCount] = useState(null);
+
   const { lightTheme, shiftID, shiftDone } = useContext(GlobalContext);
 
   useEffect(() => {
@@ -60,7 +63,7 @@ const SyncDisplay = ({ navigation }) => {
 
 
   useFocusEffect(useCallback(() => {
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount ,setSitesCount);
     console.log('sync date updated', shiftID)
   }, []))
 
@@ -105,7 +108,7 @@ const SyncDisplay = ({ navigation }) => {
     setFailedShifts(responseFromSyncShifts.failures);
 
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount , setSitesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -134,7 +137,7 @@ const SyncDisplay = ({ navigation }) => {
 
     setFailedTrees(failures)
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount , setSitesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -174,7 +177,7 @@ const SyncDisplay = ({ navigation }) => {
     console.log("---------failedPlotTreesMessages------", failures)
     setFailedPlotTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount ,setSitesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -333,6 +336,9 @@ const SyncDisplay = ({ navigation }) => {
               </Text>
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
                 [ added: {usersCount?.add || 0}, edited: {usersCount?.edit || 0}, deleted: {usersCount?.delete || 0}]
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                [ added: {sitesCount?.add || 0}, edited: {sitesCount?.edit || 0}, deleted: {sitesCount?.delete || 0}]
               </Text>
             </View>
           </View>

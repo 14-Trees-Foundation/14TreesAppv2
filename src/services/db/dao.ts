@@ -1,6 +1,7 @@
 
 import { SQLiteDatabase, enablePromise, openDatabase } from 'react-native-sqlite-storage';
 import { UsersDao } from './users';
+import { SitesDao } from './sites';
 
 enablePromise(true);
 
@@ -14,9 +15,11 @@ const getDBConnection = async () => {
 
 export class DaoClient {
     public users: UsersDao;
+    public sites: SitesDao;
 
     constructor(dbConnection: SQLiteDatabase) {
         this.users = new UsersDao(dbConnection);
+        this.sites = new SitesDao(dbConnection);
     }
 
     static async authenticate() {

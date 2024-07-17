@@ -34,10 +34,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 5,
   },
-  email: {
-    fontSize: 16,
-    color: '#555',
-  },
 });
 
 export default SiteCard;

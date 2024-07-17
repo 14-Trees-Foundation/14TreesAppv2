@@ -1,6 +1,7 @@
 
 export type Sites = {
-  
+
+  local_id: number,
   id?: number,
   name_marathi: string | null;
   name_english: string | null;
@@ -24,7 +25,8 @@ export type Sites = {
   data_errors: string|null;
   date_planted: Date|null;
   site_data_check: Enumerator|null;
-
+  is_uploaded: 0 | 1,
+  change_type: 'none' | 'add' | 'edit' | 'delete',
   album: string | null;
   album_contains: string | null;
   tag: string | null;
@@ -48,4 +50,9 @@ export type CreateSiteRequest = {
   consent_letter: string | null;
   grove_type: string | null;
   consent_document_link:  string| null;
+}
+
+export type SiteHelperDataResponse = {
+  sites: Sites[],
+  deleted_site_ids: number[]
 }
