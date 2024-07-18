@@ -46,7 +46,7 @@ const TreesInShiftHeader = ({ item }) => {
                             numberOfLines={1}
                             ellipsizeMode="tail"
                         >
-                            {Strings.labels.Plot} : {item.plotselected}
+                            {Strings.labels.Plot} : {item.plot_selected}
                         </Text>
                     </View>
                     {syncUploadComplete && (
@@ -114,7 +114,7 @@ const TreesInShiftHeader = ({ item }) => {
                                 marginLeft: 20,
                                 fontWeight: '600', color: lightTheme ? '#333' : 'black'
                             }}>
-                                {item.starttime} to {item.endtime}
+                                {item.start_time} to {item.end_time}
                             </Text>
                         </View>
 
@@ -136,7 +136,7 @@ const TreesInShiftHeader = ({ item }) => {
                                 marginLeft: 20,
                                 fontWeight: '600', color: lightTheme ? '#333' : 'black'
                             }}>
-                                {item.shifttype}
+                                {item.shift_type}
                             </Text>
                         </View>
                         <View style={{ flex: 1, flexDirection: 'row', paddingBottom: 5, }}>
@@ -157,7 +157,7 @@ const TreesInShiftHeader = ({ item }) => {
                                 marginLeft: 20,
                                 fontWeight: '600', color: lightTheme ? '#333' : 'black'
                             }}>
-                                {item.treesplanted}
+                                {item.trees_planted}
                             </Text>
                         </View>
 

@@ -1,17 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import React, { useContext, useEffect, useState } from 'react';
-import { Alert, Platform, RootTagContext, TouchableOpacity } from 'react-native';
-import { PERMISSIONS, request } from 'react-native-permissions';
+import React, { useContext, useEffect } from 'react';
+import { Alert, Platform, RootTagContext, TouchableOpacity, SafeAreaView } from 'react-native';
+import { PERMISSIONS } from 'react-native-permissions';
 import { DrawerNavigator } from './components/DrawerNavigator';
 import LoadingScreen from './screens/LoadingScreen';
 import LoginScreen from './screens/Login';
 import { Strings } from './services/Strings';
 import { Constants, Utils } from './services/Utils';
 import { checkMultiplePermissions } from './services/check_permissions';
-import DeviceInfo from 'react-native-device-info';
-import { DataService } from './services/DataService';
 import { commonStyles } from './services/Styles';
 import GlobalContext from './context/GlobalContext ';
 import AddTreeShift from './screens/AddTreeShift';
@@ -27,6 +25,7 @@ import RNRestart from 'react-native-restart';
 import AddImageShift from './screens/AddImageShift';
 import UpdatePlotShift from './screens/UpdatePlotShift';
 import EditLocalAddImage from './screens/EditLocalAddImage';
+import { APP_VERSION } from './constants/constants';
 
 
 const errorHandler = async (e, isFatal) => {
@@ -195,7 +194,7 @@ const App = () => {
                 marginRight: 30, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 7, marginTop: 5, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -223,7 +222,7 @@ const App = () => {
                 marginRight: 30, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -252,7 +251,7 @@ const App = () => {
                 marginRight: 30, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -286,7 +285,7 @@ const App = () => {
             ),
             headerRight: () => (
               <View style={{ height: 35, marginRight: 13, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
               </View>
             ),
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
@@ -304,7 +303,7 @@ const App = () => {
                 marginRight: 35, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 {/* <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -358,7 +357,7 @@ const App = () => {
                 marginRight: 35, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 {/* <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -395,7 +394,7 @@ const App = () => {
               }}>
                 <View
                   style={{ height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 {/* <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -415,7 +414,6 @@ const App = () => {
           }} />
       </Stack.Navigator>
     </NavigationContainer>
-
   )
 };
 
