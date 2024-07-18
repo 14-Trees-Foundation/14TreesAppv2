@@ -9,8 +9,10 @@ import GlobalContext from '../context/GlobalContext ';
 import { Button } from 'react-native-paper';
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { DaoClient } from '../services/db/dao';
+import { uploadTreesData } from '../services/sync/tree';
+import { uploadUsersData } from '../services/sync/users';
 
-const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setUsersCount ,setSitesCount) => {
+const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount ,setSitesCount) => {
   const lsdate = await Utils.getLastSyncDate();
   if (lsdate) {
     setSyncDate(Utils.getReadableDate(lsdate));
@@ -25,10 +27,12 @@ const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setU
   setShiftsCount(shiftsCount);
   console.log('setting counts: ', counts, "setting shifts count: ", shiftsCount);
 
-  const localDb = await DaoClient.authenticate();;
-  const resp = await localDb.users.countUsersByChangeTye(false);
-  setUsersCount(resp);
-  setSitesCount(resp);
+  const daoClient = await DaoClient.authenticate();
+  const treesResp = await daoClient.trees.countTreesByChangeTye();
+  setTreesCount(treesResp)
+
+  const usersResp = await daoClient.users.countUsersByChangeTye(false);
+  setUsersCount(usersResp);
 }
 
 const getReadableProgress = (progress) => {
@@ -45,6 +49,7 @@ const SyncDisplay = ({ navigation }) => {
   const [failedImagesTrees, setFailedImagesTrees] = useState([]);
   const [failedPlotTrees, setFailedPlotTrees] = useState([]);
   const [shiftsCount, setShiftsCount] = useState(null);
+  const [treesCount, setTreesCount] = useState(null);
   const [usersCount, setUsersCount] = useState(null);
   const [sitesCount, setSitesCount] = useState(null);
 
@@ -63,7 +68,7 @@ const SyncDisplay = ({ navigation }) => {
 
 
   useFocusEffect(useCallback(() => {
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount ,setSitesCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount ,setSitesCount);
     console.log('sync date updated', shiftID)
   }, []))
 
@@ -108,7 +113,7 @@ const SyncDisplay = ({ navigation }) => {
     setFailedShifts(responseFromSyncShifts.failures);
 
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount , setSitesCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount , setSitesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -137,7 +142,7 @@ const SyncDisplay = ({ navigation }) => {
 
     setFailedTrees(failures)
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount , setSitesCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount , setSitesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -156,7 +161,7 @@ const SyncDisplay = ({ navigation }) => {
     //console.log("----------------treesinNewImageTable-----------", treesinNewImageTable[0].uploaded)
     setFailedImagesTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -177,7 +182,7 @@ const SyncDisplay = ({ navigation }) => {
     console.log("---------failedPlotTreesMessages------", failures)
     setFailedPlotTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount ,setSitesCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount ,setSitesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -190,7 +195,8 @@ const SyncDisplay = ({ navigation }) => {
     if (
       treeCounts &&
       treeCounts.pending.treesUpload === 0 && treeCounts.pending.plotUpload === 0 && treeCounts.pending.imagesUpload === 0 &&
-      shiftsCount && shiftsCount.pending === 0 && usersCount && usersCount.add === 0 && usersCount.edit === 0 && usersCount.delete === 0) {
+      shiftsCount && shiftsCount.pending === 0 
+      && treesCount && treesCount.add === 0 && treesCount.edit === 0 && treesCount.delete === 0 && usersCount && usersCount.add === 0 && usersCount.edit === 0 && usersCount.delete === 0) {
       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
       return;
     }
@@ -289,6 +295,21 @@ const SyncDisplay = ({ navigation }) => {
     }
 
     setShowProgress(false);
+    try {
+      await uploadUsersData();
+      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount);
+    } catch (error) {
+      console.log('unable to sync users---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync users(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
+
+    setShowProgress(false);
 
   };
 
@@ -330,6 +351,12 @@ const SyncDisplay = ({ navigation }) => {
               </Text>
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
                 {Strings.screenNames.Shifts}: {shiftsCount?.pending}
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "bold", paddingBottom: 4 }}>
+                {Strings.screenNames.TreesPage}: 
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                [ added: {treesCount?.add || 0}, edited: {treesCount?.edit || 0}, deleted: {treesCount?.delete || 0}]
               </Text>
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "bold", paddingBottom: 4 }}>
                 {Strings.screenNames.UsersPage}: 

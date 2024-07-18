@@ -8,6 +8,7 @@ export class Strings {
     static screenNames = new LocalizedStrings({
         "en": {
             HomePage: "Home",
+            TreesPage: "Trees",
             AddTreeShift: "Add Tree",
             LocalDataView: "Local Data",
             LocalDataNavigator: "LocalDataNavigator",
@@ -31,6 +32,7 @@ export class Strings {
         },
         "mr": {
             HomePage: "मुख्य पृष्ठ",
+            TreesPage: "झाडे",
             AddTreeShift: "नवीन झाड जोडा",
             LocalDataView: "लोकल डेटा",
             LocalDataNavigator: "LocalDataNavigator",
@@ -487,6 +489,8 @@ export class Strings {
             SaplingId: "Sapling ID",
             SelectTreeType: "Select Tree Type",
             SelectPlot: "Select Plot",
+            SelectTreeStatus: "Select Tree Status",
+            SelectUser: "Select User",
             //local data view
             UploadStatus: "Upload Status",
             TreeType: "Tree Type",
@@ -507,6 +511,8 @@ export class Strings {
             SaplingId: "रोपाची संख्या",
             SelectTreeType: "झाडाचा प्रकार निवडा",
             SelectPlot: "प्लॉट निवडा",
+            SelectTreeStatus: "झाडाची स्थिती निवडा",
+            SelectUser: "वापरकर्ता निवडा",
             //local data view
             UploadStatus: "अपलोड स्थिती",
             TreeType: "झाडाचा प्रकार",

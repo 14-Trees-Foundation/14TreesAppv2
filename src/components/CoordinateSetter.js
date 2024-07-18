@@ -90,34 +90,31 @@ export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng }) => {
     }, [isLocationAllowed]))
 
 
-    const CoordinatesDisplay = ({ latitude, longitude, title }) => {
+    const CoordinatesDisplay = ({ latitude, longitude }) => {
 
         return (
             <View style={{
-                marginTop: 15, borderRadius: 12, padding: 8, flexDirection: 'column', backgroundColor: '#e8e9ea',
-                width: 200,
+                borderRadius: 12, padding: 10, flexDirection: 'column', backgroundColor: '#e8e9ea',
+                width: "100%",
             }}>
 
                 <View style={{ flexDirection: "row", width: "100%" }}>
-                    <Text style={{ ...coordinateSetterStyles.coordinatesText(lightTheme), fontWeight: 'bold', fontSize: 18 }}>
-                        {title}:
-                    </Text>
-                    <View style={{flex: 1, flexDirection: "row", width: "100%", justifyContent: 'flex-end' }}>
-                        <Image source={require('../../assets/icon-plus.png')} style={{ width: 30, height: 30, opacity: 0.3 }}
-                        />
+                    <View>
+                        <Text
+                            style={{ ...coordinateSetterStyles.coordinatesText(lightTheme), fontSize: 16, fontWeight: "600" }}
+                        >
+                            Latitude: {getReadableCoordinate(latitude)}
+                        </Text>
+                        <Text
+                            style={{ ...coordinateSetterStyles.coordinatesText(lightTheme), fontSize: 16, fontWeight: "600" }}
+                        >
+                            Longitude: {getReadableCoordinate(longitude)}
+                        </Text>
+                    </View>
+                    <View style={{flex: 1, flexDirection: 'column', width: "100%", justifyContent: 'center', alignItems: 'flex-end' }}>
+                        <Image source={require('../../assets/icon-plus.png')} style={{ width: 30, height: 30, opacity: 0.3 }}/>
                     </View>
                 </View>
-
-                <Text
-                    style={{ ...coordinateSetterStyles.coordinatesText(lightTheme), fontSize: 16, fontWeight: "600" }}
-                >
-                    Latitude: {getReadableCoordinate(latitude)}
-                </Text>
-                <Text
-                    style={{ ...coordinateSetterStyles.coordinatesText(lightTheme), fontSize: 16, fontWeight: "600" }}
-                >
-                    Longitude: {getReadableCoordinate(longitude)}
-                </Text>
             </View>
         )
     }
@@ -125,10 +122,10 @@ export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng }) => {
     return (
         <View style={{ flexDirection: 'column' }}>
             <View style={coordinateSetterStyles.innerContainer}>
-                <TouchableOpacity style={{ flexDirection: 'column' }}
+                <TouchableOpacity style={{ flexDirection: 'column', width: '93%' }}
                     onPress={() => requestLocation(onSetLat, onSetLng, setLat, setLng)}
                 >
-                    <CoordinatesDisplay latitude={lat} longitude={lng} title={Strings.messages.Location} />
+                    <CoordinatesDisplay latitude={lat} longitude={lng} />
                 </TouchableOpacity>
             </View>
         </View>

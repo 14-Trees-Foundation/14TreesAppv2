@@ -63,15 +63,15 @@ function UpdatePlotSelectModal({ updatePlotModalVisible, setUpdatePlotModalVisib
 
                 if (shiftType === shiftTypes.updatePlot) {
                     shiftData = {
-                        shifttype: 'updatePlot',
+                        shift_type: 'updatePlot',
                         user_id: await Utils.getUserId(),
-                        plotselected: plotSelected.name,
-                        shiftended: 0,
-                        shiftuploadcomplete: 0,
-                        starttime: Utils.getCurrentTime12Hr(),
-                        endtime: Utils.getCurrentTime12Hr(),
-                        timetaken: 0,
-                        treesplanted: 0
+                        plot_selected: plotSelected.name,
+                        shift_ended: 0,
+                        shift_upload_complete: 0,
+                        start_time: Utils.getCurrentTime12Hr(),
+                        end_time: Utils.getCurrentTime12Hr(),
+                        time_taken: 0,
+                        trees_planted: 0
                     }
 
                     console.log("starting shift and inserting into shift table--", shiftData);

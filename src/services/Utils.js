@@ -147,9 +147,9 @@ export class Utils {
         for (let index = 0; index < images.length; index++) {
             //console.log("image while adding tree: ", images[index].data)
             const element = {
-                saplingid: tree.saplingid,
+                sapling_id: tree.sapling_id,
                 image: images[index].data,
-                imageid: images[index].name,
+                image_id: images[index].name,
                 remark: images[index].meta.remark,
                 timestamp: images[index].meta.capturetimestamp,
             };
@@ -206,7 +206,7 @@ export class Utils {
                 lng: res[index].lng,
                 inActive: res[index].inActive,
                 image: {
-                    name: res[index]?.imageid,
+                    name: res[index]?.image_id,
                     data: res[index]?.image,
                     meta: {
                         remark: res[index]?.remark?.replace("''", "'"),
@@ -280,9 +280,17 @@ export class Utils {
 
     static async createLocalTablesIfNeeded() {
         // await this.localdb.deleteTables();
+        // await AsyncStorage.multiRemove([
+        //     Constants.lastHashKey,
+        //     Constants.lastHashForShifts,
+        //     Constants.adminIdKey,
+        //     Constants.appRootTagKey,
+        //     Constants.syncDateKey,
+        // ])
         const daoClient = await DaoClient.authenticate();
-        daoClient.users.deleteTable();
-        daoClient.users.createTable();
+        await daoClient.trees.createTable();
+        await daoClient.users.createTable();
+        await daoClient.treeImages.createTable();
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
         await this.localdb.createSaplingTbl();
@@ -326,9 +334,10 @@ export class Utils {
         }
         if (data) {
             console.log("---------------------------New Data-------------")
+
             await Utils.storeTreeTypes(data['plant_types']);
             await Utils.storePlots(data['plots']);
-            console.log("data['saplings'] :", data['sapling_ids'].length)
+            console.log("data['sapling_ids'] :", data['sapling_ids'].length)
             await Utils.storeTrees(data['sapling_ids'])
             await AsyncStorage.setItem(Constants.lastHashKey, newHash);
             // ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
@@ -342,6 +351,7 @@ export class Utils {
         let lastHashForShifts = await AsyncStorage.getItem(Constants.lastHashForShifts);
         lastHash = String(lastHashForShifts);
         let userId = await Utils.getUserId();
+        userId = parseInt(userId);
         const shiftData = await DataService.fetchShifts(userId, lastHash);
 
         console.log("lastHash shift---", lastHash)
@@ -422,13 +432,13 @@ export class Utils {
                     const shiftData = {
                         id: shift.id,
                         user_id: shift.user_id,
-                        plotselected: shift.plotselected,
-                        starttime: shift.starttime,
-                        endtime: shift.endtime,
-                        shiftended: 1, //made it 1
-                        shiftuploadcomplete: uploadedShift ? 1 : 0,
-                        timetaken: shift.timetaken,
-                        treesplanted: shift.treesplanted,
+                        plot_selected: shift.plotselected,
+                        start_time: shift.starttime,
+                        end_time: shift.endtime,
+                        shift_ended: 1, //made it 1
+                        shift_upload_complete: uploadedShift ? 1 : 0,
+                        time_taken: shift.timetaken,
+                        trees_planted: shift.treesplanted,
                         saplings: saplings
                     }
 
@@ -461,15 +471,16 @@ export class Utils {
     }
 
 
-    static async storeTreeTypes(treeTypes) {
+    static async storeTreeTypes(plantTypes) {
         // console.log(treeTypes[0])
-        const treeTypesInLocalDBFormat = treeTypes.map((treeType) => {
-            if (treeType.name) {
-                treeType.name = treeType.name.replace("'", "''");
+        const treeTypesInLocalDBFormat = plantTypes.map((plantType) => {
+            if (plantType.name) {
+                plantType.name = plantType.name.replace("'", "''");
             }
             return {
-                name: treeType.name,
-                tree_id: treeType.tree_id
+                name: plantType.name,
+                plant_type_id: plantType.plant_type_id,
+                id: plantType.id,
             }
         })
         let failure = false;
@@ -504,6 +515,7 @@ export class Utils {
                 plot.name = plot.name.replace("'", "''");
             }
             return {
+                id: plot.id,
                 name: plot.name,
                 plot_id: plot.plot_id
             }
@@ -584,15 +596,15 @@ export class Utils {
                 plot_selected: shift.plot_selected,
                 end_time: shift.end_time,
                 saplings: shift.saplings,
-                shift_id: shift._id,
+                shift_id: shift.id,
                 shift_type: shift.shift_type,
                 start_time: shift.start_time,
                 timestamp: shift.timestamp,
                 time_taken: shift.time_taken,
                 trees_planted: shift.trees_planted,
                 user_id: shift.user_id,
-                shiftended: 1,
-                shiftuploadcomplete: 1,
+                shift_ended: 1,
+                shift_upload_complete: 1,
             }
         })
 
@@ -701,7 +713,7 @@ export class Utils {
         let shifts = await Utils.getShiftsIDLocalDB(0); //not uploaded.
 
         for (const shift of shifts) {
-            const shiftType = shiftTypesObject[shift.shifttype];
+            const shiftType = shiftTypesObject[shift.shift_type];
             let saplingsInShift = shift.saplings;
             let saplingsFromLocalTable;
 
@@ -1097,6 +1109,7 @@ export class Utils {
         var final = [];
         for (let index = 0; index < res.length; index++) {
             let tree = await Utils.formatLocalTreeToJSON(res[index]);
+            console.log(tree);
             final.push(tree);
         }
         return final;
@@ -1111,17 +1124,21 @@ export class Utils {
             element.lng = 0;
         }
         //console.log(element.lat, element.lng);
+        const userDetailsStr = await AsyncStorage.getItem(Constants.userDetailsKey)
+        const userDetails = JSON.parse(userDetailsStr);
         let images = await this.localdb.getTreeImages(element.sapling_id);
 
         const tree = {
             sapling_id: element.sapling_id,
-            type_id: element.type_id,
+            plant_type_id: element.plant_type_id,
             plot_id: element.plot_id,
             coordinates: [element.lat, element.lng],
+            planted_by: userDetails.name,
             images: images,
             // shiftID: element.shiftID,
             uploaded: (element.uploaded === 1),
             //sequenceNo: element.sequenceNo,
+            tree_status: element.tree_status,
             timestamp: element.timestamp
         };
         if (element.uploaded !== undefined) {
@@ -1141,13 +1158,13 @@ export class Utils {
     static async treeTypeFromID(treeTypeID) {
         //both ids are numbers of type string.
         const treeNames = await this.localdb.getTreeTypes();
-        const requiredTreeType = treeNames.find((tree) => (tree.value === treeTypeID));
+        const requiredTreeType = treeNames.find((tree) => (tree.id === treeTypeID));
         return requiredTreeType;
     }
     static async plotFromPlotID(plotID) {
         //both ids are numbers of type string.
         const plots = await this.localdb.getAllPlots();
-        const requiredPlot = plots.find((plot) => (plot.value === plotID));
+        const requiredPlot = plots.find((plot) => (plot.id === plotID));
         console.log(requiredPlot)
         return requiredPlot;
     }
@@ -1168,7 +1185,8 @@ export class Utils {
 
 
     static async getUserId() {
-        return await AsyncStorage.getItem(Constants.userIdKey);
+        let userId = await AsyncStorage.getItem(Constants.userIdKey)
+        return parseInt(userId);
     }
 
     static async getAdminId() {
@@ -1412,6 +1430,8 @@ export class Utils {
 
 export class Constants {
     static userIdKey = 'userid';
+    static userRole = 'user_role';
+    static authToken = 'token';
     static userDetailsKey = 'userobj';
     static adminIdKey = 'adminid';
     static phoneNumber = 'phoneNo';
@@ -1420,7 +1440,7 @@ export class Constants {
     static hashForPlotSaplingsKey = 'hashForPlotSaplings';
     static appRootTagKey = 'rootTag';
     static syncDateKey = 'date';
-    static treeFormTemplateData = { inSaplingId: null, inLat: 0, inLng: 0, inImages: [], inPlot: null, inTreeType: null, inUserId: '' }
+    static treeFormTemplateData = { inSaplingId: null, inLat: 0, inLng: 0, inImage: null, inPlot: null, inTreeType: null, inUserId: 0, inTreeStatus: 'alive' }
     static selectedLangKey = 'LANG';
     static selectedTheme = 'DARK';
     static lastUsersFetchedAt = 'last_users_fetched_at'
@@ -1432,6 +1452,10 @@ export class Constants {
     static placeholderImage() {
         return require('../../assets/icon-profile.png');
     }
+
+    // helpers data
+    static lastTreesFetchedAt = 'last_trees_fetched_at'
+    static lastUsersFetchedAt = 'last_users_fetched_at'
 }
 
 export const getImageSourceObject = (src) => {

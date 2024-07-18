@@ -2,6 +2,7 @@ import axios from 'axios'
 import { Strings } from '../Strings';
 import { ToastAndroid } from 'react-native';
 import { UserService } from './users';
+import { TreeService } from './trees';
 
 axios.interceptors.response.use(function (response) {
     return response;
@@ -51,4 +52,5 @@ export class ApiClient {
         baseURL: this.serverBase,
     });
     public users = new UserService(this.api);
+    public trees = new TreeService(this.api);
 } 

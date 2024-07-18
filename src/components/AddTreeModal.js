@@ -17,7 +17,9 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
 
         const endtime = Utils.getCurrentTime12Hr();
         const timetaken = Utils.formatTime(finalShiftData.current.seconds);
-        const user_id = await Utils.getUserId();
+        let user_id = await Utils.getUserId();
+        user_id = parseInt(user_id)
+
 
         const sapling = {
             sapling_id: saplingId,
@@ -28,13 +30,13 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
         const shiftData = {
             id: shiftID,
             user_id: user_id,
-            plotselected: finalShiftData.current.plotselected,
-            starttime: finalShiftData.current.shiftTime,
-            endtime: endtime,
-            shiftended: 0,
-            shiftuploadcomplete: 0,
-            timetaken: timetaken,
-            treesplanted: finalShiftData.current.treesPlanted,
+            plot_selected: finalShiftData.current.plotselected,
+            start_time: finalShiftData.current.shiftTime,
+            end_time: endtime,
+            shift_ended: 0,
+            shift_upload_complete: 0,
+            time_taken: timetaken,
+            trees_planted: finalShiftData.current.treesPlanted,
             sapling: sapling
         }
 
@@ -50,17 +52,17 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
             await Utils.saveTreeAndImagesToLocalDB(tree, images);
             setPlaySound(true);
             ToastAndroid.show(Strings.alertMessages.TreeSaved, ToastAndroid.SHORT);
-            await saveShiftsAndTreesToDB(tree.saplingid);
+            await saveShiftsAndTreesToDB(tree.sapling_id);
 
         } else if (mode === treeFormModes.localEdit) {
 
-            if (tree.saplingid !== details.inSaplingId) {
+            if (tree.sapling_id !== details.inSaplingId) {
                 await Utils.deleteTreeAndImages(details.inSaplingId); //delete tree by sapling ID
                 //change sapling id in shift table also...
-                await Utils.updateSaplingInShiftDB(tree.saplingid, details.inSaplingId, shiftID);
+                await Utils.updateSaplingInShiftDB(tree.sapling_id, details.inSaplingId, shiftID);
             }
 
-            await Utils.deleteTreeImages(tree.saplingid);
+            await Utils.deleteTreeImages(tree.sapling_id);
             await Utils.saveTreeAndImagesToLocalDB(tree, images);
             //onFetchData();
             let toastmsg = Strings.alertMessages.TreeUpdatedfirsthalf + saplingID + Strings.alertMessages.TreeUpdatedsecondhalf;
@@ -86,11 +88,11 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
             return;
         }
 
-        if (treeDetails.type_id && treeDetails.plot_id && treeDetails.images && treeDetails.coordinates[0] && treeDetails.coordinates[1] && treeDetails.user_id) {
+        if (treeDetails.plant_type_id && treeDetails.plot_id && treeDetails.images && treeDetails.coordinates[0] && treeDetails.coordinates[1] && treeDetails.user_id) {
             const detailsForTreeForm = { ...Constants.treeFormTemplateData };
-            const treeType = await Utils.treeTypeFromID(treeDetails.type_id);
+            const treeType = await Utils.treeTypeFromID(treeDetails.plant_type_id);
             const plot = await Utils.plotFromPlotID(treeDetails.plot_id);
-            detailsForTreeForm.inImages = treeDetails.images;
+            detailsForTreeForm.inImage = treeDetails.images[0] || null;
             detailsForTreeForm.inLat = 0;
             detailsForTreeForm.inLng = 0;
             detailsForTreeForm.inLat = Number.parseFloat(treeDetails.coordinates[0]);
@@ -99,6 +101,7 @@ const AddTreeModal = ({ modalVisible, setModalVisible, mode, onFetchData, saplin
             detailsForTreeForm.inTreeType = treeType;
             detailsForTreeForm.inPlot = plot;
             detailsForTreeForm.inUserId = treeDetails.user_id;
+            detailsForTreeForm.inTreeStatus = treeDetails.tree_status;
 
             setDetails(detailsForTreeForm);
         } else {
