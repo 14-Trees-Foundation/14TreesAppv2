@@ -11,7 +11,7 @@ export class SiteService {
     }
 
     async getSites(offset: number, limit: number, filters?: FilterItem[]): Promise<PaginatedResponse<Site>> {
-        const url = `/get?offset=${offset}&limit=${limit}`;
+        const url = `/api/sites/get?offset=${offset}&limit=${limit}`;
         try {
             const response = await this.api.post<PaginatedResponse<Site>>(url, { filters: filters });
             return response.data;
@@ -20,18 +20,9 @@ export class SiteService {
         }
     }
 
-    async searchSites(searchStr: string): Promise<Site[]> {
-        try {
-            const response = await this.api.get<Site[]>(`/${searchStr}`);
-            return response.data;
-        } catch (error: any) {
-            return handleApiError("SitesClient::searchSites:", error)
-        }
-    }
-
     async createSite(data: Site): Promise<Site> {
         try {
-            const response = await this.api.post<Site>(`/`, data);
+            const response = await this.api.post<Site>(`/api/sites`, data);
             return response.data;
         } catch (error: any) {
             return handleApiError("SitesClient::createSiets:", error)
@@ -40,7 +31,7 @@ export class SiteService {
 
     async updateSite(data: Site): Promise<Site> {
         try {
-            const response = await this.api.put<Site>(`/${data.id}`, data);
+            const response = await this.api.put<Site>(`/api/sites/${data.id}`, data);
             return response.data;
         } catch (error: any) {
             return handleApiError("SitesClient::updateSite:", error)
@@ -50,7 +41,7 @@ export class SiteService {
     async deleteSite(data: Site): Promise<number> {
         if (!data.id) throw new Error('Site id required to delete Site!')
         try {
-            await this.api.delete<any>(`/${data.id}`);
+            await this.api.delete<any>(`/api/sites/${data.id}`);
             return data.id;
         } catch (error: any) {
             return handleApiError("SitesClient::deleteSite:", error)
@@ -58,7 +49,7 @@ export class SiteService {
     }
 
     async fetchChanges(timestamp: string, site_ids: number[]): Promise<SiteHelperDataResponse> {
-        const url = `/api/appv2/fetchHelperData/users`;
+        const url = `/api/appv2/fetchHelperData/sites`;
         try {
             const response = await this.api.post<SiteHelperDataResponse>(url, { timestamp, site_ids });
             return response.data;

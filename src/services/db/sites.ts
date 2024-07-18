@@ -1,8 +1,6 @@
 import { SQLiteDatabase } from 'react-native-sqlite-storage';
 import { CreateSiteRequest, Site } from '../../model/sites';
 
-const sitesTableName = 'sites'
-
 export class SitesDao {
     private db: SQLiteDatabase;
     private tableName: string = 'sites';
@@ -179,7 +177,71 @@ export class SitesDao {
         }
     }
 
- 
+    upsertLiveSiteIntoLocalDb = async (data: Site) => {
+        if (!data.id) return;
+
+        const [response] = await this.db.executeSql(
+            `SELECT * FROM ${this.tableName} WHERE id = ?;`,
+            [data.id]
+        )
+        if (response.rows.length === 0) {
+            // insert live user
+            await this.db.executeSql(
+                `INSERT INTO ${this.tableName} (
+                    id,
+                    name_marathi,
+                    name_english,
+                    owner,
+                    land_type,
+                    land_strata,
+                    district,
+                    taluka,
+                    village,
+                    area_acres,
+                    length_km,
+                    grove_type,
+                    created_at,
+                    updated_at,
+                    is_uploaded,
+                    change_type
+                ) VALUES (
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 'none'
+                );`,
+                [
+                    data.id, data.name_english, data.name_marathi, data.owner, data.land_type, 
+                    data.land_strata, data.district, data.taluka, data.village, data.area_acres, 
+                    data.length_km, data.grove_type, data.created_at, data.updated_at
+                ]
+            )
+        } else {
+            // update user
+            await this.db.executeSql(
+                `UPDATE ${this.tableName}
+                SET
+                    name_english = ?,
+                    name_marathi = ?,
+                    owner = ?,
+                    land_type = ?,
+                    land_strata = ?,
+                    district = ?,
+                    taluka = ?,
+                    village = ?,
+                    area_acres = ?,
+                    length_km = ?,
+                    grove_type = ?,
+                    is_uploaded = 0,
+                    change_type = 'none',
+                    created_at = ?
+                    updated_at = ?
+                    WHERE id = ?;`,
+                [
+                    data.name_english, data.name_marathi, data.owner, data.land_type, 
+                    data.land_strata, data.district, data.taluka, data.village, data.area_acres, 
+                    data.length_km, data.grove_type, data.created_at, data.updated_at, data.id
+                ]
+            )
+        }
+    }
 
     deleteSite = async (id: number) => {
         const [response] = await this.db.executeSql(

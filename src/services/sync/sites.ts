@@ -17,10 +17,9 @@ export const fetchAndStoreSites = async () => {
         const now = new Date().toISOString();
         const response = await apiClient.sites.fetchChanges(timestamp, siteIds)
         const sites = response.sites;
-
         // upload sites in local db
         for (const site of sites) {
-            // await daoClient.sites.upsertLiveUserIntoLocalDb(site);
+            await daoClient.sites.upsertLiveSiteIntoLocalDb(site);
         }
 
         // delete sites in local db
