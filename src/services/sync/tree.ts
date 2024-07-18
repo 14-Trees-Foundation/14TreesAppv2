@@ -36,7 +36,12 @@ export const fetchAndStoreTrees = async () => {
                 tree.memory_images = tree.memory_images ? JSON.stringify(tree.memory_images) : null;
                 return tree;
             })
-            await daoClient.trees.bulkInsertTrees(data);
+
+            const BATCH_SIZE = 1000;
+            for (let i = 0; i < data.length; i += BATCH_SIZE) {
+                await daoClient.trees.bulkInsertTrees(data.slice(i, i + BATCH_SIZE));
+            }
+            // await daoClient.trees.bulkInsertTrees(data);
         
             // delete trees in local db
             for (const treeId of response.deleted_tree_ids) {

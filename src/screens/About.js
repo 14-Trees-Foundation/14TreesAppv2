@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Text, Image, View, BackHandler, StyleSheet } from 'react-native';
+import { Text, Image, View, BackHandler } from 'react-native';
 import { aboutStyles } from '../services/Styles';
 import { APP_VERSION } from '../constants/constants';
 

@@ -252,17 +252,15 @@ export class TreesDao {
         if (trees.length !== 0) {
 
             let replacement: any[] = []
-            let valuesStr = '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?),'.repeat(trees.length);
-            valuesStr = valuesStr.slice(0, -1);
+            let valuesStr = '';
             trees.forEach(data => {
+                valuesStr += `(${data.id}, ?, ${data.plant_type_id}, ${data.plot_id}, ?, ?, ?, ${data.mapped_to_user}, ${data.mapped_to_group}, ?, ${data.sponsored_by_user}, ${data.sponsored_by_group}, ${data.gifted_by}, ${data.gifted_to}, ?, ${data.assigned_to}, ?, ?,1, ?, ?),`
                 replacement = [ ...replacement,
-                    data.id, data.sapling_id, data.plant_type_id, data.plot_id, data.image, data.tags, 
-                    data.location, data.planted_by, data.mapped_to_user, data.mapped_to_group, data.mapped_at,
-                    data.sponsored_by_user, data.sponsored_by_group, data.gifted_by, data.gifted_to, 
-                    data.assigned_at, data.assigned_to, data.user_tree_image, data.description, data.event_id, 
-                    data.memory_images, data.tree_status, data.created_at, data.updated_at 
+                    data.sapling_id, data.image, data.location, data.planted_by, data.mapped_at, 
+                    data.assigned_at, data.user_tree_image, data.tree_status, data.created_at, data.updated_at 
                 ]
             })
+            valuesStr = valuesStr.slice(0, -1);
             
             // insert live tree
             await this.db.executeSql(
@@ -272,7 +270,6 @@ export class TreesDao {
                     plant_type_id,
                     plot_id,
                     image,
-                    tags,
                     location,
                     planted_by,
                     mapped_to_user,
@@ -285,9 +282,6 @@ export class TreesDao {
                     assigned_at,
                     assigned_to,
                     user_tree_image,
-                    description,
-                    event_id,
-                    memory_images,
                     tree_status,
                     is_uploaded,
                     created_at,

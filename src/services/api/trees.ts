@@ -14,7 +14,7 @@ export class TreeService {
     async fetchChanges(timestamp: string, tree_ids: number[], offset?: number, limit?: number): Promise<TreeHelperDataResponse> {
         const url = `/api/appv2/fetchHelperData/trees?`;
         try {
-            const response = await this.api.post<TreeHelperDataResponse>(url, { timestamp, tree_ids, offset, limit });
+            const response = await this.api.post<TreeHelperDataResponse>(url, { timestamp, tree_ids, offset, limit: 10000 });
             return response.data;
         } catch (error: any) {
             return handleApiError("TreeService::fetchChanges:", error)
