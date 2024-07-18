@@ -23,20 +23,29 @@ export const fetchAndStoreTrees = async () => {
             const trees = response.trees;
             
             // upload trees in local db
-            for (const tree of trees) {
+            // for (const tree of trees) {
+            //     tree.location = tree.location ? JSON.stringify(tree.location) : null;
+            //     tree.tags = tree.tags ? JSON.stringify(tree.tags) : null;
+            //     tree.memory_images = tree.memory_images ? JSON.stringify(tree.memory_images) : null;
+            //     await daoClient.trees.upsertLiveTreeIntoLocalDb(tree);
+            // }
+
+            let data = trees.map(tree => {
                 tree.location = tree.location ? JSON.stringify(tree.location) : null;
                 tree.tags = tree.tags ? JSON.stringify(tree.tags) : null;
                 tree.memory_images = tree.memory_images ? JSON.stringify(tree.memory_images) : null;
-                await daoClient.trees.upsertLiveTreeIntoLocalDb(tree);
-            }
+                return tree;
+            })
+            await daoClient.trees.bulkInsertTrees(data);
         
             // delete trees in local db
             for (const treeId of response.deleted_tree_ids) {
                 await daoClient.trees.deleteLiveTreeFromLocalDb(treeId);
             }
 
-            treeIds = []
+            // treeIds = []
             offset += trees.length;
+            console.log(offset+"/"+response.total)
             if (offset >= response.total) break;
         }
 

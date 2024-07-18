@@ -15,7 +15,7 @@ export class TreesDao {
             const query = `CREATE TABLE IF NOT EXISTS ${this.tableName} (
                 local_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 id INTEGER NULL,
-                sapling_id TEXT NOT NULL,
+                sapling_id TEXT UNIQUE NOT NULL,
                 plant_type_id INTEGER NOT NULL,
                 plot_id INTEGER,
                 image TEXT,
@@ -243,6 +243,57 @@ export class TreesDao {
                     data.assigned_at, data.assigned_to, data.user_tree_image, data.description, data.event_id, 
                     data.memory_images, data.tree_status, data.created_at, data.updated_at, data.id
                 ]
+            )
+        }
+    }
+
+    bulkInsertTrees = async (trees: Tree[]) => {
+
+        if (trees.length !== 0) {
+
+            let replacement: any[] = []
+            let valuesStr = '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?),'.repeat(trees.length);
+            valuesStr = valuesStr.slice(0, -1);
+            trees.forEach(data => {
+                replacement = [ ...replacement,
+                    data.id, data.sapling_id, data.plant_type_id, data.plot_id, data.image, data.tags, 
+                    data.location, data.planted_by, data.mapped_to_user, data.mapped_to_group, data.mapped_at,
+                    data.sponsored_by_user, data.sponsored_by_group, data.gifted_by, data.gifted_to, 
+                    data.assigned_at, data.assigned_to, data.user_tree_image, data.description, data.event_id, 
+                    data.memory_images, data.tree_status, data.created_at, data.updated_at 
+                ]
+            })
+            
+            // insert live tree
+            await this.db.executeSql(
+                `INSERT OR REPLACE INTO ${this.tableName} (
+                    id,
+                    sapling_id,
+                    plant_type_id,
+                    plot_id,
+                    image,
+                    tags,
+                    location,
+                    planted_by,
+                    mapped_to_user,
+                    mapped_to_group,
+                    mapped_at,
+                    sponsored_by_user,
+                    sponsored_by_group,
+                    gifted_by,
+                    gifted_to,
+                    assigned_at,
+                    assigned_to,
+                    user_tree_image,
+                    description,
+                    event_id,
+                    memory_images,
+                    tree_status,
+                    is_uploaded,
+                    created_at,
+                    updated_at
+                ) VALUES ${valuesStr};`,
+                replacement
             )
         }
     }

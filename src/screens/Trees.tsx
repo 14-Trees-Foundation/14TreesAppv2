@@ -149,9 +149,10 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                     }} />
                 </View>
             </View>}
-            {!isFormVisible && <ScrollView style={styles.scrollView} >
+            {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems: 'center'}}>
                 {trees.map((tree, index) => (
-                    <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.5} key={index} onPress={() => {
+                <View style={{ width: '95%' }} key={index}>
+                    <TouchableOpacity style={{ width: '100%' }} activeOpacity={0.91} onPress={() => {
                         setSelectedTree(tree);
                         setInfoModalVisible(true);
                     }}>
@@ -161,6 +162,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                             plotName={plots.find(plot => plot.id === tree.plot_id)?.name || ''}
                         />
                     </TouchableOpacity>
+                </View>
                 ))}
             </ScrollView>}
 
@@ -211,7 +213,7 @@ const styles = StyleSheet.create({
     },
     scrollView: {
         flex: 1,
-        width: '95%'
+        width: '100%'
     },
     modal: {
         justifyContent: 'center',
