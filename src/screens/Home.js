@@ -5,7 +5,6 @@ import { Utils } from '../services/Utils';
 import GlobalContext from '../context/GlobalContext ';
 import { useFocusEffect } from '@react-navigation/native';
 import { homeStyles } from '../services/Styles';
-import { LocalDatabase } from '../services/db/db';
 import { fetchAndStoreUsers } from '../services/sync/users';
 import { fetchAndStorePlots } from '../services/sync/plots';
 

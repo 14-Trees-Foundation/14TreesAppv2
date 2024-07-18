@@ -5,11 +5,13 @@ export type User = {
     name: string,
     phone: string,
     email: string,
-    birth_date?: Date,
+    birth_date: string | null,
+    roles: string | null,
+    pin: string | null,
     is_uploaded: 0 | 1,
     change_type: 'none' | 'add' | 'edit' | 'delete',
-    created_at: Date,
-    updated_at: Date
+    created_at: string,
+    updated_at: string
 }
 
 export type CreateUserRequest = {
@@ -17,4 +19,9 @@ export type CreateUserRequest = {
     phone: string,
     email: string,
     birth_date: string | null
+}
+
+export type UserHelperDataResponse = {
+    users: User[],
+    deleted_user_ids: number[]
 }

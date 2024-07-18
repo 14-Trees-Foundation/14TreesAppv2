@@ -1,16 +1,13 @@
 import axios, { AxiosInstance } from "axios";
 import { FilterItem, PaginatedResponse } from "../../model/common"
-import { User } from "../../model/user"
+import { User, UserHelperDataResponse } from "../../model/user"
 import { handleApiError } from "./handleError";
 
-export class UserClient {
+export class UserService {
     private api: AxiosInstance;
-    
-    constructor() {
-        const baseURL = 'https://dev-api.14trees.org/api/users';
-        this.api = axios.create({
-          baseURL: baseURL,
-        });
+
+    constructor(api: AxiosInstance) {
+        this.api = api;
     }
 
     async getUsers(offset: number, limit: number, filters?: FilterItem[]): Promise<PaginatedResponse<User>> {
@@ -57,6 +54,16 @@ export class UserClient {
             return data.id;
         } catch (error: any) {
             return handleApiError("UserClient::deleteUser:", error)
+        }
+    }
+
+    async fetchChanges(timestamp: string, user_ids: number[]): Promise<UserHelperDataResponse> {
+        const url = `/api/appv2/fetchHelperData/users`;
+        try {
+            const response = await this.api.post<UserHelperDataResponse>(url, { timestamp, user_ids });
+            return response.data;
+        } catch (error: any) {
+            return handleApiError("UserService::fetchChanges:", error)
         }
     }
 }
