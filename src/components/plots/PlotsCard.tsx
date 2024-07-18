@@ -11,8 +11,8 @@ const PlotsCard: React.FC<PlotsCardInputProps> = ({ plot }) => {
   return (
     <View style={styles.card}>
       <Text style={styles.name}>{plot.name}</Text>
-      <Text style={styles.email}>{plot.plot_id}</Text>
-      <Text style={styles.email}>{plot.land_type}</Text>
+      <Text >{plot.plot_id}</Text>
+      <Text>{plot.land_type}</Text>
     </View>
   );
 };
@@ -34,11 +34,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
-  },
-  email: {
-    fontSize: 16,
-    color: '#555',
-  },
+  }
+ 
 });
 
 export default PlotsCard;

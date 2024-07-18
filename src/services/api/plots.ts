@@ -1,16 +1,13 @@
 import axios, { AxiosInstance } from "axios";
 import { FilterItem, PaginatedResponse } from "../../model/common"
-import { Plots } from "../../model/plots"
+import { Plots  , PlotHelperDataResponse} from "../../model/plots"
 import { handleApiError } from "./handleError";
 
-export class PlotsClient {
+export class PlotsService {
     private api: AxiosInstance;
     
-    constructor() {
-        const baseURL = 'https://dev-api.14trees.org/api/plots';
-        this.api = axios.create({
-          baseURL: baseURL,
-        });
+    constructor(api: AxiosInstance) {
+        this.api = api;
     }
 
     async getPlots(offset: number, limit: number, filters?: FilterItem[]): Promise<PaginatedResponse<Plots>> {
@@ -50,13 +47,23 @@ export class PlotsClient {
         }
     }
 
-    async deleteUser(data: Plots): Promise<number> {
-        if (!data.id) throw new Error('User id required to delete user!')
+    async deletePlot(data: Plots): Promise<number> {
+        if (!data.id) throw new Error('Plot id required to delete plot!')
         try {
             await this.api.delete<any>(`/${data.id}`);
             return data.id;
         } catch (error: any) {
-            return handleApiError("UserClient::deleteUser:", error)
+            return handleApiError("PlotClient::deletePlot:", error)
+        }
+    }
+
+    async fetchChanges(timestamp: string, plot_ids: number[]): Promise<PlotHelperDataResponse> {
+        const url = `/api/appv2/fetchHelperData/plots`;
+        try {
+            const response = await this.api.post<PlotHelperDataResponse>(url, { timestamp, plot_ids });
+            return response.data;
+        } catch (error: any) {
+            return handleApiError("PlotsService::fetchChanges:", error)
         }
     }
 }

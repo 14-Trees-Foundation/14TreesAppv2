@@ -1,19 +1,21 @@
 // PLotsEditModal.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState , useContext} from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
+import { Strings } from "../../services/Strings";
+import { CustomButtonStyles, treeFormStyles } from "../../services/Styles";
+import GlobalContext from '../../context/GlobalContext ';
 import RCTDateTimePicker from '@react-native-community/datetimepicker';
 import { CreatePlotRequest, Plots } from '../../model/plots';
 
-interface PlotsFormModalInputProps {
+interface PlotsFormInputProps {
     mode: 'edit' | 'add'
     isVisible: boolean,
-    onClose: () => void,
-    onSave: (data: Plots | CreatePlotRequest) => void
-    user?: Plots
+    onSubmit: (data: Plots | CreatePlotRequest) => void,
+    onCancel: () => void,
 }
 
-const PlotsFormModal: React.FC<PlotsFormModalInputProps> = ({ mode, isVisible, onClose, onSave, plot }) => {
+const PlotsForm: React.FC<PlotsFormInputProps> = ({ plot, changeMode, onCancel, onSubmit }) => {
     const date = new Date();
     const [name, setName] = useState('');
     const [plot_id, setPlotId] = useState('');
@@ -38,7 +40,7 @@ const PlotsFormModal: React.FC<PlotsFormModalInputProps> = ({ mode, isVisible, o
     const handleSubmit = () => {
         onClose();
         
-        let data: Plots | CreatePlotRequest = {
+        let data = {
             name: name,
             plot_id: plot_id,
             tags: tags,
@@ -49,13 +51,13 @@ const PlotsFormModal: React.FC<PlotsFormModalInputProps> = ({ mode, isVisible, o
             
         }
 
-        if (plot) {
-            data = {
-                ...plot,
-                ...data
-            }
+        if (changeMode === 'add') {
+            const newPlot = { ...data } as CreatePlotRequest;
+            onSubmit(newPlot)
+        } else if (plot) {
+            let newChanges = { ...plot, ...data } as Plots;
+            onSubmit(newChanges)
         }
-        onSave(data);
     }
      return (
         <Modal
@@ -150,4 +152,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default PlotsFormModal;
+export default PlotsForm;

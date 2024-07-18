@@ -1,12 +1,20 @@
 import { View, Button, BackHandler, ScrollView, SafeAreaView, StyleSheet, TextInput } from "react-native";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState ,useCallback } from "react";
 import GlobalContext from "../context/GlobalContext ";
+
+import { DaoClient } from "../services/db/dao";
 import { PlotsClient } from "../services/api/plots";
 import { LocalDatabase } from "../services/db/db";
-import PlotsFormModal from "../components/plots/PlotsFormModal";
+import PlotsForm from "../components/plots/PlotsForm";
 import PlotsCard from "../components/plots/PlotsCard";
 import PlotsInfo from "../components/plots/PlotsInfo";
 import { TouchableOpacity } from "react-native";
+import { CreatePlotRequest, Plots } from "../model/plots";
+import { useFocusEffect } from "@react-navigation/native";
+
+interface PlotsInputProps {
+    navigation: any
+}
 
 const Plots = ({ navigation }) => {
 
@@ -15,13 +23,25 @@ const Plots = ({ navigation }) => {
     const [isInfoModalVisible, setInfoModalVisible] = useState(false);
     const [changeMode, setChangeModel] = useState('add');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedPlot, setSelectedPlo] = useState(null);
     const [page, setPage] = useState(0);
     const [plots, setPlots] = useState([]);
 
-    const apiClient = new PlotsClient();
-    let localClient;
-    LocalDatabase.authenticate().then((client) => { localClient = client; });
+
+
+    
+
+    let daoClient: DaoClient;
+    DaoClient.authenticate().then((client) => { daoClient = client; });
+
+    useFocusEffect(
+        useCallback(() => {
+          setIsFormVisible(false);
+          setStateChange(stateChange + 1);
+          return () => {
+          };
+        }, [])
+    );
 
     useEffect(() => {
         const backAction = () => {
@@ -35,9 +55,9 @@ const Plots = ({ navigation }) => {
 
     useEffect(() => {
         setTimeout(async() => {
-            let resp = await localClient.users.getLocalUsers(page*10, 10);
-            if (page != 0) setUsers([...users, ...resp]);
-            else setUsers(resp)
+            let resp = await  daoClient.plots.getLocalPlots(page*10, 10);
+            if (page != 0) setPlots([...plots, ...resp]);
+            else setPlots(resp)
             console.log(resp);
         }, 1000)
     }, [page])
@@ -45,15 +65,15 @@ const Plots = ({ navigation }) => {
     useEffect(() => {
         if (searchQuery.length < 3) return;
         setTimeout(async() => {
-            let users = await apiClient.searchUsers(searchQuery);
-            setUsers(users);
+            let plots = await daoClient.searchPlots(searchQuery);
+            setPlots(plots);
         }, 1000)
     }, [searchQuery])
 
     const handleSave = (data) => {
         setTimeout(async() => {
-            if (changeMode === 'add') await localClient.users.createLocalUser(data);
-            else await localClient.users.updateLocalUser(data);
+            if (changeMode === 'add') await daoClient.plots.createLocalUser(data);
+            else await daoClient.plots.updateLocalPlot(data);
 
             setPage(0);
         }, 1000)
@@ -61,17 +81,17 @@ const Plots = ({ navigation }) => {
     };
 
     const handleDelete = () => {
-        if (selectedUser) {
+        if (selectedPlot) {
             setTimeout(async() => {
-                await localClient.users.deleteLocalUser(selectedUser);
+                await daoClient.plots.deleteLocalUser(selectedPlot);
                 setPage(0);
             }, 1000)
         }
     }
 
-    const filteredUsers = users.filter(user =>
-        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredPlots = plots.filter(plot =>
+        plot.name.toLowerCase().includes(searchQuery.toLowerCase()) 
+       
     );
 
     return (
@@ -101,7 +121,7 @@ const Plots = ({ navigation }) => {
                 ))}
             </ScrollView>
 
-            <PlotsFormModal
+            <PlotsForm
                 mode={changeMode}
                 isVisible={isFormVisible}
                 onClose={() => setIsFormVisible(false)}

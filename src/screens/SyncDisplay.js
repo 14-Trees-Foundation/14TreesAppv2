@@ -10,7 +10,7 @@ import { Button } from 'react-native-paper';
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { DaoClient } from '../services/db/dao';
 
-const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setUsersCount) => {
+const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setUsersCount , setPlotsCount) => {
   const lsdate = await Utils.getLastSyncDate();
   if (lsdate) {
     setSyncDate(Utils.getReadableDate(lsdate));
@@ -45,6 +45,7 @@ const SyncDisplay = ({ navigation }) => {
   const [failedPlotTrees, setFailedPlotTrees] = useState([]);
   const [shiftsCount, setShiftsCount] = useState(null);
   const [usersCount, setUsersCount] = useState(null);
+  const [plotsCount, setPlotsCount] = useState(null);
   const { lightTheme, shiftID, shiftDone } = useContext(GlobalContext);
 
   useEffect(() => {
@@ -60,7 +61,7 @@ const SyncDisplay = ({ navigation }) => {
 
 
   useFocusEffect(useCallback(() => {
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount ,setPlotsCount);
     console.log('sync date updated', shiftID)
   }, []))
 
@@ -105,7 +106,7 @@ const SyncDisplay = ({ navigation }) => {
     setFailedShifts(responseFromSyncShifts.failures);
 
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount, setPlotsCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -134,7 +135,7 @@ const SyncDisplay = ({ navigation }) => {
 
     setFailedTrees(failures)
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount, setPlotsCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -153,7 +154,7 @@ const SyncDisplay = ({ navigation }) => {
     //console.log("----------------treesinNewImageTable-----------", treesinNewImageTable[0].uploaded)
     setFailedImagesTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount , setPlotsCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -174,7 +175,7 @@ const SyncDisplay = ({ navigation }) => {
     console.log("---------failedPlotTreesMessages------", failures)
     setFailedPlotTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setUsersCount, setPlotsCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -333,6 +334,12 @@ const SyncDisplay = ({ navigation }) => {
               </Text>
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
                 [ added: {usersCount?.add || 0}, edited: {usersCount?.edit || 0}, deleted: {usersCount?.delete || 0}]
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "bold", paddingBottom: 4 }}>
+                {Strings.screenNames.PlotsPage}: 
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                [ added: {plotsCount?.add || 0}, edited: {plotsCount?.edit || 0}, deleted: {plotsCount?.delete || 0}]
               </Text>
             </View>
           </View>

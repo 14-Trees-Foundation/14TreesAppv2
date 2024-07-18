@@ -56,7 +56,7 @@ export const PlotsInfo: React.FC<PlotsInfoInputProps> = ({ isVisible, plot, onCl
                 backdropOpacity={0.5}
             >
                 <View style={styles.container}>
-                    <Text style={styles.deleteTitle}>Delete user "{user.name}"?</Text>
+                    <Text style={styles.deleteTitle}>Delete plot "{plot.name}"?</Text>
                     <View style={{ flexDirection: 'row' }}>
                         <Button style={styles.cancelButton} onPress={() => { setIsDelete(false);}} >
                             Cancel

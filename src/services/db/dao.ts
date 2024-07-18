@@ -1,7 +1,7 @@
 
 import { SQLiteDatabase, enablePromise, openDatabase } from 'react-native-sqlite-storage';
 import { UsersData } from './users';
-import { PlotsData } from './plots';
+import { PlotsDao, PlotsData } from './plots';
 import { UsersDao } from './users';
 
 enablePromise(true);
@@ -20,11 +20,14 @@ export class LocalDatabase {
     constructor(dbConnection: SQLiteDatabase) {
         this.users = new UsersData(dbConnection);
         this.plots = new PlotsData(dbConnection);
+    
 export class DaoClient {
     public users: UsersDao;
+    public plots: PlotsDao;
 
     constructor(dbConnection: SQLiteDatabase) {
         this.users = new UsersDao(dbConnection);
+        this.plots = new PlotsDao(dbConnection);
     }
 
     static async authenticate() {
@@ -34,3 +37,4 @@ export class DaoClient {
 
     
 }
+    
