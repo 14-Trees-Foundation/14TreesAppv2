@@ -1456,6 +1456,7 @@ export class Constants {
     // helpers data
     static lastTreesFetchedAt = 'last_trees_fetched_at'
     static lastUsersFetchedAt = 'last_users_fetched_at'
+    static lastSitesFetchedAt = 'last_sites_fetched_at'
 }
 
 export const getImageSourceObject = (src) => {

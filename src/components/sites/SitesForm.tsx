@@ -1,35 +1,30 @@
 // SiteEditModal.js
-import { useContext, useEffect, useState  , React} from 'react';
-import { ScrollView ,View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import Modal from 'react-native-modal';
+import { useContext, useEffect, useState} from 'react';
+import { ScrollView ,View, Text, TextInput } from 'react-native';
 import { Strings } from "../../services/Strings";
 import { CustomButtonStyles, treeFormStyles } from "../../services/Styles";
-import RCTDateTimePicker from '@react-native-community/datetimepicker';
-import GlobalContext from '../../context/GlobalContext ';
 import { Button } from 'react-native-paper';
-import { CreateSiteRequest, Sites } from '../../model/sites';
+import GlobalContext from '../../context/GlobalContext ';
+import { CreateSiteRequest, Site } from '../../model/sites';
 
 interface SiteFormInputProps {
-    site: Sites | null,
-    mode: 'edit' | 'add'
-    isVisible: boolean,
-    onClose: () => void,
-    onSave: (data: Sites | CreateSiteRequest) => void
+    site: Site | null,
+    changeMode: 'edit' | 'add'
+    onCancel: () => void,
+    onSubmit: (data: Site | CreateSiteRequest) => void
    
 }
 
 const SiteForm: React.FC<SiteFormInputProps> = ({ site, changeMode, onCancel, onSubmit }) => {
-    const date = new Date();
+
+    const { lightTheme } = useContext(GlobalContext);
     const [name_marathi, setNameMarathi] = useState('');
     const [name_english, setNameEnglish] = useState('');
    
-
     useEffect(() => {
         if (site) {
           setNameMarathi(site.name_marathi);
-          setNameEnglish(site.name_english);
-            
-            
+          setNameEnglish(site.name_english);            
         }
     }, [site])
 
@@ -38,102 +33,81 @@ const SiteForm: React.FC<SiteFormInputProps> = ({ site, changeMode, onCancel, on
         let data = {
             name_english: name_english,
             name_marathi: name_marathi,
-           
         }
 
         if (changeMode === 'add') {
             const newSite = { ...data } as CreateSiteRequest;
             onSubmit(newSite)
         } else if (site) {
-            let newChanges = { ...site, ...data } as Sites;
+            let newChanges = { ...site, ...data } as Site;
             onSubmit(newChanges)
         }
     }
-     return (
-        <Modal
-            isVisible={isVisible}
-            backdropColor="black"
-            backdropOpacity={0.5}
-            style={styles.modal}
-            onBackdropPress={onClose}
-        >
-            <View style={styles.modalContainer}>
-                <Text style={styles.title}> {mode === 'add' ? 'Add' : 'Edit'} Site Information</Text>
 
-                <TextInput
-                    style={styles.input}
-                    value={name_english}
-                    onChangeText={setNameEnglish}
-                    placeholder="Name English"
-                />
-                <TextInput
-                    style={styles.input}
-                    value={name_marathi}
-                    onChangeText={setNameMarathi}
-                    placeholder="Name Marathi"
-                    keyboardType=""
-                />
-              
+    return (
+        <View style={{ height: "97%" }}>
+            <Text style={treeFormStyles.plotSapling}> { changeMode === 'add' ? 'Add Site' : 'Edit Site' } </Text>
+            <ScrollView
+                keyboardShouldPersistTaps='handled'
+                scrollEnabled={true}
+                style={{ ...treeFormStyles.detailsContainerOuter, marginHorizontal: 0, }} >
+                <View style={{ margin: 4, borderRadius: 10 }}>
 
-                <View style={styles.buttonContainer}>
-                    <View style={styles.buttonCancel}>
-                        <Button title="Cancel" onPress={onClose} />
+                    <View style={{ marginTop: 15 }}>
+                        <Text style={ treeFormStyles.inputLabel }>Name in english:</Text>
+                        <TextInput
+                            defaultValue={name_english}
+                            style={treeFormStyles.textInput(lightTheme)}
+                            placeholder={Strings.labels.SiteName}
+                            placeholderTextColor={'black'}
+                            onChangeText={(text) => { setNameEnglish(text) }}
+                        />
                     </View>
-                    <View style={styles.buttonSave}>
-                        <Button title="Save" onPress={handleSubmit} />
+
+                    <View style={{ marginTop: 15 }}>
+                        <Text style={ treeFormStyles.inputLabel }>Name in marathi:</Text>
+                        <TextInput
+                            defaultValue={name_marathi}
+                            style={treeFormStyles.textInput(lightTheme)}
+                            placeholder={Strings.labels.SiteName}
+                            placeholderTextColor={'black'}
+                            onChangeText={(text) => { setNameMarathi(text) }}
+                        />
                     </View>
+
+
+                    <View style={CustomButtonStyles.container}>
+                        <View style={CustomButtonStyles.buttonRow}>
+                            <View style={CustomButtonStyles.buttonContainer}>
+                                {
+                                    <Button
+                                        mode="contained"
+                                        buttonColor='red'
+                                        labelStyle={CustomButtonStyles.buttonLabel}
+                                        style={CustomButtonStyles.button}
+                                        onPress={onCancel}
+                                    >
+                                        {Strings.buttonLabels.cancel}
+                                    </Button>
+                                }
+                            </View>
+                            <View style={CustomButtonStyles.buttonContainer}>
+                                <Button
+                                    onPress={handleSubmit}
+                                    buttonColor='#1D4ED8'
+                                    labelStyle={CustomButtonStyles.buttonLabel}
+                                    style={CustomButtonStyles.button}
+                                >
+                                    {Strings.buttonLabels.Submit}
+                                </Button>
+                            </View>
+                        </View>
+                    </View>
+
                 </View>
-            </View>
-        </Modal>
+            </ScrollView>
+        </View>
     );
 };
-
-const styles = StyleSheet.create({
-    modal: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        margin: 0,
-    },
-    modalContainer: {
-        backgroundColor: 'white',
-        padding: 20,
-        borderRadius: 10,
-        width: '80%',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 10,
-        marginBottom: 15,
-        borderRadius: 5,
-    },
-    datePicker: {
-        width: '100%',
-        marginBottom: 15,
-    },
-    buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-    },
-    buttonSave: {
-        margin: 5,
-        color: "green"
-    },
-    buttonCancel: {
-        margin: 5,
-        color: "red"
-    },
-});
 
 export default SiteForm;

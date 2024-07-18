@@ -1,5 +1,5 @@
 import { SQLiteDatabase } from 'react-native-sqlite-storage';
-import { CreateSiteRequest, Sites } from '../../model/sites';
+import { CreateSiteRequest, Site } from '../../model/sites';
 
 const sitesTableName = 'sites'
 
@@ -17,12 +17,22 @@ export class SitesDao {
         try {
             const query = `CREATE TABLE IF NOT EXISTS ${this.tableName}(
                 local_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                id INTEGER NULL,
-                name_english TEXT NOT NULL,
-                name_marathi TEXT NOT NULL,
-                
-                is_uploaded INTEGER DEFAULT 0 CHECK (is_uploaded IN (0, 1)),
-                change_type TEXT DEFAULT 'none' CHECK (change_type IN ('none', 'add', 'edit', 'delete')),
+                id INTEGER,
+                name_marathi TEXT,
+                name_english TEXT,
+                owner TEXT,
+                land_type TEXT,
+                land_strata TEXT,
+                district TEXT,
+                taluka TEXT,
+                village TEXT,
+                area_acres REAL,
+                length_km REAL,
+                tree_count INTEGER,
+                grove_type TEXT,
+                site_data_check TEXT,
+                is_uploaded INTEGER NOT NULL CHECK (is_uploaded IN (0, 1)),
+                change_type TEXT NOT NULL CHECK (change_type IN ('none', 'add', 'edit', 'delete')),
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
             );`;
@@ -42,7 +52,7 @@ export class SitesDao {
 
     // Data manipulation operations
     getSites = async (offset: number = 0, limit: number = 10, isUploaded?: boolean ,isDeleted: boolean = false) => {
-        const site: Sites[] = []
+        const site: Site[] = []
         const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
         const query = `SELECT * FROM ${this.tableName}
             WHERE 1=1 ${isDeleted ? '' : ` AND change_type != 'delete'`} ${isUploaded !== undefined ? 'AND ' + whereCondition : ""}
@@ -58,25 +68,23 @@ export class SitesDao {
         return site;
     }
 
+    countSitesByChangeType = async (isUploaded?: boolean): Promise<any> => {
+        const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
+        const query = `SELECT change_type, COUNT(*) as count FROM ${this.tableName}
+            WHERE ${isUploaded !== undefined ? whereCondition : "1==1"} GROUP BY change_type;`
 
-    // countSitesByChangeTye = async (isUploaded?: boolean): Promise<any> => {
-    //     const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
-    //     const query = `SELECT change_type, COUNT(*) as count FROM ${this.tableName}
-    //         WHERE ${isUploaded !== undefined ? whereCondition : "1==1"} GROUP BY change_type;`
+        const [results] = await this.db.executeSql(query)
+        let response: any = {}
+        for (let i = 0; i < results.rows.length; i++) {
+            const row = results.rows.item(i);
+            response = {
+                ...response,
+                [row.change_type]: row.count,
+            }
+        }
 
-    //     const [results] = await this.db.executeSql(query)
-    //     let response: any = {}
-    //     for (let i = 0; i < results.rows.length; i++) {
-    //         const row = results.rows.item(i);
-    //         response = {
-    //             ...response,
-    //             [row.change_type]: row.count,
-    //         }
-    //     }
-
-    //     return response;
-    // }
-
+        return response;
+    }
 
     createSite = async (data: CreateSiteRequest) => {
         const query = `
@@ -91,10 +99,10 @@ export class SitesDao {
               village,
               area_acres,
               length_km,
-              consent_letter,
               grove_type,
-              consent_document_link)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ? ,?)
+              created_at,
+              updated_at )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `
 
         const timeStamp = new Date().toISOString();
@@ -109,17 +117,14 @@ export class SitesDao {
             data.village,
             data.area_acres,
             data.length_km,
-            data.consent_letter,
             data.grove_type,
-            data.consent_document_link,
-
             timeStamp,
             timeStamp
         ]);
         console.log(JSON.stringify(results))
     }
 
-    updateSite = async (data: Sites) => {
+    updateSite = async (data: Site) => {
         const now = new Date().toISOString();
         let changeType = 'edit';
         
@@ -129,7 +134,7 @@ export class SitesDao {
         )
 
         if (response.rows.length === 1) {
-            const existingSite = response.rows.item(0) as Sites;
+            const existingSite = response.rows.item(0) as Site;
             if (existingSite.change_type === 'add') {
                 changeType = 'add'
             }
@@ -142,19 +147,16 @@ export class SitesDao {
                     name_english = ?,
                     name_marathi = ?,
                     owner = ?,
-                    land_type=?,
-
-                    land_strata =?,
-                    district=?,
-                    taluka=?,
-                    village=?,
-                    area_acres=?,
-                    length_km=?,
-                    consent_letter=?,
+                    land_type = ?,
+                    land_strata = ?,
+                    district = ?,
+                    taluka = ?,
+                    village = ?,
+                    area_acres = ?,
+                    length_km = ?,
+                    grove_type = ?,
                     is_uploaded = 0,
-                    grove_type=?,
-                    consent_document_link=?,
-                    is_uploaded = 0,
+                    change_type = ?,
                     updated_at = ?
                 WHERE id = ?;`,
                 [data.name_marathi, 
@@ -167,12 +169,10 @@ export class SitesDao {
                   data.village,
                   data.area_acres,
                   data.length_km,
-                  data.consent_letter,
                   data.grove_type,
                   changeType, 
                   now, 
-                  data.local_id,
-                  data.consent_document_link,]
+                  data.local_id]
             )
         } catch(err: any) {
             console.log(err);
@@ -189,7 +189,7 @@ export class SitesDao {
 
         // locally added Site: HARD DELETE
         if (response.rows.length === 1) {
-            const existingSite = response.rows.item(0) as Sites;
+            const existingSite = response.rows.item(0) as Site;
             if (existingSite.change_type === 'add') {
                 await this.db.executeSql(
                     `DELETE FROM ${this.tableName} WHERE local_id = ?;`,
@@ -207,9 +207,21 @@ export class SitesDao {
                 )
             }
         }
-
     }
 
+    deleteLiveSiteFromLocalDb = async (id: number) => {
+        await this.db.executeSql(
+            `DELETE FROM ${this.tableName} WHERE id = ?;`,
+            [id]
+        )
+    }
+
+    deleteLocalSite = async (id: number) => {
+        await this.db.executeSql(
+            `DELETE FROM ${this.tableName} WHERE local_id = ?;`,
+            [id]
+        )
+    }
 
     updateSiteUploadStatus = async (id: number) => {
         const query = `UPDATE ${this.tableName} SET is_uploaded = 1, change_type = 'none' WHERE local_id = ${id};`
@@ -222,10 +234,38 @@ export class SitesDao {
             WHERE id = ?;
         `
         const [results] = await this.db.executeSql(query, [id]);
-        if (results.rows.length === 1) return results.rows.item(0) as Sites;
+        if (results.rows.length === 1) return results.rows.item(0) as Site;
         return null;
     }
 
- 
+    getLiveSiteIds = async () => {
+        const query =  `SELECT id FROM ${this.tableName} WHERE id IS NOT NULL;`
+        const [result] = await this.db.executeSql(query);
+
+        const site_ids: number [] = [];
+        for (let i = 0; i < result.rows.length; i++) {
+            const row = result.rows.item(i);
+            site_ids.push(row.id);
+        }
+
+        return site_ids;
+    }
+
+    searchSites = async (searchStr: string, offset: number, limit: number) => {
+        let sites: Site[] = [];
+        const query =  `
+            SELECT * FROM ${this.tableName} 
+            WHERE change_type != 'delete' AND (name_english LIKE ? OR name_marathi LIKE ? OR village LIKE ?)
+            ORDER BY updated_at DESC
+            LIMIT ? OFFSET ?;
+        `
+        const likeStr = `%${searchStr}%`
+        const [results] = await this.db.executeSql(query, [ likeStr, likeStr, likeStr, limit, offset]);
+        for (let index = 0; index < results.rows.length; index++) {
+            sites.push(results.rows.item(index));
+        }
+        return sites;
+    }
+
 }
 
