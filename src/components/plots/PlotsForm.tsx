@@ -1,106 +1,160 @@
 // PLotsEditModal.js
-import React, { useEffect, useState , useContext} from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import Modal from 'react-native-modal';
-import { Strings } from "../../services/Strings";
-import { CustomButtonStyles, treeFormStyles } from "../../services/Styles";
+import React, { useContext, useEffect, useState} from 'react';
+import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { CreatePlotRequest, Plot } from '../../model/plot';
+import { Button } from 'react-native-paper';
+import { CustomButtonStyles, treeFormStyles } from '../../services/Styles';
+import { ScrollView } from 'react-native';
 import GlobalContext from '../../context/GlobalContext ';
-import RCTDateTimePicker from '@react-native-community/datetimepicker';
-import { CreatePlotRequest, Plots } from '../../model/plots';
+import { Strings } from '../../services/Strings';
+import { NewCustomDropdown } from '../NewCustomDropdown';
 
-interface PlotsFormInputProps {
-    mode: 'edit' | 'add'
-    isVisible: boolean,
-    onSubmit: (data: Plots | CreatePlotRequest) => void,
+interface PlotFormInputProps {
+    plot: Plot | null,
+    changeMode: 'add' | 'edit',
+    onSubmit: (data: Plot | CreatePlotRequest, image?: any) => void,
     onCancel: () => void,
 }
 
-const PlotsForm: React.FC<PlotsFormInputProps> = ({ plot, changeMode, onCancel, onSubmit }) => {
-    const date = new Date();
+const PlotForm: React.FC<PlotFormInputProps> = ({ plot, changeMode, onCancel, onSubmit }) => {
+
+    const { lightTheme } = useContext(GlobalContext);
+
+    const categoryList = [
+        'Public',
+        'Foundation'
+    ]
+
     const [name, setName] = useState('');
-    const [plot_id, setPlotId] = useState('');
-    const [tags, setTags] = useState('');
-    const [land_type , setLandType] = useState("");
-    const [gat, setGat] = useState('');
-    const [site_id, setSiteId] = useState('');
+    const [plotId, setPlotId] = useState('');
+    const [tags, setTags] = useState<string[] | null>(null);
+    const [category , setCategory] = useState<string | null>(null);
+    const [gat, setGat] = useState<string | null>(null);
     
 
     useEffect(() => {
         if (plot) {
-            
             setName(plot.name);
             setPlotId(plot.plot_id);
-            setTags(plot.tags);
+            setTags(plot.tags ? plot.tags.split(',') : null);
             setGat(plot.gat);
-            setLandType(plot.land_type);
-            setSiteId(plot.site_id);
+            setCategory(plot.category);
+            setGat(plot.gat);
         }
     }, [plot])
 
-    const handleSubmit = () => {
-        onClose();
-        
+    const handleSubmit = () => {        
         let data = {
             name: name,
-            plot_id: plot_id,
-            tags: tags,
+            plot_id: plotId,
+            tags: tags ? tags.join(',') : null,
             gat: gat,
-            land_type: land_type,
-            site_id: site_id
-
-            
+            category: category,
         }
 
         if (changeMode === 'add') {
             const newPlot = { ...data } as CreatePlotRequest;
             onSubmit(newPlot)
         } else if (plot) {
-            let newChanges = { ...plot, ...data } as Plots;
+            let newChanges = { ...plot, ...data } as Plot;
             onSubmit(newChanges)
         }
     }
-     return (
-        <Modal
-            isVisible={isVisible}
-            backdropColor="black"
-            backdropOpacity={0.5}
-            style={styles.modal}
-            onBackdropPress={onClose}
-        >
-            <View style={styles.modalContainer}>
-                <Text style={styles.title}> {mode === 'add' ? 'Add' : 'Edit'} Plot Information</Text>
 
-                <TextInput
-                    style={styles.input}
-                    value={name}
-                    onChangeText={setName}
-                    placeholder="Name"
-                />
-                <TextInput
-                    style={styles.input}
-                    value={plot_id}
-                    onChangeText={setPlotId}
-                    placeholder="Plot Id"
-                    keyboardType=""
-                />
-                <TextInput
-                    style={styles.input}
-                    value={land_type}
-                    onChangeText={setLandType}
-                    placeholder="Land Type"
-                    keyboardType=""
-                />
+    return (
+        <View style={{ height: "97%" }}>
+            <Text style={treeFormStyles.plotSapling}> { changeMode === 'add' ? 'Add Plot' : 'Edit Plot' } </Text>
+            <ScrollView
+                keyboardShouldPersistTaps='handled'
+                scrollEnabled={true}
+                style={{ ...treeFormStyles.detailsContainerOuter, marginHorizontal: 0, }} >
+                <View style={{ margin: 4, borderRadius: 10 }}>
 
-                <View style={styles.buttonContainer}>
-                    <View style={styles.buttonCancel}>
-                        <Button title="Cancel" onPress={onClose} />
+                    <View style={{ marginTop: 15 }}>
+                        <Text style={ treeFormStyles.inputLabel }>{Strings.labels.PlotName}:</Text>
+                        <TextInput
+                            defaultValue={name}
+                            style={treeFormStyles.textInput(lightTheme)}
+                            placeholder={Strings.labels.PlotName}
+                            placeholderTextColor={'black'}
+                            onChangeText={(text) => { setName(text) }}
+                        />
                     </View>
-                    <View style={styles.buttonSave}>
-                        <Button title="Save" onPress={handleSubmit} />
+                    <View style={{ marginTop: 15 }}>
+                        <Text style={ treeFormStyles.inputLabel }>{Strings.labels.PlotId}:</Text>
+                        <TextInput
+                            defaultValue={plotId}
+                            style={treeFormStyles.textInput(lightTheme)}
+                            placeholder={Strings.labels.PlotId}
+                            placeholderTextColor={'black'}
+                            onChangeText={(text) => { setPlotId(text) }}
+                        />
                     </View>
+                    <View>
+                        <Text style={ treeFormStyles.inputLabel }>{Strings.labels.PlotCategory}:</Text>
+                        <View style={{ paddingLeft: 12, alignItems: 'center', width: '96%' }}>
+                            <NewCustomDropdown
+                                value={category}
+                                options={categoryList}
+                                label={Strings.labels.PlotCategory}
+                                onChange={(data) => { setCategory(data); }}
+                                valueGetter={(data) => data || ''}
+                                keyGetter={(data) => data || ''}
+                            />
+                        </View>
+                    </View>
+                    <View style={{ marginTop: 15 }}>
+                        <Text style={ treeFormStyles.inputLabel }>{Strings.labels.Tags}:</Text>
+                        <TextInput
+                            defaultValue={tags?.join(',') || ''}
+                            style={treeFormStyles.textInput(lightTheme)}
+                            placeholder={Strings.labels.Tags}
+                            placeholderTextColor={'black'}
+                            onChangeText={(text) => { setTags(text.split(',')) }}
+                        />
+                    </View>
+                    <View style={{ marginTop: 15 }}>
+                        <Text style={ treeFormStyles.inputLabel }>{Strings.labels.Gat}:</Text>
+                        <TextInput
+                            defaultValue={gat || ''}
+                            style={treeFormStyles.textInput(lightTheme)}
+                            placeholder={Strings.labels.Gat}
+                            placeholderTextColor={'black'}
+                            onChangeText={(text) => { setGat(text) }}
+                        />
+                    </View>
+
+                    <View style={CustomButtonStyles.container}>
+                        <View style={CustomButtonStyles.buttonRow}>
+                            <View style={CustomButtonStyles.buttonContainer}>
+                                {
+                                    <Button
+                                        mode="contained"
+                                        buttonColor='red'
+                                        labelStyle={CustomButtonStyles.buttonLabel}
+                                        style={CustomButtonStyles.button}
+                                        onPress={onCancel}
+                                    >
+                                        {Strings.buttonLabels.cancel}
+                                    </Button>
+                                }
+                            </View>
+                            <View style={CustomButtonStyles.buttonContainer}>
+                                <Button
+                                    onPress={handleSubmit}
+                                    buttonColor='#1D4ED8'
+                                    labelStyle={CustomButtonStyles.buttonLabel}
+                                    style={CustomButtonStyles.button}
+                                >
+                                    {Strings.buttonLabels.Submit}
+                                </Button>
+                            </View>
+                        </View>
+                    </View>
+
                 </View>
-            </View>
-        </Modal>
+            </ScrollView>
+        </View>
     );
 };
 
@@ -152,4 +206,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default PlotsForm;
+export default PlotForm;

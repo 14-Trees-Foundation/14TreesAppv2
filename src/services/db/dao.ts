@@ -1,8 +1,7 @@
 import { SQLiteDatabase, enablePromise, openDatabase } from 'react-native-sqlite-storage';
 import { TreesDao } from './trees';
-import { UsersData } from './users';
-import { PlotsDao, PlotsData } from './plots';
 import { UsersDao } from './users';
+import { PlotsDao } from './plots';
 import { TreeImagesDao } from './tree_images';
 
 enablePromise(true);
@@ -15,13 +14,6 @@ const getDBConnection = async () => {
     return dbConnection;
 };
 
-export class LocalDatabase {
-    public users: UsersData;
-    public plots: PlotsData;
-    constructor(dbConnection: SQLiteDatabase) {
-        this.users = new UsersData(dbConnection);
-        this.plots = new PlotsData(dbConnection);
-    
 export class DaoClient {
     public trees: TreesDao;
     public users: UsersDao;
@@ -39,6 +31,4 @@ export class DaoClient {
         const connection = await getDBConnection();
         return new DaoClient(connection);
     }
-
-    
 }

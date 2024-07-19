@@ -1,15 +1,14 @@
 
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import Modal from 'react-native-modal';
-import moment from 'moment';
 import { Button } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useState } from 'react';
-import { Plots } from '../../model/plots';
+import { Plot } from '../../model/plot';
 
 interface PlotsInfoInputProps {
     isVisible: boolean
-    user: Plots
+    plot: Plot
     onClose: () => void
     onEdit: () => void
     onDelete: () => void
@@ -40,9 +39,8 @@ export const PlotsInfo: React.FC<PlotsInfoInputProps> = ({ isVisible, plot, onCl
                 <Text style={styles.value}>{plot.name}</Text>
                 <Text style={styles.label}>Plot Id:</Text>
                 <Text style={styles.value}>{plot.plot_id}</Text>
-                <Text style={styles.label}>Land Type:</Text>
-                <Text style={styles.value}>{plot.land_type}</Text>
-                
+                <Text style={styles.label}>Category:</Text>
+                <Text style={styles.value}>{plot.category}</Text>
                
                 <Button style={styles.closeButton} onPress={onClose} >
                     Close

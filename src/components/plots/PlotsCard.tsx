@@ -1,18 +1,18 @@
 // PlotsCard.js
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Plots } from '../../model/plots';
+import { Plot } from '../../model/plot';
 
 interface PlotsCardInputProps {
-    plot: Plots
+    plot: Plot
 }
 
 const PlotsCard: React.FC<PlotsCardInputProps> = ({ plot }) => {
   return (
     <View style={styles.card}>
-      <Text style={styles.name}>{plot.name}</Text>
-      <Text >{plot.plot_id}</Text>
-      <Text>{plot.land_type}</Text>
+      <Text style={styles.title}>{plot.name}</Text>
+      <Text style={styles.text}>{plot.plot_id}</Text>
+      <Text style={styles.text}>{plot.category}</Text>
     </View>
   );
 };
@@ -30,11 +30,15 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
-  name: {
+  title: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
-  }
+  },
+  text: {
+    fontSize: 16,
+    color: 'black',
+  },
  
 });
 
