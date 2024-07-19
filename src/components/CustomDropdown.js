@@ -4,7 +4,7 @@ import { commonStyles, customDropdownStyles } from '../services/Styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 import GlobalContext from '../context/GlobalContext ';
 
-export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, label }) => {
+export const CustomDropdown = ({ items, onSelectItem, initItem, label }) => {
     const [filteredOptions, setFilteredOptions] = useState(items);
     const [selectedItem, setSelectedItem] = useState({ value: -1, name: "" });
     const [clearButton, setClearButton] = useState(true);
@@ -80,7 +80,7 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
                 style={{
                     height: 54,
                     fontFamily: 'Inter-Regular',
-                    fontStyle: "italic",
+                    // fontStyle: "italic",
                     width: '93%',
                     borderWidth: 2,
                     borderColor: !isFocused?"#ccc":"black",
@@ -90,9 +90,8 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
                         height: 2,
                     },
                     backgroundColor: 'white',
-                    marginTop: 10,
                     padding: 10,
-                    marginBottom: 6,
+                    marginBottom: 10,
                     paddingBottom: 12,
                     color: '#333', // Change font color here
                     //fontWeight: 'bold',
@@ -128,6 +127,7 @@ export const CustomDropdown = ({ items, onSelectItem, initItem, scrollEnabled, l
                 data={filteredOptions}
                 renderItem={renderOption}
                 keyboardShouldPersistTaps="handled"
+                keyExtractor={(item) => item.value}
                 scrollEnabled={false}
                 style={{ marginLeft: 13, width: "93%", borderColor: "#B8B8B8", borderWidth: 0, borderRadius: 10, backgroundColor: "white" }}
             />

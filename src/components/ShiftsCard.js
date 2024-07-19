@@ -87,7 +87,7 @@ const ShiftsCard = ({ item, disableHandlePress }) => {
                             numberOfLines={1}
                             ellipsizeMode="tail"
                         >
-                            {item.plotselected}
+                            {item.plot_selected}
                         </Text>
                     </View>
 
@@ -183,7 +183,7 @@ const ShiftsCard = ({ item, disableHandlePress }) => {
                             numberOfLines={1}
                             ellipsizeMode="tail"
                         >
-                            {item.starttime} to {item.endtime}
+                            {item.start_time} to {item.end_time}
                         </Text>
                     </View>
                 </View>
