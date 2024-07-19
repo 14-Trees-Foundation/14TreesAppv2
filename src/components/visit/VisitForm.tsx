@@ -16,9 +16,10 @@ interface VisitFormInputProps {
 const VisitForm: React.FC<VisitFormInputProps> = ({ visit, changeMode, onCancel, onSubmit }) => {
 
     const { lightTheme } = useContext(GlobalContext);
-    const [visit_name, setName] = useState('');
-    const [visit_date, setDate] = useState('');
-    const [site_id, setSiteId] = useState('');
+    const [visitName, setName] = useState('');
+    const [visitDate, setDate] = useState('');
+    const [siteId, setSiteId] = useState<number | null>(null);
+    const [visitType, setVisitType] = useState<string>('');
    
 
     useEffect(() => {
@@ -26,36 +27,16 @@ const VisitForm: React.FC<VisitFormInputProps> = ({ visit, changeMode, onCancel,
             setName(visit.visit_name);
             setDate(visit.visit_date);
             setSiteId(visit.site_id);
-           
+            setVisitType(visit.visit_type);
         }
     }, [visit])
 
-    // useEffect(() => {
-    //     setTimeout(async () => {
-    //         try {
-    //             const userData = await AsyncStorage.getItem(Constants.userDetailsKey)
-    //             if (userData) setUserDetails(JSON.parse(userData));
-    //             let { userTypes, plots } = await Utils.getLocalUserTypesAndPlots();
-    //         } catch (error: any) {
-    //             console.error(error);
-    //             const stackTrace = error.stack;
-    //             const errorLog = {
-    //                 msg: 'happened while trying to fetch user details from local db(loadDataCallback())',
-    //                 error: JSON.stringify(error),
-    //                 stackTrace: stackTrace,
-    //             };
-    
-    //             await Utils.logException(JSON.stringify(errorLog));
-    //         }
-    //     }, 1000);
-    // }, []);
-
     const handleSubmit = () => {
         const data = {
-            visit_name: visit_name,
-            visit_date: visit_date,
-            site_id: site_id,
-           
+            visit_name: visitName,
+            visit_date: visitDate,
+            site_id: siteId,
+            visit_type: visitType,
         }
 
         if (changeMode === 'add') {
@@ -76,23 +57,33 @@ const VisitForm: React.FC<VisitFormInputProps> = ({ visit, changeMode, onCancel,
                 style={{ ...treeFormStyles.detailsContainerOuter, marginHorizontal: 0, }} >
                 <View style={{ margin: 4, borderRadius: 10 }}>
                     <View style={{ marginTop: 15, flexGrow: 1 }}>
-                        <Text style={ treeFormStyles.inputLabel }>Enter visit name:</Text>
+                        <Text style={ treeFormStyles.inputLabel }>{Strings.labels.VisitName}:</Text>
                         <TextInput
-                            defaultValue={visit_name}
+                            defaultValue={visitName}
                             style={treeFormStyles.textInput(lightTheme)}
-                            placeholder={Strings.labels.SaplingId}
+                            placeholder={Strings.labels.VisitName}
                             placeholderTextColor={'black'}
                             onChangeText={(text) => { setName(text) }}
                         />
                     </View>
+                    <View style={{ marginTop: 15, flexGrow: 1 }}>
+                        <Text style={ treeFormStyles.inputLabel }>{Strings.labels.VisitType}:</Text>
+                        <TextInput
+                            defaultValue={visitType}
+                            style={treeFormStyles.textInput(lightTheme)}
+                            placeholder={Strings.labels.VisitType}
+                            placeholderTextColor={'black'}
+                            onChangeText={(text) => { setVisitType(text) }}
+                        />
+                    </View>
 
                     <View >
-                        <Text style={ treeFormStyles.inputLabel }>Enter visit date:</Text>
+                        <Text style={ treeFormStyles.inputLabel }>{Strings.labels.VisitDate}:</Text>
                         <View style={{ flexGrow: 1 }}>
                             <TextInput
-                                defaultValue={email}
+                                defaultValue={visitDate}
                                 style={treeFormStyles.textInput(lightTheme)}
-                                placeholder={Strings.labels.SaplingId}
+                                placeholder={Strings.labels.VisitDate}
                                 placeholderTextColor={'black'}
                                 onChangeText={(text) => { setDate(text) }}
                             />

@@ -3,10 +3,9 @@ export type Visit = {
   local_id: number,
   id?: number,
   visit_name: string,
-  visit_date: Date,
-  site_id: string,
-  siteName: string,
-  
+  visit_date: string,
+  site_id: number | null,
+  visit_type: string,
   is_uploaded: 0 | 1,
   change_type: 'none' | 'add' | 'edit' | 'delete',
   created_at: string,
@@ -15,11 +14,12 @@ export type Visit = {
 
 export type CreateVisitRequest = {
   visit_name: string,
-  visit_date: Date,
-  site_id: string,
+  visit_date: string,
+  site_id: number | null,
+  visit_type: string,
 }
 
 export type VisitHelperDataResponse = {
-  visit: Visit[],
+  visits: Visit[],
   deleted_visit_ids: number[]
 }

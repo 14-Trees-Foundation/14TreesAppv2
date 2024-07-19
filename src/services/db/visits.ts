@@ -18,7 +18,7 @@ export class VisitsDao {
                 visit_name TEXT NOT NULL,
                 visit_date TEXT NULL,
                 site_id TEXT NULL,
-                
+                visit_type TEXT NULL,
                 is_uploaded INTEGER DEFAULT 0 CHECK (is_uploaded IN (0, 1)),
                 change_type TEXT DEFAULT 'none' CHECK (change_type IN ('none', 'add', 'edit', 'delete')),
                 created_at TEXT NOT NULL,
@@ -28,7 +28,7 @@ export class VisitsDao {
             await this.db.executeSql(query);
             console.log('Visits table created successfully!');
         } catch (error) {
-            console.log('error creating vists table:', error);
+            console.log('error creating visits table:', error);
         }
     };
 
@@ -78,8 +78,8 @@ export class VisitsDao {
     createVisit = async (data: CreateVisitRequest) => {
         const query = `
             INSERT INTO ${this.tableName}
-            (visit_name, visit_date, site_id,  is_uploaded, change_type, created_at, updated_at)
-            VALUES (?, ?, ?, ?, 0, 'add', ?)
+            (visit_name, visit_date, site_id, visit_type, is_uploaded, change_type, created_at, updated_at)
+            VALUES (?, ?, ?, ?, 0, 'add', ?, ?)
         `
 
         const timeStamp = new Date().toISOString();
@@ -87,7 +87,7 @@ export class VisitsDao {
             data.visit_name, 
             data.visit_date,
             data.site_id,
-            
+            data.visit_type,
             timeStamp,
             timeStamp
         ]);
@@ -113,14 +113,16 @@ export class VisitsDao {
             await this.db.executeSql(
                 `UPDATE ${this.tableName}
                 SET 
-                   visit_name=?, visit_date=?, site_id=?,
-                  
+                    visit_name = ?, 
+                    visit_date = ?, 
+                    site_id = ?,
+                    visit_type = ?,
                     is_uploaded = 0,
                     change_type = ?,
                     updated_at = ?
                 WHERE local_id = ?;`,
                 [
-                    data.visit_name, data.visit_date, data.site_id, changeType, now, data.local_id
+                    data.visit_name, data.visit_date, data.site_id, data.visit_type, changeType, now, data.local_id
                 ]
             )
         } catch(err: any) {
@@ -140,16 +142,19 @@ export class VisitsDao {
             await this.db.executeSql(
                 `INSERT INTO ${this.tableName} (
                     id,
-                    visit_name, visit_date, site_id,
+                    visit_name,
+                    visit_date,
+                    site_id,
+                    visit_type,
                     change_type,
                     is_uploaded,
                     created_at,
                     updated_at
                 ) VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?
                 );`,
                 [
-                    data.id, data.visit_name, data.visit_date, data.site_id,'none', 1, data.created_at, data.updated_at
+                    data.id, data.visit_name, data.visit_date, data.site_id, data.visit_type, 'none', 1, data.created_at, data.updated_at
                 ]
             )
         } else {
@@ -157,14 +162,17 @@ export class VisitsDao {
             await this.db.executeSql(
                 `UPDATE ${this.tableName}
                 SET
-                    visit_name=?, visit_date=?, site_id=?,
+                    visit_name = ?,
+                    visit_date = ?,
+                    site_id = ?,
+                    visit_type = ?,
                     change_type = 'none',
                     is_uploaded = 1,
                     created_at = ?,
                     updated_at = ?
                 WHERE id = ?;`,
                 [
-                    data.visit_name, data.visit_date, data.site_id,data.created_at, data.updated_at, data.id
+                    data.visit_name, data.visit_date, data.site_id, data.visit_type, data.created_at, data.updated_at, data.id
                 ]
             )
         }
@@ -235,12 +243,12 @@ export class VisitsDao {
         let visits: Visit[] = [];
         const query =  `
             SELECT * FROM ${this.tableName} 
-            WHERE change_type != 'delete' AND (visit_name LIKE ? OR visit_date LIKE ? )
+            WHERE change_type != 'delete' AND visit_name LIKE ?
             ORDER BY updated_at DESC
             LIMIT ? OFFSET ?;
         `
         const likeStr = `%${searchStr}%`
-        const [results] = await this.db.executeSql(query, [ likeStr, likeStr, limit, offset]);
+        const [results] = await this.db.executeSql(query, [ likeStr, limit, offset]);
         for (let index = 0; index < results.rows.length; index++) {
           visits.push(results.rows.item(index));
         }

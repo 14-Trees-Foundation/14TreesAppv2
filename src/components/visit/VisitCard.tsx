@@ -10,8 +10,9 @@ interface VisitCardInputProps {
 const VisitCard: React.FC<VisitCardInputProps> = ({ visit }) => {
   return (
     <View style={styles.card}>
-      <Text style={styles.name}>{visit.visit_name}</Text>
-      <Text style={styles.date}>{visit.visit_date}</Text>
+      <Text style={styles.title}>{visit.visit_name}</Text>
+      <Text style={styles.text}>{visit.visit_type}</Text>
+      <Text style={styles.text}>{visit.visit_date}</Text>
     </View>
   );
 };
@@ -29,13 +30,13 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
-  name: {
+  title: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
     color: 'black',
   },
-  date: {
+  text: {
     fontSize: 16,
     color: 'black',
   },
