@@ -86,21 +86,24 @@ export class SitesDao {
 
     createSite = async (data: CreateSiteRequest) => {
         const query = `
-            INSERT INTO ${this.tableName}
-            ( name_marathi,
-              name_english,
-              owner,
-              land_type,
-              land_strata,
-              district,
-              taluka,
-              village,
-              area_acres,
-              length_km,
-              grove_type,
-              created_at,
-              updated_at )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO ${this.tableName} ( 
+                name_marathi,
+                name_english,
+                owner,
+                land_type,
+                land_strata,
+                district,
+                taluka,
+                village,
+                area_acres,
+                length_km,
+                grove_type,
+                is_uploaded,
+                change_type,
+                created_at,
+                updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'add', ?, ?)
         `
 
         const timeStamp = new Date().toISOString();
@@ -156,21 +159,23 @@ export class SitesDao {
                     is_uploaded = 0,
                     change_type = ?,
                     updated_at = ?
-                WHERE id = ?;`,
-                [data.name_marathi, 
-                  data.name_english,
-                  data.owner,
-                  data.land_type,
-                  data.land_strata,
-                  data.district,
-                  data.taluka,
-                  data.village,
-                  data.area_acres,
-                  data.length_km,
-                  data.grove_type,
-                  changeType, 
-                  now, 
-                  data.local_id]
+                WHERE local_id = ?;`,
+                [
+                    data.name_english, 
+                    data.name_marathi,
+                    data.owner,
+                    data.land_type,
+                    data.land_strata,
+                    data.district,
+                    data.taluka,
+                    data.village,
+                    data.area_acres,
+                    data.length_km,
+                    data.grove_type,
+                    changeType, 
+                    now, 
+                    data.local_id
+                ]
             )
         } catch(err: any) {
             console.log(err);

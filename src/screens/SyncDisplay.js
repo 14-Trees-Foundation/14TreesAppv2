@@ -11,8 +11,9 @@ import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { DaoClient } from '../services/db/dao';
 import { uploadTreesData } from '../services/sync/tree';
 import { uploadUsersData } from '../services/sync/users';
+import { uploadSitesData } from '../services/sync/sites';
 
-const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount ,setSitesCount) => {
+const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setSitesCount) => {
   const lsdate = await Utils.getLastSyncDate();
   if (lsdate) {
     setSyncDate(Utils.getReadableDate(lsdate));
@@ -33,6 +34,9 @@ const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setT
 
   const usersResp = await daoClient.users.countUsersByChangeTye(false);
   setUsersCount(usersResp);
+
+  const sitesResp = await daoClient.sites.countSitesByChangeType(false);
+  setSitesCount(sitesResp);
 }
 
 const getReadableProgress = (progress) => {
@@ -161,7 +165,7 @@ const SyncDisplay = ({ navigation }) => {
     //console.log("----------------treesinNewImageTable-----------", treesinNewImageTable[0].uploaded)
     setFailedImagesTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setSitesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -282,7 +286,7 @@ const SyncDisplay = ({ navigation }) => {
 
     try {
       await uploadTreesData();
-      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount);
+      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setSitesCount);
     } catch (error) {
       console.log('unable to sync trees---', error);
       const stackTrace = error.stack;
@@ -294,10 +298,23 @@ const SyncDisplay = ({ navigation }) => {
       await Utils.logException(JSON.stringify(errorLog));
     }
 
-    setShowProgress(false);
     try {
       await uploadUsersData();
-      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount);
+      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setSitesCount);
+    } catch (error) {
+      console.log('unable to sync users---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync users(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
+
+    try {
+      await uploadSitesData();
+      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setSitesCount);
     } catch (error) {
       console.log('unable to sync users---', error);
       const stackTrace = error.stack;
@@ -363,6 +380,9 @@ const SyncDisplay = ({ navigation }) => {
               </Text>
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
                 [ added: {usersCount?.add || 0}, edited: {usersCount?.edit || 0}, deleted: {usersCount?.delete || 0}]
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "bold", paddingBottom: 4 }}>
+                {Strings.screenNames.SitesPage}: 
               </Text>
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
                 [ added: {sitesCount?.add || 0}, edited: {sitesCount?.edit || 0}, deleted: {sitesCount?.delete || 0}]

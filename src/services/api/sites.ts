@@ -25,7 +25,7 @@ export class SiteService {
             const response = await this.api.post<Site>(`/api/sites`, data);
             return response.data;
         } catch (error: any) {
-            return handleApiError("SitesClient::createSiets:", error)
+            return handleApiError("SitesClient::createSites:", error)
         }
     }
 
