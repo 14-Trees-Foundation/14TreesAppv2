@@ -17,6 +17,8 @@ import ScreenHeaderContent from './ScreenHeaderContent';
 import { Button } from 'react-native-paper';
 import Users from '../screens/Users';
 import Plots from "../screens/Plots"
+import Trees from '../screens/Trees';
+import { APP_VERSION } from '../constants/constants';
 const Drawer = createDrawerNavigator();
 
 const CustomDrawerToggleButton = ({ navigation }) => (
@@ -192,6 +194,25 @@ export const DrawerNavigator = () => {
                 }}
             />
             <Drawer.Screen
+                name={Strings.screenNames.getString('TreesPage', Strings.english)}
+                component={Trees}
+                options={{
+                    headerRight: () => (
+                        <ScreenHeaderContent />
+                    ),
+                    title: Strings.screenNames.TreesPage,
+                    // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+                    // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+                    // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                    // drawerActiveBackgroundColor: '#F1FAEE',
+                    // drawerActiveTintColor: 'blue',
+                    // drawerStyle: {
+                    //     backgroundColor: '#f0f3f7',
+                    //     fontFamily: 'Inter-Regular'
+                    // }
+                }}
+            />
+            <Drawer.Screen
                 name={Strings.screenNames.getString('PlotsPage', Strings.english)}
                 component={Plots}
                 options={{
@@ -242,7 +263,7 @@ export const DrawerNavigator = () => {
                                 />}
                             </TouchableOpacity> */}
                             <View style={{ height: 35, marginRight: 6, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                                <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                                <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                             </View>
                         </View>
                     )
@@ -282,14 +303,16 @@ export const DrawerNavigator = () => {
                                     />}
                                 </TouchableOpacity>
                                 <View style={{ height: 35, marginRight: 6, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                                    <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                                    <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                                 </View>
                             </View>
                         )
                     }}
                 />
             )}
-            {isAdmin && (
+
+            {/* Hidden Screen */}
+            {isAdmin && false && (
                 <Drawer.Screen
                     name={Strings.screenNames.getString('VerifyUsers', Strings.english)}
                     component={VerifyusersScreen}
