@@ -3,12 +3,10 @@ import React, { useCallback, useContext, useEffect, useState } from "react";
 import GlobalContext from "../context/GlobalContext ";
 
 import { DaoClient } from "../services/db/dao";
-import { SitesClient } from "../services/api/sites";
-import { LocalDatabase } from "../services/db/db";
 import SiteForm from "../components/sites/SitesForm";
 import SiteCard from "../components/sites/SitesCard";
 import SiteInfo from "../components/sites/SitesInfo";
-import { CreateSiteRequest, Sites } from "../model/sites";
+import { CreateSiteRequest, Site } from "../model/sites";
 import { TouchableOpacity } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -18,17 +16,16 @@ interface SitesInputProps {
 }
 
 
-const Site: React.FC<SitesInputProps> = ({ navigation })  => {
+const Sites: React.FC<SitesInputProps> = ({ navigation })  => {
 
     const { lightTheme } = useContext(GlobalContext);
     const [stateChange, setStateChange] = useState(0);
     const [isFormVisible, setIsFormVisible] = useState(false);
     const [isInfoModalVisible, setInfoModalVisible] = useState(false);
-    const [changeMode, setChangeModel] = useState('add');
+    const [changeMode, setChangeModel] = useState<'add' | 'edit'>('add');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedSite, setSelectedSite] = useState(null);
-    const [page, setPage] = useState(0);
-    const [site, setSite] = useState([]);
+    const [selectedSite, setSelectedSite] = useState<Site | null>(null);
+    const [sites, setSites] = useState<Site[]>([]);
 
     let daoClient: DaoClient;
     DaoClient.authenticate().then((client) => { daoClient = client; });
@@ -53,43 +50,42 @@ const Site: React.FC<SitesInputProps> = ({ navigation })  => {
         return () => backHandler.remove();
     }, []);
 
-    // useEffect(() => {
-    //     if (searchQuery.length < 1) return;
-    //     setTimeout(async () => {
-    //         let sites = await daoClient.sites.searchSi(searchQuery, 0, 20);
-    //         setSite(sites);
-    //     }, 1000)
-    // }, [searchQuery, stateChange])
+    useEffect(() => {
+        if (searchQuery.length < 1) return;
+        setTimeout(async () => {
+            let sites = await daoClient.sites.searchSites(searchQuery, 0, 100);
+            setSites(sites);
+        }, 1000)
+    }, [searchQuery, stateChange])
 
-    
+    useEffect(() => {
+        if (searchQuery.length !== 0) return;
+        setTimeout(async () => {
+            let sites = await daoClient.sites.getSites(0, 100);
+            setSites(sites);
+        }, 1000)
+    }, [searchQuery, stateChange])
 
-    const handleSave = (data: Sites | CreateSiteRequest) => {
+    const handleSave = (data: Site| CreateSiteRequest) => {
         setTimeout(async() => {
             if (changeMode === 'add') {
                 let request = JSON.parse(JSON.stringify(data)) as CreateSiteRequest;
                 await daoClient.sites.createSite(request)
             } else {
-                let request = JSON.parse(JSON.stringify(data)) as Sites;
+                let request = JSON.parse(JSON.stringify(data)) as Site;
                 await daoClient.sites.updateSite(request)
             };
 
         }, 1000)
-
     };
 
     const handleDelete = () => {
         if (selectedSite) {
             setTimeout(async() => {
                 await daoClient.sites.deleteSite(selectedSite.local_id);
-                setPage(0);
             }, 1000)
         }
     }
-
-    const filteredSites = site.filter(site =>
-        site.name_english.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        site.name_marathi.toLowerCase().includes(searchQuery.toLowerCase())
-    );
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -108,9 +104,9 @@ const Site: React.FC<SitesInputProps> = ({ navigation })  => {
                 </View>
             </View>
             <ScrollView contentContainerStyle={styles.scrollView} >
-                {filteredUsers.map((user, index) => (
+                {sites.map((site, index) => (
                     <TouchableOpacity style={{ width: '100%' }} key={index} onPress={() => {
-                        setSelectedUser(user);
+                        setSelectedSite(site);
                         setInfoModalVisible(true);
                     }}>
                         <SiteCard site={site} />
@@ -118,13 +114,12 @@ const Site: React.FC<SitesInputProps> = ({ navigation })  => {
                 ))}
             </ScrollView>
 
-            <SiteForm
-                mode={changeMode}
-                isVisible={isFormVisible}
-                onClose={() => setIsFormVisible(false)}
-                onSave={handleSave}
+            {isFormVisible && <SiteForm
+                changeMode={changeMode}
+                onCancel={() => setIsFormVisible(false)}
+                onSubmit={handleSave}
                 site={selectedSite}
-            />
+            />}
             
             { selectedSite && <SiteInfo
                 isVisible={isInfoModalVisible}

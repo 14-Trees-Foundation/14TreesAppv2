@@ -9,6 +9,7 @@ export class Strings {
         "en": {
             HomePage: "Home",
             TreesPage: "Trees",
+            SitesPage: "Sites",
             AddTreeShift: "Add Tree",
             LocalDataView: "Local Data",
             LocalDataNavigator: "LocalDataNavigator",
@@ -33,6 +34,7 @@ export class Strings {
         "mr": {
             HomePage: "मुख्य पृष्ठ",
             TreesPage: "झाडे",
+            SitesPage: "साइट्स",
             AddTreeShift: "नवीन झाड जोडा",
             LocalDataView: "लोकल डेटा",
             LocalDataNavigator: "LocalDataNavigator",
@@ -505,6 +507,9 @@ export class Strings {
             TimeTaken: 'Timer',
             AddAShift : 'Add a tree to this shift',
             Time: 'Time',
+
+            // site
+            SiteName: 'Site Name',
         },
         "mr": {
             //add tree
@@ -526,7 +531,10 @@ export class Strings {
             EndTime: 'समाप्ती वेळ',
             TimeTaken: 'वेळ',
             Time: 'वेळ',
-            AddAShift: 'या शिफ्टमध्ये एक झाड जोडा'
+            AddAShift: 'या शिफ्टमध्ये एक झाड जोडा',
+
+            // site
+            SiteName: 'साइटचे नाव'
         }
     })
     static english = 'en';

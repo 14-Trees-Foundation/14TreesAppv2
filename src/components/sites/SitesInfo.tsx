@@ -1,15 +1,14 @@
 
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import Modal from 'react-native-modal';
-import moment from 'moment';
 import { Button } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useState } from 'react';
-import { Sites } from '../../model/sites';
+import { Site } from '../../model/sites';
 
 interface SiteInfoInputProps {
     isVisible: boolean
-    site: Sites
+    site: Site
     onClose: () => void
     onEdit: () => void
     onDelete: () => void

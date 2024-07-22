@@ -1,13 +1,13 @@
 // SitesCard.js
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Sites } from '../../model/sites';
+import { Site } from '../../model/sites';
 
-interface SitesCardInputProps {
-    site: Sites
+interface SiteCardInputProps {
+    site: Site
 }
 
-const SiteCard: React.FC<SitesCardInputProps> = ({ site }) => {
+const SiteCard: React.FC<SiteCardInputProps> = ({ site }) => {
   return (
     <View style={styles.card}>
       <Text style={styles.name}>{site.name_english}</Text>

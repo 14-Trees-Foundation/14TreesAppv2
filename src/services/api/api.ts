@@ -3,6 +3,7 @@ import { Strings } from '../Strings';
 import { ToastAndroid } from 'react-native';
 import { UserService } from './users';
 import { TreeService } from './trees';
+import { SiteService } from './sites';
 
 axios.interceptors.response.use(function (response) {
     return response;
@@ -47,10 +48,11 @@ axios.interceptors.response.use(function (response) {
   
 
 export class ApiClient {
-    private serverBase = 'https://dev-api.14trees.org';
+    private serverBase = 'http://192.168.1.5:8088';
     private api = axios.create({
         baseURL: this.serverBase,
     });
     public users = new UserService(this.api);
     public trees = new TreeService(this.api);
+    public sites = new SiteService(this.api);
 } 

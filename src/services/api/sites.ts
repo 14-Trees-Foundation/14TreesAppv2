@@ -1,60 +1,47 @@
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
 import { FilterItem, PaginatedResponse } from "../../model/common"
-import { Sites , CreateSiteRequest , SiteHelperDataResponse } from "../../model/sites"
+import { Site, SiteHelperDataResponse } from "../../model/sites"
 import { handleApiError } from "./handleError";
 
-export class SitesClient {
+export class SiteService {
     private api: AxiosInstance;
-
     
     constructor(api: AxiosInstance) {
         this.api = api;
     }
 
-    
-  
-
-    async getSites(offset: number, limit: number, filters?: FilterItem[]): Promise<PaginatedResponse<Sites>> {
-        const url = `/get?offset=${offset}&limit=${limit}`;
+    async getSites(offset: number, limit: number, filters?: FilterItem[]): Promise<PaginatedResponse<Site>> {
+        const url = `/api/sites/get?offset=${offset}&limit=${limit}`;
         try {
-            const response = await this.api.post<PaginatedResponse<Sites>>(url, { filters: filters });
+            const response = await this.api.post<PaginatedResponse<Site>>(url, { filters: filters });
             return response.data;
         } catch (error: any) {
             return handleApiError("SitesClient::getSites:", error)
         }
     }
 
-    async searchSites(searchStr: string): Promise<Sites[]> {
+    async createSite(data: Site): Promise<Site> {
         try {
-            const response = await this.api.get<Sites[]>(`/${searchStr}`);
+            const response = await this.api.post<Site>(`/api/sites`, data);
             return response.data;
         } catch (error: any) {
-            return handleApiError("SitesClient::searchSites:", error)
+            return handleApiError("SitesClient::createSites:", error)
         }
     }
 
-    async createSiets(data: Sites): Promise<Sites> {
+    async updateSite(data: Site): Promise<Site> {
         try {
-            const response = await this.api.post<Sites>(`/`, data);
-            return response.data;
-        } catch (error: any) {
-            return handleApiError("SitesClient::createSiets:", error)
-        }
-    }
-
-    async updateSite(data: Sites): Promise<Sites> {
-        try {
-            const response = await this.api.put<Sites>(`/${data.id}`, data);
+            const response = await this.api.put<Site>(`/api/sites/${data.id}`, data);
             return response.data;
         } catch (error: any) {
             return handleApiError("SitesClient::updateSite:", error)
         }
     }
 
-    async deleteSite(data: Sites): Promise<number> {
+    async deleteSite(data: Site): Promise<number> {
         if (!data.id) throw new Error('Site id required to delete Site!')
         try {
-            await this.api.delete<any>(`/${data.id}`);
+            await this.api.delete<any>(`/api/sites/${data.id}`);
             return data.id;
         } catch (error: any) {
             return handleApiError("SitesClient::deleteSite:", error)
@@ -62,7 +49,7 @@ export class SitesClient {
     }
 
     async fetchChanges(timestamp: string, site_ids: number[]): Promise<SiteHelperDataResponse> {
-        const url = `/api/appv2/fetchHelperData/users`;
+        const url = `/api/appv2/fetchHelperData/sites`;
         try {
             const response = await this.api.post<SiteHelperDataResponse>(url, { timestamp, site_ids });
             return response.data;
