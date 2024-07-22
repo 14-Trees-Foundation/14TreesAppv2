@@ -23,7 +23,6 @@ const Users: React.FC<UsersInputProps> = ({ navigation }) => {
     const [changeMode, setChangeModel] = useState<'add' | 'edit'>('add');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
-    const [page, setPage] = useState(0);
     const [users, setUsers] = useState<User[]>([]);
 
     let daoClient: DaoClient;
@@ -51,7 +50,15 @@ const Users: React.FC<UsersInputProps> = ({ navigation }) => {
     useEffect(() => {
         if (searchQuery.length < 1) return;
         setTimeout(async () => {
-            let users = await daoClient.users.searchUsers(searchQuery, 0, 20);
+            let users = await daoClient.users.searchUsers(searchQuery, 0, 100);
+            setUsers(users);
+        }, 1000)
+    }, [searchQuery, stateChange])
+    
+    useEffect(() => {
+        if (searchQuery.length > 0) return;
+        setTimeout(async () => {
+            let users = await daoClient.users.getUsers(0, 100);
             setUsers(users);
         }, 1000)
     }, [searchQuery, stateChange])
