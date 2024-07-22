@@ -1,6 +1,7 @@
 import { SQLiteDatabase, enablePromise, openDatabase } from 'react-native-sqlite-storage';
 import { TreesDao } from './trees';
 import { UsersDao } from './users';
+import { PlotsDao } from './plots';
 import { TreeImagesDao } from './tree_images';
 
 enablePromise(true);
@@ -17,11 +18,13 @@ export class DaoClient {
     public trees: TreesDao;
     public users: UsersDao;
     public treeImages: TreeImagesDao;
+    public plots: PlotsDao;
 
     constructor(dbConnection: SQLiteDatabase) {
         this.trees = new TreesDao(dbConnection);
         this.users = new UsersDao(dbConnection);
         this.treeImages = new TreeImagesDao(dbConnection);
+        this.plots = new PlotsDao(dbConnection);
     }
 
     static async authenticate() {

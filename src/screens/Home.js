@@ -7,6 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { homeStyles } from '../services/Styles';
 import { fetchAndStoreTrees } from '../services/sync/tree';
 import { fetchAndStoreUsers } from '../services/sync/users';
+import { fetchAndStorePlots } from '../services/sync/plots';
 
 const HomeScreen = ({ navigation }) => {
   const { langChanged, lightTheme } = useContext(GlobalContext);
@@ -22,8 +23,9 @@ const HomeScreen = ({ navigation }) => {
 
     const helperDataStatus = await Utils.fetchAndStoreHelperData();
 
-    await fetchAndStoreUsers();
+    // await fetchAndStoreUsers();
     await fetchAndStoreTrees();
+    await fetchAndStorePlots();
 
     if (helperDataStatus.helperDataUptoDate) {
       setDataUptoDate(true);
