@@ -291,6 +291,8 @@ export class Utils {
         await daoClient.trees.createTable();
         await daoClient.users.createTable();
         await daoClient.treeImages.createTable();
+        await daoClient.plots.createTable();
+        await daoClient.sites.createTable();
         await daoClient.visits.createTable();
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
@@ -1444,7 +1446,6 @@ export class Constants {
     static treeFormTemplateData = { inSaplingId: null, inLat: 0, inLng: 0, inImage: null, inPlot: null, inTreeType: null, inUserId: 0, inTreeStatus: 'alive' }
     static selectedLangKey = 'LANG';
     static selectedTheme = 'DARK';
-    static lastUsersFetchedAt = 'last_users_fetched_at'
     static authToken = 'token'
     static userRole = 'user_role'
     static logoImage() {
@@ -1457,6 +1458,8 @@ export class Constants {
     // helpers data
     static lastTreesFetchedAt = 'last_trees_fetched_at'
     static lastUsersFetchedAt = 'last_users_fetched_at'
+    static lastPlotsFetchedAt = 'last_plots_fetched_at'
+    static lastSitesFetchedAt = 'last_sites_fetched_at'
     static lastVisitsFetchedAt = 'last_visits_fetched_at'
 }
 

@@ -11,9 +11,11 @@ import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { DaoClient } from '../services/db/dao';
 import { uploadTreesData } from '../services/sync/tree';
 import { uploadUsersData } from '../services/sync/users';
+import { uploadPlotsData } from '../services/sync/plots';
+import { uploadSitesData } from '../services/sync/sites';
 import { uploadVisitData } from '../services/sync/visits';
 
-const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setVisitsCount) => {
+const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount , setPlotsCount, setSitesCount, setVisitsCount) => {
   const lsdate = await Utils.getLastSyncDate();
   if (lsdate) {
     setSyncDate(Utils.getReadableDate(lsdate));
@@ -35,6 +37,12 @@ const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setT
   const usersResp = await daoClient.users.countUsersByChangeTye(false);
   setUsersCount(usersResp);
 
+  const plotsResp = await daoClient.plots.countPlotsByChangeType(false);
+  setPlotsCount(plotsResp);
+
+  const sitesResp = await daoClient.sites.countSitesByChangeType(false);
+  setSitesCount(sitesResp);
+
   const visitsResp = await daoClient.visits.countVisitsByChangeTye(false);
   setVisitsCount(visitsResp);
 }
@@ -55,6 +63,9 @@ const SyncDisplay = ({ navigation }) => {
   const [shiftsCount, setShiftsCount] = useState(null);
   const [treesCount, setTreesCount] = useState(null);
   const [usersCount, setUsersCount] = useState(null);
+  const [plotsCount, setPlotsCount] = useState(null);
+  const [sitesCount, setSitesCount] = useState(null);
+
   const [visitsCount, setVisitsCount] = useState(null);
   const { lightTheme, shiftID, shiftDone } = useContext(GlobalContext);
 
@@ -71,7 +82,7 @@ const SyncDisplay = ({ navigation }) => {
 
 
   useFocusEffect(useCallback(() => {
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setVisitsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount, setVisitsCount);
     console.log('sync date updated', shiftID)
   }, []))
 
@@ -116,7 +127,7 @@ const SyncDisplay = ({ navigation }) => {
     setFailedShifts(responseFromSyncShifts.failures);
 
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setVisitsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount, setVisitsCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -145,7 +156,7 @@ const SyncDisplay = ({ navigation }) => {
 
     setFailedTrees(failures)
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setVisitsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount, setVisitsCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -164,7 +175,7 @@ const SyncDisplay = ({ navigation }) => {
     //console.log("----------------treesinNewImageTable-----------", treesinNewImageTable[0].uploaded)
     setFailedImagesTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setVisitsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount , setPlotsCount, setSitesCount, setVisitsCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -185,7 +196,7 @@ const SyncDisplay = ({ navigation }) => {
     console.log("---------failedPlotTreesMessages------", failures)
     setFailedPlotTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setVisitsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount ,setSitesCount, setVisitsCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -199,8 +210,11 @@ const SyncDisplay = ({ navigation }) => {
       treeCounts &&
       treeCounts.pending.treesUpload === 0 && treeCounts.pending.plotUpload === 0 && treeCounts.pending.imagesUpload === 0 &&
       shiftsCount && shiftsCount.pending === 0 
-      && treesCount && treesCount.add === 0 && treesCount.edit === 0 && treesCount.delete === 0 
+      && treesCount && treesCount.add === 0 && treesCount.edit === 0 && treesCount.delete === 0
+      
       && usersCount && usersCount.add === 0 && usersCount.edit === 0 && usersCount.delete === 0
+      && plotsCount && plotsCount.add === 0 && plotsCount.edit === 0 && plotsCount.delete === 0
+      && sitesCount && sitesCount.add === 0 && sitesCount.edit === 0 && sitesCount.delete === 0
       && visitsCount && visitsCount.add === 0 && visitsCount.edit === 0 && visitsCount.delete === 0) {
       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
       return;
@@ -208,108 +222,134 @@ const SyncDisplay = ({ navigation }) => {
 
     setShowProgress(true);
 
-    // try {
+    try {
 
-    //   await syncLogs();
+      await syncLogs();
 
-    // } catch (error) {
-    //   console.log('unable to sync logs---', error);
-    //   const stackTrace = error.stack;
-    //   const errorLog = {
-    //     msg: 'happened while trying to sync logs(inside sync display)',
-    //     error: JSON.stringify(error),
-    //     stackTrace: stackTrace,
-    //   };
-    //   await Utils.logException(JSON.stringify(errorLog));
-    // }
+    } catch (error) {
+      console.log('unable to sync logs---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync logs(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
 
-    // let uploadedSaplings;
+    let uploadedSaplings;
 
-    // try {
-    //   uploadedSaplings = await uploadTrees();
-    // } catch (error) {
-    //   console.log('unable to sync trees---', error);
-    //   const stackTrace = error.stack;
-    //   const errorLog = {
-    //     msg: 'happened while trying to sync trees(inside sync display)',
-    //     error: JSON.stringify(error),
-    //     stackTrace: stackTrace,
-    //   };
-    //   await Utils.logException(JSON.stringify(errorLog));
-    // }
-
-
-
-    // let uploadedImageSaplings;
-    // try {
-    //   uploadedImageSaplings = await uploadImages();
-    // } catch (error) {
-    //   console.log('unable to sync new images---', error);
-    //   const stackTrace = error.stack;
-    //   const errorLog = {
-    //     msg: 'happened while trying to sync new images(inside sync display)',
-    //     error: JSON.stringify(error),
-    //     stackTrace: stackTrace,
-    //   };
-    //   await Utils.logException(JSON.stringify(errorLog));
-    // }
+    try {
+      uploadedSaplings = await uploadTrees();
+    } catch (error) {
+      console.log('unable to sync trees---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync trees(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
 
 
-    // let uploadedTreesPlotsSaplings;
 
-    // try {
-    //   uploadedTreesPlotsSaplings = await uploadTreesPlots();
-    //   //console.log("uploadedTreesPlotsSaplings---", uploadedTreesPlotsSaplings);
-    // } catch (error) {
-    //   console.log('unable to sync trees---', error);
-    //   const stackTrace = error.stack;
-    //   const errorLog = {
-    //     msg: 'happened while trying to sync trees(inside sync display)',
-    //     error: JSON.stringify(error),
-    //     stackTrace: stackTrace,
-    //   };
-    //   await Utils.logException(JSON.stringify(errorLog));
-    // }
+    let uploadedImageSaplings;
+    try {
+      uploadedImageSaplings = await uploadImages();
+    } catch (error) {
+      console.log('unable to sync new images---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync new images(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
 
-    // try {
 
-    //   await uploadShift();
-    // } catch (error) {
-    //   console.log('unable to sync shifts---', error);
-    //   const stackTrace = error.stack;
-    //   const errorLog = {
-    //     msg: 'happened while trying to sync shifts(inside sync display)',
-    //     error: JSON.stringify(error),
-    //     stackTrace: stackTrace,
-    //   };
-    //   await Utils.logException(JSON.stringify(errorLog));
-    // }
+    let uploadedTreesPlotsSaplings;
 
-    // try {
-    //   await uploadTreesData();
-    // } catch (error) {
-    //   console.log('unable to sync trees---', error);
-    //   const stackTrace = error.stack;
-    //   const errorLog = {
-    //     msg: 'happened while trying to sync trees(inside sync display)',
-    //     error: JSON.stringify(error),
-    //     stackTrace: stackTrace,
-    //   };
-    //   await Utils.logException(JSON.stringify(errorLog));
-    // }
+    try {
+      uploadedTreesPlotsSaplings = await uploadTreesPlots();
+      //console.log("uploadedTreesPlotsSaplings---", uploadedTreesPlotsSaplings);
+    } catch (error) {
+      console.log('unable to sync trees---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync trees(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
 
-    // try {
-    //   await uploadUsersData();
-    // } catch (error) {
-    //   console.log('unable to sync users---', error);
-    //   const stackTrace = error.stack;
-    //   const errorLog = {
-    //     msg: 'happened while trying to sync users(inside sync display)',
-    //     error: JSON.stringify(error),
-    //     stackTrace: stackTrace,
-    //   };
-    //   await Utils.logException(JSON.stringify(errorLog));
-    // }
+    try {
+
+      await uploadShift();
+    } catch (error) {
+      console.log('unable to sync shifts---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync shifts(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
+
+    try {
+      await uploadTreesData();
+    } catch (error) {
+      console.log('unable to sync trees---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync trees(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
+
+    try {
+      await uploadUsersData();
+    } catch (error) {
+      console.log('unable to sync users---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync users(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
+
+    try {
+      await uploadPlotsData();
+    } catch (error) {
+      console.log('unable to sync plots---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync plots(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
+
+    try {
+      await uploadSitesData();
+    } catch (error) {
+      console.log('unable to sync sites---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync sites(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
 
     try {
       await uploadVisitData();
@@ -324,7 +364,7 @@ const SyncDisplay = ({ navigation }) => {
       await Utils.logException(JSON.stringify(errorLog));
     }
 
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setVisitsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount, setVisitsCount);
     setShowProgress(false);
 
   };
@@ -379,6 +419,18 @@ const SyncDisplay = ({ navigation }) => {
               </Text>
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
                 [ added: {usersCount?.add || 0}, edited: {usersCount?.edit || 0}, deleted: {usersCount?.delete || 0}]
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "bold", paddingBottom: 4 }}>
+                {Strings.screenNames.PlotsPage}: 
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                [ added: {plotsCount?.add || 0}, edited: {plotsCount?.edit || 0}, deleted: {plotsCount?.delete || 0}]
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "bold", paddingBottom: 4 }}>
+                {Strings.screenNames.SitesPage}: 
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                [ added: {sitesCount?.add || 0}, edited: {sitesCount?.edit || 0}, deleted: {sitesCount?.delete || 0}]
               </Text>
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "bold", paddingBottom: 4 }}>
                 {Strings.screenNames.VisitsPage}: 

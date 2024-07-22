@@ -9,6 +9,8 @@ export class Strings {
         "en": {
             HomePage: "Home",
             TreesPage: "Trees",
+            PlotsPage: "Plots",
+            SitesPage: "Sites",
             VisitsPage: "Visits",
             AddTreeShift: "Add Tree",
             LocalDataView: "Local Data",
@@ -34,7 +36,9 @@ export class Strings {
         "mr": {
             HomePage: "मुख्य पृष्ठ",
             TreesPage: "झाडे",
-            VIsitsPage: "भेटी",
+            PlotsPage: "भूखंड",
+            SitesPage: "साइट्स",
+            VisitsPage: "भेटी",
             AddTreeShift: "नवीन झाड जोडा",
             LocalDataView: "लोकल डेटा",
             LocalDataNavigator: "LocalDataNavigator",
@@ -508,6 +512,16 @@ export class Strings {
             AddAShift : 'Add a tree to this shift',
             Time: 'Time',
 
+            // Plot
+            PlotName: 'Plot name',
+            PlotId: 'Plot ID',
+            Tags: 'Tags',
+            PlotCategory: 'Plot category',
+            Gat: 'Gat',
+
+            // site
+            SiteName: 'Site Name',
+
             // Visits
             VisitName: 'Visit Name',
             VisitType: 'Visit Type',
@@ -533,6 +547,17 @@ export class Strings {
             EndTime: 'समाप्ती वेळ',
             TimeTaken: 'वेळ',
             Time: 'वेळ',
+            AddAShift: 'या शिफ्टमध्ये एक झाड जोडा',
+
+            // site
+            SiteName: 'साइटचे नाव',
+
+            // Plot
+            PlotName: 'प्लॉटचे नाव',
+            PlotId: 'प्लॉट आयडी',
+            Tags: 'टॅग्ज',
+            PlotCategory: 'प्लॉट श्रेणी',
+            Gat: 'गॅट',
             AddAShift: 'या शिफ्टमध्ये एक झाड जोडा',
 
             // Visits

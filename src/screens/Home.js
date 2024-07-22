@@ -6,7 +6,10 @@ import GlobalContext from '../context/GlobalContext ';
 import { useFocusEffect } from '@react-navigation/native';
 import { homeStyles } from '../services/Styles';
 import { fetchAndStoreTrees } from '../services/sync/tree';
-import { fetchAndStoreUsers } from '../services/sync/users';
+// import { fetchAndStoreUsers } from '../services/sync/users';
+import { fetchAndStorePlots } from '../services/sync/plots';
+import { fetchAndStoreSites } from '../services/sync/sites';
+
 import { fetchAndStoreVisits } from '../services/sync/visits';
 
 
@@ -24,8 +27,10 @@ const HomeScreen = ({ navigation }) => {
 
     const helperDataStatus = await Utils.fetchAndStoreHelperData();
 
-    await fetchAndStoreUsers();
+    // await fetchAndStoreUsers();
     await fetchAndStoreTrees();
+    await fetchAndStorePlots();
+    await fetchAndStoreSites();
     await fetchAndStoreVisits();
 
     if (helperDataStatus.helperDataUptoDate) {
