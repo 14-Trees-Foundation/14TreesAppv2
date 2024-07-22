@@ -38,6 +38,8 @@ export const VisitInfo: React.FC<VisitInfoInputProps> = ({ isVisible, visit, onC
                 </View>
                 <Text style={styles.label}>Name:</Text>
                 <Text style={styles.value}>{visit.visit_name}</Text>
+                <Text style={styles.label}>Type:</Text>
+                <Text style={styles.value}>{visit.visit_type}</Text>
                 <Text style={styles.label}>Date:</Text>
                 <Text style={styles.value}>{visit.visit_date}</Text>
               

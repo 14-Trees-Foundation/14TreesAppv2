@@ -11,49 +11,40 @@ export class VisitService {
     }
 
     async getVisits(offset: number, limit: number, filters?: FilterItem[]): Promise<PaginatedResponse<Visit>> {
-        const url = `/get?offset=${offset}&limit=${limit}`;
+        const url = `/api/visits/get?offset=${offset}&limit=${limit}`;
         try {
             const response = await this.api.post<PaginatedResponse<Visit>>(url, { filters: filters });
             return response.data;
         } catch (error: any) {
-            return handleApiError("VisitClient::getVists:", error)
-        }
-    }
-
-    async searchVisits(searchStr: string): Promise<Visit[]> {
-        try {
-            const response = await this.api.get<Visit[]>(`/${searchStr}`);
-            return response.data;
-        } catch (error: any) {
-            return handleApiError("VisitClient::searchVists:", error)
+            return handleApiError("VisitService::getVisits:", error)
         }
     }
 
     async createVisit(data: Visit): Promise<Visit> {
         try {
-            const response = await this.api.post<Visit>(`/`, data);
+            const response = await this.api.post<Visit>(`/api/visits/`, data);
             return response.data;
         } catch (error: any) {
-            return handleApiError("VisitClient::createVisit:", error)
+            return handleApiError("VisitService::createVisit:", error)
         }
     }
 
     async updateVisit(data: Visit): Promise<Visit> {
         try {
-            const response = await this.api.put<Visit>(`/${data.id}`, data);
+            const response = await this.api.put<Visit>(`/api/visits/${data.id}`, data);
             return response.data;
         } catch (error: any) {
-            return handleApiError("VisitClient::updateVisit:", error)
+            return handleApiError("VisitService::updateVisit:", error)
         }
     }
 
     async deleteVisit(data: Visit): Promise<number> {
         if (!data.id) throw new Error('Visit id required to delete visit!')
         try {
-            await this.api.delete<any>(`/${data.id}`);
+            await this.api.delete<any>(`/api/visits/${data.id}`);
             return data.id;
         } catch (error: any) {
-            return handleApiError("VisitClient::deleteVisit:", error)
+            return handleApiError("VisitService::deleteVisit:", error)
         }
     }
 
@@ -63,7 +54,7 @@ export class VisitService {
             const response = await this.api.post<VisitHelperDataResponse>(url, { timestamp, visit_ids });
             return response.data;
         } catch (error: any) {
-            return handleApiError("VisitClient::fetchChanges:", error)
+            return handleApiError("VisitService::fetchChanges:", error)
         }
     }
 }

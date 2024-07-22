@@ -11,16 +11,15 @@ export const fetchAndStoreVisits = async () => {
     const daoClient = await DaoClient.authenticate();
 
     const visitIds = await daoClient.visits.getLiveVisitIds()
-    const timestamp = await AsyncStorage.getItem(Constants.lastVisitFetchedAt) || '2020-01-01T00:00:00Z'
+    const timestamp = await AsyncStorage.getItem(Constants.lastVisitsFetchedAt) || '2020-01-01T00:00:00Z'
 
     try {
         const now = new Date().toISOString();
         const response = await apiClient.visits.fetchChanges(timestamp, visitIds)
-        const visits = response.visit;
-
+        const visits = response.visits;
+        console.log(JSON.stringify(response))
         // upload visits in local db
         for (const visit of visits) {
-            // user.roles = user.roles ? (user.roles as any).join(',') : '';
             await daoClient.visits.upsertLiveVisitIntoLocalDb(visit);
         }
 
@@ -28,10 +27,10 @@ export const fetchAndStoreVisits = async () => {
         for (const visitId of response.deleted_visit_ids) {
             await daoClient.visits.deleteLiveVisitFromLocalDb(visitId);
         }
-        await AsyncStorage.setItem(Constants.lastVisitFetchedAt, now);
+        await AsyncStorage.setItem(Constants.lastVisitsFetchedAt, now);
         console.log('visits fetch Done!')
     } catch(err: any) {
-        console.log('Inside fetchAndStorevisits:', err)
+        console.log('Inside fetchAndStoreVisits:', err)
     }
 }
 

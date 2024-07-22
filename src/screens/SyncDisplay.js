@@ -11,8 +11,9 @@ import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { DaoClient } from '../services/db/dao';
 import { uploadTreesData } from '../services/sync/tree';
 import { uploadUsersData } from '../services/sync/users';
+import { uploadVisitData } from '../services/sync/visits';
 
-const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount) => {
+const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setVisitsCount) => {
   const lsdate = await Utils.getLastSyncDate();
   if (lsdate) {
     setSyncDate(Utils.getReadableDate(lsdate));
@@ -33,6 +34,9 @@ const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setT
 
   const usersResp = await daoClient.users.countUsersByChangeTye(false);
   setUsersCount(usersResp);
+
+  const visitsResp = await daoClient.visits.countVisitsByChangeTye(false);
+  setVisitsCount(visitsResp);
 }
 
 const getReadableProgress = (progress) => {
@@ -51,6 +55,7 @@ const SyncDisplay = ({ navigation }) => {
   const [shiftsCount, setShiftsCount] = useState(null);
   const [treesCount, setTreesCount] = useState(null);
   const [usersCount, setUsersCount] = useState(null);
+  const [visitsCount, setVisitsCount] = useState(null);
   const { lightTheme, shiftID, shiftDone } = useContext(GlobalContext);
 
   useEffect(() => {
@@ -66,7 +71,7 @@ const SyncDisplay = ({ navigation }) => {
 
 
   useFocusEffect(useCallback(() => {
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setVisitsCount);
     console.log('sync date updated', shiftID)
   }, []))
 
@@ -111,7 +116,7 @@ const SyncDisplay = ({ navigation }) => {
     setFailedShifts(responseFromSyncShifts.failures);
 
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setVisitsCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -140,7 +145,7 @@ const SyncDisplay = ({ navigation }) => {
 
     setFailedTrees(failures)
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setVisitsCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -159,7 +164,7 @@ const SyncDisplay = ({ navigation }) => {
     //console.log("----------------treesinNewImageTable-----------", treesinNewImageTable[0].uploaded)
     setFailedImagesTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setVisitsCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -180,7 +185,7 @@ const SyncDisplay = ({ navigation }) => {
     console.log("---------failedPlotTreesMessages------", failures)
     setFailedPlotTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setVisitsCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -194,119 +199,132 @@ const SyncDisplay = ({ navigation }) => {
       treeCounts &&
       treeCounts.pending.treesUpload === 0 && treeCounts.pending.plotUpload === 0 && treeCounts.pending.imagesUpload === 0 &&
       shiftsCount && shiftsCount.pending === 0 
-      && treesCount && treesCount.add === 0 && treesCount.edit === 0 && treesCount.delete === 0 && usersCount && usersCount.add === 0 && usersCount.edit === 0 && usersCount.delete === 0) {
+      && treesCount && treesCount.add === 0 && treesCount.edit === 0 && treesCount.delete === 0 
+      && usersCount && usersCount.add === 0 && usersCount.edit === 0 && usersCount.delete === 0
+      && visitsCount && visitsCount.add === 0 && visitsCount.edit === 0 && visitsCount.delete === 0) {
       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
       return;
     }
 
     setShowProgress(true);
 
+    // try {
+
+    //   await syncLogs();
+
+    // } catch (error) {
+    //   console.log('unable to sync logs---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync logs(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+    // let uploadedSaplings;
+
+    // try {
+    //   uploadedSaplings = await uploadTrees();
+    // } catch (error) {
+    //   console.log('unable to sync trees---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync trees(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+
+
+    // let uploadedImageSaplings;
+    // try {
+    //   uploadedImageSaplings = await uploadImages();
+    // } catch (error) {
+    //   console.log('unable to sync new images---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync new images(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+
+    // let uploadedTreesPlotsSaplings;
+
+    // try {
+    //   uploadedTreesPlotsSaplings = await uploadTreesPlots();
+    //   //console.log("uploadedTreesPlotsSaplings---", uploadedTreesPlotsSaplings);
+    // } catch (error) {
+    //   console.log('unable to sync trees---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync trees(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+    // try {
+
+    //   await uploadShift();
+    // } catch (error) {
+    //   console.log('unable to sync shifts---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync shifts(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+    // try {
+    //   await uploadTreesData();
+    // } catch (error) {
+    //   console.log('unable to sync trees---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync trees(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+    // try {
+    //   await uploadUsersData();
+    // } catch (error) {
+    //   console.log('unable to sync users---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync users(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
     try {
-
-      await syncLogs();
-
+      await uploadVisitData();
     } catch (error) {
-      console.log('unable to sync logs---', error);
+      console.log('unable to sync visits---', error);
       const stackTrace = error.stack;
       const errorLog = {
-        msg: 'happened while trying to sync logs(inside sync display)',
+        msg: 'happened while trying to sync visits(inside sync display)',
         error: JSON.stringify(error),
         stackTrace: stackTrace,
       };
       await Utils.logException(JSON.stringify(errorLog));
     }
 
-    let uploadedSaplings;
-
-    try {
-      uploadedSaplings = await uploadTrees();
-    } catch (error) {
-      console.log('unable to sync trees---', error);
-      const stackTrace = error.stack;
-      const errorLog = {
-        msg: 'happened while trying to sync trees(inside sync display)',
-        error: JSON.stringify(error),
-        stackTrace: stackTrace,
-      };
-      await Utils.logException(JSON.stringify(errorLog));
-    }
-
-
-
-    let uploadedImageSaplings;
-    try {
-      uploadedImageSaplings = await uploadImages();
-    } catch (error) {
-      console.log('unable to sync new images---', error);
-      const stackTrace = error.stack;
-      const errorLog = {
-        msg: 'happened while trying to sync new images(inside sync display)',
-        error: JSON.stringify(error),
-        stackTrace: stackTrace,
-      };
-      await Utils.logException(JSON.stringify(errorLog));
-    }
-
-
-    let uploadedTreesPlotsSaplings;
-
-    try {
-      uploadedTreesPlotsSaplings = await uploadTreesPlots();
-      //console.log("uploadedTreesPlotsSaplings---", uploadedTreesPlotsSaplings);
-    } catch (error) {
-      console.log('unable to sync trees---', error);
-      const stackTrace = error.stack;
-      const errorLog = {
-        msg: 'happened while trying to sync trees(inside sync display)',
-        error: JSON.stringify(error),
-        stackTrace: stackTrace,
-      };
-      await Utils.logException(JSON.stringify(errorLog));
-    }
-
-    try {
-
-      await uploadShift();
-    } catch (error) {
-      console.log('unable to sync shifts---', error);
-      const stackTrace = error.stack;
-      const errorLog = {
-        msg: 'happened while trying to sync shifts(inside sync display)',
-        error: JSON.stringify(error),
-        stackTrace: stackTrace,
-      };
-      await Utils.logException(JSON.stringify(errorLog));
-    }
-
-    try {
-      await uploadTreesData();
-      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount);
-    } catch (error) {
-      console.log('unable to sync trees---', error);
-      const stackTrace = error.stack;
-      const errorLog = {
-        msg: 'happened while trying to sync trees(inside sync display)',
-        error: JSON.stringify(error),
-        stackTrace: stackTrace,
-      };
-      await Utils.logException(JSON.stringify(errorLog));
-    }
-
-    setShowProgress(false);
-    try {
-      await uploadUsersData();
-      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount);
-    } catch (error) {
-      console.log('unable to sync users---', error);
-      const stackTrace = error.stack;
-      const errorLog = {
-        msg: 'happened while trying to sync users(inside sync display)',
-        error: JSON.stringify(error),
-        stackTrace: stackTrace,
-      };
-      await Utils.logException(JSON.stringify(errorLog));
-    }
-
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setVisitsCount);
     setShowProgress(false);
 
   };
@@ -361,6 +379,12 @@ const SyncDisplay = ({ navigation }) => {
               </Text>
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
                 [ added: {usersCount?.add || 0}, edited: {usersCount?.edit || 0}, deleted: {usersCount?.delete || 0}]
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "bold", paddingBottom: 4 }}>
+                {Strings.screenNames.VisitsPage}: 
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                [ added: {visitsCount?.add || 0}, edited: {visitsCount?.edit || 0}, deleted: {visitsCount?.delete || 0}]
               </Text>
             </View>
           </View>

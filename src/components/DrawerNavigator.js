@@ -215,7 +215,7 @@ export const DrawerNavigator = () => {
             />
             <Drawer.Screen
                 name={Strings.screenNames.getString('VisitsPage', Strings.english)}
-                component={Visit}
+                component={Visits}
                 options={{
                     headerRight: () => (
                         <ScreenHeaderContent />

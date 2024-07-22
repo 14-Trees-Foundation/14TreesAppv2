@@ -23,7 +23,6 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
     const [changeMode, setChangeModel] = useState<'add' | 'edit'>('add');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
-    const [page, setPage] = useState(0);
     const [Visits, setVisits] = useState<Visit[]>([]);
 
     let daoClient: DaoClient;
@@ -49,11 +48,19 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
     }, []);
 
     useEffect(() => {
+        if (searchQuery.length > 0) return;
+        setTimeout(async () => {
+            let visits = await daoClient.visits.getVisits(0, 100);
+            setVisits(visits);
+        }, 100)
+    }, [searchQuery, stateChange])
+
+    useEffect(() => {
         if (searchQuery.length < 1) return;
         setTimeout(async () => {
-            let visits = await daoClient.visits.searchVisits(searchQuery, 0, 20);
+            let visits = await daoClient.visits.searchVisits(searchQuery, 0, 100);
             setVisits(visits);
-        }, 1000)
+        }, 100)
     }, [searchQuery, stateChange])
 
     const handleSave = (data: Visit | CreateVisitRequest) => {
