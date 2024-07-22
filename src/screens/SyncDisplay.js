@@ -11,6 +11,7 @@ import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { DaoClient } from '../services/db/dao';
 import { uploadTreesData } from '../services/sync/tree';
 import { uploadUsersData } from '../services/sync/users';
+import { uploadPlotsData } from '../services/sync/plots';
 
 const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount , setPlotsCount) => {
   const lsdate = await Utils.getLastSyncDate();
@@ -33,6 +34,9 @@ const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setT
 
   const usersResp = await daoClient.users.countUsersByChangeTye(false);
   setUsersCount(usersResp);
+
+  const plotsResp = await daoClient.plots.countPlotsByChangeType(false);
+  setPlotsCount(plotsResp);
 }
 
 const getReadableProgress = (progress) => {
@@ -195,113 +199,128 @@ const SyncDisplay = ({ navigation }) => {
       treeCounts &&
       treeCounts.pending.treesUpload === 0 && treeCounts.pending.plotUpload === 0 && treeCounts.pending.imagesUpload === 0 &&
       shiftsCount && shiftsCount.pending === 0 
-      && treesCount && treesCount.add === 0 && treesCount.edit === 0 && treesCount.delete === 0 && usersCount && usersCount.add === 0 && usersCount.edit === 0 && usersCount.delete === 0) {
+      && treesCount && treesCount.add === 0 && treesCount.edit === 0 && treesCount.delete === 0
+      && usersCount && usersCount.add === 0 && usersCount.edit === 0 && usersCount.delete === 0
+      && plotsCount && plotsCount.add === 0 && plotsCount.edit === 0 && plotsCount.delete === 0) {
       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
       return;
     }
 
     setShowProgress(true);
 
+    // try {
+
+    //   await syncLogs();
+
+    // } catch (error) {
+    //   console.log('unable to sync logs---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync logs(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+    // let uploadedSaplings;
+
+    // try {
+    //   uploadedSaplings = await uploadTrees();
+    // } catch (error) {
+    //   console.log('unable to sync trees---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync trees(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+
+
+    // let uploadedImageSaplings;
+    // try {
+    //   uploadedImageSaplings = await uploadImages();
+    // } catch (error) {
+    //   console.log('unable to sync new images---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync new images(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+
+    // let uploadedTreesPlotsSaplings;
+
+    // try {
+    //   uploadedTreesPlotsSaplings = await uploadTreesPlots();
+    //   //console.log("uploadedTreesPlotsSaplings---", uploadedTreesPlotsSaplings);
+    // } catch (error) {
+    //   console.log('unable to sync trees---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync trees(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+    // try {
+
+    //   await uploadShift();
+    // } catch (error) {
+    //   console.log('unable to sync shifts---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync shifts(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+    // try {
+    //   await uploadTreesData();
+    //   updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount);
+    // } catch (error) {
+    //   console.log('unable to sync trees---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync trees(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+    // try {
+    //   await uploadUsersData();
+    //   updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount);
+    // } catch (error) {
+    //   console.log('unable to sync users---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync users(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
     try {
-
-      await syncLogs();
-
+      await uploadPlotsData();
+      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount);
     } catch (error) {
-      console.log('unable to sync logs---', error);
+      console.log('unable to sync plots---', error);
       const stackTrace = error.stack;
       const errorLog = {
-        msg: 'happened while trying to sync logs(inside sync display)',
-        error: JSON.stringify(error),
-        stackTrace: stackTrace,
-      };
-      await Utils.logException(JSON.stringify(errorLog));
-    }
-
-    let uploadedSaplings;
-
-    try {
-      uploadedSaplings = await uploadTrees();
-    } catch (error) {
-      console.log('unable to sync trees---', error);
-      const stackTrace = error.stack;
-      const errorLog = {
-        msg: 'happened while trying to sync trees(inside sync display)',
-        error: JSON.stringify(error),
-        stackTrace: stackTrace,
-      };
-      await Utils.logException(JSON.stringify(errorLog));
-    }
-
-
-
-    let uploadedImageSaplings;
-    try {
-      uploadedImageSaplings = await uploadImages();
-    } catch (error) {
-      console.log('unable to sync new images---', error);
-      const stackTrace = error.stack;
-      const errorLog = {
-        msg: 'happened while trying to sync new images(inside sync display)',
-        error: JSON.stringify(error),
-        stackTrace: stackTrace,
-      };
-      await Utils.logException(JSON.stringify(errorLog));
-    }
-
-
-    let uploadedTreesPlotsSaplings;
-
-    try {
-      uploadedTreesPlotsSaplings = await uploadTreesPlots();
-      //console.log("uploadedTreesPlotsSaplings---", uploadedTreesPlotsSaplings);
-    } catch (error) {
-      console.log('unable to sync trees---', error);
-      const stackTrace = error.stack;
-      const errorLog = {
-        msg: 'happened while trying to sync trees(inside sync display)',
-        error: JSON.stringify(error),
-        stackTrace: stackTrace,
-      };
-      await Utils.logException(JSON.stringify(errorLog));
-    }
-
-    try {
-
-      await uploadShift();
-    } catch (error) {
-      console.log('unable to sync shifts---', error);
-      const stackTrace = error.stack;
-      const errorLog = {
-        msg: 'happened while trying to sync shifts(inside sync display)',
-        error: JSON.stringify(error),
-        stackTrace: stackTrace,
-      };
-      await Utils.logException(JSON.stringify(errorLog));
-    }
-
-    try {
-      await uploadTreesData();
-      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount);
-    } catch (error) {
-      console.log('unable to sync trees---', error);
-      const stackTrace = error.stack;
-      const errorLog = {
-        msg: 'happened while trying to sync trees(inside sync display)',
-        error: JSON.stringify(error),
-        stackTrace: stackTrace,
-      };
-      await Utils.logException(JSON.stringify(errorLog));
-    }
-
-    setShowProgress(false);
-    try {
-      await uploadUsersData();
-      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount);
-    } catch (error) {
-      console.log('unable to sync users---', error);
-      const stackTrace = error.stack;
-      const errorLog = {
-        msg: 'happened while trying to sync users(inside sync display)',
+        msg: 'happened while trying to sync plots(inside sync display)',
         error: JSON.stringify(error),
         stackTrace: stackTrace,
       };

@@ -23,7 +23,7 @@ const HomeScreen = ({ navigation }) => {
 
     const helperDataStatus = await Utils.fetchAndStoreHelperData();
 
-    await fetchAndStoreUsers();
+    // await fetchAndStoreUsers();
     await fetchAndStoreTrees();
     await fetchAndStorePlots();
 

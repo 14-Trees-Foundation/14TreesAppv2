@@ -3,7 +3,7 @@ import { Strings } from '../Strings';
 import { ToastAndroid } from 'react-native';
 import { UserService } from './users';
 import { TreeService } from './trees';
-import { PlotsService } from './plots';
+import { PlotService } from './plots';
 
 axios.interceptors.response.use(function (response) {
     return response;
@@ -54,5 +54,5 @@ export class ApiClient {
     });
     public users = new UserService(this.api);
     public trees = new TreeService(this.api);
-    public plots = new PlotsService(this.api);
+    public plots = new PlotService(this.api);
 } 

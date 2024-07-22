@@ -3,33 +3,27 @@ import React, { useContext, useEffect, useState ,useCallback } from "react";
 import GlobalContext from "../context/GlobalContext ";
 
 import { DaoClient } from "../services/db/dao";
-import { PlotsClient } from "../services/api/plots";
-import { LocalDatabase } from "../services/db/db";
 import PlotsForm from "../components/plots/PlotsForm";
 import PlotsCard from "../components/plots/PlotsCard";
 import PlotsInfo from "../components/plots/PlotsInfo";
 import { TouchableOpacity } from "react-native";
-import { CreatePlotRequest, Plots } from "../model/plots";
+import { CreatePlotRequest, Plot } from "../model/plot";
 import { useFocusEffect } from "@react-navigation/native";
 
 interface PlotsInputProps {
     navigation: any
 }
 
-const Plots = ({ navigation }) => {
+const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
 
     const { lightTheme } = useContext(GlobalContext);
+    const [stateChange, setStateChange] = useState(0);
     const [isFormVisible, setIsFormVisible] = useState(false);
     const [isInfoModalVisible, setInfoModalVisible] = useState(false);
-    const [changeMode, setChangeModel] = useState('add');
+    const [changeMode, setChangeModel] = useState<'add'  |'edit'>('add');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedPlot, setSelectedPlo] = useState(null);
-    const [page, setPage] = useState(0);
-    const [plots, setPlots] = useState([]);
-
-
-
-    
+    const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null);
+    const [plots, setPlots] = useState<Plot[]>([]);
 
     let daoClient: DaoClient;
     DaoClient.authenticate().then((client) => { daoClient = client; });
@@ -54,49 +48,46 @@ const Plots = ({ navigation }) => {
     }, []);
 
     useEffect(() => {
+        if (searchQuery.length !== 0) return;
         setTimeout(async() => {
-            let resp = await  daoClient.plots.getLocalPlots(page*10, 10);
-            if (page != 0) setPlots([...plots, ...resp]);
-            else setPlots(resp)
-            console.log(resp);
-        }, 1000)
-    }, [page])
+            let resp = await  daoClient.plots.getPlots(0, 100);
+            setPlots(resp)
+        }, 100)
+    }, [stateChange, stateChange])
 
     useEffect(() => {
-        if (searchQuery.length < 3) return;
+        if (searchQuery.length < 1) return;
         setTimeout(async() => {
-            let plots = await daoClient.searchPlots(searchQuery);
+            let plots = await daoClient.plots.searchPlots(searchQuery, 0 ,100);
             setPlots(plots);
-        }, 1000)
-    }, [searchQuery])
+        }, 100)
+    }, [stateChange, searchQuery])
 
-    const handleSave = (data) => {
+    const handleSave = (data: Plot | CreatePlotRequest) => {
+        setIsFormVisible(false);
         setTimeout(async() => {
-            if (changeMode === 'add') await daoClient.plots.createLocalUser(data);
-            else await daoClient.plots.updateLocalPlot(data);
-
-            setPage(0);
-        }, 1000)
-
+            if (changeMode === 'add') await daoClient.plots.createPlot(data);
+            else {
+                const updatedPlot = JSON.parse(JSON.stringify(data)) as Plot;
+                console.log(updatedPlot)
+                await daoClient.plots.updatePlot(updatedPlot);
+            }
+            setStateChange(prev => prev + 1);
+        }, 100)
     };
 
     const handleDelete = () => {
         if (selectedPlot) {
             setTimeout(async() => {
-                await daoClient.plots.deleteLocalUser(selectedPlot);
-                setPage(0);
+                await daoClient.plots.deletePlot(selectedPlot.local_id);
+                setStateChange(prev => prev + 1);
             }, 1000)
         }
     }
 
-    const filteredPlots = plots.filter(plot =>
-        plot.name.toLowerCase().includes(searchQuery.toLowerCase()) 
-       
-    );
-
     return (
         <SafeAreaView style={styles.safeArea}>
-            <View style={styles.header}>
+            { !isFormVisible && <View style={styles.header}>
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Search"
@@ -106,35 +97,35 @@ const Plots = ({ navigation }) => {
                 <View style={styles.buttonAdd}>
                     <Button title="Add" onPress={() => {
                         setIsFormVisible(true);
+                        setSelectedPlot(null);
                         setChangeModel('add');
                     }} />
                 </View>
-            </View>
-            <ScrollView contentContainerStyle={styles.scrollView} >
-                {filteredUsers.map((user, index) => (
+            </View> }
+            {!isFormVisible && <ScrollView contentContainerStyle={styles.scrollView} >
+                {plots.map((plot, index) => (
                     <TouchableOpacity style={{ width: '100%' }} key={index} onPress={() => {
-                        setSelectedUser(user);
+                        setSelectedPlot(plot);
                         setInfoModalVisible(true);
                     }}>
                         <PlotsCard plot={plot} />
                     </TouchableOpacity>
                 ))}
-            </ScrollView>
+            </ScrollView> }
 
-            <PlotsForm
-                mode={changeMode}
-                isVisible={isFormVisible}
-                onClose={() => setIsFormVisible(false)}
-                onSave={handleSave}
-                user={selectedUser}
-            />
+            {isFormVisible && <PlotsForm
+                changeMode={changeMode}
+                onCancel={() => setIsFormVisible(false)}
+                onSubmit={handleSave}
+                plot={selectedPlot}
+            />}
             
-            { selectedUser && <PlotsInfo
+            { selectedPlot && <PlotsInfo
                 isVisible={isInfoModalVisible}
                 onClose={() => { setInfoModalVisible(false) }}
                 onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
                 onDelete={handleDelete}
-                user={selectedUser}
+                plot={selectedPlot}
             />}
         </SafeAreaView>
     );
