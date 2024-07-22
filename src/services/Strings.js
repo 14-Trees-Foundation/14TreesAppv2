@@ -11,6 +11,7 @@ export class Strings {
             TreesPage: "Trees",
             PlotsPage: "Plots",
             SitesPage: "Sites",
+            VisitsPage: "Visits",
             AddTreeShift: "Add Tree",
             LocalDataView: "Local Data",
             LocalDataNavigator: "LocalDataNavigator",
@@ -37,6 +38,7 @@ export class Strings {
             TreesPage: "झाडे",
             PlotsPage: "भूखंड",
             SitesPage: "साइट्स",
+            VisitsPage: "भेटी",
             AddTreeShift: "नवीन झाड जोडा",
             LocalDataView: "लोकल डेटा",
             LocalDataNavigator: "LocalDataNavigator",
@@ -519,6 +521,11 @@ export class Strings {
 
             // site
             SiteName: 'Site Name',
+
+            // Visits
+            VisitName: 'Visit Name',
+            VisitType: 'Visit Type',
+            VisitDate: 'Visit Date',
         },
         "mr": {
             //add tree
@@ -551,6 +558,12 @@ export class Strings {
             Tags: 'टॅग्ज',
             PlotCategory: 'प्लॉट श्रेणी',
             Gat: 'गॅट',
+            AddAShift: 'या शिफ्टमध्ये एक झाड जोडा',
+
+            // Visits
+            VisitName: 'भेटीचे नाव',
+            VisitType: 'भेट प्रकार',
+            VisitDate: 'भेट तारीख',
         }
     })
     static english = 'en';

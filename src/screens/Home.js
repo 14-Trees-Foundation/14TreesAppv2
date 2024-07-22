@@ -10,6 +10,8 @@ import { fetchAndStoreTrees } from '../services/sync/tree';
 import { fetchAndStorePlots } from '../services/sync/plots';
 import { fetchAndStoreSites } from '../services/sync/sites';
 
+import { fetchAndStoreVisits } from '../services/sync/visits';
+
 
 const HomeScreen = ({ navigation }) => {
   const { langChanged, lightTheme } = useContext(GlobalContext);
@@ -29,6 +31,7 @@ const HomeScreen = ({ navigation }) => {
     await fetchAndStoreTrees();
     await fetchAndStorePlots();
     await fetchAndStoreSites();
+    await fetchAndStoreVisits();
 
     if (helperDataStatus.helperDataUptoDate) {
       setDataUptoDate(true);

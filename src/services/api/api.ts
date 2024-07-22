@@ -5,6 +5,7 @@ import { UserService } from './users';
 import { TreeService } from './trees';
 import { PlotService } from './plots';
 import { SiteService } from './sites';
+import { VisitService } from './visits';
 
 axios.interceptors.response.use(function (response) {
     return response;
@@ -57,4 +58,5 @@ export class ApiClient {
     public trees = new TreeService(this.api);
     public plots = new PlotService(this.api);
     public sites = new SiteService(this.api);
+    public visits = new VisitService(this.api);
 } 

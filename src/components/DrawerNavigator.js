@@ -18,6 +18,8 @@ import { Button } from 'react-native-paper';
 import Users from '../screens/Users';
 import Plots from "../screens/Plots"
 import Sites from '../screens/Sites';
+import Visits from '../screens/Visits';
+
 import Trees from '../screens/Trees';
 import { APP_VERSION } from '../constants/constants';
 const Drawer = createDrawerNavigator();
@@ -241,6 +243,25 @@ export const DrawerNavigator = () => {
                         <ScreenHeaderContent />
                     ),
                     title: Strings.screenNames.SitesPage,
+                    // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+                    // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+                    // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                    // drawerActiveBackgroundColor: '#F1FAEE',
+                    // drawerActiveTintColor: 'blue',
+                    // drawerStyle: {
+                    //     backgroundColor: '#f0f3f7',
+                    //     fontFamily: 'Inter-Regular'
+                    // }
+                }}
+            />
+            <Drawer.Screen
+                name={Strings.screenNames.getString('VisitsPage', Strings.english)}
+                component={Visits}
+                options={{
+                    headerRight: () => (
+                        <ScreenHeaderContent />
+                    ),
+                    title: Strings.screenNames.VisitsPage,
                     // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
                     // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
                     // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,

@@ -13,8 +13,9 @@ import { uploadTreesData } from '../services/sync/tree';
 import { uploadUsersData } from '../services/sync/users';
 import { uploadPlotsData } from '../services/sync/plots';
 import { uploadSitesData } from '../services/sync/sites';
+import { uploadVisitData } from '../services/sync/visits';
 
-const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount , setPlotsCount, setSitesCount) => {
+const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount , setPlotsCount, setSitesCount, setVisitsCount) => {
   const lsdate = await Utils.getLastSyncDate();
   if (lsdate) {
     setSyncDate(Utils.getReadableDate(lsdate));
@@ -41,6 +42,9 @@ const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setT
 
   const sitesResp = await daoClient.sites.countSitesByChangeType(false);
   setSitesCount(sitesResp);
+
+  const visitsResp = await daoClient.visits.countVisitsByChangeTye(false);
+  setVisitsCount(visitsResp);
 }
 
 const getReadableProgress = (progress) => {
@@ -62,6 +66,7 @@ const SyncDisplay = ({ navigation }) => {
   const [plotsCount, setPlotsCount] = useState(null);
   const [sitesCount, setSitesCount] = useState(null);
 
+  const [visitsCount, setVisitsCount] = useState(null);
   const { lightTheme, shiftID, shiftDone } = useContext(GlobalContext);
 
   useEffect(() => {
@@ -77,7 +82,7 @@ const SyncDisplay = ({ navigation }) => {
 
 
   useFocusEffect(useCallback(() => {
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount, setVisitsCount);
     console.log('sync date updated', shiftID)
   }, []))
 
@@ -122,7 +127,7 @@ const SyncDisplay = ({ navigation }) => {
     setFailedShifts(responseFromSyncShifts.failures);
 
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount, setVisitsCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -151,7 +156,7 @@ const SyncDisplay = ({ navigation }) => {
 
     setFailedTrees(failures)
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount, setVisitsCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -170,7 +175,7 @@ const SyncDisplay = ({ navigation }) => {
     //console.log("----------------treesinNewImageTable-----------", treesinNewImageTable[0].uploaded)
     setFailedImagesTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount , setPlotsCount, setSitesCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount , setPlotsCount, setSitesCount, setVisitsCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -191,7 +196,7 @@ const SyncDisplay = ({ navigation }) => {
     console.log("---------failedPlotTreesMessages------", failures)
     setFailedPlotTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount ,setSitesCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount ,setSitesCount, setVisitsCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -206,9 +211,11 @@ const SyncDisplay = ({ navigation }) => {
       treeCounts.pending.treesUpload === 0 && treeCounts.pending.plotUpload === 0 && treeCounts.pending.imagesUpload === 0 &&
       shiftsCount && shiftsCount.pending === 0 
       && treesCount && treesCount.add === 0 && treesCount.edit === 0 && treesCount.delete === 0
+      
       && usersCount && usersCount.add === 0 && usersCount.edit === 0 && usersCount.delete === 0
       && plotsCount && plotsCount.add === 0 && plotsCount.edit === 0 && plotsCount.delete === 0
-      && sitesCount && sitesCount.add === 0 && sitesCount.edit === 0 && sitesCount.delete === 0) {
+      && sitesCount && sitesCount.add === 0 && sitesCount.edit === 0 && sitesCount.delete === 0
+      && visitsCount && visitsCount.add === 0 && visitsCount.edit === 0 && visitsCount.delete === 0) {
       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
       return;
     }
@@ -294,7 +301,6 @@ const SyncDisplay = ({ navigation }) => {
 
     try {
       await uploadTreesData();
-      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount);
     } catch (error) {
       console.log('unable to sync trees---', error);
       const stackTrace = error.stack;
@@ -308,7 +314,6 @@ const SyncDisplay = ({ navigation }) => {
 
     try {
       await uploadUsersData();
-      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount);
     } catch (error) {
       console.log('unable to sync users---', error);
       const stackTrace = error.stack;
@@ -322,21 +327,6 @@ const SyncDisplay = ({ navigation }) => {
 
     try {
       await uploadPlotsData();
-      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount);
-    } catch (error) {
-      console.log('unable to sync plots---', error);
-      const stackTrace = error.stack;
-      const errorLog = {
-        msg: 'happened while trying to sync plots(inside sync display)',
-        error: JSON.stringify(error),
-        stackTrace: stackTrace,
-      };
-      await Utils.logException(JSON.stringify(errorLog));
-    }
-
-    try {
-      await uploadPlotsData();
-      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount);
     } catch (error) {
       console.log('unable to sync plots---', error);
       const stackTrace = error.stack;
@@ -350,7 +340,6 @@ const SyncDisplay = ({ navigation }) => {
 
     try {
       await uploadSitesData();
-      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount);
     } catch (error) {
       console.log('unable to sync sites---', error);
       const stackTrace = error.stack;
@@ -362,6 +351,20 @@ const SyncDisplay = ({ navigation }) => {
       await Utils.logException(JSON.stringify(errorLog));
     }
 
+    try {
+      await uploadVisitData();
+    } catch (error) {
+      console.log('unable to sync visits---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync visits(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
+
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount, setVisitsCount);
     setShowProgress(false);
 
   };
@@ -428,6 +431,12 @@ const SyncDisplay = ({ navigation }) => {
               </Text>
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
                 [ added: {sitesCount?.add || 0}, edited: {sitesCount?.edit || 0}, deleted: {sitesCount?.delete || 0}]
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "bold", paddingBottom: 4 }}>
+                {Strings.screenNames.VisitsPage}: 
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                [ added: {visitsCount?.add || 0}, edited: {visitsCount?.edit || 0}, deleted: {visitsCount?.delete || 0}]
               </Text>
             </View>
           </View>
