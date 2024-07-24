@@ -28,12 +28,12 @@ export const PlotsInfo: React.FC<PlotsInfoInputProps> = ({ isVisible, plot, onCl
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.title}>Plots Information</Text>
-                    <TouchableOpacity style={styles.icons} onPress={() => { onClose(); onEdit(); }}>
+                    {/* <TouchableOpacity style={styles.icons} onPress={() => { onClose(); onEdit(); }}>
                         <Icon name="edit" size={24} color="green" />
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.icons} onPress={ () => { setIsDelete(true) }}>
                         <Icon name="trash" size={24} color="red" />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
                 <Text style={styles.label}>Name:</Text>
                 <Text style={styles.value}>{plot.name}</Text>

@@ -29,8 +29,8 @@ export const VisitInfo: React.FC<VisitInfoInputProps> = ({ isVisible, visit, onC
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.title}>Visit Information</Text>
-                    <IconButton icon='circle-edit-outline' style={styles.icons} iconColor='green' onPress={() => { onClose(); onEdit(); }}/>
-                    <IconButton icon='delete-outline' style={styles.icons} iconColor='red' onPress={ () => { setIsDelete(true) }}/>
+                    {/* <IconButton icon='circle-edit-outline' style={styles.icons} iconColor='green' onPress={() => { onClose(); onEdit(); }}/>
+                    <IconButton icon='delete-outline' style={styles.icons} iconColor='red' onPress={ () => { setIsDelete(true) }}/> */}
                 </View>
                 <Text style={styles.label}>Name:</Text>
                 <Text style={styles.value}>{visit.visit_name}</Text>

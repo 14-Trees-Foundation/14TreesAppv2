@@ -1,6 +1,6 @@
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import Modal from 'react-native-modal';
-import { Button } from 'react-native-paper';
+import { Button, IconButton } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useState } from 'react';
 import { Tree } from '../../model/tree';
@@ -29,12 +29,8 @@ export const TreeInfo: React.FC<TreeInfoInputProps> = ({ isVisible, tree, plantT
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.title}>Tree Information</Text>
-                    <TouchableOpacity style={styles.icons} onPress={() => { onClose(); onEdit(); }}>
-                        <Icon name="edit" size={24} color="green" />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.icons} onPress={ () => { setIsDelete(true) }}>
-                        <Icon name="trash" size={24} color="red" />
-                    </TouchableOpacity>
+                    <IconButton icon='circle-edit-outline' style={styles.icons} iconColor='green' onPress={() => { onClose(); onEdit(); }}/>
+                    <IconButton icon='delete-outline' style={styles.icons} iconColor='red' onPress={ () => { setIsDelete(true) }}/>
                 </View>
                 <Text style={styles.label}>Sapling Id:</Text>
                 <Text style={styles.value}>{tree.sapling_id}</Text>

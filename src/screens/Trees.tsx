@@ -15,6 +15,7 @@ import { Strings } from "../services/Strings";
 import Autocomplete from "../components/AutocompleteModal";
 import SearchBar from "../components/Searchbar";
 import { AddIconButton } from "../components/FABplusIcon";
+import { TreeImageType } from "../model/tree_image";
 
 interface TreesInputProps {
     navigation: any
@@ -81,7 +82,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
         }, 1000)
     }, [searchQuery, stateChange, selectedPlot])
 
-    const handleSave = (data: Tree | CreateTreeRequest, image?: any) => {
+    const handleSave = (data: Tree | CreateTreeRequest, images?: any) => {
         setTimeout(async () => {
 
             if (changeMode === 'add') {
@@ -92,16 +93,21 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                 await localClient.trees.updateTree(data)
             };
 
-            if (image) {
-                await localClient.treeImages.upsertTreeImage({ 
-                    name: image.name, 
-                    data: image.data,
-                    sapling_id: data.sapling_id,
-                    type: 'tree_image',
-                    is_active: null,
-                    user_id: null,
-                })
+            const upsertImage = async (type: TreeImageType) => {
+                if (images[type]) {
+                    await localClient.treeImages.upsertTreeImage({ 
+                        name: images[type].name, 
+                        data: images[type].data,
+                        sapling_id: data.sapling_id,
+                        type: type,
+                        is_active: null,
+                        user_id: null,
+                    })
+                }
             }
+            upsertImage('tree_image')
+            upsertImage('user_card_image')
+            upsertImage('user_tree_image')
 
             setStateChange(stateChange + 1);
         }, 1000)

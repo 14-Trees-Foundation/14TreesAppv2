@@ -9,30 +9,41 @@ interface SiteCardInputProps {
 
 const SiteCard: React.FC<SiteCardInputProps> = ({ site }) => {
   return (
-    <View style={styles.card}>
-      <Text style={styles.name}>{site.name_english}</Text>
-      <Text >{site.name_marathi}</Text>
+    <View style={styles.container}>
+      <View style={styles.info}>
+        <Text style={styles.title}>{site.name_english}</Text>
+        <Text style={styles.text}>{site.name_marathi}</Text>
+        <Text style={styles.text}>{site.district} {site.taluka} {site.village}</Text>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  card: {
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#dff0d8', // Light green color
     width: '100%',
-    padding: 10,
-    margin: 10,
+    padding: 5,
+    margin: 5,
     borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 3,
   },
-  name: {
+  info: {
+    marginLeft: 16,
+  },
+  title: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
+  },
+  text: {
+    fontSize: 14,
+    color: 'gray',
   },
 });
 

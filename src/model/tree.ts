@@ -19,6 +19,7 @@ export type Tree = {
     assigned_at: string | null;
     assigned_to: number | null;
     user_tree_image: string | null;
+    user_card_image: string | null;
     description: string | null;
     event_id: number | null;
     memory_images: string | null;
@@ -34,10 +35,6 @@ export type CreateTreeRequest = {
     plant_type_id: number;
     plot_id: number;
     location: string; // { type: 'Point', coordinates: number[] }
-    tree_image: {
-        name: string,
-        data: string,
-    };
     planted_by: string;
     tree_status: 'alive' | 'dead' | 'lost';
     assigned_at: string | null;

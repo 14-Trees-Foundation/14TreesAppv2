@@ -7,19 +7,18 @@ import { CustomButtonStyles, treeFormStyles } from "../../services/Styles";
 import GlobalContext from '../../context/GlobalContext ';
 import { Button, TextInput } from 'react-native-paper';
 import { DataService } from '../../services/DataService';
-import { ImageContainer } from '../ImageContainer';
-import { NewCustomDropdown } from '../NewCustomDropdown';
 import { CreateTreeRequest, Tree } from '../../model/tree';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../../model/user';
 import { DaoClient } from '../../services/db/dao';
 import Autocomplete from '../AutocompleteModal';
 import { ImageSelector } from '../SingleImageSelector';
+import { Image } from '../../model/common';
 
 interface TreeFormInputProps {
     tree: Tree | null,
     changeMode: 'add' | 'edit',
-    onSubmit: (data: Tree | CreateTreeRequest, image?: any) => void,
+    onSubmit: (data: Tree | CreateTreeRequest, images?: any) => void,
     onCancel: () => void,
 }
 
@@ -29,9 +28,13 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     const [lat, setlat] = useState(0);
     const [lng, setlng] = useState(0);
 
-    const [image, setImage] = useState<any>(null);
-    const [userTreeImage, setUserTreeImage] = useState<any>(null);
-    const [userCardImage, setUserCardImage] = useState<any>(null);
+    const [image, setImage] = useState<Image | null>(null);
+    const [userTreeImage, setUserTreeImage] = useState<Image | null>(null);
+    const [userCardImage, setUserCardImage] = useState<Image | null>(null);
+
+    const [imageUri, setImageUri] = useState<string | null>(null);
+    const [userTreeImageUri, setUserTreeImageUri] = useState<string | null>(null);
+    const [userCardImageUri, setUserCardImageUri] = useState<string | null>(null);
 
     const [plantTypes, setPlantTypes] = useState<any[]>([]);
     const [plots, setPlots] = useState<any[]>([]);
@@ -71,26 +74,29 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
             }
             setTreeStatus(treeStatusList.find((item) => item.value === tree.tree_status) || treeStatusList[0]);
 
-            if (tree.image) {
-                fetchImageData(tree.image);
-            } else {
-                setTimeout(async () => {
-                    const daoClient = await DaoClient.authenticate();
-                    const resp = await daoClient.treeImages.getTreeImagesForSaplingId(tree.sapling_id);
-                    if (resp) {
-                        setImage(resp.tree_image);
-                        setUserTreeImage(resp.user_tree_image);
-                        setUserCardImage(resp.user_card_image);
-                    }
-                })
-            }
+            tree.image && setImageUri(tree.image)
+            tree.user_tree_image && setUserTreeImageUri(tree.user_tree_image)
+            tree.user_card_image && setUserCardImageUri(tree.user_card_image)
+            // if (tree.image) {
+            //     fetchImageData(tree.image);
+            // } else {
+            //     setTimeout(async () => {
+            //         const daoClient = await DaoClient.authenticate();
+            //         const resp = await daoClient.treeImages.getTreeImagesForSaplingId(tree.sapling_id);
+            //         if (resp) {
+            //             resp.tree_image && setImageUri(`data:image/jpg;base64,${resp.tree_image.data}`);
+            //             resp.user_tree_image && setUserTreeImageUri(`data:image/jpg;base64,${resp.user_tree_image.data}`);
+            //             resp.user_card_image && setUserCardImageUri(`data:image/jpg;base64,${resp.user_card_image.data}`);
+            //         }
+            //     })
+            // }
 
         }
     }, [tree])
 
     const fetchImageData = async (imageUrl: string) => {
         const data = await DataService.fileURLToBase64(imageUrl);
-        setImage({ name: imageUrl, data: data });
+        data && setImage({ name: imageUrl, data: data });
     }
 
     useEffect(() => {
@@ -173,12 +179,11 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
         if (changeMode === 'add') {
             let changes = { ...data, location: JSON.stringify(location)  } as CreateTreeRequest;
-            if (image) changes.tree_image = { name: image.name, data: image.data }
-            onSubmit(changes, image)
+            onSubmit(changes, {tree_image: image, user_tree_image: userTreeImage, user_card_image: userCardImage})
         }
         else if (tree) {
             let newChanges = { ...tree, ...data, location: JSON.stringify(location) }
-            onSubmit(newChanges as Tree, image)
+            onSubmit(newChanges as Tree, {image: image, user_tree_image: userTreeImage, user_card_image: userCardImage})
         } 
 
         onCancel()
@@ -226,7 +231,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                         />
                     </View>
 
-                    <View style={{ marginTop: 10 }}>
+                    {changeMode === 'edit' && <View style={{ marginTop: 10 }}>
                         <Autocomplete
                             value={treeStatus}
                             options={treeStatusList}
@@ -236,7 +241,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                             keyGetter={(data) => data.value}
                             variant='outlined'
                         />
-                    </View>
+                    </View>}
 
                     <View style={{ width: '100%', marginTop: 10 }}>
                         <Text style={ treeFormStyles.inputLabel }>{Strings.messages.Location}:</Text>
@@ -252,7 +257,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                         <ImageSelector 
                             label='Tree Image'
                             onChange={setImage}
-                            imageUri={image ? `data:image/jpg;base64,${image.data}` : undefined}
+                            imageUri={imageUri ? imageUri : undefined}
                         />
                     </View>
 
@@ -273,7 +278,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                         <ImageSelector 
                             label='User Tree Image'
                             onChange={setUserTreeImage}
-                            imageUri={userTreeImage ? `data:image/jpg;base64,${userTreeImage.data}` : undefined}
+                            imageUri={userTreeImageUri ? userTreeImageUri : undefined}
                         />
                     </View>
 
@@ -281,7 +286,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                         <ImageSelector 
                             label='User with Card'
                             onChange={setUserCardImage}
-                            imageUri={userCardImage ? `data:image/jpg;base64,${userCardImage.data}` : undefined}
+                            imageUri={userCardImageUri ? userCardImageUri : undefined}
                         />
                     </View>
 

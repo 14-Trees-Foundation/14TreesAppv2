@@ -9,6 +9,7 @@ import PlotsInfo from "../components/plots/PlotsInfo";
 import { TouchableOpacity } from "react-native";
 import { CreatePlotRequest, Plot } from "../model/plot";
 import { useFocusEffect } from "@react-navigation/native";
+import SearchBar from "../components/Searchbar";
 
 interface PlotsInputProps {
     navigation: any
@@ -87,31 +88,28 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            { !isFormVisible && <View style={styles.header}>
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search"
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                />
-                <View style={styles.buttonAdd}>
-                    <Button title="Add" onPress={() => {
-                        setIsFormVisible(true);
-                        setSelectedPlot(null);
-                        setChangeModel('add');
-                    }} />
-                </View>
-            </View> }
-            {!isFormVisible && <ScrollView contentContainerStyle={styles.scrollView} >
+            {!isFormVisible && <View style={styles.header}>
+                <SearchBar onChange={setSearchQuery}/>
+            </View>}
+            {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems: 'center'}}>
                 {plots.map((plot, index) => (
-                    <TouchableOpacity style={{ width: '100%' }} key={index} onPress={() => {
-                        setSelectedPlot(plot);
-                        setInfoModalVisible(true);
-                    }}>
-                        <PlotsCard plot={plot} />
-                    </TouchableOpacity>
+                    <View style={{ width: '95%' }} key={index}>
+                        <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.9} key={index} onPress={() => {
+                            setSelectedPlot(plot);
+                            setInfoModalVisible(true);
+                        }}>
+                            <PlotsCard
+                                plot={plot}
+                            />
+                        </TouchableOpacity>
+                    </View>
                 ))}
-            </ScrollView> }
+            </ScrollView>}
+            {/* {!isFormVisible && <AddIconButton onClick={() => {
+                setIsFormVisible(true);
+                setSelectedVisit(null);
+                setChangeModel('add');
+            }} />} */}
 
             {isFormVisible && <PlotsForm
                 changeMode={changeMode}
@@ -119,8 +117,8 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
                 onSubmit={handleSave}
                 plot={selectedPlot}
             />}
-            
-            { selectedPlot && <PlotsInfo
+
+            {selectedPlot && <PlotsInfo
                 isVisible={isInfoModalVisible}
                 onClose={() => { setInfoModalVisible(false) }}
                 onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
@@ -134,21 +132,24 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
+        alignItems: 'center'
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 10,
-        height: 80,
+        marginTop: 15,
+        marginBottom: 10,
+        height: 50,
+        width: '95%'
     },
     searchInput: {
         flex: 1,
         width: '80%',
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: 'black',
         borderRadius: 5,
-        padding: 10,
         marginRight: 10,
+        color: 'black'
     },
     buttonAdd: {
         width: '20%',
@@ -156,9 +157,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     scrollView: {
-        flexGrow: 1,
-        padding: 5,
-        alignItems: 'center',
+        flex: 1,
+        width: '100%'
     },
     modal: {
         justifyContent: 'center',

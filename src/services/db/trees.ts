@@ -32,6 +32,7 @@ export class TreesDao {
                 assigned_at TEXT,
                 assigned_to INTEGER,
                 user_tree_image TEXT,
+                user_card_image TEXT,
                 description TEXT,
                 event_id INTEGER,
                 memory_images TEXT,
@@ -187,6 +188,7 @@ export class TreesDao {
                     assigned_at,
                     assigned_to,
                     user_tree_image,
+                    user_card_image,
                     description,
                     event_id,
                     memory_images,
@@ -195,13 +197,13 @@ export class TreesDao {
                     created_at,
                     updated_at
                 ) VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?
                 );`,
                 [
                     data.id, data.sapling_id, data.plant_type_id, data.plot_id, data.image, data.tags, 
                     data.location, data.planted_by, data.mapped_to_user, data.mapped_to_group, data.mapped_at,
                     data.sponsored_by_user, data.sponsored_by_group, data.gifted_by, data.gifted_to, 
-                    data.assigned_at, data.assigned_to, data.user_tree_image, data.description, data.event_id, 
+                    data.assigned_at, data.assigned_to, data.user_tree_image, data.user_card_image, data.description, data.event_id, 
                     data.memory_images, data.tree_status, data.created_at, data.updated_at
                 ]
             )
@@ -227,6 +229,7 @@ export class TreesDao {
                     assigned_at = ?,
                     assigned_to = ?,
                     user_tree_image = ?,
+                    user_card_image = ?,
                     description = ?,
                     event_id = ?,
                     memory_images = ?,
@@ -240,7 +243,7 @@ export class TreesDao {
                     data.sapling_id, data.plant_type_id, data.plot_id, data.image, data.tags, 
                     data.location, data.planted_by, data.mapped_to_user, data.mapped_to_group, data.mapped_at,
                     data.sponsored_by_user, data.sponsored_by_group, data.gifted_by, data.gifted_to, 
-                    data.assigned_at, data.assigned_to, data.user_tree_image, data.description, data.event_id, 
+                    data.assigned_at, data.assigned_to, data.user_tree_image, data.user_card_image, data.description, data.event_id, 
                     data.memory_images, data.tree_status, data.created_at, data.updated_at, data.id
                 ]
             )
@@ -254,10 +257,10 @@ export class TreesDao {
             let replacement: any[] = []
             let valuesStr = '';
             trees.forEach(data => {
-                valuesStr += `(${data.id}, ?, ${data.plant_type_id}, ${data.plot_id}, ?, ?, ?, ${data.mapped_to_user}, ${data.mapped_to_group}, ?, ${data.sponsored_by_user}, ${data.sponsored_by_group}, ${data.gifted_by}, ${data.gifted_to}, ?, ${data.assigned_to}, ?, ?,1, ?, ?),`
+                valuesStr += `(${data.id}, ?, ${data.plant_type_id}, ${data.plot_id}, ?, ?, ?, ${data.mapped_to_user}, ${data.mapped_to_group}, ?, ${data.sponsored_by_user}, ${data.sponsored_by_group}, ${data.gifted_by}, ${data.gifted_to}, ?, ${data.assigned_to}, ?, ?, ?, 1, ?, ?),`
                 replacement = [ ...replacement,
                     data.sapling_id, data.image, data.location, data.planted_by, data.mapped_at, 
-                    data.assigned_at, data.user_tree_image, data.tree_status, data.created_at, data.updated_at 
+                    data.assigned_at, data.user_tree_image, data.user_card_image, data.tree_status, data.created_at, data.updated_at 
                 ]
             })
             valuesStr = valuesStr.slice(0, -1);
@@ -282,6 +285,7 @@ export class TreesDao {
                     assigned_at,
                     assigned_to,
                     user_tree_image,
+                    user_card_image,
                     tree_status,
                     is_uploaded,
                     created_at,

@@ -294,7 +294,6 @@ export class Utils {
         await daoClient.treeImages.createTable();
         await daoClient.plots.createTable();
         await daoClient.sites.createTable();
-        await daoClient.visits.deleteTable();
         await daoClient.visits.createTable();
         await daoClient.visitImages.createTable();
         await this.localdb.createTreetTypesTbl();

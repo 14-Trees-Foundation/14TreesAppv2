@@ -115,11 +115,11 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
                     </View>
                 ))}
             </ScrollView>}
-            {!isFormVisible && <AddIconButton onClick={() => {
+            {/* {!isFormVisible && <AddIconButton onClick={() => {
                 setIsFormVisible(true);
                 setSelectedVisit(null);
                 setChangeModel('add');
-            }} />}
+            }} />} */}
 
             {isFormVisible && <VisitForm
                 changeMode={changeMode}

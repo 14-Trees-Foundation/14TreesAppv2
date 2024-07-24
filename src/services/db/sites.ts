@@ -213,7 +213,7 @@ export class SitesDao {
                     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 'none'
                 );`,
                 [
-                    data.id, data.name_english, data.name_marathi, data.owner, data.land_type, 
+                    data.id, data.name_marathi, data.name_english, data.owner, data.land_type, 
                     data.land_strata, data.district, data.taluka, data.village, data.area_acres, 
                     data.length_km, data.grove_type, data.created_at, data.updated_at
                 ]

@@ -29,12 +29,12 @@ export const UserInfo: React.FC<UserInfoInputProps> = ({ isVisible, user, onClos
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.title}>User Information</Text>
-                    <TouchableOpacity style={styles.icons} onPress={() => { onClose(); onEdit(); }}>
+                    {/* <TouchableOpacity style={styles.icons} onPress={() => { onClose(); onEdit(); }}>
                         <Icon name="edit" size={24} color="green" />
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.icons} onPress={ () => { setIsDelete(true) }}>
                         <Icon name="trash" size={24} color="red" />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
                 <Text style={styles.label}>Name:</Text>
                 <Text style={styles.value}>{user.name}</Text>

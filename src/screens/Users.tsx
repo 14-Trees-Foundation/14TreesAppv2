@@ -109,11 +109,11 @@ const Users: React.FC<UsersInputProps> = ({ navigation }) => {
                     </View>
                 ))}
             </ScrollView>}
-            {!isFormVisible && <AddIconButton onClick={() => {
+            {/* {!isFormVisible && <AddIconButton onClick={() => {
                 setIsFormVisible(true);
                 setSelectedUser(null);
                 setChangeModel('add');
-            }} />}
+            }} />} */}
 
             {isFormVisible && <UserForm
                 changeMode={changeMode}

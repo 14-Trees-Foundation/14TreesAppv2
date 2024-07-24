@@ -9,6 +9,7 @@ import SiteInfo from "../components/sites/SitesInfo";
 import { CreateSiteRequest, Site } from "../model/sites";
 import { TouchableOpacity } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import SearchBar from "../components/Searchbar";
 
 
 interface SitesInputProps {
@@ -89,30 +90,28 @@ const Sites: React.FC<SitesInputProps> = ({ navigation })  => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <View style={styles.header}>
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search"
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                />
-                <View style={styles.buttonAdd}>
-                    <Button title="Add" onPress={() => {
-                        setIsFormVisible(true);
-                        setChangeModel('add');
-                    }} />
-                </View>
-            </View>
-            <ScrollView contentContainerStyle={styles.scrollView} >
+            {!isFormVisible && <View style={styles.header}>
+                <SearchBar onChange={setSearchQuery}/>
+            </View>}
+            {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems: 'center'}}>
                 {sites.map((site, index) => (
-                    <TouchableOpacity style={{ width: '100%' }} key={index} onPress={() => {
-                        setSelectedSite(site);
-                        setInfoModalVisible(true);
-                    }}>
-                        <SiteCard site={site} />
-                    </TouchableOpacity>
+                    <View style={{ width: '95%' }} key={index}>
+                        <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.9} key={index} onPress={() => {
+                            setSelectedSite(site);
+                            setInfoModalVisible(true);
+                        }}>
+                            <SiteCard
+                                site={site}
+                            />
+                        </TouchableOpacity>
+                    </View>
                 ))}
-            </ScrollView>
+            </ScrollView>}
+            {/* {!isFormVisible && <AddIconButton onClick={() => {
+                setIsFormVisible(true);
+                setSelectedVisit(null);
+                setChangeModel('add');
+            }} />} */}
 
             {isFormVisible && <SiteForm
                 changeMode={changeMode}
@@ -120,8 +119,8 @@ const Sites: React.FC<SitesInputProps> = ({ navigation })  => {
                 onSubmit={handleSave}
                 site={selectedSite}
             />}
-            
-            { selectedSite && <SiteInfo
+
+            {selectedSite && <SiteInfo
                 isVisible={isInfoModalVisible}
                 onClose={() => { setInfoModalVisible(false) }}
                 onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
@@ -135,21 +134,24 @@ const Sites: React.FC<SitesInputProps> = ({ navigation })  => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
+        alignItems: 'center'
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 10,
-        height: 80,
+        marginTop: 15,
+        marginBottom: 10,
+        height: 50,
+        width: '95%'
     },
     searchInput: {
         flex: 1,
         width: '80%',
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: 'black',
         borderRadius: 5,
-        padding: 10,
         marginRight: 10,
+        color: 'black'
     },
     buttonAdd: {
         width: '20%',
@@ -157,9 +159,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     scrollView: {
-        flexGrow: 1,
-        padding: 5,
-        alignItems: 'center',
+        flex: 1,
+        width: '100%'
     },
     modal: {
         justifyContent: 'center',
