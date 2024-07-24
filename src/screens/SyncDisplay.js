@@ -14,8 +14,9 @@ import { uploadTreesData } from '../services/sync/tree';
 // import { uploadPlotsData } from '../services/sync/plots';
 // import { uploadSitesData } from '../services/sync/sites';
 // import { uploadVisitData } from '../services/sync/visits';
+import { uploadVisitImagesData } from '../services/sync/visit_images';
 
-const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount , setPlotsCount, setSitesCount, setVisitsCount) => {
+const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setVisitImagesCount) => {
   const lsdate = await Utils.getLastSyncDate();
   if (lsdate) {
     setSyncDate(Utils.getReadableDate(lsdate));
@@ -34,17 +35,20 @@ const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setT
   const treesResp = await daoClient.trees.countTreesByChangeTye();
   setTreesCount(treesResp)
 
-  const usersResp = await daoClient.users.countUsersByChangeTye(false);
-  setUsersCount(usersResp);
+  // const usersResp = await daoClient.users.countUsersByChangeTye(false);
+  // setUsersCount(usersResp);
 
-  const plotsResp = await daoClient.plots.countPlotsByChangeType(false);
-  setPlotsCount(plotsResp);
+  // const plotsResp = await daoClient.plots.countPlotsByChangeType(false);
+  // setPlotsCount(plotsResp);
 
-  const sitesResp = await daoClient.sites.countSitesByChangeType(false);
-  setSitesCount(sitesResp);
+  // const sitesResp = await daoClient.sites.countSitesByChangeType(false);
+  // setSitesCount(sitesResp);
 
-  const visitsResp = await daoClient.visits.countVisitsByChangeTye(false);
-  setVisitsCount(visitsResp);
+  // const visitsResp = await daoClient.visits.countVisitsByChangeTye(false);
+  // setVisitsCount(visitsResp);
+
+  const visitImagesResp = await daoClient.visitImages.countVisitImages(false);
+  setVisitImagesCount(visitImagesResp);
 }
 
 const getReadableProgress = (progress) => {
@@ -62,11 +66,11 @@ const SyncDisplay = ({ navigation }) => {
   const [failedPlotTrees, setFailedPlotTrees] = useState([]);
   const [shiftsCount, setShiftsCount] = useState(null);
   const [treesCount, setTreesCount] = useState(null);
-  const [usersCount, setUsersCount] = useState(null);
-  const [plotsCount, setPlotsCount] = useState(null);
-  const [sitesCount, setSitesCount] = useState(null);
-
-  const [visitsCount, setVisitsCount] = useState(null);
+  // const [usersCount, setUsersCount] = useState(null);
+  // const [plotsCount, setPlotsCount] = useState(null);
+  // const [sitesCount, setSitesCount] = useState(null);
+  // const [visitsCount, setVisitsCount] = useState(null);
+  const [visitImagesCount, setVisitImagesCount] = useState(0);
   const { lightTheme, shiftID, shiftDone } = useContext(GlobalContext);
 
   useEffect(() => {
@@ -82,7 +86,7 @@ const SyncDisplay = ({ navigation }) => {
 
 
   useFocusEffect(useCallback(() => {
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount, setVisitsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setVisitImagesCount);
     console.log('sync date updated', shiftID)
   }, []))
 
@@ -127,7 +131,7 @@ const SyncDisplay = ({ navigation }) => {
     setFailedShifts(responseFromSyncShifts.failures);
 
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount, setVisitsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setVisitImagesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -156,7 +160,7 @@ const SyncDisplay = ({ navigation }) => {
 
     setFailedTrees(failures)
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount, setVisitsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setVisitImagesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -175,7 +179,7 @@ const SyncDisplay = ({ navigation }) => {
     //console.log("----------------treesinNewImageTable-----------", treesinNewImageTable[0].uploaded)
     setFailedImagesTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount , setPlotsCount, setSitesCount, setVisitsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setVisitImagesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -196,7 +200,7 @@ const SyncDisplay = ({ navigation }) => {
     console.log("---------failedPlotTreesMessages------", failures)
     setFailedPlotTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount ,setSitesCount, setVisitsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setVisitImagesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -215,6 +219,7 @@ const SyncDisplay = ({ navigation }) => {
       // && plotsCount && plotsCount.add === 0 && plotsCount.edit === 0 && plotsCount.delete === 0
       // && sitesCount && sitesCount.add === 0 && sitesCount.edit === 0 && sitesCount.delete === 0
       // && visitsCount && visitsCount.add === 0 && visitsCount.edit === 0 && visitsCount.delete === 0
+      && visitImagesCount === 0
     ) {
       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
       return;
@@ -364,8 +369,22 @@ const SyncDisplay = ({ navigation }) => {
     //   await Utils.logException(JSON.stringify(errorLog));
     // }
 
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setUsersCount, setPlotsCount, setSitesCount, setVisitsCount);
+    try {
+      await uploadVisitImagesData();
+    } catch (error) {
+      console.log('unable to sync visit images---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync visit images(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
+
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setVisitImagesCount);
     setShowProgress(false);
+    await Utils.setLastSyncDateNow();
 
   };
 
@@ -438,6 +457,9 @@ const SyncDisplay = ({ navigation }) => {
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
                 [ added: {visitsCount?.add || 0}, edited: {visitsCount?.edit || 0}, deleted: {visitsCount?.delete || 0}]
               </Text> */}
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                Visit Images: {visitImagesCount}
+              </Text>
             </View>
           </View>
 

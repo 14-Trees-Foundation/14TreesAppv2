@@ -42,6 +42,7 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: 'gray'
   },
   userEmail: {
     fontSize: 14,

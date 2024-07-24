@@ -15,9 +15,10 @@ interface AutocompleteInputProps<T> {
   onSelect: (option: T | null) => void
   onSearch?: (text: string) => void
   variant?: 'flat' | 'outlined'
+  disabled?: boolean
 }
 
-function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSelect, onSearch, variant }: AutocompleteInputProps<T>) {
+function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSelect, onSearch, variant, disabled }: AutocompleteInputProps<T>) {
   const [filteredData, setFilteredData] = useState(options);
   const [visible, setVisible] = useState(false);
 
@@ -53,13 +54,14 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
 
   return (
     <View>
-      <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); setVisible(true);}}>
-          <View pointerEvents='box-only'>
+      <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); disabled || setVisible(true);}}>
+          <View pointerEvents='none'>
             <TextInput
               value={value ? valueGetter(value): ''}
               mode= {variant ? variant : 'flat'}
               label={label}
               right={<Icon source='close' size={10}/>}
+              disabled={disabled}
             />
           </View>
       </TouchableWithoutFeedback>

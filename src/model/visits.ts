@@ -6,7 +6,6 @@ export type Visit = {
   visit_date: string,
   site_id: number | null,
   visit_type: string,
-  images: string | null,
   is_uploaded: 0 | 1,
   change_type: 'none' | 'add' | 'edit' | 'delete',
   created_at: string,

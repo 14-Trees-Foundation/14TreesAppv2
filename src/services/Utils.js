@@ -1463,6 +1463,7 @@ export class Constants {
     static lastPlotsFetchedAt = 'last_plots_fetched_at'
     static lastSitesFetchedAt = 'last_sites_fetched_at'
     static lastVisitsFetchedAt = 'last_visits_fetched_at'
+    static lastVisitImagesFetchedAt = 'last_visit_images_fetched_at'
 }
 
 export const getImageSourceObject = (src) => {
@@ -1474,4 +1475,41 @@ export const getImageSourceObject = (src) => {
     }
     console.log('image src was unexpected.')
     return Constants.placeholderImage()
+}
+
+export const getTimeDiffString = (time) => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - new Date(time)) / 1000);
+    
+    const minute = 60;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+    const week = 7 * day;
+    const month = 30 * day;
+    const year = 365 * day;
+    
+    if (diffInSeconds < minute) {
+        return diffInSeconds === 1 ? "1 second ago" : `${diffInSeconds} seconds ago`;
+    } else if (diffInSeconds < hour) {
+        const minutes = Math.floor(diffInSeconds / minute);
+        return minutes === 1 ? "1 min ago" : `${minutes} min ago`;
+    } else if (diffInSeconds < day) {
+        const hours = Math.floor(diffInSeconds / hour);
+        const minutes = Math.floor((diffInSeconds % hour) / minute);
+        return minutes === 0 
+        ? `${hours} hour${hours === 1 ? '' : 's'} ago` 
+        : `${hours} hour${hours === 1 ? '' : 's'} and ${minutes} min${minutes === 1 ? '' : 's'} ago`;
+    } else if (diffInSeconds < week) {
+        const days = Math.floor(diffInSeconds / day);
+        return days === 1 ? "1 day ago" : `${days} days ago`;
+    } else if (diffInSeconds < month) {
+        const weeks = Math.floor(diffInSeconds / week);
+        return weeks === 1 ? "1 week ago" : `${weeks} weeks ago`;
+    } else if (diffInSeconds < year) {
+        const months = Math.floor(diffInSeconds / month);
+        return months === 1 ? "1 month ago" : `${months} months ago`;
+    } else {
+        const years = Math.floor(diffInSeconds / year);
+        return years === 1 ? "1 year ago" : `${years} years ago`;
+    }
 }

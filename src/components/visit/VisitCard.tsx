@@ -49,6 +49,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: 'gray'
   },
   text: {
     fontSize: 14,

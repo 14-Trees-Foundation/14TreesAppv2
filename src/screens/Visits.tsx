@@ -76,10 +76,10 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
                 await daoClient.visits.createVisit(request)
             } else {
                 let request = JSON.parse(JSON.stringify(data)) as Visit;
-                await daoClient.visits.updateVisit(request)
+                // await daoClient.visits.updateVisit(request)
 
-                if (images && images.length > 0) {
-                    await daoClient.visitImages.insertVisitImages(request.local_id, images);
+                if (images && images.length > 0 && request.id) {
+                    await daoClient.visitImages.insertVisitImages(request.id, images);
                 }
             };
 

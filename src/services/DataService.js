@@ -4,6 +4,7 @@ import { ToastAndroid } from 'react-native';
 import { Strings } from './Strings';
 import { Constants, Utils } from './Utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_HOST } from '../constants/constants';
 
 axios.interceptors.response.use(function (response) {
   return response;
@@ -52,7 +53,7 @@ export class DataService {
   static devHostName = 'https://dev-api.14trees.org';
   static hostName = 'http://10.0.2.2:8088';
   static phoneHostName = "http://192.168.1.5:8088";
-  static serverBase = `${this.phoneHostName}/api/appv2`;
+  static serverBase = `${API_HOST}/api/appv2`;
 
   static async loginUser(userDataPayload) {
     const url = `${DataService.serverBase}/login`;

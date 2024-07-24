@@ -54,7 +54,7 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
             let resp = await  daoClient.plots.getPlots(0, 100);
             setPlots(resp)
         }, 100)
-    }, [stateChange, stateChange])
+    }, [stateChange, searchQuery])
 
     useEffect(() => {
         if (searchQuery.length < 1) return;

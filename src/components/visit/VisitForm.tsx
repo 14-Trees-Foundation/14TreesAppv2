@@ -42,16 +42,19 @@ const VisitForm: React.FC<VisitFormInputProps> = ({ visit, changeMode, onCancel,
 
             setName(visit.visit_name);
             setSiteId(visit.site_id);
-            visit.images && setImageUris(visit.images.split(','))
 
             const type = visitTypes.find((item) => item.id === visit.visit_type)
             if (type) setVisitType(type);
 
             changeMode === 'edit' && setTimeout(async () => {
+                if (!visit.id) return;
                 const daoClient = await DaoClient.authenticate();
-                const visitImages = await  daoClient.visitImages.getVisitImages(visit.local_id);
+                const visitImages = await  daoClient.visitImages.getVisitImagesByVisitId(visit.id);
 
-                const uris = visitImages.map(visitImage => `data:image/jpg;base64,${visitImage.data}`)
+                const uris = visitImages.map(visitImage => {
+                    if (visitImage.image_url) return visitImage.image_url;
+                    return `data:image/jpg;base64,${visitImage.data}`;
+                })
 
                 setImageUris([...imageUris, ...uris])
             }, 10)
@@ -96,9 +99,10 @@ const VisitForm: React.FC<VisitFormInputProps> = ({ visit, changeMode, onCancel,
                 <View style={{ marginTop: 15, flexGrow: 1 }}>
                         <TextInput
                             value={visitName}
-                            mode='flat'
+                            mode='outlined'
                             label={Strings.labels.VisitName}
                             onChangeText={(text) => { setName(text) }}
+                            disabled
                         />
                     </View>
                     <View style={{ marginTop: 15, flexGrow: 1 }}>
@@ -109,6 +113,8 @@ const VisitForm: React.FC<VisitFormInputProps> = ({ visit, changeMode, onCancel,
                             keyGetter={(option) => option.id}
                             valueGetter={(option) => option.value}
                             onSelect={(option) => {option && setVisitType(option)}}
+                            variant='outlined'
+                            disabled
                         />
                     </View>
                     <View style={{ marginTop: 15, flexGrow: 1 }}>
@@ -116,6 +122,7 @@ const VisitForm: React.FC<VisitFormInputProps> = ({ visit, changeMode, onCancel,
                             label={Strings.labels.VisitDate}
                             value={visitDate}
                             onChange={setVisitDate}
+                            disabled
                         />
                     </View>
 

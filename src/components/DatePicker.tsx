@@ -9,9 +9,10 @@ interface DatePickerInputProps {
     label: string,
     value: Date | null,
     onChange: (date: Date) => void
+    disabled?: boolean
 }
 
-export const DatePicker: React.FC<DatePickerInputProps> = ({ label, value, onChange }) => {
+export const DatePicker: React.FC<DatePickerInputProps> = ({ label, value, onChange, disabled }) => {
 
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [date, setDate] = useState(new Date());
@@ -36,11 +37,12 @@ export const DatePicker: React.FC<DatePickerInputProps> = ({ label, value, onCha
     return (
         <View>
             <TouchableWithoutFeedback onPress={() => {Keyboard.dismiss(); setDatePickerVisible(true);}}>
-                <View pointerEvents='box-only'>
+                <View pointerEvents={ disabled ? 'none' : 'box-only'}>
                 <TextInput
                     value={selectedDate ? moment(selectedDate).format('DD/MM/YYYY') : 'dd/mm/yyyy' }
-                    mode='flat'
+                    mode='outlined'
                     label={label}
+                    disabled={disabled}
                 />
                 </View>
             </TouchableWithoutFeedback>

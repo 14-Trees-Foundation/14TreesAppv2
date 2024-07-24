@@ -94,9 +94,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginTop: 5,
         marginBottom: 1,
+        color: 'gray'
     },
     value: {
         fontWeight: 'normal',
+        color: 'gray'
     },
     header: {
         flexDirection: 'row',
@@ -109,12 +111,14 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         textAlign: 'left',
+        color: 'gray'
     },
     deleteTitle: {
         fontSize: 20,
         fontWeight: 'bold',
         textAlign: 'left',
         marginBottom: 10,
+        color: 'gray'
     },
     icons: {
         fontSize: 20,
@@ -123,11 +127,13 @@ const styles = StyleSheet.create({
     },
     closeButton: {
         marginTop: 20,
-        backgroundColor: "#55cf5f"
+        backgroundColor: "#55cf5f",
+        color: 'gray'
     },
     cancelButton: { 
         backgroundColor: '#f9f9f9',
         borderRadius: 5,
+        color: 'gray'
     },
     deleteButton: {
         backgroundColor: '#e82a2a',

@@ -18,6 +18,12 @@ interface VisitInfoInputProps {
 export const VisitInfo: React.FC<VisitInfoInputProps> = ({ isVisible, visit, onClose, onDelete, onEdit }) => {
 
     const [isDelete, setIsDelete] = useState(false);
+    const getDateStringForVisit = (str: string) => {
+        const date = new Date(str);
+        if (isNaN(date.getTime())) return '';
+    
+        return moment(date).format('DD MMMM, YYYY');
+    }
 
     return (
         <Modal
@@ -29,15 +35,15 @@ export const VisitInfo: React.FC<VisitInfoInputProps> = ({ isVisible, visit, onC
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.title}>Visit Information</Text>
-                    {/* <IconButton icon='circle-edit-outline' style={styles.icons} iconColor='green' onPress={() => { onClose(); onEdit(); }}/>
-                    <IconButton icon='delete-outline' style={styles.icons} iconColor='red' onPress={ () => { setIsDelete(true) }}/> */}
+                    <IconButton icon='circle-edit-outline' style={styles.icons} iconColor='green' onPress={() => { onClose(); onEdit(); }}/>
+                    {/* <IconButton icon='delete-outline' style={styles.icons} iconColor='red' onPress={ () => { setIsDelete(true) }}/> */}
                 </View>
                 <Text style={styles.label}>Name:</Text>
                 <Text style={styles.value}>{visit.visit_name}</Text>
                 <Text style={styles.label}>Type:</Text>
                 <Text style={styles.value}>{visit.visit_type}</Text>
                 <Text style={styles.label}>Date:</Text>
-                <Text style={styles.value}>{visit.visit_date}</Text>
+                <Text style={styles.value}>{getDateStringForVisit(visit.visit_date)}</Text>
               
                 <Button style={styles.closeButton} onPress={onClose} >
                     Close
