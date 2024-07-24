@@ -9,6 +9,10 @@ import VisitInfo from "../components/visit/VisitInfo";
 import { TouchableOpacity } from "react-native";
 import { CreateVisitRequest, Visit } from "../model/visits";
 import { useFocusEffect } from "@react-navigation/native";
+import { AddIconButton } from "../components/FABplusIcon";
+import { FAB } from "react-native-paper";
+import SearchBar from "../components/Searchbar";
+import { Image } from "../model/common";
 
 interface VisitsInputProps {
     navigation: any
@@ -23,7 +27,7 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
     const [changeMode, setChangeModel] = useState<'add' | 'edit'>('add');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
-    const [Visits, setVisits] = useState<Visit[]>([]);
+    const [visits, setVisits] = useState<Visit[]>([]);
 
     let daoClient: DaoClient;
     DaoClient.authenticate().then((client) => { daoClient = client; });
@@ -63,7 +67,7 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
         }, 100)
     }, [searchQuery, stateChange])
 
-    const handleSave = (data: Visit | CreateVisitRequest) => {
+    const handleSave = (data: Visit | CreateVisitRequest, images?: Image[]) => {
         setIsFormVisible(false);
         setTimeout(async () => {
 
@@ -73,6 +77,10 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
             } else {
                 let request = JSON.parse(JSON.stringify(data)) as Visit;
                 await daoClient.visits.updateVisit(request)
+
+                if (images && images.length > 0) {
+                    await daoClient.visitImages.insertVisitImages(request.local_id, images);
+                }
             };
 
             setStateChange(stateChange + 1);
@@ -91,33 +99,27 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.safeArea}>
             {!isFormVisible && <View style={styles.header}>
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search"
-                    placeholderTextColor={'black'}
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                />
-                <View style={styles.buttonAdd}>
-                    <Button title="Add" onPress={() => {
-                        setIsFormVisible(true);
-                        setSelectedVisit(null);
-                        setChangeModel('add');
-                    }} />
-                </View>
+                <SearchBar onChange={setSearchQuery}/>
             </View>}
-            {!isFormVisible && <ScrollView style={styles.scrollView} >
-                {Visits.map((visit, index) => (
-                    <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.5} key={index} onPress={() => {
-                        setSelectedVisit(visit);
-                        setInfoModalVisible(true);
-                    }}>
-                        <VisitCard 
-                            visit={visit}
-                        />
-                    </TouchableOpacity>
+            {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems: 'center'}}>
+                {visits.map((visit, index) => (
+                    <View style={{ width: '95%' }} key={index}>
+                        <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.9} key={index} onPress={() => {
+                            setSelectedVisit(visit);
+                            setInfoModalVisible(true);
+                        }}>
+                            <VisitCard
+                                visit={visit}
+                            />
+                        </TouchableOpacity>
+                    </View>
                 ))}
             </ScrollView>}
+            {!isFormVisible && <AddIconButton onClick={() => {
+                setIsFormVisible(true);
+                setSelectedVisit(null);
+                setChangeModel('add');
+            }} />}
 
             {isFormVisible && <VisitForm
                 changeMode={changeMode}
@@ -145,6 +147,8 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginTop: 15,
+        marginBottom: 10,
         height: 50,
         width: '95%'
     },
@@ -164,7 +168,7 @@ const styles = StyleSheet.create({
     },
     scrollView: {
         flex: 1,
-        width: '95%'
+        width: '100%'
     },
     modal: {
         justifyContent: 'center',

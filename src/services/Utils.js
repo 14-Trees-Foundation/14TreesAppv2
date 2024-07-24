@@ -10,6 +10,7 @@ import RNFS from 'react-native-fs';
 import ReactNativeForegroundService from '@supersami/rn-foreground-service';
 import { shiftTypes } from "../screens/Shifts";
 import { DaoClient } from "./db/dao";
+import { Buffer } from 'buffer'
 const MIN_BATCH_SIZE = 5
 
 const shiftTypesObject = {
@@ -293,7 +294,9 @@ export class Utils {
         await daoClient.treeImages.createTable();
         await daoClient.plots.createTable();
         await daoClient.sites.createTable();
+        await daoClient.visits.deleteTable();
         await daoClient.visits.createTable();
+        await daoClient.visitImages.createTable();
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
         await this.localdb.createSaplingTbl();

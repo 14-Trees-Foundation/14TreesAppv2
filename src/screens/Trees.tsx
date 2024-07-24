@@ -12,6 +12,9 @@ import { Utils } from "../services/Utils";
 import { useFocusEffect } from "@react-navigation/native";
 import { NewCustomDropdown } from "../components/NewCustomDropdown";
 import { Strings } from "../services/Strings";
+import Autocomplete from "../components/AutocompleteModal";
+import SearchBar from "../components/Searchbar";
+import { AddIconButton } from "../components/FABplusIcon";
 
 interface TreesInputProps {
     navigation: any
@@ -117,38 +120,24 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.safeArea}>
             {!isFormVisible && <View style={{ height: 'auto', alignItems: 'center', width: "96%"}}>
-                <View style={{ width: '100%', alignItems: 'flex-start', marginBottom: 5, marginTop: 15}}>
-                    <Text style={{ color: 'black' }}>Selected Plot:</Text>
-                </View>
-                    <NewCustomDropdown 
+                <View style={{width: '100%', flexGrow: 1, marginTop: 15}}>
+                    <Autocomplete 
                         label={Strings.labels.SelectPlot}
                         options={plots}
                         value={selectedPlot}
-                        onChange={setSelectedPlot}
+                        onSelect={setSelectedPlot}
                         valueGetter={(data) => data.name}
                         keyGetter={(data) => data.id}
-                        scrollable={true}
+                        variant="outlined"
                     />
+                </View>
             </View>}
             {!isFormVisible && <View style={styles.header}>
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search"
-                    placeholderTextColor={'black'}
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                />
-                <View style={styles.buttonAdd}>
-                    <Button title="Add" onPress={() => {
-                        setIsFormVisible(true);
-                        setSelectedTree(null);
-                        setChangeModel('add');
-                    }} />
-                </View>
+                <SearchBar onChange={setSearchQuery} />
             </View>}
             {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems: 'center'}}>
                 {trees.map((tree, index) => (
-                <View style={{ width: '95%' }} key={index}>
+                <View style={{ width: '95%', marginVertical: 5 }} key={index}>
                     <TouchableOpacity style={{ width: '100%' }} activeOpacity={0.91} onPress={() => {
                         setSelectedTree(tree);
                         setInfoModalVisible(true);
@@ -162,6 +151,11 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                 </View>
                 ))}
             </ScrollView>}
+            {!isFormVisible && <AddIconButton onClick={() => {
+                setIsFormVisible(true);
+                setSelectedTree(null);
+                setChangeModel('add');
+            }} />}
 
             {isFormVisible && <TreeForm
                 changeMode={changeMode}
@@ -189,6 +183,7 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     header: {
+        marginVertical: 10,
         flexDirection: 'row',
         alignItems: 'center',
         height: 50,
@@ -210,7 +205,7 @@ const styles = StyleSheet.create({
     },
     scrollView: {
         flex: 1,
-        width: '100%'
+        width: '100%',
     },
     modal: {
         justifyContent: 'center',

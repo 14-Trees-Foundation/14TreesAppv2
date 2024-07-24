@@ -5,6 +5,7 @@ import { PlotsDao } from './plots';
 import { TreeImagesDao } from './tree_images';
 import { SitesDao } from './sites';
 import { VisitsDao } from './visits';
+import { VisitImagesDao } from './visit_images';
 
 enablePromise(true);
 
@@ -23,6 +24,7 @@ export class DaoClient {
     public plots: PlotsDao;
     public sites: SitesDao;
     public visits: VisitsDao;
+    public visitImages: VisitImagesDao;
 
     constructor(dbConnection: SQLiteDatabase) {
         this.trees = new TreesDao(dbConnection);
@@ -31,6 +33,7 @@ export class DaoClient {
         this.plots = new PlotsDao(dbConnection);
         this.sites = new SitesDao(dbConnection);
         this.visits = new VisitsDao(dbConnection);
+        this.visitImages = new VisitImagesDao(dbConnection);
     }
 
     static async authenticate() {

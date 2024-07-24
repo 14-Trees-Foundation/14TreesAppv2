@@ -2,7 +2,7 @@ import { Text, TouchableOpacity, View } from "react-native";
 import { treeFormStyles, treeFormModalStyles } from "../services/Styles";
 import { Image } from "react-native";
 import { Modal } from "react-native";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Utils } from "../services/Utils";
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Strings } from "../services/Strings";

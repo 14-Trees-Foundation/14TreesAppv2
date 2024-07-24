@@ -4,6 +4,8 @@ import { CreateVisitRequest, Visit } from '../../model/visits';
 export class VisitsDao {
     private db: SQLiteDatabase;
     private tableName: string = 'visits';
+    private tableVisitUsersName: string = 'visit_users';
+    private tableVisitImagesName: string = 'visit_images';
 
     constructor(db: SQLiteDatabase) {
         this.db = db;
@@ -19,6 +21,7 @@ export class VisitsDao {
                 visit_date TEXT NULL,
                 site_id TEXT NULL,
                 visit_type TEXT NULL,
+                images TEXT NULL,
                 is_uploaded INTEGER DEFAULT 0 CHECK (is_uploaded IN (0, 1)),
                 change_type TEXT DEFAULT 'none' CHECK (change_type IN ('none', 'add', 'edit', 'delete')),
                 created_at TEXT NOT NULL,
@@ -27,15 +30,27 @@ export class VisitsDao {
 
             await this.db.executeSql(query);
             console.log('Visits table created successfully!');
+
+            const visitUsers = `CREATE TABLE IF NOT EXISTS ${this.tableVisitUsersName} (
+                visit_id INTEGER NOT NULL, 
+                user_id INTEGER NOT NULL,
+                PRIMARY KEY (visit_id, user_id)
+            );`;
+            await this.db.executeSql(visitUsers);
+            console.log('Visit Users table created successfully!');
         } catch (error) {
-            console.log('error creating visits table:', error);
+            console.log('error creating visit_users table:', error);
         }
     };
 
     deleteTable = async () => {
-        const query = `drop table ${this.tableName};`;
+        const query = `drop table if exists ${this.tableName};`;
         await this.db.executeSql(query);
         console.log("Visits table deleted")
+
+        const query2 = `drop table if exists ${this.tableVisitUsersName};`;
+        await this.db.executeSql(query2);
+        console.log("Visit Users table deleted")
     }
 
 
@@ -263,6 +278,42 @@ export class VisitsDao {
         const [results] = await this.db.executeSql(query, [id]);
         if (results.rows.length === 1) return results.rows.item(0) as Visit;
         return null;
+    }
+
+
+    /*
+        Visit Users relationship
+    */
+
+    addUsersToVisit = async (visitId: number, userIds: number[]) => {
+        let placeHolder = '';
+        let values: number[] = [];
+        userIds.forEach((userId) => {
+            placeHolder += `(?, ?),`
+            values.push(visitId, userId);
+        })
+        placeHolder = placeHolder.slice(0, -1);
+
+        const query = `
+        INSERT OR REPLACE INTO ${this.tableVisitUsersName} (visit_id, user_id)
+        VALUES ${placeHolder};
+        `;
+
+        await this.db.executeSql(query, values);
+    }
+
+    getVisitUsers = async (visitId: number) => {
+
+        const query = `SELECT user_id FROM ${this.tableVisitUsersName} WHERE visit_id = ?`;
+        const [result] = await this.db.executeSql(query, [visitId]);
+
+        let userIds: number[] = [];
+        for (let i = 0; i < result.rows.length; i++) {
+            const row = result.rows.item(i);
+            userIds.push(row.user_id);
+        }
+
+        return userIds;
     }
 
 };

@@ -9,6 +9,8 @@ import UserInfo from "../components/user/UserInfo";
 import { TouchableOpacity } from "react-native";
 import { CreateUserRequest, User } from "../model/user";
 import { useFocusEffect } from "@react-navigation/native";
+import { AddIconButton } from "../components/FABplusIcon";
+import SearchBar from "../components/Searchbar";
 
 interface UsersInputProps {
     navigation: any
@@ -30,10 +32,10 @@ const Users: React.FC<UsersInputProps> = ({ navigation }) => {
 
     useFocusEffect(
         useCallback(() => {
-          setIsFormVisible(false);
-          setStateChange(stateChange + 1);
-          return () => {
-          };
+            setIsFormVisible(false);
+            setStateChange(stateChange + 1);
+            return () => {
+            };
         }, [])
     );
 
@@ -54,7 +56,7 @@ const Users: React.FC<UsersInputProps> = ({ navigation }) => {
             setUsers(users);
         }, 1000)
     }, [searchQuery, stateChange])
-    
+
     useEffect(() => {
         if (searchQuery.length > 0) return;
         setTimeout(async () => {
@@ -91,33 +93,27 @@ const Users: React.FC<UsersInputProps> = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.safeArea}>
             {!isFormVisible && <View style={styles.header}>
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search"
-                    placeholderTextColor={'black'}
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                />
-                <View style={styles.buttonAdd}>
-                    <Button title="Add" onPress={() => {
-                        setIsFormVisible(true);
-                        setSelectedUser(null);
-                        setChangeModel('add');
-                    }} />
-                </View>
+                <SearchBar onChange={setSearchQuery}/>
             </View>}
-            {!isFormVisible && <ScrollView style={styles.scrollView} >
+            {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems: 'center'}}>
                 {users.map((user, index) => (
-                    <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.5} key={index} onPress={() => {
-                        setSelectedUser(user);
-                        setInfoModalVisible(true);
-                    }}>
-                        <UserCard 
-                            user={user}
-                        />
-                    </TouchableOpacity>
+                    <View style={{ width: '95%' }} key={index}>
+                        <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.9} key={index} onPress={() => {
+                            setSelectedUser(user);
+                            setInfoModalVisible(true);
+                        }}>
+                            <UserCard
+                                user={user}
+                            />
+                        </TouchableOpacity>
+                    </View>
                 ))}
             </ScrollView>}
+            {!isFormVisible && <AddIconButton onClick={() => {
+                setIsFormVisible(true);
+                setSelectedUser(null);
+                setChangeModel('add');
+            }} />}
 
             {isFormVisible && <UserForm
                 changeMode={changeMode}
@@ -145,6 +141,8 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginTop: 15,
+        marginBottom: 10,
         height: 50,
         width: '95%'
     },
@@ -164,7 +162,7 @@ const styles = StyleSheet.create({
     },
     scrollView: {
         flex: 1,
-        width: '95%'
+        width: '100%'
     },
     modal: {
         justifyContent: 'center',

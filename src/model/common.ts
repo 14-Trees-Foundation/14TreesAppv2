@@ -10,3 +10,7 @@ export type FilterItem = {
     value: any,
     operatorField: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'isEmpty' | 'isNotEmpty'
 }
+export type Image = {
+    name: string,
+    data: string
+}

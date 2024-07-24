@@ -433,6 +433,9 @@ export class Strings {
             login: "Log in",
             Done: "End Shift", //manjur
             Continue: "Continue", //manjur
+            Settings: "Settings",
+            ChangeLanguage: "Change Language",
+            ChangeTheme: "Change Theme",
 
             // Users
             AddUser: "Add User",
@@ -483,6 +486,9 @@ export class Strings {
             login: "लॉगिन",
             Done: "शिफ्ट संपली", //manjur
             Continue: 'सुरू', //manjur
+            Settings: "सेटिंग्ज",
+            ChangeLanguage: "भाषा बदला",
+            ChangeTheme: "थीम बदला",
 
             // Users
             AddUser: "वापरकर्ता जोडा",
@@ -493,7 +499,7 @@ export class Strings {
 
             //add tree
             SaplingId: "Sapling ID",
-            SelectTreeType: "Select Tree Type",
+            SelectTreeType: "Select Plant Type",
             SelectPlot: "Select Plot",
             SelectTreeStatus: "Select Tree Status",
             SelectUser: "Select User",
@@ -511,6 +517,12 @@ export class Strings {
             TimeTaken: 'Timer',
             AddAShift : 'Add a tree to this shift',
             Time: 'Time',
+
+            // User
+            Username: 'Username',
+            Email: 'Email',
+            Phone: 'Contact No.',
+            DOB: 'Date of Birth',
 
             // Plot
             PlotName: 'Plot name',
@@ -548,6 +560,12 @@ export class Strings {
             TimeTaken: 'वेळ',
             Time: 'वेळ',
             AddAShift: 'या शिफ्टमध्ये एक झाड जोडा',
+
+            // User
+            Username: 'वापरकर्ता नाव',
+            Email: 'ईमेल',
+            Phone: 'संपर्क क्र.',
+            DOB: 'जन्मतारीख',
 
             // site
             SiteName: 'साइटचे नाव',

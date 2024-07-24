@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { User } from '../../model/user';
+import { Avatar } from 'react-native-paper';
 
 interface UserCardInputProps {
     user: User
@@ -9,35 +10,42 @@ interface UserCardInputProps {
 
 const UserCard: React.FC<UserCardInputProps> = ({ user }) => {
   return (
-    <View style={styles.card}>
-      <Text style={styles.name}>{user.name}</Text>
-      <Text style={styles.email}>{user.email}</Text>
+    <View style={styles.container}>
+      <Avatar.Icon size={50} icon='account' style={{backgroundColor: '#e0e0e0'}}/>
+      <View style={styles.userInfo}>
+        <Text style={styles.userName}>{user.name}</Text>
+        <Text style={styles.userEmail}>{user.email}</Text>
+        {user.phone && user.phone !== '0' && <Text style={styles.userEmail}>{user.phone}</Text>}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  card: {
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#dff0d8', // Light green color
     width: '100%',
-    padding: 10,
-    margin: 10,
+    padding: 5,
+    margin: 5,
     borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 3,
   },
-  name: {
+  userInfo: {
+    marginLeft: 16,
+  },
+  userName: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
-    color: 'black',
   },
-  email: {
-    fontSize: 16,
-    color: 'black',
+  userEmail: {
+    fontSize: 14,
+    color: 'gray',
   },
 });
 

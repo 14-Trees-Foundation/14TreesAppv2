@@ -405,10 +405,7 @@ export const CustomButtonStyles = StyleSheet.create({
   button: {
     height: 50,
     justifyContent: 'center',
-    borderRadius: 10,
-    borderColor: 'white',
-    //borderColor: 'white',
-    //borderWidth: 1,
+    borderRadius: 6,
     shadowColor: '#1A894E',
     elevation: 4,
     shadowOffset: {
@@ -418,6 +415,19 @@ export const CustomButtonStyles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 10,
   },
+  errorButton: {
+    height: 50,
+    justifyContent: 'center',
+    borderRadius: 6,
+    shadowColor: '#1A894E',
+    elevation: 4,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+  }
 })
 
 export const coordinateSetterStyles = StyleSheet.create({
@@ -605,7 +615,7 @@ export const languageModalStyles = StyleSheet.create({
 });
 
 export const ScreenHeaderContentStyles = StyleSheet.create({
-  container: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
+  container: { flexDirection: 'row', justifyContent: 'space-between' },
   modeIcon: { width: 35, height: 35, borderRadius: 37.5 }
 })
 

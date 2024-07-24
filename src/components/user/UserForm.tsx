@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
-import { ScrollView, Text, TextInput, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { Strings } from "../../services/Strings";
 import { CustomButtonStyles, treeFormStyles } from "../../services/Styles";
 import GlobalContext from '../../context/GlobalContext ';
-import { Button } from 'react-native-paper';
+import { Button, TextInput } from 'react-native-paper';
 import { User, CreateUserRequest } from '../../model/user';
 
 interface UserFormInputProps {
@@ -29,26 +29,6 @@ const UserForm: React.FC<UserFormInputProps> = ({ user, changeMode, onCancel, on
             setBirthDate(user.birth_date);
         }
     }, [user])
-
-    // useEffect(() => {
-    //     setTimeout(async () => {
-    //         try {
-    //             const userData = await AsyncStorage.getItem(Constants.userDetailsKey)
-    //             if (userData) setUserDetails(JSON.parse(userData));
-    //             let { userTypes, plots } = await Utils.getLocalUserTypesAndPlots();
-    //         } catch (error: any) {
-    //             console.error(error);
-    //             const stackTrace = error.stack;
-    //             const errorLog = {
-    //                 msg: 'happened while trying to fetch user details from local db(loadDataCallback())',
-    //                 error: JSON.stringify(error),
-    //                 stackTrace: stackTrace,
-    //             };
-    
-    //             await Utils.logException(JSON.stringify(errorLog));
-    //         }
-    //     }, 1000);
-    // }, []);
 
     const handleSubmit = () => {
         const data = {
@@ -76,61 +56,49 @@ const UserForm: React.FC<UserFormInputProps> = ({ user, changeMode, onCancel, on
                 style={{ ...treeFormStyles.detailsContainerOuter, marginHorizontal: 0, }} >
                 <View style={{ margin: 4, borderRadius: 10 }}>
                     <View style={{ marginTop: 15, flexGrow: 1 }}>
-                        <Text style={ treeFormStyles.inputLabel }>Enter full name:</Text>
                         <TextInput
                             defaultValue={name}
-                            style={treeFormStyles.textInput(lightTheme)}
-                            placeholder={Strings.labels.SaplingId}
-                            placeholderTextColor={'black'}
+                            mode='flat'
+                            label={Strings.labels.Username}
                             onChangeText={(text) => { setName(text) }}
                         />
                     </View>
-
-                    <View >
-                        <Text style={ treeFormStyles.inputLabel }>Enter email address:</Text>
-                        <View style={{ flexGrow: 1 }}>
-                            <TextInput
-                                defaultValue={email}
-                                style={treeFormStyles.textInput(lightTheme)}
-                                placeholder={Strings.labels.SaplingId}
-                                placeholderTextColor={'black'}
-                                onChangeText={(text) => { setEmail(text) }}
-                            />
-                        </View>
+                    <View style={{ marginTop: 15, flexGrow: 1 }}>
+                        <TextInput
+                            defaultValue={email}
+                            mode='flat'
+                            label={Strings.labels.Email}
+                            onChangeText={(text) => { setEmail(text) }}
+                        />
                     </View>
-                    <View>
-                        <Text style={ treeFormStyles.inputLabel }>Enter mobile number:</Text>
-                        <View style={{ flexGrow: 1 }}>
-                            <TextInput
-                                defaultValue={phone}
-                                style={treeFormStyles.textInput(lightTheme)}
-                                placeholder={Strings.labels.SaplingId}
-                                placeholderTextColor={'black'}
-                                onChangeText={(text) => { setPhone(text) }}
-                            />
-                        </View>
+                    <View style={{ marginTop: 15, flexGrow: 1 }}>
+                        <TextInput
+                            defaultValue={phone}
+                            mode='flat'
+                            label={Strings.labels.Phone}
+                            onChangeText={(text) => { setPhone(text) }}
+                        />
                     </View>
 
 
                     <View style={CustomButtonStyles.container}>
                         <View style={CustomButtonStyles.buttonRow}>
                             <View style={CustomButtonStyles.buttonContainer}>
-                                {
-                                    <Button
-                                        mode="contained"
-                                        buttonColor='red'
-                                        labelStyle={CustomButtonStyles.buttonLabel}
-                                        style={CustomButtonStyles.button}
-                                        onPress={onCancel}
-                                    >
-                                        {Strings.buttonLabels.cancel}
-                                    </Button>
-                                }
+                                <Button
+                                    mode="elevated"
+                                    buttonColor='#FF6666'
+                                    labelStyle={CustomButtonStyles.buttonLabel}
+                                    style={CustomButtonStyles.button}
+                                    onPress={onCancel}
+                                >
+                                    {Strings.buttonLabels.cancel}
+                                </Button>
                             </View>
                             <View style={CustomButtonStyles.buttonContainer}>
                                 <Button
+                                    mode='elevated'
                                     onPress={handleSubmit}
-                                    buttonColor='#1D4ED8'
+                                    buttonColor='#4CAF50'
                                     labelStyle={CustomButtonStyles.buttonLabel}
                                     style={CustomButtonStyles.button}
                                 >

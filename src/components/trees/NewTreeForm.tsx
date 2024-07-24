@@ -1,12 +1,11 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
-import { ScrollView, Text, TextInput, ToastAndroid, View } from 'react-native';
+import { useContext, useEffect, useState } from 'react';
+import { ScrollView, Text, ToastAndroid, View } from 'react-native';
 import { Strings } from "../../services/Strings";
 import { Constants, Utils } from "../../services/Utils";
 import { CoordinateSetter } from "../CoordinateSetter";
-import { CustomDropdown } from "../CustomDropdown";
 import { CustomButtonStyles, treeFormStyles } from "../../services/Styles";
 import GlobalContext from '../../context/GlobalContext ';
-import { Button } from 'react-native-paper';
+import { Button, TextInput } from 'react-native-paper';
 import { DataService } from '../../services/DataService';
 import { ImageContainer } from '../ImageContainer';
 import { NewCustomDropdown } from '../NewCustomDropdown';
@@ -14,6 +13,8 @@ import { CreateTreeRequest, Tree } from '../../model/tree';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../../model/user';
 import { DaoClient } from '../../services/db/dao';
+import Autocomplete from '../AutocompleteModal';
+import { ImageSelector } from '../SingleImageSelector';
 
 interface TreeFormInputProps {
     tree: Tree | null,
@@ -184,7 +185,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     }
 
     return (
-        <View style={{ height: "97%" }}>
+        <View style={{ height: "98%" }}>
             <Text style={treeFormStyles.plotSapling}> { changeMode === 'add' ? 'Add Tree' : 'Edit Sapling: ' + saplingId } </Text>
             <ScrollView
                 keyboardShouldPersistTaps='handled'
@@ -192,58 +193,52 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                 style={{ ...treeFormStyles.detailsContainerOuter, marginHorizontal: 0, }} >
                 <View style={{ margin: 4, borderRadius: 10 }}>
 
-                    <View style={{ marginTop: 15 }}>
-                        <Text style={ treeFormStyles.inputLabel }>Sapling Id:</Text>
+                    <View style={{ marginTop: 10 }}>
                         <TextInput
-                            defaultValue={saplingId}
-                            style={treeFormStyles.textInput(lightTheme)}
-                            placeholder={Strings.labels.SaplingId}
-                            placeholderTextColor={'black'}
+                            value={saplingId}
+                            label={Strings.labels.SaplingId}
                             onChangeText={(text) => { setSaplingId(text) }}
+                            mode='outlined'
                         />
                     </View>
 
-                    <View>
-                        <Text style={ treeFormStyles.inputLabel }>Plant Type:</Text>
-                        <View style={{ paddingLeft: 12, alignItems: 'center', width: '96%' }}>
-                            <NewCustomDropdown
-                                value={selectedPlantType}
-                                options={plantTypes}
-                                label={Strings.labels.SelectTreeType}
-                                onChange={(data) => { data && setSelectedPlantType(data); }}
-                                valueGetter={(data) => data.name}
-                                keyGetter={(data) => data.value}
-                            />
-                        </View>
-                    </View>
-                    <View>
-                        <Text style={ treeFormStyles.inputLabel }>Plot:</Text>
-                        <View style={{ paddingLeft: 12, alignItems: 'center', width: '96%' }}>
-                            <NewCustomDropdown
-                                value={selectedPlot}
-                                options={plots}
-                                label={Strings.labels.SelectPlot}
-                                onChange={(data) => { data && setSelectedPlot(data); }}
-                                valueGetter={(data) => data.name}
-                                keyGetter={(data) => data.value}
-                            />
-                        </View>
-                    </View>
-                    <View>
-                        <Text style={ treeFormStyles.inputLabel }>Tree Status:</Text>
-                        <View style={{ paddingLeft: 12, alignItems: 'center', width: '96%' }}>
-                            <NewCustomDropdown
-                                value={treeStatus}
-                                options={treeStatusList}
-                                label={Strings.labels.SelectTreeStatus}
-                                onChange={(data) => { data && setTreeStatus(data); }}
-                                valueGetter={(data) => data.name}
-                                keyGetter={(data) => data.value}
-                            />
-                        </View>
+                    <View style={{ marginTop: 10 }}>
+                        <Autocomplete
+                            value={selectedPlantType}
+                            options={plantTypes}
+                            label={Strings.labels.SelectTreeType}
+                            onSelect={(data) => { data && setSelectedPlantType(data); }}
+                            valueGetter={(data) => data.name}
+                            keyGetter={(data) => data.value}
+                            variant='outlined'
+                        />
                     </View>
 
-                    <View style={{ width: '100%', marginTop: 0 }}>
+                    <View style={{ marginTop: 10 }}>
+                        <Autocomplete
+                            value={selectedPlot}
+                            options={plots}
+                            label={Strings.labels.SelectPlot}
+                            onSelect={(data) => { data && setSelectedPlot(data); }}
+                            valueGetter={(data) => data.name}
+                            keyGetter={(data) => data.value}
+                            variant='outlined'
+                        />
+                    </View>
+
+                    <View style={{ marginTop: 10 }}>
+                        <Autocomplete
+                            value={treeStatus}
+                            options={treeStatusList}
+                            label={Strings.labels.SelectTreeStatus}
+                            onSelect={(data) => { data && setTreeStatus(data); }}
+                            valueGetter={(data) => data.name}
+                            keyGetter={(data) => data.value}
+                            variant='outlined'
+                        />
+                    </View>
+
+                    <View style={{ width: '100%', marginTop: 10 }}>
                         <Text style={ treeFormStyles.inputLabel }>{Strings.messages.Location}:</Text>
                         <CoordinateSetter
                             inLat={lat}
@@ -253,56 +248,62 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                         />
                     </View>
 
-                    <View>
-                        <Text style={ treeFormStyles.inputLabel }>Tree Image:</Text>
-                        <ImageContainer image={image} onChange={image => { setImage(image) }}/>
+                    <View style={{ width: '100%', marginTop: 10 }}>
+                        <ImageSelector 
+                            label='Tree Image'
+                            onChange={setImage}
+                            imageUri={image ? `data:image/jpg;base64,${image.data}` : undefined}
+                        />
                     </View>
 
-                    {/* <View>
-                        <Text style={ treeFormStyles.inputLabel }>User with Card:</Text>
-                        <ImageContainer image={userCardImage} onChange={image => { setUserCardImage(image) }}/>
-                    </View> */}
-
-                    <View>
-                        <Text style={ treeFormStyles.inputLabel }>Assigned To:</Text>
-                        <View style={{ paddingLeft: 12, alignItems: 'center', width: '96%' }}>
-                            <NewCustomDropdown
-                                value={assignedTo}
-                                options={users}
-                                label={Strings.labels.SelectUser}
-                                onChange={(data) => { setAssignedTo(data); }}
-                                valueGetter={(data) => `${data?.name} (${data?.email})`}
-                                keyGetter={(data) => `${data?.local_id}`}
-                                onSearch={handleUserSearch}
-                            />
-                        </View>
+                    <View style={{ marginTop: 10 }}>
+                        <Autocomplete
+                            value={assignedTo}
+                            options={users}
+                            label={Strings.labels.SelectUser}
+                            onSelect={(data) => { setAssignedTo(data); }}
+                            valueGetter={(data) => `${data?.name} (${data?.email})`}
+                            keyGetter={(data) => `${data?.local_id}`}
+                            onSearch={handleUserSearch}
+                            variant='outlined'
+                        />
                     </View>
 
-                    {/* <View>
-                        <Text style={ treeFormStyles.inputLabel }>User Tree Image:</Text>
-                        <ImageContainer image={userTreeImage} onChange={image => { setUserTreeImage(image) }}/>
-                    </View> */}
+                    <View style={{ width: '100%', marginTop: 10 }}>
+                        <ImageSelector 
+                            label='User Tree Image'
+                            onChange={setUserTreeImage}
+                            imageUri={userTreeImage ? `data:image/jpg;base64,${userTreeImage.data}` : undefined}
+                        />
+                    </View>
+
+                    <View style={{ width: '100%', marginTop: 10 }}>
+                        <ImageSelector 
+                            label='User with Card'
+                            onChange={setUserCardImage}
+                            imageUri={userCardImage ? `data:image/jpg;base64,${userCardImage.data}` : undefined}
+                        />
+                    </View>
 
 
                     <View style={CustomButtonStyles.container}>
                         <View style={CustomButtonStyles.buttonRow}>
                             <View style={CustomButtonStyles.buttonContainer}>
-                                {
-                                    <Button
-                                        mode="contained"
-                                        buttonColor='red'
-                                        labelStyle={CustomButtonStyles.buttonLabel}
-                                        style={CustomButtonStyles.button}
-                                        onPress={onCancel}
-                                    >
-                                        {Strings.buttonLabels.cancel}
-                                    </Button>
-                                }
+                                <Button
+                                    mode="elevated"
+                                    buttonColor='#FF6666'
+                                    labelStyle={CustomButtonStyles.buttonLabel}
+                                    style={CustomButtonStyles.button}
+                                    onPress={onCancel}
+                                >
+                                    {Strings.buttonLabels.cancel}
+                                </Button>
                             </View>
                             <View style={CustomButtonStyles.buttonContainer}>
                                 <Button
+                                    mode='elevated'
                                     onPress={handleSubmit}
-                                    buttonColor='#1D4ED8'
+                                    buttonColor='#4CAF50'
                                     labelStyle={CustomButtonStyles.buttonLabel}
                                     style={CustomButtonStyles.button}
                                 >
@@ -311,7 +312,6 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                             </View>
                         </View>
                     </View>
-
                 </View>
             </ScrollView>
         </View>
