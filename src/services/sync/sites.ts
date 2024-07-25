@@ -4,27 +4,35 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Constants } from "../Utils";
 import { Site } from "../../model/sites";
 
-// TODO: Implement the api call in backend to fetch the changes only
 export const fetchAndStoreSites = async () => {
     // fetch data from the backend
     const apiClient = new ApiClient();
     const daoClient = await DaoClient.authenticate();
 
-    const siteIds = await daoClient.sites.getLiveSiteIds();
+    let siteIds = await daoClient.sites.getLiveSiteIds();
     const timestamp = await AsyncStorage.getItem(Constants.lastSitesFetchedAt) || '2020-01-01T00:00:00Z';
 
    try {
         const now = new Date().toISOString();
-        const response = await apiClient.sites.fetchChanges(timestamp, siteIds)
-        const sites = response.sites;
-        // upload sites in local db
-        for (const site of sites) {
-            await daoClient.sites.upsertLiveSiteIntoLocalDb(site);
-        }
 
-        // delete sites in local db
-        for (const siteId of response.deleted_site_ids) {
-            await daoClient.sites.deleteLiveSiteFromLocalDb(siteId);
+        let offset: number = 0;
+        while (true) {
+            const response = await apiClient.sites.fetchChanges(timestamp, siteIds, offset)
+            const sites = response.sites;
+            // upload sites in local db
+            for (const site of sites) {
+                await daoClient.sites.upsertLiveSiteIntoLocalDb(site);
+            }
+
+            // delete sites in local db
+            for (const siteId of response.deleted_site_ids) {
+                await daoClient.sites.deleteLiveSiteFromLocalDb(siteId);
+            }
+
+            siteIds = []
+            offset += sites.length;
+            console.log(offset + "/" + response.total)
+            if (offset >= response.total) break;
         }
         await AsyncStorage.setItem(Constants.lastSitesFetchedAt, now);
         console.log('Sites fetch Done!')

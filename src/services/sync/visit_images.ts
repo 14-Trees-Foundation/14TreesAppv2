@@ -10,22 +10,31 @@ export const fetchAndStoreVisitImages = async () => {
     const apiClient = new ApiClient();
     const daoClient = await DaoClient.authenticate();
 
-    const visitImageIds = await daoClient.visitImages.getLiveVisitImageIds()
+    let visitImageIds = await daoClient.visitImages.getLiveVisitImageIds()
     const timestamp = await AsyncStorage.getItem(Constants.lastVisitImagesFetchedAt) || '2020-01-01T00:00:00Z'
 
     try {
         const now = new Date().toISOString();
-        const response = await apiClient.visitImages.fetchChanges(timestamp, visitImageIds)
-        const visitImages = response.visit_images;
-        console.log(JSON.stringify(response))
-        // upload visit images in local db
-        for (const visitImage of visitImages) {
-            await daoClient.visitImages.upsertLiveVisitIntoLocalDb(visitImage);
-        }
 
-        // delete visit images in local db
-        for (const visitImageId of response.deleted_visit_image_ids) {
-            await daoClient.visitImages.deleteLiveVisitFromLocalDb(visitImageId);
+        let offset = 0;
+        while (true) {
+            const response = await apiClient.visitImages.fetchChanges(timestamp, visitImageIds, offset)
+            const visitImages = response.visit_images;
+
+            // upload visit images in local db
+            for (const visitImage of visitImages) {
+                await daoClient.visitImages.upsertLiveVisitIntoLocalDb(visitImage);
+            }
+
+            // delete visit images in local db
+            for (const visitImageId of response.deleted_visit_image_ids) {
+                await daoClient.visitImages.deleteLiveVisitFromLocalDb(visitImageId);
+            }
+
+            visitImageIds = []
+            offset += visitImages.length;
+            console.log(offset + "/" + response.total)
+            if (offset >= response.total) break;
         }
 
         await AsyncStorage.setItem(Constants.lastVisitImagesFetchedAt, now);

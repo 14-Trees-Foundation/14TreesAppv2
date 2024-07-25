@@ -35,6 +35,7 @@ export class TreesDao {
                 user_card_image TEXT,
                 description TEXT,
                 event_id INTEGER,
+                visit_id INTEGER,
                 memory_images TEXT,
                 tree_status TEXT DEFAULT 'alive' CHECK (tree_status IN ('alive', 'dead', 'lost')),
                 is_uploaded INTEGER DEFAULT 0 CHECK (is_uploaded IN (0, 1)),
@@ -98,8 +99,8 @@ export class TreesDao {
     createTree = async (data: CreateTreeRequest) => {
         const query = `
             INSERT INTO ${this.tableName}
-            (sapling_id, plant_type_id, plot_id, location, tree_status, planted_by, assigned_to, assigned_at , change_type, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'add', ?, ?)
+            (sapling_id, plant_type_id, plot_id, location, tree_status, planted_by, assigned_to, assigned_at, visit_id , change_type, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'add', ?, ?)
         `
 
         const timeStamp = new Date().toISOString();
@@ -112,6 +113,7 @@ export class TreesDao {
             data.planted_by,
             data.assigned_to,
             data.assigned_at,
+            data.visit_id,
             timeStamp,
             timeStamp
         ]);
@@ -145,13 +147,14 @@ export class TreesDao {
                     assigned_at = ?,
                     assigned_to = ?,
                     tree_status = ?,
+                    visit_id = ?,
                     is_uploaded = 0,
                     change_type = ?,
                     updated_at = ?
                 WHERE local_id = ?;`,
                 [
                     data.sapling_id, data.plant_type_id, data.plot_id, data.location, data.planted_by,
-                    data.assigned_at, data.assigned_to, data.tree_status, changeType, now, data.local_id
+                    data.assigned_at, data.assigned_to, data.tree_status, data.visit_id, changeType, now, data.local_id
                 ]
             )
         } catch(err: any) {
@@ -191,20 +194,21 @@ export class TreesDao {
                     user_card_image,
                     description,
                     event_id,
+                    visit_id,
                     memory_images,
                     tree_status,
                     is_uploaded,
                     created_at,
                     updated_at
                 ) VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?
                 );`,
                 [
                     data.id, data.sapling_id, data.plant_type_id, data.plot_id, data.image, data.tags, 
                     data.location, data.planted_by, data.mapped_to_user, data.mapped_to_group, data.mapped_at,
                     data.sponsored_by_user, data.sponsored_by_group, data.gifted_by, data.gifted_to, 
                     data.assigned_at, data.assigned_to, data.user_tree_image, data.user_card_image, data.description, data.event_id, 
-                    data.memory_images, data.tree_status, data.created_at, data.updated_at
+                    data.visit_id, data.memory_images, data.tree_status, data.created_at, data.updated_at
                 ]
             )
         } else {
@@ -232,6 +236,7 @@ export class TreesDao {
                     user_card_image = ?,
                     description = ?,
                     event_id = ?,
+                    visit_id = ?,
                     memory_images = ?,
                     tree_status = ?,
                     is_uploaded = 1,
@@ -244,7 +249,7 @@ export class TreesDao {
                     data.location, data.planted_by, data.mapped_to_user, data.mapped_to_group, data.mapped_at,
                     data.sponsored_by_user, data.sponsored_by_group, data.gifted_by, data.gifted_to, 
                     data.assigned_at, data.assigned_to, data.user_tree_image, data.user_card_image, data.description, data.event_id, 
-                    data.memory_images, data.tree_status, data.created_at, data.updated_at, data.id
+                    data.visit_id, data.memory_images, data.tree_status, data.created_at, data.updated_at, data.id
                 ]
             )
         }
@@ -257,7 +262,7 @@ export class TreesDao {
             let replacement: any[] = []
             let valuesStr = '';
             trees.forEach(data => {
-                valuesStr += `(${data.id}, ?, ${data.plant_type_id}, ${data.plot_id}, ?, ?, ?, ${data.mapped_to_user}, ${data.mapped_to_group}, ?, ${data.sponsored_by_user}, ${data.sponsored_by_group}, ${data.gifted_by}, ${data.gifted_to}, ?, ${data.assigned_to}, ?, ?, ?, 1, ?, ?),`
+                valuesStr += `(${data.id}, ?, ${data.plant_type_id}, ${data.plot_id}, ?, ?, ?, ${data.mapped_to_user}, ${data.mapped_to_group}, ?, ${data.sponsored_by_user}, ${data.sponsored_by_group}, ${data.gifted_by}, ${data.gifted_to}, ?, ${data.assigned_to}, ${data.visit_id}, ?, ?, ?, 1, ?, ?),`
                 replacement = [ ...replacement,
                     data.sapling_id, data.image, data.location, data.planted_by, data.mapped_at, 
                     data.assigned_at, data.user_tree_image, data.user_card_image, data.tree_status, data.created_at, data.updated_at 
@@ -284,6 +289,7 @@ export class TreesDao {
                     gifted_to,
                     assigned_at,
                     assigned_to,
+                    visit_id,
                     user_tree_image,
                     user_card_image,
                     tree_status,

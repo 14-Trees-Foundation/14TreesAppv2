@@ -48,10 +48,10 @@ export class SiteService {
         }
     }
 
-    async fetchChanges(timestamp: string, site_ids: number[]): Promise<SiteHelperDataResponse> {
+    async fetchChanges(timestamp: string, site_ids: number[], offset: number): Promise<SiteHelperDataResponse> {
         const url = `/api/appv2/fetchHelperData/sites`;
         try {
-            const response = await this.api.post<SiteHelperDataResponse>(url, { timestamp, site_ids });
+            const response = await this.api.post<SiteHelperDataResponse>(url, { timestamp, site_ids, offset });
             return response.data;
         } catch (error: any) {
             return handleApiError("SiteService::fetchChanges:", error)

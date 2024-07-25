@@ -10,24 +10,34 @@ export const fetchAndStoreUsers = async () => {
     const apiClient = new ApiClient();
     const daoClient = await DaoClient.authenticate();
 
-    const userIds = await daoClient.users.getLiveUserIds()
+    let userIds = await daoClient.users.getLiveUserIds()
     const timestamp = await AsyncStorage.getItem(Constants.lastUsersFetchedAt) || '2020-01-01T00:00:00Z'
 
     try {
         const now = new Date().toISOString();
-        const response = await apiClient.users.fetchChanges(timestamp, userIds)
-        const users = response.users;
+        
+        let offset = 0;
+        while (true) {
+            const response = await apiClient.users.fetchChanges(timestamp, userIds, offset)
+            const users = response.users;
 
-        // upload users in local db
-        for (const user of users) {
-            user.roles = user.roles ? (user.roles as any).join(',') : '';
-            await daoClient.users.upsertLiveUserIntoLocalDb(user);
-        }
+            // upload users in local db
+            for (const user of users) {
+                user.roles = user.roles ? (user.roles as any).join(',') : '';
+                await daoClient.users.upsertLiveUserIntoLocalDb(user);
+            }
 
-        // delete users in local db
-        for (const userId of response.deleted_user_ids) {
-            await daoClient.users.deleteLiveUserFromLocalDb(userId);
+            // delete users in local db
+            for (const userId of response.deleted_user_ids) {
+                await daoClient.users.deleteLiveUserFromLocalDb(userId);
+            }
+
+            userIds = []
+            offset += users.length;
+            console.log(offset + "/" + response.total)
+            if (offset >= response.total) break;
         }
+        
         await AsyncStorage.setItem(Constants.lastUsersFetchedAt, now);
         console.log('Users fetch Done!')
     } catch(err: any) {

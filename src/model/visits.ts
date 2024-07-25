@@ -20,6 +20,7 @@ export type CreateVisitRequest = {
 }
 
 export type VisitHelperDataResponse = {
+  total: number,
   visits: Visit[],
   deleted_visit_ids: number[]
 }

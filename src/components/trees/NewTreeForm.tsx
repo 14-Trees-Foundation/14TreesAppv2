@@ -14,6 +14,7 @@ import { DaoClient } from '../../services/db/dao';
 import Autocomplete from '../AutocompleteModal';
 import { ImageSelector } from '../SingleImageSelector';
 import { Image } from '../../model/common';
+import { Visit } from '../../model/visits';
 
 interface TreeFormInputProps {
     tree: Tree | null,
@@ -39,7 +40,9 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     const [plantTypes, setPlantTypes] = useState<any[]>([]);
     const [plots, setPlots] = useState<any[]>([]);
     const [users, setUsers] = useState<User[]>([]);
+    const [visits, setVisits] = useState<Visit[]>([]);
     const [assignedTo, setAssignedTo] = useState<User | null>(null);
+    const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
 
     const [selectedPlantType, setSelectedPlantType] = useState<any>(null);
     const [selectedPlot, setSelectedPlot] = useState<any>(null);
@@ -77,27 +80,17 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
             tree.image && setImageUri(tree.image)
             tree.user_tree_image && setUserTreeImageUri(tree.user_tree_image)
             tree.user_card_image && setUserCardImageUri(tree.user_card_image)
-            // if (tree.image) {
-            //     fetchImageData(tree.image);
-            // } else {
-            //     setTimeout(async () => {
-            //         const daoClient = await DaoClient.authenticate();
-            //         const resp = await daoClient.treeImages.getTreeImagesForSaplingId(tree.sapling_id);
-            //         if (resp) {
-            //             resp.tree_image && setImageUri(`data:image/jpg;base64,${resp.tree_image.data}`);
-            //             resp.user_tree_image && setUserTreeImageUri(`data:image/jpg;base64,${resp.user_tree_image.data}`);
-            //             resp.user_card_image && setUserCardImageUri(`data:image/jpg;base64,${resp.user_card_image.data}`);
-            //         }
-            //     })
-            // }
-
+            setTimeout(async () => {
+                const daoClient = await DaoClient.authenticate();
+                const resp = await daoClient.treeImages.getTreeImagesForSaplingId(tree.sapling_id);
+                if (resp) {
+                    resp.tree_image && setImageUri(`data:image/jpg;base64,${resp.tree_image.data}`);
+                    resp.user_tree_image && setUserTreeImageUri(`data:image/jpg;base64,${resp.user_tree_image.data}`);
+                    resp.user_card_image && setUserCardImageUri(`data:image/jpg;base64,${resp.user_card_image.data}`);
+                }
+            })
         }
     }, [tree])
-
-    const fetchImageData = async (imageUrl: string) => {
-        const data = await DataService.fileURLToBase64(imageUrl);
-        data && setImage({ name: imageUrl, data: data });
-    }
 
     useEffect(() => {
         if (tree) {
@@ -123,6 +116,17 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
             }
         }, 100)
     }, [tree, users])
+
+    useEffect(() => {
+        if (selectedVisit) return;
+        setTimeout( async () => {
+                if (tree && tree.visit_id) {
+                const daoClient = await DaoClient.authenticate();
+                const visit = await daoClient.visits.getVisitByLiveId(tree.visit_id)
+                setSelectedVisit(visit)
+            }
+        }, 100)
+    }, [tree, visits])
 
     useEffect(() => {
         setTimeout(async () => {
@@ -156,6 +160,21 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
         }
     }
 
+    const handleVisitSearch = (txt: string) => {
+        if (txt.length > 0) {
+            setTimeout(async () => {
+                const daoClient = await DaoClient.authenticate();
+                const visits = await daoClient.visits.searchVisits(txt, 0, 20)
+                setVisits(visits)
+            }, 100)
+        }
+    }
+
+    useEffect(() => {
+        handleUserSearch('');
+        handleVisitSearch('');
+    }, [])
+
     const handleSubmit = () => {
         if (!selectedPlantType || !selectedPlot) {
             ToastAndroid.show("Please Select Plant type and plot", ToastAndroid.SHORT)
@@ -175,6 +194,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
             tree_status: treeStatus.value,
             assigned_to: assignedTo ? assignedTo.id : null,
             assigned_at: assignedTo ? new Date().toISOString() : null,
+            visit_id: selectedVisit ? selectedVisit.id : null,
         }
 
         if (changeMode === 'add') {
@@ -187,6 +207,23 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
         } 
 
         onCancel()
+    }
+
+    const handleImageChange = (image: Image | null) => {
+        setImage(image);
+        if (image) setImageUri(`data:image/jpg;base64,${image.data}`)
+        else setImageUri(null);
+    }
+
+    const handleUserTreeImageChange = (image: Image | null) => {
+        setUserTreeImage(image);
+        if (image) setUserTreeImageUri(`data:image/jpg;base64,${image.data}`)
+        else setUserTreeImageUri(null);
+    }
+    const handleUserCardImageChange = (image: Image | null) => {
+        setUserCardImage(image);
+        if (image) setUserCardImageUri(`data:image/jpg;base64,${image.data}`)
+        else setUserCardImageUri(null);
     }
 
     return (
@@ -256,8 +293,21 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                     <View style={{ width: '100%', marginTop: 10 }}>
                         <ImageSelector 
                             label='Tree Image'
-                            onChange={setImage}
+                            onChange={handleImageChange}
                             imageUri={imageUri ? imageUri : undefined}
+                        />
+                    </View>
+
+                    <View style={{ marginTop: 10 }}>
+                        <Autocomplete
+                            value={selectedVisit}
+                            options={visits}
+                            label={Strings.labels.SelectVisit}
+                            onSelect={(data) => { setSelectedVisit(data); }}
+                            valueGetter={(data) => `${data?.visit_name}`}
+                            keyGetter={(data) => `${data?.local_id}`}
+                            onSearch={handleVisitSearch}
+                            variant='outlined'
                         />
                     </View>
 
@@ -277,7 +327,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                     <View style={{ width: '100%', marginTop: 10 }}>
                         <ImageSelector 
                             label='User Tree Image'
-                            onChange={setUserTreeImage}
+                            onChange={handleUserTreeImageChange}
                             imageUri={userTreeImageUri ? userTreeImageUri : undefined}
                         />
                     </View>
@@ -285,7 +335,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                     <View style={{ width: '100%', marginTop: 10 }}>
                         <ImageSelector 
                             label='User with Card'
-                            onChange={setUserCardImage}
+                            onChange={handleUserCardImageChange}
                             imageUri={userCardImageUri ? userCardImageUri : undefined}
                         />
                     </View>

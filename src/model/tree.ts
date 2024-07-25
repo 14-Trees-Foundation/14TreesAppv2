@@ -22,6 +22,7 @@ export type Tree = {
     user_card_image: string | null;
     description: string | null;
     event_id: number | null;
+    visit_id: number | null;
     memory_images: string | null;
     tree_status: 'alive' | 'dead' | 'lost';
     is_uploaded: 0 | 1;
@@ -39,6 +40,7 @@ export type CreateTreeRequest = {
     tree_status: 'alive' | 'dead' | 'lost';
     assigned_at: string | null;
     assigned_to: number | null;
+    visit_id: number | null;
 }
 
 export type TreeHelperDataResponse = {

@@ -128,7 +128,7 @@ export const uploadEditedTreesData = async (trees: Tree[], saplingIdToImgMap: an
         let treeReq: any = { tree: {...tree, location: location} }
 
         const images = saplingIdToImgMap[tree.sapling_id];
-        if (images['tree_image']) treeReq = { ...treeReq, new_image: { name: images['tree_image'].name, data: images['tree_image'].data } }
+        if (images && images['tree_image']) treeReq = { ...treeReq, new_image: { name: images['tree_image'].name, data: images['tree_image'].data } }
         return treeReq
     })
 

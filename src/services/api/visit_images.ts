@@ -19,10 +19,10 @@ export class VisitImageService {
         }
     }
 
-    async fetchChanges(timestamp: string, visit_image_ids: number[]): Promise<DeltaChangesResponse> {
+    async fetchChanges(timestamp: string, visit_image_ids: number[], offset: number): Promise<DeltaChangesResponse> {
         const url = `/api/appv2/fetchHelperData/visit-images`;
         try {
-            const response = await this.api.post<DeltaChangesResponse>(url, { timestamp, visit_image_ids });
+            const response = await this.api.post<DeltaChangesResponse>(url, { timestamp, visit_image_ids, offset });
             return response.data;
         } catch (error: any) {
             return handleApiError("VisitImageService::fetchChanges:", error)

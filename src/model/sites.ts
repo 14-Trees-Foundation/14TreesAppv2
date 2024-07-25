@@ -36,6 +36,7 @@ export type CreateSiteRequest = {
 }
 
 export type SiteHelperDataResponse = {
+  total: number,
   sites: Site[],
   deleted_site_ids: number[]
 }

@@ -22,6 +22,7 @@ export type CreateUserRequest = {
 }
 
 export type UserHelperDataResponse = {
+    total: number,
     users: User[],
     deleted_user_ids: number[]
 }

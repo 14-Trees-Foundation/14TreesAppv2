@@ -9,23 +9,32 @@ export const fetchAndStorePlots = async () => {
     const apiClient = new ApiClient();
     const daoClient = await DaoClient.authenticate();
 
-     const plotIds = await daoClient.plots.getLivePlotIds()
+    let plotIds = await daoClient.plots.getLivePlotIds()
     const timestamp = await AsyncStorage.getItem(Constants.lastPlotsFetchedAt) || '2020-01-01T00:00:00Z'
     
     try {
         const now = new Date().toISOString();
-        const response = await apiClient.plots.fetchChanges(timestamp, plotIds)
-        const plots = response.plots;
 
-        // upload plot in local db
-        for (const plot of plots) {
-            plot.tags = plot.tags ? (plot.tags as any).join(',') : '';
-            await daoClient.plots.upsertLivePlotIntoLocalDb(plot);
-        }
+        let offset: number = 0;
+        while (true) {
+            const response = await apiClient.plots.fetchChanges(timestamp, plotIds, offset)
+            const plots = response.plots;
 
-        // delete plots in local db
-        for (const plotId of response.deleted_plot_ids) {
-            await daoClient.plots.deleteLivePlotFromLocalDb(plotId);
+            // upload plot in local db
+            for (const plot of plots) {
+                plot.tags = plot.tags ? (plot.tags as any).join(',') : '';
+                await daoClient.plots.upsertLivePlotIntoLocalDb(plot);
+            }
+
+            // delete plots in local db
+            for (const plotId of response.deleted_plot_ids) {
+                await daoClient.plots.deleteLivePlotFromLocalDb(plotId);
+            }
+
+            plotIds = []
+            offset += plots.length;
+            console.log(offset+"/"+response.total)
+            if (offset >= response.total) break;
         }
 
         await AsyncStorage.setItem(Constants.lastPlotsFetchedAt, now);

@@ -57,10 +57,10 @@ export class UserService {
         }
     }
 
-    async fetchChanges(timestamp: string, user_ids: number[]): Promise<UserHelperDataResponse> {
+    async fetchChanges(timestamp: string, user_ids: number[], offset: number): Promise<UserHelperDataResponse> {
         const url = `/api/appv2/fetchHelperData/users`;
         try {
-            const response = await this.api.post<UserHelperDataResponse>(url, { timestamp, user_ids });
+            const response = await this.api.post<UserHelperDataResponse>(url, { timestamp, user_ids, offset });
             return response.data;
         } catch (error: any) {
             return handleApiError("UserService::fetchChanges:", error)

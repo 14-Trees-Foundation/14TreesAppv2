@@ -17,6 +17,7 @@ export type CreateVisitImageRequest = {
 }
 
 export type DeltaChangesResponse = {
+    total: number,
     visit_images: VisitImage[],
     deleted_visit_image_ids: number []
 }
