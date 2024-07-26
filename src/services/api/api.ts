@@ -8,6 +8,7 @@ import { SiteService } from './sites';
 import { VisitService } from './visits';
 import { VisitImageService } from './visit_images';
 import { API_HOST } from '../../constants/constants';
+import { TreeSnapshotService } from './tree_snapshots';
 
 axios.interceptors.response.use(function (response) {
     return response;
@@ -62,4 +63,5 @@ export class ApiClient {
     public sites = new SiteService(this.api);
     public visits = new VisitService(this.api);
     public visitImages = new VisitImageService(this.api);
+    public treeSnapshots = new TreeSnapshotService(this.api);
 } 

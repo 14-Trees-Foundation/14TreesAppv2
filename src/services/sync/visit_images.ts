@@ -4,6 +4,7 @@ import { DaoClient } from "../db/dao";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Constants } from "../Utils";
 import { Image } from "../../model/common";
+import { ToastAndroid } from "react-native";
 
 export const fetchAndStoreVisitImages = async () => {
     // fetch data from the backend
@@ -39,6 +40,7 @@ export const fetchAndStoreVisitImages = async () => {
 
         await AsyncStorage.setItem(Constants.lastVisitImagesFetchedAt, now);
         console.log('Visit images fetch Done!')
+        ToastAndroid.show('Visit Images data upto date!', ToastAndroid.LONG)
     } catch(err: any) {
         console.log('Inside fetchAndStoreVisitImages:', err)
     }

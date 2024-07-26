@@ -42,11 +42,11 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: 'gray'
+    color: 'black'
   },
   userEmail: {
     fontSize: 14,
-    color: 'gray',
+    color: 'black',
   },
 });
 

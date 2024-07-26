@@ -70,6 +70,7 @@ export class TreesDao {
             ${limit < 0 ? '' : `LIMIT ${limit} OFFSET ${offset}`};
         `
 
+        console.log(query);
         const [results] = await this.db.executeSql(query)
         for (let index = 0; index < results.rows.length; index++) {
             trees.push(results.rows.item(index));

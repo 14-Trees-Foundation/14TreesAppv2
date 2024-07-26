@@ -4,6 +4,7 @@ import { DaoClient } from "../db/dao";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Constants } from "../Utils";
 import { Visit } from "../../model/visits";
+import { ToastAndroid } from "react-native";
 
 export const fetchAndStoreVisits = async () => {
     // fetch data from the backend
@@ -39,6 +40,7 @@ export const fetchAndStoreVisits = async () => {
         
         await AsyncStorage.setItem(Constants.lastVisitsFetchedAt, now);
         console.log('visits fetch Done!')
+        ToastAndroid.show('Visits data upto date!', ToastAndroid.LONG)
     } catch(err: any) {
         console.log('Inside fetchAndStoreVisits:', err)
     }

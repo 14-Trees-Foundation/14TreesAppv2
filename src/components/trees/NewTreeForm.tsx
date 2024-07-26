@@ -6,7 +6,6 @@ import { CoordinateSetter } from "../CoordinateSetter";
 import { CustomButtonStyles, treeFormStyles } from "../../services/Styles";
 import GlobalContext from '../../context/GlobalContext ';
 import { Button, TextInput } from 'react-native-paper';
-import { DataService } from '../../services/DataService';
 import { CreateTreeRequest, Tree } from '../../model/tree';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../../model/user';
@@ -21,9 +20,10 @@ interface TreeFormInputProps {
     changeMode: 'add' | 'edit',
     onSubmit: (data: Tree | CreateTreeRequest, images?: any) => void,
     onCancel: () => void,
+    defaultPlot?: any
 }
 
-export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCancel, onSubmit }) => {
+export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCancel, onSubmit, defaultPlot }) => {
 
     const [saplingId, setSaplingId] = useState('');
     const [lat, setlat] = useState(0);
@@ -53,7 +53,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
         { value: 'dead', name: 'Dead' },
         { value: 'lost', name: 'Lost' },
     ];
-    const [treeStatus, setTreeStatus] = useState(treeStatusList[0]);
+    const [treeStatus, setTreeStatus] = useState<any>(treeStatusList[0]);
 
     const { lightTheme } = useContext(GlobalContext);
 
@@ -105,6 +105,10 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
             setSelectedPlot(plot)
         }
     }, [tree, plots])
+
+    useEffect(() => {
+        changeMode === 'add' && defaultPlot && setSelectedPlot(defaultPlot);
+    }, [defaultPlot])
 
     useEffect(() => {
         if (assignedTo) return;
@@ -171,8 +175,8 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     }
 
     useEffect(() => {
-        handleUserSearch('');
-        handleVisitSearch('');
+        handleUserSearch(' ');
+        handleVisitSearch(' ');
     }, [])
 
     const handleSubmit = () => {
@@ -203,7 +207,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
         }
         else if (tree) {
             let newChanges = { ...tree, ...data, location: JSON.stringify(location) }
-            onSubmit(newChanges as Tree, {image: image, user_tree_image: userTreeImage, user_card_image: userCardImage})
+            onSubmit(newChanges as Tree, {tree_image: image, user_tree_image: userTreeImage, user_card_image: userCardImage})
         } 
 
         onCancel()
@@ -249,7 +253,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                             value={selectedPlantType}
                             options={plantTypes}
                             label={Strings.labels.SelectTreeType}
-                            onSelect={(data) => { data && setSelectedPlantType(data); }}
+                            onSelect={(data) => { setSelectedPlantType(data); }}
                             valueGetter={(data) => data.name}
                             keyGetter={(data) => data.value}
                             variant='outlined'
@@ -261,7 +265,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                             value={selectedPlot}
                             options={plots}
                             label={Strings.labels.SelectPlot}
-                            onSelect={(data) => { data && setSelectedPlot(data); }}
+                            onSelect={(data) => { setSelectedPlot(data); }}
                             valueGetter={(data) => data.name}
                             keyGetter={(data) => data.value}
                             variant='outlined'
@@ -273,7 +277,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                             value={treeStatus}
                             options={treeStatusList}
                             label={Strings.labels.SelectTreeStatus}
-                            onSelect={(data) => { data && setTreeStatus(data); }}
+                            onSelect={(data) => { setTreeStatus(data); }}
                             valueGetter={(data) => data.name}
                             keyGetter={(data) => data.value}
                             variant='outlined'

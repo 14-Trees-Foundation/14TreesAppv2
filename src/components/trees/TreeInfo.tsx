@@ -13,9 +13,10 @@ interface TreeInfoInputProps {
     onClose: () => void
     onEdit: () => void
     onDelete: () => void
+    onImageAdd: () => void
 }
 
-export const TreeInfo: React.FC<TreeInfoInputProps> = ({ isVisible, tree, plantType, plot, onClose, onDelete, onEdit }) => {
+export const TreeInfo: React.FC<TreeInfoInputProps> = ({ isVisible, tree, plantType, plot, onClose, onDelete, onEdit, onImageAdd }) => {
 
     const [isDelete, setIsDelete] = useState(false);
 
@@ -29,6 +30,7 @@ export const TreeInfo: React.FC<TreeInfoInputProps> = ({ isVisible, tree, plantT
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.title}>Tree Information</Text>
+                    <IconButton icon='file-image-plus-outline' style={styles.icons} iconColor='green' onPress={() => { onClose(); onImageAdd(); }}/>
                     <IconButton icon='circle-edit-outline' style={styles.icons} iconColor='green' onPress={() => { onClose(); onEdit(); }}/>
                     <IconButton icon='delete-outline' style={styles.icons} iconColor='red' onPress={ () => { setIsDelete(true) }}/>
                 </View>

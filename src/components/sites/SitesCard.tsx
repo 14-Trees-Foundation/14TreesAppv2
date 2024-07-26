@@ -40,11 +40,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: 'gray'
+    color: 'black'
   },
   text: {
     fontSize: 14,
-    color: 'gray',
+    color: 'black',
   },
 });
 

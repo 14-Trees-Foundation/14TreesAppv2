@@ -500,7 +500,8 @@ export class Strings {
             //add tree
             SaplingId: "Sapling ID",
             SelectTreeType: "Select Plant Type",
-            SelectPlot: "Select Plot",
+            SelectPlot: "Select a Plot",
+            SelectedPlot: "Selected Plot",
             SelectTreeStatus: "Select Tree Status",
             SelectUser: "Select User",
             SelectVisit: "Select Visit",
@@ -545,6 +546,7 @@ export class Strings {
             SaplingId: "रोपाची संख्या",
             SelectTreeType: "झाडाचा प्रकार निवडा",
             SelectPlot: "प्लॉट निवडा",
+            SelectedPlot: "निवडलेला प्लॉट",
             SelectTreeStatus: "झाडाची स्थिती निवडा",
             SelectUser: "वापरकर्ता निवडा",
             SelectVisit: "भेट द्या निवडा",

@@ -1,4 +1,4 @@
-import { View, Button, BackHandler, ScrollView, SafeAreaView, StyleSheet, TextInput, Text } from "react-native";
+import { View, Button, BackHandler, ScrollView, SafeAreaView, StyleSheet, TextInput, Text, ToastAndroid } from "react-native";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import GlobalContext from "../context/GlobalContext ";
 
@@ -80,6 +80,7 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
 
                 if (images && images.length > 0 && request.id) {
                     await daoClient.visitImages.insertVisitImages(request.id, images);
+                    ToastAndroid.show("Added Visit images locally!", ToastAndroid.LONG)
                 }
             };
 

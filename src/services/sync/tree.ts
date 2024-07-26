@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Constants } from "../Utils";
 import { Tree } from "../../model/tree";
 import { TreeImageType } from "../../model/tree_image";
+import { ToastAndroid } from "react-native";
 
 export const fetchAndStoreTrees = async () => {
     // fetch data from the backend
@@ -47,6 +48,7 @@ export const fetchAndStoreTrees = async () => {
 
         await AsyncStorage.setItem(Constants.lastTreesFetchedAt, now);
         console.log('Trees fetch Done')
+        ToastAndroid.show('Trees data upto date!', ToastAndroid.LONG)
     } catch(err: any) {
         console.log('Inside fetchAndStoreTrees:', err)
     }
@@ -72,13 +74,16 @@ const getTreeImages = async (daoClient: DaoClient) => {
 
 export const uploadTreesData = async () => {
     const daoClient = await DaoClient.authenticate();
-    const trees = await daoClient.trees.getTrees(0, -1, undefined, true);
+    const trees = await daoClient.trees.getTrees(0, -1, false, true);
 
     const saplingIdToImgMap = await getTreeImages(daoClient);
 
     const newTrees = trees.filter(tree => tree.change_type === 'add');
     const editedTrees = trees.filter(tree => tree.change_type === 'edit');
     const deletedTrees = trees.filter(tree => tree.change_type === 'delete');
+
+    console.log(newTrees);
+    console.log(editedTrees);
 
     await uploadDeletedTreesData(deletedTrees);
     deletedTrees.forEach(async (tree) => {
@@ -128,6 +133,7 @@ export const uploadEditedTreesData = async (trees: Tree[], saplingIdToImgMap: an
         let treeReq: any = { tree: {...tree, location: location} }
 
         const images = saplingIdToImgMap[tree.sapling_id];
+        console.log(saplingIdToImgMap)
         if (images && images['tree_image']) treeReq = { ...treeReq, new_image: { name: images['tree_image'].name, data: images['tree_image'].data } }
         return treeReq
     })

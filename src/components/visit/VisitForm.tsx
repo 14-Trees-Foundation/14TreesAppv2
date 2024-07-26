@@ -129,7 +129,7 @@ const VisitForm: React.FC<VisitFormInputProps> = ({ visit, changeMode, onCancel,
                     {changeMode !== 'add' && <View style={{ marginTop: 15, flexGrow: 1 }}>
                         <ImagesView
                             title='Visit Images'
-                            images={imageUris}
+                            images={imageUris.reverse()}
                         />
                     </View>}
                     {changeMode !== 'add' && <ImageOptions onChange={handleImageChange} />}

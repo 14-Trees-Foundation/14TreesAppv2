@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, View, StyleSheet, Keyboard } from 'react-native';
-import { TextInput, Button, List, Icon } from 'react-native-paper';
+import { Modal, View, StyleSheet, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { TextInput, Button, List, Icon, IconButton } from 'react-native-paper';
 import { FlatList, TouchableOpacity } from 'react-native';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import SearchBar from './Searchbar';
 
 
@@ -16,9 +15,10 @@ interface AutocompleteInputProps<T> {
   onSearch?: (text: string) => void
   variant?: 'flat' | 'outlined'
   disabled?: boolean
+  boldSelection?: boolean
 }
 
-function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSelect, onSearch, variant, disabled }: AutocompleteInputProps<T>) {
+function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSelect, onSearch, variant, disabled, boldSelection }: AutocompleteInputProps<T>) {
   const [filteredData, setFilteredData] = useState(options);
   const [visible, setVisible] = useState(false);
 
@@ -50,21 +50,32 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
   const handleSelect = (option: T | null) => {
     onSelect(option);
     handleClose();
+    setFilteredData(options);
   }
 
   return (
     <View>
-      <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); disabled || setVisible(true);}}>
-          <View pointerEvents='none'>
-            <TextInput
+      <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); disabled || setVisible(true); }}>
+        <View pointerEvents='box-only'>
+            <TextInput      
               value={value ? valueGetter(value): ''}
               mode= {variant ? variant : 'flat'}
               label={label}
-              right={<Icon source='close' size={10}/>}
               disabled={disabled}
+              style={{ fontWeight: (boldSelection && value) ? 'bold' : 'normal' }}
+              numberOfLines={2}
             />
-          </View>
+        </View>
       </TouchableWithoutFeedback>
+
+      {value && (
+            <IconButton 
+              icon="close" 
+              size={20} 
+              onPress={() => handleSelect(null)} 
+              style={styles.iconButton} 
+            />
+          )}
 
       <Modal
         visible={visible}
@@ -76,13 +87,17 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
           <View style={styles.modalContent}>
             <SearchBar onChange={handleSearch}/>
             <FlatList
+              keyboardShouldPersistTaps={'handled'}
               style={{ maxHeight: '70%', marginTop: 20 }}
               data={filteredData}
               keyExtractor={(item, index) => keyGetter(item)}
               renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => handleSelect(item)}>
+                <TouchableOpacity onPress={() => {
+                  handleSelect(item);
+                }}>
                   <List.Item
                     title={valueGetter(item)}
+                    titleNumberOfLines={2}
                   />
                 </TouchableOpacity>
               )}
@@ -125,6 +140,14 @@ const styles = StyleSheet.create({
   closeButton: {
     marginHorizontal: 5,
     flexGrow: 1,
+  },
+  container: {
+    position: 'relative',
+  },
+  iconButton: {
+    position: 'absolute',
+    right: 0,
+    top: 8,  // Adjust this value as needed to align with the TextInput
   },
 });
 

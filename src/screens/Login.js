@@ -1,17 +1,19 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState, useContext, useEffect } from 'react';
-import { Alert, Text, View, TextInput } from 'react-native';
+import { Alert, View } from 'react-native';
 import { DataService } from '../services/DataService';
 import DeviceInfo from 'react-native-device-info';
 import { Strings } from '../services/Strings';
 import { Utils, Constants } from '../services/Utils';
 import { CustomButtonStyles, commonStyles, loginStyles } from "../services/Styles";
 import GlobalContext from '../context/GlobalContext ';
-import { Button } from 'react-native-paper';
+import { Button, HelperText, Text, TextInput } from 'react-native-paper';
 
 const LoginScreen = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [pinNumber, setPinNumber] = useState('');
+  const [isPinInvalid, setIsPinInvalid] = useState(false);
+  const [isPhoneInvalid, setIsPhoneInvalid] = useState(false);
 
   const { langChanged, lightTheme, setUserName } = useContext(GlobalContext);
 
@@ -28,9 +30,9 @@ const LoginScreen = ({ navigation }) => {
 
   const autoSetPhoneNumber = async () => {
     try {
-      const phone = await DeviceInfo.getPhoneNumber();
+      let phone = await DeviceInfo.getPhoneNumber();
       if (phone) {
-        if (phone.startsWith("91") && phone.length > 10) phone = phone.substring(2);
+        if (phone.length > 10) phone = phone.slice(-10);
         if (phone.length === 10) setPhoneNumber(phone);
       }
     } catch (error) {
@@ -48,6 +50,16 @@ const LoginScreen = ({ navigation }) => {
 
   const loginUser = async () => {
     console.log("phone: ", phoneNumber, "pin: ", pinNumber);
+
+    if (invalidPhoneNumber()) {
+      setIsPhoneInvalid(true);
+      return;
+    } else { setIsPhoneInvalid(false) }
+
+    if (invalidPin()) {
+      setIsPinInvalid(true);
+      return;
+    } else { setIsPinInvalid(false) }
 
     try {
       if (phoneNumber.length !== 10) {
@@ -173,29 +185,55 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
+  const invalidPhoneNumber = () => {
+    if (phoneNumber.length < 10) return true;
+    return !isNumeric(phoneNumber);
+  }
+
+  const invalidPin = () => {
+    if (pinNumber.length < 4) return true;
+    return !isNumeric(pinNumber);
+  }
+
+  const isNumeric = (str) => {
+    const regex = /^\d+$/;
+    return regex.test(str);
+  }
+
 
   return (
     <View style={loginStyles.outerContainer}>
       <View style={loginStyles.inputContainer}>
-        <View style={{ marginVertical: 30 }}>
-          <TextInput
-            style={loginStyles.textInput(lightTheme, phoneNumber)}
-            placeholder="Enter your phone number"
-            placeholderTextColor="grey"
-            onChangeText={text => setPhoneNumber(text)}
-            value={phoneNumber}
-            keyboardType="number-pad"
-            maxLength={10}
-          />
-          <TextInput
-            style={loginStyles.textInput(lightTheme, phoneNumber)}
-            placeholder="Enter your pin"
-            placeholderTextColor="grey"
-            onChangeText={text => setPinNumber(text)}
-            value={pinNumber}
-            keyboardType="number-pad"
-            maxLength={4}
-          />
+        <View style={{ marginVertical: 10 }}>
+          <View style={{ marginVertical: 5, justifyContent: 'center', alignItems: 'center'}}>
+            <Text variant='headlineLarge'>LogIn</Text>
+          </View>
+          <View style={{ marginVertical: 5, justifyContent: 'center', alignItems: 'center'}}>
+            <TextInput
+              style={{ width: '95%' }}
+              label='Phone number'
+              placeholder="Enter your phone number"
+              placeholderTextColor="grey"
+              onChangeText={text => setPhoneNumber(text)}
+              value={phoneNumber}
+              keyboardType="number-pad"
+              maxLength={10}
+              mode='outlined'
+            />
+          </View>
+          <View style={{ marginVertical: 5, justifyContent: 'center', alignItems: 'center'}}>
+            <TextInput
+              style={{ width: '95%' }}
+              label='Pin'
+              placeholder="Enter your pin"
+              placeholderTextColor="grey"
+              onChangeText={text => setPinNumber(text)}
+              value={pinNumber}
+              keyboardType="number-pad"
+              maxLength={4}
+              mode='outlined'
+            />
+          </View>
 
           <View style={loginStyles.loginView}>
             <Button
