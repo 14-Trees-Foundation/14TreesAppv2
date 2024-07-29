@@ -540,6 +540,9 @@ export class Strings {
             VisitName: 'Visit Name',
             VisitType: 'Visit Type',
             VisitDate: 'Visit Date',
+
+            // Trees
+            ImageDate: 'Image Date',
         },
         "mr": {
             //add tree
@@ -586,6 +589,9 @@ export class Strings {
             VisitName: 'भेटीचे नाव',
             VisitType: 'भेट प्रकार',
             VisitDate: 'भेट तारीख',
+
+            // Trees
+            ImageDate: 'प्रतिमा/चित्र तारीख',
         }
     })
     static english = 'en';

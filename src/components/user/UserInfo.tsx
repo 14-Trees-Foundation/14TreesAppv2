@@ -3,7 +3,6 @@ import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import Modal from 'react-native-modal';
 import moment from 'moment';
 import { Button } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import { useState } from 'react';
 import { User } from '../../model/user';
 
@@ -18,6 +17,12 @@ interface UserInfoInputProps {
 export const UserInfo: React.FC<UserInfoInputProps> = ({ isVisible, user, onClose, onDelete, onEdit }) => {
 
     const [isDelete, setIsDelete] = useState(false);
+
+    const getBirthDate = (birthDateStr: string) => {
+        const date = new Date(birthDateStr);
+        if (isNaN(date.getTime())) return 'N/A';
+        return moment(user.birth_date).format('MMMM D, YYYY');
+    }
 
     return (
         <Modal
@@ -43,7 +48,7 @@ export const UserInfo: React.FC<UserInfoInputProps> = ({ isVisible, user, onClos
                 <Text style={styles.label}>Contact No.:</Text>
                 <Text style={styles.value}>{user.phone}</Text>
                 <Text style={styles.label}>Date of Birth:</Text>
-                <Text style={styles.value}>{moment(user.birth_date).format('MMMM D, YYYY')}</Text>
+                <Text style={styles.value}>{getBirthDate(user.birth_date || '')}</Text>
                 <Text style={styles.label}>Last Updated:</Text>
                 <Text style={styles.value}>{moment(user.updated_at).format('MMMM D, YYYY HH:mm')}</Text>
                 <Button style={styles.closeButton} onPress={onClose} >

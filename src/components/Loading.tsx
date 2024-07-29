@@ -1,12 +1,14 @@
 import { Modal } from "react-native"
 import { View } from "react-native-animatable"
-import { ActivityIndicator } from "react-native-paper"
+import { Text } from "react-native-paper"
+import { CircleSnail } from "react-native-progress"
 
 interface LoadingInputProps {
     loading: boolean
+    text?: string
 }
 
-export const Loading: React.FC<LoadingInputProps> = ({ loading }) => {
+export const Loading: React.FC<LoadingInputProps> = ({ loading, text }) => {
 
     return (
         <Modal
@@ -17,9 +19,11 @@ export const Loading: React.FC<LoadingInputProps> = ({ loading }) => {
                 flex: 1,
                 justifyContent: 'center',
                 alignItems: 'center',
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                backgroundColor: 'rgba(0, 0, 0, 0.3)',
             }}>
-                <ActivityIndicator animating={true} size={'large'} color='green'/>
+                <CircleSnail size={70} color={'#059636'}
+                    thickness={6} duration={700} spinDuration={2000} />
+                <Text variant='bodyMedium' style={{ color: 'black' }}>{ text ? text : 'Loading...'}</Text>
             </View>
         </Modal>
     )

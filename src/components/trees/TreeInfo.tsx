@@ -40,8 +40,8 @@ export const TreeInfo: React.FC<TreeInfoInputProps> = ({ isVisible, tree, plantT
                 <Text style={styles.value}>{plantType}</Text>
                 <Text style={styles.label}>Plot:</Text>
                 <Text style={styles.value}>{plot}</Text>
-                <Text style={styles.label}>Location</Text>
-                <Text style={styles.value}>{tree.location}</Text>
+                {/* <Text style={styles.label}>Location</Text>
+                <Text style={styles.value}>{tree.location}</Text> */}
 
 
                 <Button style={styles.closeButton} onPress={onClose} >

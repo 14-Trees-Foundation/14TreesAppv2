@@ -82,9 +82,6 @@ export const uploadTreesData = async () => {
     const editedTrees = trees.filter(tree => tree.change_type === 'edit');
     const deletedTrees = trees.filter(tree => tree.change_type === 'delete');
 
-    console.log(newTrees);
-    console.log(editedTrees);
-
     await uploadDeletedTreesData(deletedTrees);
     deletedTrees.forEach(async (tree) => {
         await daoClient.trees.deleteLocalTree(tree.local_id);

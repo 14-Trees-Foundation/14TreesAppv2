@@ -119,9 +119,9 @@ export const TreeForm = ({ treeData, onVerifiedSave, mode, onCancel, onNewImage,
     const pickImage = async (selectionId) => {
         setModalVisible(false);
         Utils.startTask();
-        let newImage = await Utils.getImage(true, selectionId);
-        if (newImage === undefined) return;
-        newImage = await Utils.formatImageForSapling(newImage, saplingId);
+        let newImages = await Utils.getImage(true, selectionId);
+        if (!newImages || newImages.length === 0) return;
+        const newImage = await Utils.formatImageForSapling(newImages[0], saplingId);
         await handleAddImage(newImage);
         setShowImage(true);
         Utils.stopTask();

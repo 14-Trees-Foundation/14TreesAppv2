@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import { Tree, TreeHelperDataResponse } from "../../model/tree"
+import { Tree, TreeAnalytics, TreeHelperDataResponse } from "../../model/tree"
 import { handleApiError } from "./handleError";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Constants } from "../Utils";
@@ -39,6 +39,12 @@ export class TreeService {
     async deleteTree(tree: Tree) {
         const url = `/api/trees/${tree.id}`;
         return await this.api.delete(url);
+    }
+
+    async analyticsCount(userName: string): Promise<TreeAnalytics> {
+        const url = `/api/appv2/trees-count?name=${userName}`;
+        const response =  await this.api.get<TreeAnalytics>(url);
+        return response.data;
     }
 
 }

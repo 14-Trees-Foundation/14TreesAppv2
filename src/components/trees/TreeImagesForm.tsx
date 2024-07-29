@@ -2,22 +2,38 @@ import { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { Strings } from "../../services/Strings";
 import { CustomButtonStyles, treeFormStyles } from "../../services/Styles";
-import { Button } from 'react-native-paper';
+import { Button, Checkbox, SegmentedButtons } from 'react-native-paper';
 import ImagesView from '../ImagesView';
 import ImageOptions from '../ImageOptionsModal';
 import { Image } from '../../model/common';
 import { DaoClient } from '../../services/db/dao';
+import { DatePicker } from '../DatePicker';
+import { getHumanReadableDate } from '../../services/Utils';
+import { CreateTreeSnapshotRequest } from '../../model/tree_snapshot';
+
+const getImageDescription = (imageDate: string, treeStatus: string) => {
+    const treeStatusMap: any = {
+        'healthy': 'Healthy',
+        'diseased': 'Diseased',
+        'dead': 'Dead',
+    }
+    return `${getHumanReadableDate(imageDate)} (${treeStatusMap[treeStatus]})`
+}
 
 interface TreeImageFormInputProps {
     sapling_id: string,
-    onSubmit: (images: Image[]) => void,
+    tree_status: string,
+    onSubmit: (images: CreateTreeSnapshotRequest[]) => void,
     onCancel: () => void,
 }
 
-const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, onCancel, onSubmit }) => {
+const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_status, onCancel, onSubmit }) => {
 
-    const [images, setImages] = useState<Image[]>([]);
-    const [imageUris, setImageUris] = useState<string[]>([]);
+    const [images, setImages] = useState<CreateTreeSnapshotRequest[]>([]);
+    const [imageUris, setImageUris] = useState<{uri: string, description: string}[]>([]);
+    const [date, setDate] = useState(new Date());
+    const [treeStatus, setTreeStatus] = useState(tree_status);
+    const [dateEnabled, setDateEnabled] = useState(false);
 
     useEffect(() => {
         if (sapling_id !== '') {
@@ -27,8 +43,9 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, onCancel
                 const treeSnapshots = await  daoClient.treeSnapshots.getTreeSnapshotsBySaplingId(sapling_id);
 
                 const uris = treeSnapshots.map(treeImage => {
-                    if (treeImage.image) return treeImage.image;
-                    return `data:image/jpg;base64,${treeImage.data}`;
+                    const description = getImageDescription(treeImage.created_at, treeImage.tree_status);
+                    if (treeImage.image) return {uri: treeImage.image, description: description};
+                    return {uri: `data:image/jpg;base64,${treeImage.data}`, description: description};
                 })
 
                 setImageUris([...imageUris, ...uris])
@@ -41,9 +58,12 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, onCancel
     }
 
     const handleImageChange = (image?: Image) => {
+        const imageDate = dateEnabled ? date.toISOString() : new Date().toISOString();
         if (image) {
-            setImages([...images, image])
-            setImageUris([...imageUris, `data:image/jpg;base64,${image.data}`])
+            setImages(prev => [...prev, { ...image, image_date: imageDate, tree_status: treeStatus}])
+
+            const description = getImageDescription(imageDate, treeStatus);
+            setImageUris(prev => [...prev, {uri: `data:image/jpg;base64,${image.data}`, description: description}])
         }
     }
 
@@ -59,10 +79,36 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, onCancel
                     <View style={{ marginTop: 15, flexGrow: 1 }}>
                         <ImagesView
                             title='Tree Images'
-                            images={imageUris.reverse()}
+                            images={imageUris.map(item => item).reverse()}
                         />
                     </View>
-                    <ImageOptions onChange={handleImageChange} />
+                    <View style={{ marginTop: 10 }}>
+                        <Checkbox.Item
+                            label="Image date different than today's date?"
+                            status={dateEnabled ? "checked" : 'unchecked'}
+                            onPress={() => { setDateEnabled(prev => !prev) }}
+                            color='#4CAF50'
+                        />
+                    </View>
+                    {dateEnabled && <View style={{ marginTop: 10, flexGrow: 1 }}>
+                        <DatePicker
+                            label={Strings.labels.ImageDate}
+                            value={date}
+                            onChange={setDate}
+                        />
+                    </View>}
+                    <View style={{ marginTop: 10, flexGrow: 1 }}>
+                        <SegmentedButtons
+                            value={treeStatus}
+                            onValueChange={setTreeStatus}
+                            buttons={[
+                                { value: 'healthy', label: 'Healthy', style: { backgroundColor: treeStatus === 'healthy' ? 'lightgreen' : 'white' } },
+                                { value: 'diseased', label: 'Diseased', style: { backgroundColor: treeStatus === 'diseased' ? 'lightgreen' : 'white' } },
+                                { value: 'dead', label: 'Dead', style: { backgroundColor: treeStatus === 'dead' ? 'lightgreen' : 'white' } },
+                            ]}
+                        />
+                    </View>
+                    <ImageOptions onChange={handleImageChange} multiple/>
 
                     <View style={CustomButtonStyles.container}>
                         <View style={CustomButtonStyles.buttonRow}>

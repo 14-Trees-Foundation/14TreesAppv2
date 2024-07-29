@@ -10,7 +10,6 @@ import { TouchableOpacity } from "react-native";
 import { CreateVisitRequest, Visit } from "../model/visits";
 import { useFocusEffect } from "@react-navigation/native";
 import { AddIconButton } from "../components/FABplusIcon";
-import { FAB } from "react-native-paper";
 import SearchBar from "../components/Searchbar";
 import { Image } from "../model/common";
 
@@ -35,7 +34,7 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
     useFocusEffect(
         useCallback(() => {
           setIsFormVisible(false);
-          setStateChange(stateChange + 1);
+          setStateChange(prev => prev + 1);
           return () => {
           };
         }, [])
@@ -84,7 +83,7 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
                 }
             };
 
-            setStateChange(stateChange + 1);
+            setStateChange(prev => prev + 1);
         }, 1000)
     };
 
@@ -92,7 +91,7 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
         if (selectedVisit) {
             setTimeout(async () => {
                 await daoClient.visits.deleteVisit(selectedVisit.local_id);
-                setStateChange(stateChange + 1);
+                setStateChange(prev => prev + 1);
             }, 1000)
         }
     }
@@ -100,7 +99,7 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.safeArea}>
             {!isFormVisible && <View style={styles.header}>
-                <SearchBar onChange={setSearchQuery}/>
+                <SearchBar query={searchQuery} onChange={setSearchQuery}/>
             </View>}
             {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems: 'center'}}>
                 {visits.map((visit, index) => (

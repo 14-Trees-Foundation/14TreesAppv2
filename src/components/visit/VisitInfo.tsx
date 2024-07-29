@@ -1,11 +1,11 @@
 
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
 import moment from 'moment';
 import { Button, IconButton } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Visit } from '../../model/visits';
+import { DaoClient } from '../../services/db/dao';
 
 interface VisitInfoInputProps {
     isVisible: boolean
@@ -18,12 +18,24 @@ interface VisitInfoInputProps {
 export const VisitInfo: React.FC<VisitInfoInputProps> = ({ isVisible, visit, onClose, onDelete, onEdit }) => {
 
     const [isDelete, setIsDelete] = useState(false);
+    const [numOfImg, setNumOfImg] = useState(0);
     const getDateStringForVisit = (str: string) => {
         const date = new Date(str);
         if (isNaN(date.getTime())) return '';
     
         return moment(date).format('DD MMMM, YYYY');
     }
+
+    useEffect(() => {
+        setTimeout( async() => {
+            if (isVisible && visit.id) {
+                const daoClient = await DaoClient.authenticate();
+                const images = await daoClient.visitImages.getVisitImagesByVisitId(visit.id);
+                setNumOfImg(images.length);
+            }
+        }, 10)
+
+    }, [isVisible, visit])
 
     return (
         <Modal
@@ -42,6 +54,8 @@ export const VisitInfo: React.FC<VisitInfoInputProps> = ({ isVisible, visit, onC
                 <Text style={styles.value}>{visit.visit_name}</Text>
                 <Text style={styles.label}>Type:</Text>
                 <Text style={styles.value}>{visit.visit_type}</Text>
+                <Text style={styles.label}>Visit Images:</Text>
+                <Text style={styles.value}>{numOfImg}</Text>
                 <Text style={styles.label}>Date:</Text>
                 <Text style={styles.value}>{getDateStringForVisit(visit.visit_date)}</Text>
               

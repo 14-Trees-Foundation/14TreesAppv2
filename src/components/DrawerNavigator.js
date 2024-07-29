@@ -23,6 +23,8 @@ import Visits from '../screens/Visits';
 import Trees from '../screens/Trees';
 import { APP_VERSION } from '../constants/constants';
 import { DrawerContent } from './Drawer';
+import LoginScreen from '../screens/Login';
+import Home from '../screens/HomeScreen';
 
 const CustomDrawerToggleButton = ({ navigation }) => (
     <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
@@ -106,7 +108,7 @@ export const DrawerNavigator = () => {
         >
             <Drawer.Screen
                 name={Strings.screenNames.getString('HomePage', Strings.english)}
-                component={HomeScreen}
+                component={Home}
                 options={{
                     headerRight: () => (
                         <ScreenHeaderContent />

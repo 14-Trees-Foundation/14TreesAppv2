@@ -17,7 +17,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { Text, View } from 'react-native';
 import { EditLocalTree } from './screens/EditLocalTree';
 import TreesInShift from './screens/TreesInShift';
-import SyncDisplay from './screens/SyncDisplay';
 import SplashScreen from './screens/SplashScreen';
 import ScreenHeaderContent from './components/ScreenHeaderContent';
 import { setJSExceptionHandler } from 'react-native-exception-handler';
@@ -26,6 +25,7 @@ import AddImageShift from './screens/AddImageShift';
 import UpdatePlotShift from './screens/UpdatePlotShift';
 import EditLocalAddImage from './screens/EditLocalAddImage';
 import { APP_VERSION } from './constants/constants';
+import Sync from './screens/Sync';
 
 
 const errorHandler = async (e, isFatal) => {
@@ -74,7 +74,7 @@ async function requestPermissions() {
     PERMISSIONS.ANDROID.CAMERA,
     PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
     PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-    PERMISSIONS.ANDROID.ACCESS_BACKGROUND_LOCATION,
+    // PERMISSIONS.ANDROID.ACCESS_BACKGROUND_LOCATION,
     PERMISSIONS.ANDROID.READ_PHONE_NUMBERS
   ];
   if (androidVersion < versionOfPermissionChange) {
@@ -94,6 +94,7 @@ async function requestPermissions() {
   let ungrantedPermissions = await checkMultiplePermissions(permissions);
   console.log("ungrantedPermissions: ", ungrantedPermissions);
 
+  console.log(ungrantedPermissions)
   if (ungrantedPermissions.length > 0) {
     Alert.alert(Strings.alertMessages.PermissionsRequired, Strings.alertMessages.Settings);
   }
@@ -272,7 +273,7 @@ const App = () => {
           }} />
         <Stack.Screen
           name={Strings.screenNames.getString('SyncDisplay', Strings.english)}
-          component={SyncDisplay}
+          component={Sync}
           options={{
             headerLeft: () => (
               <View style={{ marginLeft: 10 }}>
@@ -284,9 +285,7 @@ const App = () => {
               </View>
             ),
             headerRight: () => (
-              <View style={{ height: 35, marginRight: 13, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
-              </View>
+              <ScreenHeaderContent />
             ),
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
             headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
@@ -332,7 +331,6 @@ const App = () => {
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
             headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
             headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
-            title: Strings.screenNames.LogIn
           }} />
         <Stack.Screen
           name={Strings.screenNames.getString('DrawerScreen', Strings.english)}

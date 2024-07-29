@@ -33,7 +33,7 @@ const Users: React.FC<UsersInputProps> = ({ navigation }) => {
     useFocusEffect(
         useCallback(() => {
             setIsFormVisible(false);
-            setStateChange(stateChange + 1);
+            setStateChange(prev => prev + 1);
             return () => {
             };
         }, [])
@@ -77,7 +77,7 @@ const Users: React.FC<UsersInputProps> = ({ navigation }) => {
                 await daoClient.users.updateUser(request)
             };
 
-            setStateChange(stateChange + 1);
+            setStateChange(prev => prev + 1);
         }, 1000)
     };
 
@@ -85,7 +85,7 @@ const Users: React.FC<UsersInputProps> = ({ navigation }) => {
         if (selectedUser) {
             setTimeout(async () => {
                 await daoClient.users.deleteUser(selectedUser.local_id);
-                setStateChange(stateChange + 1);
+                setStateChange(prev => prev + 1);
             }, 1000)
         }
     }
@@ -93,7 +93,7 @@ const Users: React.FC<UsersInputProps> = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.safeArea}>
             {!isFormVisible && <View style={styles.header}>
-                <SearchBar onChange={setSearchQuery}/>
+                <SearchBar query={searchQuery} onChange={setSearchQuery}/>
             </View>}
             {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems: 'center'}}>
                 {users.map((user, index) => (

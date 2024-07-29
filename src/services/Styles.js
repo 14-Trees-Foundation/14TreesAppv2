@@ -127,10 +127,10 @@ export const commonStyles = StyleSheet.create({
     textAlign: 'center',
   },
   drawerHeaderLight: {
-    backgroundColor: '#F1FAEE',
+    backgroundColor: '#83cde6',
   },
   drawerHeaderDark: {
-    backgroundColor: '#FFD700'
+    backgroundColor: 'lightgreen'
   },
   headerTitleStyleDark: {
     fontFamily: 'Inter-Regular',
@@ -896,13 +896,18 @@ export const homeStyles = StyleSheet.create({
 });
 
 export const loginStyles = StyleSheet.create({
-  outerContainer: { backgroundColor: 'white', height: '100%', marginTop: 40 },
+  outerContainer: { 
+    backgroundColor: 'white', 
+    height: '100%', 
+    paddingTop: 40,
+  },
   inputContainer: {
-    padding: 2,
-    margin: 4,
+    marginVertical: 8,
+    marginHorizontal: 10,
     borderRadius: 10,
     borderColor: '#ccc',
     borderWidth: 3,
+    borderRadius: 5,
   },
   textInput: (lightTheme, phoneNumber) => ({
     ...commonStyles.txtInput,

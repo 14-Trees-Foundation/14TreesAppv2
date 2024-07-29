@@ -18,6 +18,7 @@ import TreeImageForm from "../components/trees/TreeImagesForm";
 import { Image } from "../model/common";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Loading } from "../components/Loading";
+import { CreateTreeSnapshotRequest } from "../model/tree_snapshot";
 
 interface TreesInputProps {
     navigation: any
@@ -46,7 +47,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
         useCallback(() => {
           setIsFormVisible(false);
           setIsImageFormVisible(false);
-          setStateChange(stateChange + 1);
+          setStateChange(prev => prev + 1);
           return () => {
           };
         }, [])
@@ -78,7 +79,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
         setTimeout(async () => {
             let resp = await localClient.trees.getTrees(0, 100, undefined, false, selectedPlot?.id);
             setTrees(resp)
-
+            setLoading(false);
         }, 1000)
     }, [searchQuery, stateChange, selectedPlot])
 
@@ -87,46 +88,65 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
         setTimeout(async () => {
             let trees = await localClient.trees.searchTrees(searchQuery, 0, 100, selectedPlot?.id);
             setTrees(trees);
+            setLoading(false);
         }, 1000)
     }, [searchQuery, stateChange, selectedPlot])
 
     const handleSave = (data: Tree | CreateTreeRequest, images?: any) => {
+        let hasError = false;
         setTimeout(async () => {
             setLoading(true);
             if (changeMode === 'add') {
                 data = JSON.parse(JSON.stringify(data)) as CreateTreeRequest;
-                await localClient.trees.createTree(data)
-                ToastAndroid.show("Added Tree Locally!", ToastAndroid.LONG)
+                try {
+                    await localClient.trees.createTree(data)
+                    ToastAndroid.show("Added Tree Locally!", ToastAndroid.SHORT)
+                } catch (err: any) {
+                    hasError = true;
+                    ToastAndroid.show("Failed to add tree locally!", ToastAndroid.SHORT)
+                }
             } else {
                 data = JSON.parse(JSON.stringify(data)) as Tree;
-                await localClient.trees.updateTree(data)
-                ToastAndroid.show("Updated Tree Locally!", ToastAndroid.LONG)
+
+                try {
+                    await localClient.trees.updateTree(data)
+                    ToastAndroid.show("Updated Tree Locally!", ToastAndroid.SHORT)
+                } catch (err: any) {
+                    hasError = true;
+                    ToastAndroid.show("Failed to update tree locally!", ToastAndroid.SHORT)
+                }
             };
 
             const upsertImage = async (type: TreeImageType) => {
                 if (images[type]) {
-                    await localClient.treeImages.upsertTreeImage({ 
-                        name: images[type].name, 
-                        data: images[type].data,
-                        sapling_id: data.sapling_id,
-                        type: type,
-                        is_active: null,
-                        user_id: null,
-                    })
+                    try{
+                        await localClient.treeImages.upsertTreeImage({ 
+                            name: images[type].name, 
+                            data: images[type].data,
+                            sapling_id: data.sapling_id,
+                            type: type,
+                            is_active: null,
+                            user_id: null,
+                        })
+                    } catch (err: any) {
+                        ToastAndroid.show(`Failed to add ${type.replace('_', ' ')} locally!`, ToastAndroid.SHORT)
+                    }
                 }
             }
-            upsertImage('tree_image')
-            upsertImage('user_card_image')
-            upsertImage('user_tree_image')
 
-            ToastAndroid.show("Updated Tree images locally!", ToastAndroid.LONG)
-            setLoading(false);
-            setStateChange(stateChange + 1);
+            if (!hasError) {
+                upsertImage('tree_image')
+                upsertImage('user_card_image')
+                upsertImage('user_tree_image')
+                ToastAndroid.show("Updated Tree images locally!", ToastAndroid.SHORT)
+            }
+
+            setStateChange(prev => prev + 1);
         }, 1000)
 
     };
 
-    const handleImagesSave = (images: Image[]) => {
+    const handleImagesSave = (images: CreateTreeSnapshotRequest[]) => {
         setIsImageFormVisible(false);
         setTimeout(async () => {
             if (images.length > 0 && selectedTree) {
@@ -140,8 +160,13 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     const handleDelete = () => {
         if (selectedTree) {
             setTimeout(async () => {
-                await localClient.trees.deleteTree(selectedTree.local_id);
-                setStateChange(stateChange + 1);
+                try {
+                    await localClient.trees.deleteTree(selectedTree.local_id);
+                    ToastAndroid.show("Deleted tree locally!", ToastAndroid.SHORT)
+                } catch (err: any) {
+                    ToastAndroid.show("Failed to delete tree!", ToastAndroid.SHORT)
+                }
+                setStateChange(prev => prev + 1);
             }, 1000)
         }
     }
@@ -163,7 +188,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                 </View>
             </View>}
             {!(isFormVisible || isImageFormVisible) && <View style={styles.header}>
-                <SearchBar onChange={setSearchQuery} />
+                <SearchBar query={searchQuery} onChange={setSearchQuery} />
             </View>}
             {!(isFormVisible || isImageFormVisible) && <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems: 'center'}}>
                 {trees.map((tree, index) => (
@@ -199,6 +224,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                 onCancel={() => setIsImageFormVisible(false)}
                 onSubmit={handleImagesSave}
                 sapling_id={selectedTree?.sapling_id}
+                tree_status={selectedTree?.tree_status}
             />}
 
             {selectedTree && <TreeInfo

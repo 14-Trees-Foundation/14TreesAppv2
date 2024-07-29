@@ -22,11 +22,11 @@ export const ImageContainer: React.FC<ImageContainerInputProps> = ({ image, onCh
     const pickImage = async (selectionId: number) => {
         setModalVisible(false);
         Utils.startTask();
-        let newImage = await Utils.getImage(true, selectionId);
-        if (!newImage) return;
+        let newImages = await Utils.getImage(true, selectionId);
+        if (!newImages || newImages.length === 0) return;
         const image = {
-            name: `${newImage?.meta.capturetimestamp}.jpg`,
-            data: newImage.data
+            name: `${newImages[0]?.meta.capturetimestamp}.jpg`,
+            data: newImages[0].data
         }
         onChange(image);
         Utils.stopTask();

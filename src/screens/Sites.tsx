@@ -35,7 +35,7 @@ const Sites: React.FC<SitesInputProps> = ({ navigation })  => {
     useFocusEffect(
         useCallback(() => {
           setIsFormVisible(false);
-          setStateChange(stateChange + 1);
+          setStateChange(prev => prev + 1);
           return () => {
           };
         }, [])
@@ -91,7 +91,7 @@ const Sites: React.FC<SitesInputProps> = ({ navigation })  => {
     return (
         <SafeAreaView style={styles.safeArea}>
             {!isFormVisible && <View style={styles.header}>
-                <SearchBar onChange={setSearchQuery}/>
+                <SearchBar query={searchQuery} onChange={setSearchQuery}/>
             </View>}
             {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems: 'center'}}>
                 {sites.map((site, index) => (

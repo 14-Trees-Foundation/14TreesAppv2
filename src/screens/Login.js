@@ -12,6 +12,7 @@ import { Button, HelperText, Text, TextInput } from 'react-native-paper';
 const LoginScreen = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [pinNumber, setPinNumber] = useState('');
+  const [pinVisible, setPinVisible] = useState(false);
   const [isPinInvalid, setIsPinInvalid] = useState(false);
   const [isPhoneInvalid, setIsPhoneInvalid] = useState(false);
 
@@ -204,13 +205,13 @@ const LoginScreen = ({ navigation }) => {
   return (
     <View style={loginStyles.outerContainer}>
       <View style={loginStyles.inputContainer}>
-        <View style={{ marginVertical: 10 }}>
+        <View style={{ marginVertical: 10}}>
           <View style={{ marginVertical: 5, justifyContent: 'center', alignItems: 'center'}}>
-            <Text variant='headlineLarge'>LogIn</Text>
+            <Text variant='headlineLarge'>Log In</Text>
           </View>
           <View style={{ marginVertical: 5, justifyContent: 'center', alignItems: 'center'}}>
             <TextInput
-              style={{ width: '95%' }}
+              style={{ width: '90%' }}
               label='Phone number'
               placeholder="Enter your phone number"
               placeholderTextColor="grey"
@@ -223,13 +224,15 @@ const LoginScreen = ({ navigation }) => {
           </View>
           <View style={{ marginVertical: 5, justifyContent: 'center', alignItems: 'center'}}>
             <TextInput
-              style={{ width: '95%' }}
+              style={{ width: '90%' }}
               label='Pin'
               placeholder="Enter your pin"
               placeholderTextColor="grey"
               onChangeText={text => setPinNumber(text)}
               value={pinNumber}
               keyboardType="number-pad"
+              secureTextEntry={!pinVisible}
+              right={<TextInput.Icon icon={pinVisible ? "eye" : "eye-off"} onPress={() => setPinVisible(prev => !prev)}/>}
               maxLength={4}
               mode='outlined'
             />
@@ -243,7 +246,7 @@ const LoginScreen = ({ navigation }) => {
               labelStyle={CustomButtonStyles.buttonLabel}
               style={CustomButtonStyles.button}
             >
-              {Strings.buttonLabels.login}
+              {Strings.buttonLabels.Submit}
             </Button>
           </View>
         </View>

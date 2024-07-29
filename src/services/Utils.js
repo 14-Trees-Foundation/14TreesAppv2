@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { Alert, ToastAndroid, Modal } from "react-native";
+import { openCamera, openPicker } from "react-native-image-crop-picker";
+import { Alert, ToastAndroid } from "react-native";
 import { DataService } from "./DataService";
 import { LocalDatabase } from "./tree_db";
 import RNRestart from 'react-native-restart';
@@ -10,7 +10,7 @@ import RNFS from 'react-native-fs';
 import ReactNativeForegroundService from '@supersami/rn-foreground-service';
 import { shiftTypes } from "../screens/Shifts";
 import { DaoClient } from "./db/dao";
-import { Buffer } from 'buffer'
+import moment from "moment";
 const MIN_BATCH_SIZE = 5
 
 const shiftTypesObject = {
@@ -1272,43 +1272,41 @@ export class Utils {
         ReactNativeForegroundService.stopAll();
     };
 
-    static async getImage(compressionRequired = false, selectionId) {
+    static async getImage(compressionRequired = false, selectionId, multiple = false) {
 
         const options = {
             mediaType: 'photo',
             includeBase64: true,
             maxHeight: 960,
             maxWidth: 720,
+            multiple: multiple
         };
 
         try {
             let response = {}
-            if (selectionId === 0) {
-                response = await launchCamera(options);
-            } else {
-                response = await launchImageLibrary(options)
+            try {
+                if (selectionId === 0) {
+                    response = await openCamera(options);
+                } else {
+                    response = await openPicker(options)
+                }
+            } catch (err) {
+                if (err.code = 'E_PICKER_CANCELLED') return null;
+                throw new Error(err.message)
             }
 
+            let images = response[0] ? response : [response];
 
-            if (response.didCancel) {
-                console.log('User cancelled image picker');
-            } else if (response.error) {
-                console.log('ImagePicker Error: ', response.error);
-            } else {
-
+            let result = []
+            for (const image of images) {
                 const timestamp = new Date().toISOString(); // only show time and not date
-                let filesz = response.assets[0].fileSize;
-                let base64Data = response.assets[0].base64;
+                let fileSize = image.size;
+                let base64Data = image.data;
 
-
-
-                let imagePath = response.assets[0].uri;
-
-                console.log("response.assets[0]----", filesz);
+                let imagePath = image.path;
 
                 if (compressionRequired) {
-                    const compressedData = await Utils.compressImageAt(filesz, imagePath);
-                    //console.log("compressedData: ", compressedData.size);
+                    const compressedData = await Utils.compressImageAt(fileSize, imagePath);
                     if (compressedData) {
                         base64Data = compressedData;
                     } else {
@@ -1320,12 +1318,13 @@ export class Utils {
                     meta: {
                         capturetimestamp: timestamp,
                         remark: Strings.messages.defaultRemark,
-
                     },
                 };
-
-                return newImage;
+                result.push(newImage);
             }
+
+            return result;
+            
         } catch (error) {
             console.log('An error occurred while accessing the camera:', error);
             const stackTrace = error.stack;
@@ -1466,6 +1465,9 @@ export class Constants {
     static lastVisitsFetchedAt = 'last_visits_fetched_at'
     static lastVisitImagesFetchedAt = 'last_visit_images_fetched_at'
     static lastTreeSnapshotsFetchedAt = 'last_tree_snapshots_fetched_at'
+
+    // tree analytics for home screen
+    static treeAnalyticsDataKey = 'tree_analytics'
 }
 
 export const getImageSourceObject = (src) => {
@@ -1514,4 +1516,10 @@ export const getTimeDiffString = (time) => {
         const years = Math.floor(diffInSeconds / year);
         return years === 1 ? "1 year ago" : `${years} years ago`;
     }
+}
+
+export const getHumanReadableDate = (dateStr) => {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    return moment(dateStr).format('MMMM D, YYYY');
 }

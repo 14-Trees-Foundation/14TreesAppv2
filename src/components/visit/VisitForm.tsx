@@ -83,8 +83,8 @@ const VisitForm: React.FC<VisitFormInputProps> = ({ visit, changeMode, onCancel,
 
     const handleImageChange = (image?: Image) => {
         if (image) {
-            setImages([...images, image])
-            setImageUris([...imageUris, `data:image/jpg;base64,${image.data}`])
+            setImages(prev => [...prev, image])
+            setImageUris(prev => [...prev, `data:image/jpg;base64,${image.data}`])
         }
     }
 
@@ -132,7 +132,7 @@ const VisitForm: React.FC<VisitFormInputProps> = ({ visit, changeMode, onCancel,
                             images={imageUris.reverse()}
                         />
                     </View>}
-                    {changeMode !== 'add' && <ImageOptions onChange={handleImageChange} />}
+                    {changeMode !== 'add' && <ImageOptions onChange={handleImageChange} multiple />}
 
                     <View style={CustomButtonStyles.container}>
                         <View style={CustomButtonStyles.buttonRow}>

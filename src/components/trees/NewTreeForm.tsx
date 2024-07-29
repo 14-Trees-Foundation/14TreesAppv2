@@ -1,11 +1,10 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, Text, ToastAndroid, View } from 'react-native';
 import { Strings } from "../../services/Strings";
 import { Constants, Utils } from "../../services/Utils";
 import { CoordinateSetter } from "../CoordinateSetter";
 import { CustomButtonStyles, treeFormStyles } from "../../services/Styles";
-import GlobalContext from '../../context/GlobalContext ';
-import { Button, TextInput } from 'react-native-paper';
+import { Button, Checkbox, HelperText, TextInput } from 'react-native-paper';
 import { CreateTreeRequest, Tree } from '../../model/tree';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../../model/user';
@@ -48,14 +47,34 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     const [selectedPlot, setSelectedPlot] = useState<any>(null);
     const [userDetails, setUserDetails] = useState<any>(null);
 
+    const [visitEnabled, setVisitEnabled] = useState(false);
+
+    const [validationErrors, setValidationErrors] = useState({
+        saplingId: false,
+        plantType: false,
+        plot: false,
+        image: false,
+        status: false,
+        coordinates: false,
+    })
+
+    const resetValidationErrors = () => {
+        setValidationErrors({
+            saplingId: false,
+            plantType: false,
+            plot: false,
+            image: false,
+            status: false,
+            coordinates: false,
+        })
+    }
+
     const treeStatusList = [
-        { value: 'alive', name: 'Alive' },
+        { value: 'healthy', name: 'Healthy' },
+        { value: 'diseased', name: 'Diseased' },
         { value: 'dead', name: 'Dead' },
-        { value: 'lost', name: 'Lost' },
     ];
     const [treeStatus, setTreeStatus] = useState<any>(treeStatusList[0]);
-
-    const { lightTheme } = useContext(GlobalContext);
 
     useEffect(() => {
         Utils.addTasks();
@@ -71,7 +90,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                         setlat(location.coordinates[0]);
                         setlng(location.coordinates[1]);
                     }
-                } catch(err) {
+                } catch (err) {
                     console.log(err);
                 }
             }
@@ -112,22 +131,24 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
     useEffect(() => {
         if (assignedTo) return;
-        setTimeout( async () => {
-                if (tree && tree.assigned_to) {
+        setTimeout(async () => {
+            if (tree && tree.assigned_to) {
                 const daoClient = await DaoClient.authenticate();
                 const user = await daoClient.users.getUserByLiveId(tree.assigned_to)
                 setAssignedTo(user)
+                setVisitEnabled(true);
             }
         }, 100)
     }, [tree, users])
 
     useEffect(() => {
         if (selectedVisit) return;
-        setTimeout( async () => {
-                if (tree && tree.visit_id) {
+        setTimeout(async () => {
+            if (tree && tree.visit_id) {
                 const daoClient = await DaoClient.authenticate();
                 const visit = await daoClient.visits.getVisitByLiveId(tree.visit_id)
                 setSelectedVisit(visit)
+                setVisitEnabled(true);
             }
         }, 100)
     }, [tree, visits])
@@ -148,7 +169,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                     error: JSON.stringify(error),
                     stackTrace: stackTrace,
                 };
-    
+
                 await Utils.logException(JSON.stringify(errorLog));
             }
         }, 1000);
@@ -180,10 +201,15 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     }, [])
 
     const handleSubmit = () => {
-        if (!selectedPlantType || !selectedPlot) {
-            ToastAndroid.show("Please Select Plant type and plot", ToastAndroid.SHORT)
-            return;
-        }
+        resetValidationErrors();
+        if (!selectedPlot) setValidationErrors(prev => ({ ...prev, plot: true }))
+        if (!selectedPlantType) setValidationErrors(prev => ({ ...prev, plantType: true }))
+        if (!treeStatus) setValidationErrors(prev => ({ ...prev, status: true }))
+        if (!imageUri) setValidationErrors(prev => ({ ...prev, image: true }))
+        if (saplingId === '') setValidationErrors(prev => ({ ...prev, saplingId: true }))
+        if (lat === 0) setValidationErrors(prev => ({ ...prev, coordinates: true }))
+
+        if (!selectedPlot || !selectedPlantType || !treeStatus || !imageUri || saplingId === '' || lat === 0) return;
 
         let location = {
             type: 'Point',
@@ -196,19 +222,25 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
             plot_id: selectedPlot.id,
             planted_by: userDetails?.name,
             tree_status: treeStatus.value,
-            assigned_to: assignedTo ? assignedTo.id : null,
-            assigned_at: assignedTo ? new Date().toISOString() : null,
-            visit_id: selectedVisit ? selectedVisit.id : null,
+            assigned_to: ( visitEnabled && assignedTo) ? assignedTo.id : null,
+            assigned_at: ( visitEnabled && assignedTo) ? new Date().toISOString() : null,
+            visit_id: ( visitEnabled && selectedVisit) ? selectedVisit.id : null,
+        }
+
+        const imageData = { 
+            tree_image: image, 
+            user_tree_image: visitEnabled ? userTreeImage : null, 
+            user_card_image: visitEnabled ? userCardImage : null,
         }
 
         if (changeMode === 'add') {
-            let changes = { ...data, location: JSON.stringify(location)  } as CreateTreeRequest;
-            onSubmit(changes, {tree_image: image, user_tree_image: userTreeImage, user_card_image: userCardImage})
+            let changes = { ...data, location: JSON.stringify(location) } as CreateTreeRequest;
+            onSubmit(changes, imageData)
         }
         else if (tree) {
             let newChanges = { ...tree, ...data, location: JSON.stringify(location) }
-            onSubmit(newChanges as Tree, {tree_image: image, user_tree_image: userTreeImage, user_card_image: userCardImage})
-        } 
+            onSubmit(newChanges as Tree, imageData)
+        }
 
         onCancel()
     }
@@ -232,7 +264,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
     return (
         <View style={{ height: "98%" }}>
-            <Text style={treeFormStyles.plotSapling}> { changeMode === 'add' ? 'Add Tree' : 'Edit Sapling: ' + saplingId } </Text>
+            <Text style={treeFormStyles.plotSapling}> {changeMode === 'add' ? 'Add Tree' : 'Edit Sapling: ' + saplingId} </Text>
             <ScrollView
                 keyboardShouldPersistTaps='handled'
                 scrollEnabled={true}
@@ -246,6 +278,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                             onChangeText={(text) => { setSaplingId(text) }}
                             mode='outlined'
                         />
+                        {validationErrors.saplingId && <HelperText visible={true} type='error'>Please Enter Sapling Id</HelperText>}
                     </View>
 
                     <View style={{ marginTop: 10 }}>
@@ -258,6 +291,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                             keyGetter={(data) => data.value}
                             variant='outlined'
                         />
+                        {validationErrors.plantType && <HelperText visible={true} type='error'>Please select a plant type</HelperText>}
                     </View>
 
                     <View style={{ marginTop: 10 }}>
@@ -270,6 +304,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                             keyGetter={(data) => data.value}
                             variant='outlined'
                         />
+                        {validationErrors.plot && <HelperText visible={true} type='error'>Please select a plot</HelperText>}
                     </View>
 
                     {changeMode === 'edit' && <View style={{ marginTop: 10 }}>
@@ -282,67 +317,81 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                             keyGetter={(data) => data.value}
                             variant='outlined'
                         />
+                        {validationErrors.status && <HelperText visible={true} type='error'>Please select tree status</HelperText>}
                     </View>}
 
                     <View style={{ width: '100%', marginTop: 10 }}>
-                        <Text style={ treeFormStyles.inputLabel }>{Strings.messages.Location}:</Text>
+                        <Text style={treeFormStyles.inputLabel}>{Strings.messages.Location}:</Text>
                         <CoordinateSetter
                             inLat={lat}
                             inLng={lng}
                             onSetLat={(item: number) => setlat(item)}
                             onSetLng={(item: number) => setlng(item)}
                         />
+                        {validationErrors.coordinates && <HelperText visible={true} type='error'>Tree coordinates are required</HelperText>}
                     </View>
 
                     <View style={{ width: '100%', marginTop: 10 }}>
-                        <ImageSelector 
+                        <ImageSelector
                             label='Tree Image'
                             onChange={handleImageChange}
                             imageUri={imageUri ? imageUri : undefined}
                         />
+                        {validationErrors.image && <HelperText visible={true} type='error'>Tree Image is required</HelperText>}
                     </View>
 
                     <View style={{ marginTop: 10 }}>
-                        <Autocomplete
-                            value={selectedVisit}
-                            options={visits}
-                            label={Strings.labels.SelectVisit}
-                            onSelect={(data) => { setSelectedVisit(data); }}
-                            valueGetter={(data) => `${data?.visit_name}`}
-                            keyGetter={(data) => `${data?.local_id}`}
-                            onSearch={handleVisitSearch}
-                            variant='outlined'
+                        <Checkbox.Item
+                            label="Add Visitor Details?"
+                            status={visitEnabled ? "checked" : 'unchecked'}
+                            onPress={() => { setVisitEnabled(prev => !prev) }}
+                            color='#4CAF50'
                         />
                     </View>
 
-                    <View style={{ marginTop: 10 }}>
-                        <Autocomplete
-                            value={assignedTo}
-                            options={users}
-                            label={Strings.labels.SelectUser}
-                            onSelect={(data) => { setAssignedTo(data); }}
-                            valueGetter={(data) => `${data?.name} (${data?.email})`}
-                            keyGetter={(data) => `${data?.local_id}`}
-                            onSearch={handleUserSearch}
-                            variant='outlined'
-                        />
-                    </View>
+                    {visitEnabled && <View>
+                        <View style={{ marginTop: 10 }}>
+                            <Autocomplete
+                                value={selectedVisit}
+                                options={visits}
+                                label={Strings.labels.SelectVisit}
+                                onSelect={(data) => { setSelectedVisit(data); }}
+                                valueGetter={(data) => `${data?.visit_name}`}
+                                keyGetter={(data) => `${data?.local_id}`}
+                                onSearch={handleVisitSearch}
+                                variant='outlined'
+                            />
+                        </View>
 
-                    <View style={{ width: '100%', marginTop: 10 }}>
-                        <ImageSelector 
-                            label='User Tree Image'
-                            onChange={handleUserTreeImageChange}
-                            imageUri={userTreeImageUri ? userTreeImageUri : undefined}
-                        />
-                    </View>
+                        <View style={{ marginTop: 10 }}>
+                            <Autocomplete
+                                value={assignedTo}
+                                options={users}
+                                label={Strings.labels.SelectUser}
+                                onSelect={(data) => { setAssignedTo(data); }}
+                                valueGetter={(data) => `${data?.name} (${data?.email})`}
+                                keyGetter={(data) => `${data?.local_id}`}
+                                onSearch={handleUserSearch}
+                                variant='outlined'
+                            />
+                        </View>
 
-                    <View style={{ width: '100%', marginTop: 10 }}>
-                        <ImageSelector 
-                            label='User with Card'
-                            onChange={handleUserCardImageChange}
-                            imageUri={userCardImageUri ? userCardImageUri : undefined}
-                        />
-                    </View>
+                        <View style={{ width: '100%', marginTop: 10 }}>
+                            <ImageSelector
+                                label='User Tree Image'
+                                onChange={handleUserTreeImageChange}
+                                imageUri={userTreeImageUri ? userTreeImageUri : undefined}
+                            />
+                        </View>
+
+                        <View style={{ width: '100%', marginTop: 10 }}>
+                            <ImageSelector
+                                label='User with Card'
+                                onChange={handleUserCardImageChange}
+                                imageUri={userCardImageUri ? userCardImageUri : undefined}
+                            />
+                        </View>
+                    </View>}
 
 
                     <View style={CustomButtonStyles.container}>

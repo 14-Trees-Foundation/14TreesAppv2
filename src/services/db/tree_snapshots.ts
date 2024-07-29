@@ -1,6 +1,6 @@
 import { SQLiteDatabase } from 'react-native-sqlite-storage';
 import { Image } from '../../model/common';
-import { TreeSnapshot } from '../../model/tree_snapshot';
+import { CreateTreeSnapshotRequest, TreeSnapshot } from '../../model/tree_snapshot';
 
 export class TreeSnapshotsDao {
     private db: SQLiteDatabase;
@@ -21,6 +21,8 @@ export class TreeSnapshotsDao {
                 name TEXT NULL,
                 data TEXT NULL,
                 image TEXT NULL,
+                image_date TEXT,
+                tree_status TEXT,
                 is_uploaded INTEGER DEFAULT 0 CHECK (is_uploaded IN (0, 1)),
                 created_at TEXT
             );`;
@@ -38,18 +40,18 @@ export class TreeSnapshotsDao {
         console.log("Tree snapshots table deleted")
     }
 
-    insertTreeSnapshots = async (saplingId: string, userId: number, images: Image[]) => {
+    insertTreeSnapshots = async (saplingId: string, userId: number, images: CreateTreeSnapshotRequest[]) => {
         const now = new Date().toISOString();
         let placeHolder = ''
         let values: any[] = [];
         images.forEach(image => {
-            placeHolder += '(?, ?, ?, ?, 0, ?),'
-            values.push(saplingId, userId, image.name, image.data, now);
+            placeHolder += '(?, ?, ?, ?, ?, ?, 0, ?),'
+            values.push(saplingId, userId, image.name, image.data, image.image_date, image.tree_status, now);
         })
         placeHolder = placeHolder.slice(0, -1);
 
         const query = `
-            INSERT INTO ${this.tableName} (sapling_id, user_id, name, data, is_uploaded, created_at)
+            INSERT INTO ${this.tableName} (sapling_id, user_id, name, data, image_date, tree_status, is_uploaded, created_at)
             VALUES ${placeHolder};
         `
 
@@ -115,13 +117,15 @@ export class TreeSnapshotsDao {
                     sapling_id,
                     user_id,
                     image,
+                    image_date,
+                    tree_status,
                     is_uploaded,
                     created_at
                 ) VALUES (
-                    ?, ?, ?, ?, ?, ?
+                    ?, ?, ?, ?, ?, ?, ?, ?
                 );`,
                 [
-                    data.id, data.sapling_id, data.user_id, data.image, 1, data.created_at
+                    data.id, data.sapling_id, data.user_id, data.image, data.image_date, data.tree_status, 1, data.created_at
                 ]
             )
         } else {
@@ -132,11 +136,13 @@ export class TreeSnapshotsDao {
                     sapling_id = ?,
                     user_id = ?,
                     image = ?,
+                    image_date = ?,
+                    tree_status = ?,
                     is_uploaded = 1,
                     created_at = ?
                 WHERE id = ?;`,
                 [
-                    data.sapling_id, data.user_id, data.image, data.created_at, data.id
+                    data.sapling_id, data.user_id, data.image, data.image_date, data.tree_status, data.created_at, data.id
                 ]
             )
         }

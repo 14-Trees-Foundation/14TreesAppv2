@@ -37,7 +37,7 @@ export class TreesDao {
                 event_id INTEGER,
                 visit_id INTEGER,
                 memory_images TEXT,
-                tree_status TEXT DEFAULT 'alive' CHECK (tree_status IN ('alive', 'dead', 'lost')),
+                tree_status TEXT DEFAULT 'healthy' CHECK (tree_status IN ('healthy', 'dead', 'diseased')),
                 is_uploaded INTEGER DEFAULT 0 CHECK (is_uploaded IN (0, 1)),
                 change_type TEXT DEFAULT 'none' CHECK (change_type IN ('none', 'add', 'edit', 'delete')),
                 created_at TEXT,
@@ -70,7 +70,6 @@ export class TreesDao {
             ${limit < 0 ? '' : `LIMIT ${limit} OFFSET ${offset}`};
         `
 
-        console.log(query);
         const [results] = await this.db.executeSql(query)
         for (let index = 0; index < results.rows.length; index++) {
             trees.push(results.rows.item(index));

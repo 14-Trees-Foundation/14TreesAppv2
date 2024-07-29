@@ -3,8 +3,8 @@ import { ApiClient } from "../api/api";
 import { DaoClient } from "../db/dao";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Constants } from "../Utils";
-import { Image } from "../../model/common";
 import { ToastAndroid } from "react-native";
+import { TreeSnapshot } from "../../model/tree_snapshot";
 
 export const fetchAndStoreTreeSnapshots = async () => {
     // fetch data from the backend
@@ -38,7 +38,7 @@ export const fetchAndStoreTreeSnapshots = async () => {
             if (offset >= response.total) break;
         }
 
-        await AsyncStorage.setItem(Constants.lastVisitImagesFetchedAt, now);
+        await AsyncStorage.setItem(Constants.lastTreeSnapshotsFetchedAt, now);
         console.log('Tree snapshots fetch Done!')
         ToastAndroid.show('Trees images data upto date!', ToastAndroid.LONG)
     } catch(err: any) {
@@ -55,14 +55,14 @@ export const uploadTreeSnapshotsData = async () => {
 
     let saplingIds: string[] = [];
     let userId = 0;
-    let treeSnapshotsMap: Record<string, Image[]> = {};
+    let treeSnapshotsMap: Record<string, TreeSnapshot[]> = {};
     for (let treeSnapshot of treeSnapshots) {
         userId = treeSnapshot.user_id;
         if (Object.hasOwn(treeSnapshotsMap, treeSnapshot.sapling_id)) {
-            treeSnapshotsMap[treeSnapshot.sapling_id].push({ name: treeSnapshot.name, data: treeSnapshot.data });
+            treeSnapshotsMap[treeSnapshot.sapling_id].push(treeSnapshot);
         } else {
             saplingIds.push(treeSnapshot.sapling_id);
-            treeSnapshotsMap[treeSnapshot.sapling_id] = [{ name: treeSnapshot.name, data: treeSnapshot.data }]
+            treeSnapshotsMap[treeSnapshot.sapling_id] = [treeSnapshot]
         }
     }
 
@@ -71,10 +71,11 @@ export const uploadTreeSnapshotsData = async () => {
     for (const saplingId of saplingIds) {
         const images = treeSnapshotsMap[saplingId];
         await apiClient.treeSnapshots.createTreeSnapshots(saplingId, userId, images)
+
+        for (const image of images) {
+            await daoClient.treeSnapshots.markImageUploaded(image.local_id)
+        }
     }
 
-    for (const image of treeSnapshots) {
-        await daoClient.treeSnapshots.markImageUploaded(image.local_id)
-    }
     await daoClient.treeSnapshots.deleteUploadedImages();
 }

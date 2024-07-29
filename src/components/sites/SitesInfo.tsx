@@ -39,6 +39,12 @@ export const SiteInfo: React.FC<SiteInfoInputProps> = ({ isVisible, site, onClos
                 <Text style={styles.value}>{site.name_english}</Text>
                 <Text style={styles.label}>Name (Marathi):</Text>
                 <Text style={styles.value}>{site.name_marathi}</Text>
+                <Text style={styles.label}>District:</Text>
+                <Text style={styles.value}>{site.district}</Text>
+                <Text style={styles.label}>Taluka:</Text>
+                <Text style={styles.value}>{site.taluka}</Text>
+                <Text style={styles.label}>Village:</Text>
+                <Text style={styles.value}>{site.village}</Text>
                 
                 <Button style={styles.closeButton} onPress={onClose} >
                     Close

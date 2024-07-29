@@ -2,9 +2,14 @@ import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 
+interface ImageObject {
+  uri: string;
+  description?: string;
+}
+
 interface ImagesViewInputProps {
-    title: string
-    images: string[]
+  title: string;
+  images: (string | ImageObject)[];
 }
 
 const ImagesView: React.FC<ImagesViewInputProps> = ({ title, images }) => {
@@ -14,7 +19,8 @@ const ImagesView: React.FC<ImagesViewInputProps> = ({ title, images }) => {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
             {images.map((image, index) => (
               <Card key={index} style={styles.card}>
-                  <Card.Cover source={{ uri: image }} style={styles.cardCover} />
+                <Card.Cover source={{ uri: typeof image === 'string' ? image : image.uri }} style={styles.cardCover} />
+                {typeof image !== 'string' && image.description && <Card.Content><Text>{image.description}</Text></Card.Content>}
               </Card>
             ))}
         </ScrollView>

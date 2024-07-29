@@ -9,22 +9,25 @@ import { Image } from "../model/common";
 interface ImageOptionsInputProps {
     buttonLabel?: string
     onChange: (image?: Image) => void
+    multiple?: boolean
 }
 
-const ImageOptions: React.FC<ImageOptionsInputProps> = ({ buttonLabel, onChange }) => {
+const ImageOptions: React.FC<ImageOptionsInputProps> = ({ buttonLabel, onChange, multiple }) => {
 
     const [modalVisible, setModalVisible] = useState(false);
 
     const pickImage = async (selectionId: number) => {
         setModalVisible(false);
         Utils.startTask();
-        let newImage = await Utils.getImage(true, selectionId);
-        if (newImage) {
-            const image = {
-                name: `${newImage?.meta.capturetimestamp}.jpg`,
-                data: newImage.data
+        let newImages = await Utils.getImage(true, selectionId, multiple);
+        if (newImages && newImages.length ) {
+            for (const newImage of newImages) {
+                const image = {
+                    name: `${newImage?.meta.capturetimestamp}.jpg`,
+                    data: newImage.data
+                }
+                onChange(image);
             }
-            onChange(image);
         }
         Utils.stopTask();
     };
