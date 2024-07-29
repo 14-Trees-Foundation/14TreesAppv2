@@ -43,6 +43,8 @@ const Home: React.FC<{navigation: any}> = ({ navigation }) => {
       await fetchDeltaChanges(setProgress);
       setLoading(false);
       Utils.setLastSyncDateNow();
+      handleAnalytics();
+      handleLastSyncDate();
     }
   }
   const handleAnalytics = async () => {

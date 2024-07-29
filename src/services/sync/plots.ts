@@ -1,7 +1,7 @@
 import { ApiClient } from "../api/api";
 import { DaoClient } from "../db/dao";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Constants } from "../Utils";
+import { Constants, Utils } from "../Utils";
 import { Plot } from  "../../model/plot";
 import { ToastAndroid } from "react-native";
 
@@ -41,8 +41,14 @@ export const fetchAndStorePlots = async () => {
         await AsyncStorage.setItem(Constants.lastPlotsFetchedAt, now);
         console.log('Plots fetch Done!')
         ToastAndroid.show('Plots data upto date!', ToastAndroid.LONG)
-    } catch(err: any) {
-        console.log('Inside fetchAndStorePlots:', err)
+    } catch (error: any) {
+        const stackTrace = error.stack;
+        const errorLog = {
+            msg: 'Error inside fetchAndStoreTrees',
+            error: JSON.stringify(error),
+            stackTrace: stackTrace,
+        };
+        await Utils.logException(JSON.stringify(errorLog));
     }
 }
 

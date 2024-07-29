@@ -72,9 +72,10 @@ export class VisitImagesDao {
     }
 
     getVisitImages = async (uploaded?: boolean) => {
+        const whereCondition = `is_uploaded = ${uploaded ? 1 : 0}`
         const [result] = await this.db.executeSql(
             `SELECT * FROM ${this.tableName}
-            WHERE 1=1 ${uploaded === undefined ? '' : `AND is_uploaded = ${uploaded}`};`
+            WHERE 1=1 ${uploaded === undefined ? '' : 'AND ' + whereCondition};`
         )
 
         let images: VisitImage[] = []

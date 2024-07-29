@@ -2,7 +2,7 @@
 import { ApiClient } from "../api/api";
 import { DaoClient } from "../db/dao";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Constants } from "../Utils";
+import { Constants, Utils } from "../Utils";
 import { Tree } from "../../model/tree";
 import { TreeImageType } from "../../model/tree_image";
 import { ToastAndroid } from "react-native";
@@ -49,8 +49,14 @@ export const fetchAndStoreTrees = async () => {
         await AsyncStorage.setItem(Constants.lastTreesFetchedAt, now);
         console.log('Trees fetch Done')
         ToastAndroid.show('Trees data upto date!', ToastAndroid.LONG)
-    } catch(err: any) {
-        console.log('Inside fetchAndStoreTrees:', err)
+    } catch (error: any) {
+        const stackTrace = error.stack;
+        const errorLog = {
+            msg: 'Error inside fetchAndStoreTrees',
+            error: JSON.stringify(error),
+            stackTrace: stackTrace,
+        };
+        await Utils.logException(JSON.stringify(errorLog));
     }
 }
 
