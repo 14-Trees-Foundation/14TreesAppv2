@@ -5,7 +5,7 @@ import { CustomButtonStyles, treeFormStyles } from "../../services/Styles";
 import { Button, Checkbox, SegmentedButtons } from 'react-native-paper';
 import ImagesView from '../ImagesView';
 import ImageOptions from '../ImageOptionsModal';
-import { Image } from '../../model/common';
+import { Image, ImageSource } from '../../model/common';
 import { DaoClient } from '../../services/db/dao';
 import { DatePicker } from '../DatePicker';
 import { getHumanReadableDate } from '../../services/Utils';
@@ -23,14 +23,14 @@ const getImageDescription = (imageDate: string, treeStatus: string) => {
 interface TreeImageFormInputProps {
     sapling_id: string,
     tree_status: string,
-    onSubmit: (images: CreateTreeSnapshotRequest[]) => void,
+    onSubmit: (images: CreateTreeSnapshotRequest[], deleted: number[]) => void,
     onCancel: () => void,
 }
 
 const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_status, onCancel, onSubmit }) => {
 
-    const [images, setImages] = useState<CreateTreeSnapshotRequest[]>([]);
-    const [imageUris, setImageUris] = useState<{uri: string, description: string}[]>([]);
+    const [images, setImages] = useState<(ImageSource | CreateTreeSnapshotRequest)[]>([]);
+    const [deletedImages, setDeletedImages] = useState<number[]>([]);
     const [date, setDate] = useState(new Date());
     const [treeStatus, setTreeStatus] = useState(tree_status);
     const [dateEnabled, setDateEnabled] = useState(false);
@@ -44,27 +44,60 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_sta
 
                 const uris = treeSnapshots.map(treeImage => {
                     const description = getImageDescription(treeImage.created_at, treeImage.tree_status);
-                    if (treeImage.image) return {uri: treeImage.image, description: description};
-                    return {uri: `data:image/jpg;base64,${treeImage.data}`, description: description};
+                    let imageUri = `data:image/jpg;base64,${treeImage.data}`;
+                    if (treeImage.image) imageUri = treeImage.image;
+
+                    return {
+                        uri: imageUri, 
+                        description: description,
+                        id: treeImage.local_id,
+                        tree_status: treeImage.tree_status,
+                        image_date: treeImage.image_date
+                    };
                 })
 
-                setImageUris([...imageUris, ...uris])
+                setImages(prev => [...prev, ...uris])
             }, 10)
         }
     }, [sapling_id])
 
     const handleSubmit = () => {
-        onSubmit(images);
+        const newImages: CreateTreeSnapshotRequest[] = [];
+        images.forEach(image => {
+            let imageObj: any = { ...image }
+            if (imageObj.id === undefined) {
+                newImages.push({ 
+                    name: imageObj.name, 
+                    data: imageObj.data,
+                    tree_status: imageObj.tree_status,
+                    image_date: imageObj.image_date,
+                });
+            }
+        });
+        onSubmit(newImages, deletedImages);
     }
 
     const handleImageChange = (image?: Image) => {
         const imageDate = dateEnabled ? date.toISOString() : new Date().toISOString();
         if (image) {
-            setImages(prev => [...prev, { ...image, image_date: imageDate, tree_status: treeStatus}])
-
             const description = getImageDescription(imageDate, treeStatus);
-            setImageUris(prev => [...prev, {uri: `data:image/jpg;base64,${image.data}`, description: description}])
+            const uri = `data:image/jpg;base64,${image.data}`
+            setImages(prev => [...prev, { ...image, description: description, uri: uri, tree_status: treeStatus, image_date: imageDate }])
         }
+    }
+
+    const handleImageDelete = (index: number) => {
+        index = images.length - 1 - index; // since we have passed reversed array to component
+        const image = images[index];
+        if (image) {
+            const obj: ImageSource = JSON.parse(JSON.stringify(image))
+            if (obj.id) {
+                const id = obj.id
+                setDeletedImages(prev => [...prev, id])
+            }
+        }
+
+        setImages([...images.slice(0, index), ...images.slice(index + 1)])
     }
 
     return (
@@ -79,7 +112,8 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_sta
                     <View style={{ marginTop: 15, flexGrow: 1 }}>
                         <ImagesView
                             title='Tree Images'
-                            images={imageUris.map(item => item).reverse()}
+                            images={ images.map(item => item).reverse() }
+                            onDelete={handleImageDelete}
                         />
                     </View>
                     <View style={{ marginTop: 10 }}>

@@ -1,29 +1,53 @@
-import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { Card, Text } from 'react-native-paper';
-
-interface ImageObject {
-  uri: string;
-  description?: string;
-}
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Card, IconButton, Text } from 'react-native-paper';
+import ImageView from "react-native-image-viewing";
+import { ImageSource } from '../model/common';
 
 interface ImagesViewInputProps {
   title: string;
-  images: (string | ImageObject)[];
+  images: (string | ImageSource)[];
+  onDelete?: (index: number) => void
 }
 
-const ImagesView: React.FC<ImagesViewInputProps> = ({ title, images }) => {
+const ImagesView: React.FC<ImagesViewInputProps> = ({ title, images, onDelete }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleImageClick = (index: number) => {
+    setCurrentIndex(index);
+    setIsVisible(true);
+  }
+
   return (
     <View style={styles.container}>
         <Text>{title}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
             {images.map((image, index) => (
-              <Card key={index} style={styles.card}>
+            <TouchableOpacity key={index} onPress={() => handleImageClick(index)} activeOpacity={0.9}>
+              <Card style={styles.card}>
                 <Card.Cover source={{ uri: typeof image === 'string' ? image : image.uri }} style={styles.cardCover} />
+                { onDelete !== undefined && typeof image !== 'string' && 
+                  <IconButton
+                    icon="close"
+                    size={15}
+                    style={styles.deleteIcon}
+                    onPress={() => onDelete(index)}
+                  /> 
+                }
                 {typeof image !== 'string' && image.description && <Card.Content><Text>{image.description}</Text></Card.Content>}
               </Card>
+            </TouchableOpacity>
             ))}
         </ScrollView>
+
+        <ImageView
+          images={images.map(image =>({uri: typeof image === 'string' ? image : image.uri}))}
+          imageIndex={currentIndex}
+          visible={isVisible}
+          onRequestClose={() => setIsVisible(false)}
+          FooterComponent={(props) => ( <Text style={{ textAlign: 'center', color: 'white' }}>{(props.imageIndex + 1) + "/" + images.length}</Text> )}
+        />
     </View>
   );
 };
@@ -46,6 +70,12 @@ const styles = StyleSheet.create({
   },
   cardCover: {
     height: 200,
+  },
+  deleteIcon: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: 'white',
   },
 });
 

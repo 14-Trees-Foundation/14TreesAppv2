@@ -8,7 +8,7 @@ import { Visit, CreateVisitRequest } from '../../model/visits';
 import { DatePicker } from '../DatePicker';
 import ImagesView from '../ImagesView';
 import ImageOptions from '../ImageOptionsModal';
-import { Image } from '../../model/common';
+import { Image, ImageSource } from '../../model/common';
 import { DaoClient } from '../../services/db/dao';
 import Autocomplete from '../AutocompleteModal';
 
@@ -31,9 +31,8 @@ const VisitForm: React.FC<VisitFormInputProps> = ({ visit, changeMode, onCancel,
     const [visitDate, setVisitDate] = useState<Date | null>(null);
     const [siteId, setSiteId] = useState<number | null>(null);
     const [visitType, setVisitType] = useState(visitTypes[0]);
-    const [images, setImages] = useState<Image[]>([]);
-    const [imageUris, setImageUris] = useState<string[]>([]);
-
+    const [images, setImages] = useState<ImageSource[]>([]);
+    const [deletedImages, setDeletedImages] = useState<number[]>([]);
 
     useEffect(() => {
         if (visit) {
@@ -51,12 +50,12 @@ const VisitForm: React.FC<VisitFormInputProps> = ({ visit, changeMode, onCancel,
                 const daoClient = await DaoClient.authenticate();
                 const visitImages = await  daoClient.visitImages.getVisitImagesByVisitId(visit.id);
 
-                const uris = visitImages.map(visitImage => {
-                    if (visitImage.image_url) return visitImage.image_url;
-                    return `data:image/jpg;base64,${visitImage.data}`;
+                const images = visitImages.map(visitImage => {
+                    if (visitImage.image_url) return { uri: visitImage.image_url, id: visitImage.local_id};
+                    return { uri: `data:image/jpg;base64,${visitImage.data}`, id: visitImage.local_id};
                 })
 
-                setImageUris([...imageUris, ...uris])
+                setImages(prev => [...prev, ...images])
             }, 10)
         }
     }, [visit])
@@ -77,15 +76,38 @@ const VisitForm: React.FC<VisitFormInputProps> = ({ visit, changeMode, onCancel,
             onSubmit(newVisit)
         } else if (visit) {
             let newChanges = { ...visit, ...data } as Visit;
-            onSubmit(newChanges, images)
+            const newImages: Image[] = [];
+            images.forEach(image => {
+                if (image.data !== undefined && image.name !== undefined) newImages.push({ name: image.name, data: image.data });
+            });
+            onSubmit(newChanges, newImages)
         }
+
+        setTimeout(async () => {
+            if (deletedImages.length === 0) return;
+            const daoClient = await DaoClient.authenticate();
+            for (const imageId of deletedImages) {
+                await  daoClient.visitImages.deleteVisitImage(imageId);
+            }
+
+        }, 10)
     }
 
     const handleImageChange = (image?: Image) => {
         if (image) {
-            setImages(prev => [...prev, image])
-            setImageUris(prev => [...prev, `data:image/jpg;base64,${image.data}`])
+            setImages(prev => [...prev, {...image, uri: `data:image/jpg;base64,${image.data}`}])
         }
+    }
+
+    const handleImageDelete = (index: number) => {
+        index = images.length - 1 - index; // since we have passed reversed array to component
+        const image = images[index];
+        if (image.id !== undefined) {
+            const id = image.id
+            setDeletedImages(prev => [...prev, id])
+        }
+
+        setImages([...images.slice(0, index), ...images.slice(index + 1)])
     }
 
     return (
@@ -129,7 +151,8 @@ const VisitForm: React.FC<VisitFormInputProps> = ({ visit, changeMode, onCancel,
                     {changeMode !== 'add' && <View style={{ marginTop: 15, flexGrow: 1 }}>
                         <ImagesView
                             title='Visit Images'
-                            images={imageUris.reverse()}
+                            images={images.map(item => item).reverse()}
+                            onDelete={handleImageDelete}
                         />
                     </View>}
                     {changeMode !== 'add' && <ImageOptions onChange={handleImageChange} multiple />}

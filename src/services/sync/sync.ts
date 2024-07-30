@@ -12,7 +12,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const uploadLocalData = async (setProgress: React.Dispatch<React.SetStateAction<number>>, changesCount: any) => {
     const total = changesCount.trees.add + changesCount.trees.edit + changesCount.trees.delete
-                    + changesCount.tree_images + changesCount.visit_images + 1;
+                    + changesCount.tree_images.add + changesCount.tree_images.delete 
+                    + changesCount.visit_images.add + changesCount.visit_images.delete + 1;
     let count = 0;
     try {
         const response = await Utils.syncLogs();
@@ -43,7 +44,7 @@ export const uploadLocalData = async (setProgress: React.Dispatch<React.SetState
     }
     setProgress((count/total) * 0.9);
 
-    count = changesCount.tree_images
+    count = changesCount.tree_images.add + changesCount.tree_images.delete 
     try {
         if (count !== 0) await uploadTreeSnapshotsData();
     } catch (error: any) {
@@ -55,11 +56,10 @@ export const uploadLocalData = async (setProgress: React.Dispatch<React.SetState
         };
         await Utils.logException(JSON.stringify(errorLog));
     }
-    count = changesCount.tree_images
     let progress = (count/total) * 0.9;
     setProgress(prev => prev + progress);
 
-    count = changesCount.visit_images
+    count = changesCount.visit_images.add + changesCount.visit_images.delete
     try {
         if (count !== 0) await uploadVisitImagesData();
     } catch (error: any) {

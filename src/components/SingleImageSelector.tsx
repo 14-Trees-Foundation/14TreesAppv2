@@ -1,7 +1,9 @@
 import { Image } from "../model/common";
-import { View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import ImageOptions from "./ImageOptionsModal";
-import { Card, Icon, IconButton } from "react-native-paper";
+import { Card, IconButton } from "react-native-paper";
+import { useState } from "react";
+import ImageView from "react-native-image-viewing";
 
 interface ImageSelectorInputProps {
     label: string
@@ -10,7 +12,7 @@ interface ImageSelectorInputProps {
 }
 
 export const ImageSelector: React.FC<ImageSelectorInputProps> = ({ label, imageUri, onChange }) => {
-
+    const [isVisible, setIsVisible] = useState(false);
     const handleChange = (data?: Image) => {
         if (data) onChange(data);
     }
@@ -21,10 +23,25 @@ export const ImageSelector: React.FC<ImageSelectorInputProps> = ({ label, imageU
 
     return (
         <View>
-            { imageUri && <Card>
-                <Card.Title title={label} right={(props) => <IconButton icon='close' size={props.size} onPress={handleRemoveImage}/>} />
-                <Card.Cover source={{ uri: imageUri }} />
-            </Card> }
+            { imageUri && 
+            <View>
+                <Card>
+                    <Card.Title
+                        title={label}
+                        right={(props) => <IconButton icon='close' size={props.size} onPress={handleRemoveImage}/>}
+                    />
+                    <TouchableOpacity onPress={() => setIsVisible(true)} activeOpacity={0.9}>
+                        <Card.Cover source={{ uri: imageUri }}/>
+                    </TouchableOpacity>
+                </Card> 
+                <ImageView
+                    images={[{ uri: imageUri }]}
+                    imageIndex={0}
+                    visible={isVisible}
+                    onRequestClose={() => setIsVisible(false)}
+                />
+            </View>
+            }
             { !imageUri && <ImageOptions buttonLabel={'Add ' + label} onChange={handleChange}/> }
         </View>
     );

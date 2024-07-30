@@ -3,8 +3,8 @@ import { ApiClient } from "../api/api";
 import { DaoClient } from "../db/dao";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Constants, Utils } from "../Utils";
-import { Image } from "../../model/common";
 import { ToastAndroid } from "react-native";
+import { VisitImage } from "../../model/visit_image";
 
 export const fetchAndStoreVisitImages = async () => {
     // fetch data from the backend
@@ -29,7 +29,7 @@ export const fetchAndStoreVisitImages = async () => {
 
             // delete visit images in local db
             for (const visitImageId of response.deleted_visit_image_ids) {
-                await daoClient.visitImages.deleteLiveVisitFromLocalDb(visitImageId);
+                await daoClient.visitImages.deleteLiveVisitImageFromLocalDb(visitImageId);
             }
 
             visitImageIds = []
@@ -53,28 +53,50 @@ export const fetchAndStoreVisitImages = async () => {
 }
 
 export const uploadVisitImagesData = async () => {
-    const apiClient = new ApiClient();
+    
     const daoClient = await DaoClient.authenticate();
     const visitImages = await daoClient.visitImages.getVisitImages(false);
+    const deletedImages = visitImages.filter(image => image.is_deleted === 1)
+    const newImages = visitImages.filter(image => image.is_deleted === 0)
+
+    await deleteImages(daoClient, deletedImages);
+    await uploadNewImages(daoClient, newImages);
+
+    await daoClient.visitImages.deleteUploadedImages();
+}
+
+const deleteImages = async (daoClient: DaoClient, images: VisitImage[]) => {
+    const apiClient = new ApiClient();
+    let imageIds: number[] = [] 
+    images.forEach(image => { if (image.id) imageIds.push(image.id) });
+
+    await apiClient.visitImages.deleteVisitImages(imageIds);
+
+    for (const image of images) {
+        await daoClient.visitImages.markImageUploaded(image.local_id)
+    }
+}
+
+const uploadNewImages = async (daoClient: DaoClient, visitImages: VisitImage[]) => {
+    const apiClient = new ApiClient();
 
     let visitIds: number[] = [];
-    let visitImagesMap: Record<number, Image[]> = {};
+    let visitImagesMap: Record<number, VisitImage[]> = {};
     for (let visitImage of visitImages) {
         if (Object.hasOwn(visitImagesMap, visitImage.visit_id)) {
-            visitImagesMap[visitImage.visit_id].push({ name: visitImage.name, data: visitImage.data });
+            visitImagesMap[visitImage.visit_id].push(visitImage);
         } else {
             visitIds.push(visitImage.visit_id);
-            visitImagesMap[visitImage.visit_id] = [{ name: visitImage.name, data: visitImage.data }]
+            visitImagesMap[visitImage.visit_id] = [visitImage]
         }
     }
 
     for (const visitId of visitIds) {
         const images = visitImagesMap[visitId];
         await apiClient.visitImages.createVisitImages(visitId, images)
-    }
 
-    for (const image of visitImages) {
-        await daoClient.visitImages.markImageUploaded(image.local_id)
+        for (const image of images) {
+            await daoClient.visitImages.markImageUploaded(image.local_id)
+        }
     }
-    await daoClient.visitImages.deleteUploadedImages();
 }

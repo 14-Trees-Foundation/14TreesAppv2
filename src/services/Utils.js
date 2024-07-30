@@ -282,11 +282,13 @@ export class Utils {
     static async createLocalTablesIfNeeded() {
         // await this.localdb.deleteTables();
         // await AsyncStorage.multiRemove([
-        //     Constants.lastHashKey,
-        //     Constants.lastHashForShifts,
-        //     Constants.adminIdKey,
-        //     Constants.appRootTagKey,
-        //     Constants.syncDateKey,
+        //     // Constants.lastHashKey,
+        //     // Constants.lastHashForShifts,
+        //     // Constants.adminIdKey,
+        //     // Constants.appRootTagKey,
+        //     // Constants.syncDateKey,
+        //     // Constants.lastVisitImagesFetchedAt
+        //     // Constants.lastTreeSnapshotsFetchedAt
         // ])
         const daoClient = await DaoClient.authenticate();
         await daoClient.trees.createTable();
@@ -1522,4 +1524,8 @@ export const getHumanReadableDate = (dateStr) => {
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) return '';
     return moment(dateStr).format('MMMM D, YYYY');
+}
+
+export const getReadableProgress = (progress) => {
+    return Math.round(progress * 100).toString() + '%';
 }

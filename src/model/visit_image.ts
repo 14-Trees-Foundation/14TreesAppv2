@@ -7,6 +7,7 @@ export type VisitImage = {
     data: string,
     image_url: string | null,
     is_uploaded: 0 | 1,
+    is_deleted: 0 | 1,
     created_at: string
 }
 

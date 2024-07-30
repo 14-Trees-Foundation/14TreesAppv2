@@ -1,14 +1,10 @@
 import { useEffect, useState } from "react";
 import { BackHandler, StyleSheet, ToastAndroid, View } from "react-native";
 import { Button, Chip, Icon, ProgressBar, Text } from "react-native-paper";
-import { Utils, getTimeDiffString } from "../services/Utils";
+import { Utils, getReadableProgress, getTimeDiffString } from "../services/Utils";
 import { DaoClient } from "../services/db/dao";
 import { fetchDeltaChanges, uploadLocalData } from "../services/sync/sync";
 import { Loading } from "../components/Loading";
-
-const getReadableProgress = (progress: number) => {
-    return Math.round(progress * 100).toString() + '%';
-}
 
 const Sync: React.FC<{navigation: any}> = ({ navigation }) => {
 
@@ -18,8 +14,8 @@ const Sync: React.FC<{navigation: any}> = ({ navigation }) => {
     const [syncType, setSyncType] = useState<'upload' | 'fetch'>('upload');
     const [lastSyncDate, setLastSyncDate] = useState('');
     const [treeChanges, setTreeChanges] = useState<any>(null);
-    const [treeImagesCount, setTreeImagesCount] = useState(0);
-    const [visitImagesCount, setVisitImagesCount] = useState(0);
+    const [treeImagesCount, setTreeImagesCount] = useState<any>(null);
+    const [visitImagesCount, setVisitImagesCount] = useState<any>(null);
 
     useEffect(() => {
         const backAction = () => {
@@ -50,8 +46,14 @@ const Sync: React.FC<{navigation: any}> = ({ navigation }) => {
                 edit: treeChanges?.edit || 0,
                 delete: treeChanges?.delete || 0,
             },
-            tree_images: treeImagesCount,
-            visit_images: visitImagesCount,
+            tree_images: {
+                add: treeImagesCount?.add || 0,
+                delete: treeImagesCount?.delete || 0,
+            },
+            visit_images: {
+                add: visitImagesCount?.add || 0,
+                delete: visitImagesCount?.delete || 0,
+            },
         }
 
         setSyncType('upload');
@@ -111,7 +113,7 @@ const Sync: React.FC<{navigation: any}> = ({ navigation }) => {
 
     return (
         <View style={styles.screen}>
-            <Loading loading={visible}/>
+            <Loading loading={visible} text="Sync in Progress..."/>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text variant='titleMedium' style={{ color: 'black', fontWeight: 'bold', paddingRight: 8 }}>Last Synced:</Text>
                 <Chip icon='cloud-sync-outline' style={styles.chip} >
@@ -132,13 +134,15 @@ const Sync: React.FC<{navigation: any}> = ({ navigation }) => {
                 <View style={{ justifyContent: 'center', marginVertical: 5 }}>
                     <Text variant='titleMedium' style={{ color: 'black', paddingRight: 10 }}>Tree Images:</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
-                        <Chip icon={(props => getChipIcon(props, treeImagesCount === 0))} style={styles.chip} >New: {treeImagesCount}</Chip>
+                        <Chip icon={(props => getChipIcon(props, !(treeImagesCount?.add)))} style={styles.chip} >New: {treeImagesCount?.add || 0}</Chip>
+                        <Chip icon={(props => getChipIcon(props, !(treeImagesCount?.delete)))} style={styles.chip} >Deleted: {treeImagesCount?.delete || 0}</Chip>
                     </View>
                 </View>
                 <View style={{ justifyContent: 'center', marginVertical: 5 }}>
                     <Text variant='titleMedium' style={{ color: 'black', paddingRight: 10 }}>Visit Images:</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
-                        <Chip icon={(props => getChipIcon(props, visitImagesCount === 0))} style={styles.chip}>New: {visitImagesCount}</Chip>
+                        <Chip icon={(props => getChipIcon(props, !(visitImagesCount?.add)))} style={styles.chip} >New: {visitImagesCount?.add || 0}</Chip>
+                        <Chip icon={(props => getChipIcon(props, !(visitImagesCount?.delete)))} style={styles.chip} >Deleted: {visitImagesCount?.delete || 0}</Chip>
                     </View>
                 </View>
             </View>

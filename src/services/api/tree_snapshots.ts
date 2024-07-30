@@ -19,6 +19,14 @@ export class TreeSnapshotService {
         }
     }
 
+    async deleteTreeSnapshots(imageIds: number[]): Promise<void> {
+        try {
+            await this.api.post<void>(`/api/tree-snapshots/delete`, { image_ids: imageIds });
+        } catch (error: any) {
+            return handleApiError("TreeSnapshotService::deleteTreeSnapshots:", error)
+        }
+    }
+
     async fetchChanges(timestamp: string, tree_snapshot_ids: number[], offset: number): Promise<DeltaChangesResponse> {
         const url = `/api/appv2/fetchHelperData/tree-snapshots`;
         try {

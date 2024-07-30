@@ -24,6 +24,7 @@ export class TreeSnapshotsDao {
                 image_date TEXT,
                 tree_status TEXT,
                 is_uploaded INTEGER DEFAULT 0 CHECK (is_uploaded IN (0, 1)),
+                is_deleted INTEGER DEFAULT 0 CHECK (is_deleted IN (0, 1)),
                 created_at TEXT
             );`;
 
@@ -45,13 +46,13 @@ export class TreeSnapshotsDao {
         let placeHolder = ''
         let values: any[] = [];
         images.forEach(image => {
-            placeHolder += '(?, ?, ?, ?, ?, ?, 0, ?),'
+            placeHolder += '(?, ?, ?, ?, ?, ?, 0, 0, ?),'
             values.push(saplingId, userId, image.name, image.data, image.image_date, image.tree_status, now);
         })
         placeHolder = placeHolder.slice(0, -1);
 
         const query = `
-            INSERT INTO ${this.tableName} (sapling_id, user_id, name, data, image_date, tree_status, is_uploaded, created_at)
+            INSERT INTO ${this.tableName} (sapling_id, user_id, name, data, image_date, tree_status, is_uploaded, is_deleted, created_at)
             VALUES ${placeHolder};
         `
 
@@ -61,7 +62,7 @@ export class TreeSnapshotsDao {
     getTreeSnapshotsBySaplingId = async (saplingId: string, uploaded?: boolean) => {
         const [result] = await this.db.executeSql(
             `SELECT * FROM ${this.tableName}
-            WHERE sapling_id = ? ${uploaded === undefined ? '' : `AND is_uploaded = ${uploaded}`};`,
+            WHERE sapling_id = ? AND is_deleted = 0 ${uploaded === undefined ? '' : `AND is_uploaded = ${uploaded}`};`,
             [saplingId]
         )
 
@@ -74,11 +75,12 @@ export class TreeSnapshotsDao {
         return images;
     }
 
-    getTreeSnapshots = async (uploaded?: boolean) => {
-        const whereCondition = `is_uploaded = ${uploaded ? 1 : 0}`
+    getTreeSnapshots = async (uploaded?: boolean, deleted?: boolean) => {
+        const isUploaded = `is_uploaded = ${uploaded ? 1 : 0}`
+        const isDeleted = `is_deleted = ${uploaded ? 1 : 0}`
         const [result] = await this.db.executeSql(
             `SELECT * FROM ${this.tableName}
-            WHERE 1=1 ${uploaded === undefined ? '' : 'AND ' + whereCondition};`
+            WHERE 1=1 ${uploaded === undefined ? '' : 'AND ' + isUploaded} ${deleted === undefined ? '' : 'AND ' + isDeleted};`
         )
 
         let images: TreeSnapshot[] = []
@@ -121,12 +123,13 @@ export class TreeSnapshotsDao {
                     image_date,
                     tree_status,
                     is_uploaded,
+                    is_deleted,
                     created_at
                 ) VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?
                 );`,
                 [
-                    data.id, data.sapling_id, data.user_id, data.image, data.image_date, data.tree_status, 1, data.created_at
+                    data.id, data.sapling_id, data.user_id, data.image, data.image_date, data.tree_status, 1, 0, data.created_at
                 ]
             )
         } else {
@@ -140,6 +143,7 @@ export class TreeSnapshotsDao {
                     image_date = ?,
                     tree_status = ?,
                     is_uploaded = 1,
+                    is_deleted = 0,
                     created_at = ?
                 WHERE id = ?;`,
                 [
@@ -154,6 +158,35 @@ export class TreeSnapshotsDao {
             `DELETE FROM ${this.tableName} WHERE id = ?;`,
             [id]
         )
+    }
+
+    deleteTreeSnapshot = async (id: number) => {
+        const [response] = await this.db.executeSql(
+            `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
+            [id]
+        )
+
+        if (response.rows.length === 1) {
+            const existingImage = response.rows.item(0) as TreeSnapshot;
+
+            if (existingImage.image === null) {
+                // locally added image: HARD DELETE
+                await this.db.executeSql(
+                    `DELETE FROM ${this.tableName} WHERE local_id = ?;`,
+                    [id]
+                )
+            } else {
+                // Live image
+                await this.db.executeSql(
+                    `UPDATE ${this.tableName}
+                    SET
+                        is_uploaded = 0,
+                        is_deleted = 1
+                    WHERE local_id = ?;`,
+                    [id]
+                )
+            }
+        }
     }
 
     getLiveTreeSnapshotIds = async () => {
@@ -171,11 +204,21 @@ export class TreeSnapshotsDao {
 
     countTreeSnapshotImages = async (isUploaded?: boolean) => {
         const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
-        const query = `SELECT COUNT(*) as count FROM ${this.tableName}
-            WHERE ${isUploaded !== undefined ? whereCondition : "1==1"};`
+        const query = `SELECT is_deleted, COUNT(*) as count FROM ${this.tableName}
+            WHERE ${isUploaded !== undefined ? whereCondition : "1==1"} GROUP BY is_deleted;`
 
         const [results] = await this.db.executeSql(query)
-        return results.rows.item(0).count;
+        const resp = { add: 0, delete: 0 }
+        if (results.rows.item(0)) {
+            if (results.rows.item(0).is_deleted === 0) resp.add = results.rows.item(0).count;
+            else resp.delete = results.rows.item(0).count
+        }
+        if (results.rows.item(1)) {
+            if (results.rows.item(1).is_deleted === 0) resp.add = results.rows.item(1).count;
+            else resp.delete = results.rows.item(1).count
+        }
+
+        return resp;
     }
 
 };

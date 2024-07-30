@@ -10,6 +10,7 @@ export type TreeSnapshot = {
     image_date: string,
     tree_status: string,
     is_uploaded: 0 | 1,
+    is_deleted: 0 | 1,
     created_at: string
 }
 

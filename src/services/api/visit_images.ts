@@ -19,6 +19,14 @@ export class VisitImageService {
         }
     }
 
+    async deleteVisitImages(imageIds: number[]): Promise<void> {
+        try {
+            await this.api.post<void>(`/api/visit-images/delete`, { image_ids: imageIds });
+        } catch (error: any) {
+            return handleApiError("VisitImageService::deleteVisitImage:", error)
+        }
+    }
+
     async fetchChanges(timestamp: string, visit_image_ids: number[], offset: number): Promise<DeltaChangesResponse> {
         const url = `/api/appv2/fetchHelperData/visit-images`;
         try {
