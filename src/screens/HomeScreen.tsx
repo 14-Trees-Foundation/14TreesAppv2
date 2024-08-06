@@ -1,5 +1,5 @@
 import { useFocusEffect } from "@react-navigation/native";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { BackHandler, ScrollView, View } from "react-native";
 import { Button, Icon, ProgressBar, Surface, Text } from "react-native-paper";
 import { Constants, Utils, getReadableProgress, getTimeDiffString } from "../services/Utils";
@@ -9,10 +9,15 @@ import { TreeAnalytics } from "../model/tree";
 import InternetBanner from "../components/InternetInfo";
 import { fetchDeltaChanges } from "../services/sync/sync";
 import { Loading } from "../components/Loading";
+import GlobalContext from "../context/GlobalContext ";
 
 
 const Home: React.FC<{navigation: any}> = ({ navigation }) => {
   const intervalId = useRef<any>(null);
+  const { langChanged } = useContext(GlobalContext);
+  useEffect(() => {
+    console.log('langChanged inside HomeScreen: ', langChanged);
+  }, [langChanged]);
 
   const [lastSyncDate, setLastSyncDate] = useState('');
   const [userDetails, setUserDetails] = useState<any>(null);
@@ -105,7 +110,7 @@ const Home: React.FC<{navigation: any}> = ({ navigation }) => {
     if (count > 100000) {
       value = (count / 100000).toFixed(1) + 'L+';
     } else if (count > 1000) {
-      value = (count / 1000).toFixed(1) + 'k+';
+      value = (count / 1000).toFixed(0) + 'k+';
     }
 
     return value;
@@ -156,15 +161,15 @@ const Home: React.FC<{navigation: any}> = ({ navigation }) => {
             flex: 1,
             flexDirection: 'row'
           }}>
-            {card('chart-line', ' Total Trees Planted Till Date', analytics?.total_trees_planted || 120000)}
-            {card('calendar-month-outline', 'Trees Planted This Year', analytics?.trees_planted_this_year || 0)}
+            {card('chart-line', Strings.messages.TotalTrees, analytics?.total_trees_planted || 120000)}
+            {card('calendar-month-outline', Strings.messages.YearTrees, analytics?.trees_planted_this_year || 0)}
           </View>
           <View style={{
             flex: 1,
             flexDirection: 'row'
           }}>
-            {card('arm-flex-outline', 'Trees Planted This Month', analytics?.trees_planted_this_month || 0)}
-            {card('account-outline', 'Trees Planted By You!', analytics?.trees_planted_by_you || 0)}
+            {card('arm-flex-outline', Strings.messages.MonthTrees, analytics?.trees_planted_this_month || 0)}
+            {card('account-outline', Strings.messages.PersonTrees, analytics?.trees_planted_by_you || 0)}
           </View>
         </View>
         <View style={{ marginVertical: 30 }}></View>
@@ -182,14 +187,14 @@ const Home: React.FC<{navigation: any}> = ({ navigation }) => {
 
       <View style={{ position: 'absolute', bottom: 10, left: 20, right: 20 }}>
         <Text variant='bodySmall' style={{ color: 'black', alignSelf: 'center', marginBottom: 4 }}>
-          Last Synced: {lastSyncDate === '' ? 'Never' : getTimeDiffString(lastSyncDate)}
+          {Strings.messages.LastSynced} {lastSyncDate === '' ? Strings.messages.Never : getTimeDiffString(lastSyncDate)}
         </Text>
         <Button mode='elevated' style={{ backgroundColor: 'lightgreen' }} textColor="black"  onPress={() => {
           navigation.navigate(
             Strings.screenNames.getString('SyncDisplay', Strings.english),
             { data: 0 },
           )
-        }}>Sync</Button>
+        }}>{Strings.buttonLabels.SyncData}</Button>
       </View>
     </View>
   )

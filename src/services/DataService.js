@@ -38,10 +38,10 @@ axios.interceptors.response.use(function (response) {
   else {
     errorMsg = error.message;
   }
-  ToastAndroid.show(errorMsg, ToastAndroid.LONG);
-  if (requestDescriptor) {
-    requestDescriptor = ` (${requestDescriptor})`;
-    ToastAndroid.show(requestDescriptor, ToastAndroid.LONG);
+  if (error.message && error.message.includes('Network Error')) {
+    ToastAndroid.show('No internet connection. Please try later!', ToastAndroid.LONG);
+  } else {
+    ToastAndroid.show('Something went wrong. Please contact the IT Team!', ToastAndroid.LONG);
   }
   console.log(error);
   return null;

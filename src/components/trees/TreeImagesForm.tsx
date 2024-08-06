@@ -102,7 +102,7 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_sta
 
     return (
         <View style={{ height: "97%", width: '100%', flexGrow: 1 }}>
-            <Text style={treeFormStyles.plotSapling}> { 'Add Tree Images For Sapling ' + sapling_id } </Text>
+            <Text style={treeFormStyles.plotSapling}> { Strings.messages.AddTreeImages + ": " + sapling_id } </Text>
             <ScrollView
                 keyboardShouldPersistTaps='handled'
                 scrollEnabled={true}
@@ -111,14 +111,14 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_sta
 
                     <View style={{ marginTop: 15, flexGrow: 1 }}>
                         <ImagesView
-                            title='Tree Images'
+                            title={Strings.messages.TreeImages}
                             images={ images.map(item => item).reverse() }
                             onDelete={handleImageDelete}
                         />
                     </View>
                     <View style={{ marginTop: 10 }}>
                         <Checkbox.Item
-                            label="Image date different than today's date?"
+                            label={Strings.messages.ImageDate}
                             status={dateEnabled ? "checked" : 'unchecked'}
                             onPress={() => { setDateEnabled(prev => !prev) }}
                             color='#4CAF50'
@@ -142,7 +142,7 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_sta
                             ]}
                         />
                     </View>
-                    <ImageOptions onChange={handleImageChange} multiple/>
+                    <ImageOptions buttonLabel={Strings.messages.TreeImages} onChange={handleImageChange} multiple/>
 
                     <View style={CustomButtonStyles.container}>
                         <View style={CustomButtonStyles.buttonRow}>

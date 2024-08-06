@@ -19,12 +19,19 @@ import { Image } from "../model/common";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Loading } from "../components/Loading";
 import { CreateTreeSnapshotRequest } from "../model/tree_snapshot";
+import InternetBanner from "../components/InternetInfo";
+import GlobalContext from "../context/GlobalContext ";
 
 interface TreesInputProps {
     navigation: any
 }
 
 const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
+
+    const { langChanged } = useContext(GlobalContext);
+    useEffect(() => {
+        console.log('langChanged inside Trees: ', langChanged);
+    }, [langChanged]);
 
     const [stateChange, setStateChange] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -45,11 +52,11 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
 
     useFocusEffect(
         useCallback(() => {
-          setIsFormVisible(false);
-          setIsImageFormVisible(false);
-          setStateChange(prev => prev + 1);
-          return () => {
-          };
+            setIsFormVisible(false);
+            setIsImageFormVisible(false);
+            setStateChange(prev => prev + 1);
+            return () => {
+            };
         }, [])
     );
 
@@ -99,10 +106,15 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
             if (changeMode === 'add') {
                 data = JSON.parse(JSON.stringify(data)) as CreateTreeRequest;
                 try {
-                    await localClient.trees.createTree(data)
-                    ToastAndroid.show("Added Tree Locally!", ToastAndroid.SHORT)
+                    const success = await localClient.trees.createTree(data)
+                    if (success) ToastAndroid.show("Added Tree Locally!", ToastAndroid.SHORT)
+                    else {
+                        ToastAndroid.show("Tree with given sapling id already exists!", ToastAndroid.LONG)
+                        hasError = true;
+                    }
                 } catch (err: any) {
                     hasError = true;
+                    console.log(err)
                     ToastAndroid.show("Failed to add tree locally!", ToastAndroid.SHORT)
                 }
             } else {
@@ -119,9 +131,9 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
 
             const upsertImage = async (type: TreeImageType) => {
                 if (images[type]) {
-                    try{
-                        await localClient.treeImages.upsertTreeImage({ 
-                            name: images[type].name, 
+                    try {
+                        await localClient.treeImages.upsertTreeImage({
+                            name: images[type].name,
                             data: images[type].data,
                             sapling_id: data.sapling_id,
                             type: type,
@@ -175,102 +187,91 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     }
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            {!(isFormVisible || isImageFormVisible) && <View style={{ height: 'auto', alignItems: 'center', width: "96%"}}>
-                <View style={{width: '100%', flexGrow: 1, marginTop: 15}}>
-                    <Autocomplete 
-                        label={selectedPlot ? Strings.labels.SelectedPlot : Strings.labels.SelectPlot}
-                        options={plots}
-                        value={selectedPlot}
-                        onSelect={setSelectedPlot}
-                        valueGetter={(data) => data.name}
-                        keyGetter={(data) => data.id}
-                        variant="outlined"
-                        boldSelection
-                    />
-                </View>
-            </View>}
-            {!(isFormVisible || isImageFormVisible) && <View style={styles.header}>
-                <SearchBar query={searchQuery} onChange={setSearchQuery} />
-            </View>}
-            {!(isFormVisible || isImageFormVisible) && <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems: 'center'}}>
-                {trees.map((tree, index) => (
-                <View style={{ width: '95%', marginVertical: 5 }} key={index}>
-                    <TouchableOpacity style={{ width: '100%' }} activeOpacity={0.91} onPress={() => {
-                        setSelectedTree(tree);
-                        setInfoModalVisible(true);
-                    }}>
-                        <TreeCard 
-                            tree={tree}
-                            plantTypeName={plantTypes.find(plantType => plantType.id === tree.plant_type_id)?.name || ''}
-                            plotName={plots.find(plot => plot.id === tree.plot_id)?.name || ''}
+        <View style={{ flex: 1 }}>
+            <InternetBanner />
+            <SafeAreaView style={styles.safeArea}>
+                {!(isFormVisible || isImageFormVisible) && <View style={{ height: 'auto', alignItems: 'center', width: "96%" }}>
+                    <View style={{ width: '100%', flexGrow: 1, marginTop: 15 }}>
+                        <Autocomplete
+                            label={selectedPlot ? Strings.labels.SelectedPlot : Strings.labels.SelectPlot}
+                            options={plots}
+                            value={selectedPlot}
+                            onSelect={setSelectedPlot}
+                            valueGetter={(data) => data.name}
+                            keyGetter={(data) => data.id}
+                            variant="outlined"
+                            boldSelection
                         />
-                    </TouchableOpacity>
-                </View>
-                ))}
-            </ScrollView>}
-            {!(isFormVisible || isImageFormVisible) && <AddIconButton onClick={() => {
-                setIsFormVisible(true);
-                setSelectedTree(null);
-                setChangeModel('add');
-            }} />}
+                    </View>
+                </View>}
+                {!(isFormVisible || isImageFormVisible) && <View style={styles.header}>
+                    <SearchBar query={searchQuery} onChange={setSearchQuery} />
+                </View>}
+                {!(isFormVisible || isImageFormVisible) && <ScrollView style={styles.scrollView} contentContainerStyle={{ alignItems: 'center' }}>
+                    {trees.map((tree, index) => (
+                        <View style={{ width: '95%', marginVertical: 5 }} key={index}>
+                            <TouchableOpacity style={{ width: '100%' }} activeOpacity={0.91} onPress={() => {
+                                setSelectedTree(tree);
+                                setInfoModalVisible(true);
+                            }}>
+                                <TreeCard
+                                    tree={tree}
+                                    plantTypeName={plantTypes.find(plantType => plantType.id === tree.plant_type_id)?.name || ''}
+                                    plotName={plots.find(plot => plot.id === tree.plot_id)?.name || ''}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    ))}
+                </ScrollView>}
+                {!(isFormVisible || isImageFormVisible) && <AddIconButton onClick={() => {
+                    setIsFormVisible(true);
+                    setSelectedTree(null);
+                    setChangeModel('add');
+                }} />}
 
-            {isFormVisible && <TreeForm
-                changeMode={changeMode}
-                onCancel={() => setIsFormVisible(false)}
-                onSubmit={handleSave}
-                tree={selectedTree}
-                defaultPlot={selectedPlot}
-            />}
+                {isFormVisible && <TreeForm
+                    changeMode={changeMode}
+                    onCancel={() => setIsFormVisible(false)}
+                    onSubmit={handleSave}
+                    tree={selectedTree}
+                    defaultPlot={selectedPlot}
+                />}
 
-            {isImageFormVisible && selectedTree && <TreeImageForm
-                onCancel={() => setIsImageFormVisible(false)}
-                onSubmit={handleImagesSave}
-                sapling_id={selectedTree?.sapling_id}
-                tree_status={selectedTree?.tree_status}
-            />}
+                {isImageFormVisible && selectedTree && <TreeImageForm
+                    onCancel={() => setIsImageFormVisible(false)}
+                    onSubmit={handleImagesSave}
+                    sapling_id={selectedTree?.sapling_id}
+                    tree_status={selectedTree?.tree_status}
+                />}
 
-            {selectedTree && <TreeInfo
-                isVisible={isInfoModalVisible}
-                plantType={ plantTypes.find(plantType => plantType.id === selectedTree.plant_type_id)?.name || '' }
-                plot={ plots.find(plot => plot.id === selectedTree.plot_id)?.name || '' }
-                onClose={() => { setInfoModalVisible(false) }}
-                onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
-                onImageAdd={() => { setIsImageFormVisible(true); }}
-                onDelete={handleDelete}
-                tree={selectedTree}
-            />}
+                {selectedTree && <TreeInfo
+                    isVisible={isInfoModalVisible}
+                    plantType={plantTypes.find(plantType => plantType.id === selectedTree.plant_type_id)?.name || ''}
+                    plot={plots.find(plot => plot.id === selectedTree.plot_id)?.name || ''}
+                    onClose={() => { setInfoModalVisible(false) }}
+                    onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
+                    onImageAdd={() => { setIsImageFormVisible(true); }}
+                    onDelete={handleDelete}
+                    tree={selectedTree}
+                />}
 
-            <Loading loading={loading}/>
-        </SafeAreaView>
+                <Loading loading={loading} />
+            </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
+        width: '100%',
         alignItems: 'center'
     },
     header: {
         marginVertical: 10,
-        flexDirection: 'row',
         alignItems: 'center',
         height: 50,
         width: '95%'
-    },
-    searchInput: {
-        flex: 1,
-        width: '80%',
-        borderWidth: 1,
-        borderColor: 'black',
-        borderRadius: 5,
-        marginRight: 10,
-        color: 'black'
-    },
-    buttonAdd: {
-        width: '20%',
-        height: '100%',
-        justifyContent: 'center'
     },
     scrollView: {
         flex: 1,

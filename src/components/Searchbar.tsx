@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Searchbar } from 'react-native-paper';
+import { Strings } from '../services/Strings';
 
 interface SearchBarInputProps {
   query?: string,
@@ -20,7 +21,7 @@ const SearchBar: React.FC<SearchBarInputProps> = ({ query, onChange }) => {
 
   return (
     <Searchbar
-      placeholder="Search"
+      placeholder={Strings.buttonLabels.Search}
       onChangeText={handleChange}
       value={searchQuery}
       style={{

@@ -112,7 +112,7 @@ const VisitForm: React.FC<VisitFormInputProps> = ({ visit, changeMode, onCancel,
 
     return (
         <View style={{ height: "97%", width: '100%', flexGrow: 1 }}>
-            <Text style={treeFormStyles.plotSapling}> { changeMode === 'add' ? 'Add Visit' : 'Edit Visit' } </Text>
+            <Text style={treeFormStyles.plotSapling}> { changeMode === 'add' ? Strings.messages.AddVisit : Strings.messages.EditVisit } </Text>
             <ScrollView
                 keyboardShouldPersistTaps='handled'
                 scrollEnabled={true}
@@ -150,12 +150,12 @@ const VisitForm: React.FC<VisitFormInputProps> = ({ visit, changeMode, onCancel,
 
                     {changeMode !== 'add' && <View style={{ marginTop: 15, flexGrow: 1 }}>
                         <ImagesView
-                            title='Visit Images'
+                            title={Strings.messages.VisitImages}
                             images={images.map(item => item).reverse()}
                             onDelete={handleImageDelete}
                         />
                     </View>}
-                    {changeMode !== 'add' && <ImageOptions onChange={handleImageChange} multiple />}
+                    {changeMode !== 'add' && <ImageOptions buttonLabel={Strings.buttonLabels.AddVisitImages} onChange={handleImageChange} multiple />}
 
                     <View style={CustomButtonStyles.container}>
                         <View style={CustomButtonStyles.buttonRow}>

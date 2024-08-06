@@ -11,6 +11,7 @@ import { CreateUserRequest, User } from "../model/user";
 import { useFocusEffect } from "@react-navigation/native";
 import { AddIconButton } from "../components/FABplusIcon";
 import SearchBar from "../components/Searchbar";
+import InternetBanner from "../components/InternetInfo";
 
 interface UsersInputProps {
     navigation: any
@@ -18,7 +19,10 @@ interface UsersInputProps {
 
 const Users: React.FC<UsersInputProps> = ({ navigation }) => {
 
-    const { lightTheme } = useContext(GlobalContext);
+    const { langChanged } = useContext(GlobalContext);
+    useEffect(() => {
+        console.log('langChanged inside Users: ', langChanged);
+    }, [langChanged]);
     const [stateChange, setStateChange] = useState(0);
     const [isFormVisible, setIsFormVisible] = useState(false);
     const [isInfoModalVisible, setInfoModalVisible] = useState(false);
@@ -91,74 +95,63 @@ const Users: React.FC<UsersInputProps> = ({ navigation }) => {
     }
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            {!isFormVisible && <View style={styles.header}>
-                <SearchBar query={searchQuery} onChange={setSearchQuery}/>
-            </View>}
-            {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems: 'center'}}>
-                {users.map((user, index) => (
-                    <View style={{ width: '95%' }} key={index}>
-                        <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.9} key={index} onPress={() => {
-                            setSelectedUser(user);
-                            setInfoModalVisible(true);
-                        }}>
-                            <UserCard
-                                user={user}
-                            />
-                        </TouchableOpacity>
-                    </View>
-                ))}
-            </ScrollView>}
-            {/* {!isFormVisible && <AddIconButton onClick={() => {
+        <View style={{ flex: 1 }}>
+            <InternetBanner />
+            <View style={styles.safeArea}>
+                {!isFormVisible && <View style={styles.header}>
+                    <SearchBar query={searchQuery} onChange={setSearchQuery} />
+                </View>}
+                {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{ alignItems: 'center' }}>
+                    {users.map((user, index) => (
+                        <View style={{ width: '95%' }} key={index}>
+                            <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.9} key={index} onPress={() => {
+                                setSelectedUser(user);
+                                setInfoModalVisible(true);
+                            }}>
+                                <UserCard
+                                    user={user}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    ))}
+                </ScrollView>}
+                {/* {!isFormVisible && <AddIconButton onClick={() => {
                 setIsFormVisible(true);
                 setSelectedUser(null);
                 setChangeModel('add');
             }} />} */}
 
-            {isFormVisible && <UserForm
-                changeMode={changeMode}
-                onCancel={() => setIsFormVisible(false)}
-                onSubmit={handleSave}
-                user={selectedUser}
-            />}
+                {isFormVisible && <UserForm
+                    changeMode={changeMode}
+                    onCancel={() => setIsFormVisible(false)}
+                    onSubmit={handleSave}
+                    user={selectedUser}
+                />}
 
-            {selectedUser && <UserInfo
-                isVisible={isInfoModalVisible}
-                onClose={() => { setInfoModalVisible(false) }}
-                onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
-                onDelete={handleDelete}
-                user={selectedUser}
-            />}
-        </SafeAreaView>
+                {selectedUser && <UserInfo
+                    isVisible={isInfoModalVisible}
+                    onClose={() => { setInfoModalVisible(false) }}
+                    onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
+                    onDelete={handleDelete}
+                    user={selectedUser}
+                />}
+            </View>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
+        width: '100%',
         alignItems: 'center'
     },
     header: {
-        flexDirection: 'row',
         alignItems: 'center',
         marginTop: 15,
         marginBottom: 10,
         height: 50,
         width: '95%'
-    },
-    searchInput: {
-        flex: 1,
-        width: '80%',
-        borderWidth: 1,
-        borderColor: 'black',
-        borderRadius: 5,
-        marginRight: 10,
-        color: 'black'
-    },
-    buttonAdd: {
-        width: '20%',
-        height: '100%',
-        justifyContent: 'center'
     },
     scrollView: {
         flex: 1,

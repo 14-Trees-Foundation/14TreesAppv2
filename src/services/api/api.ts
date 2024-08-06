@@ -42,11 +42,7 @@ axios.interceptors.response.use(function (response) {
     else {
       errorMsg = error.message;
     }
-    ToastAndroid.show(errorMsg, ToastAndroid.LONG);
-    if (requestDescriptor) {
-      requestDescriptor = ` (${requestDescriptor})`;
-      ToastAndroid.show(requestDescriptor, ToastAndroid.LONG);
-    }
+    ToastAndroid.show('Something went wrong. Please contact the IT Team!', ToastAndroid.LONG);
     console.log(error);
     return null;
   });

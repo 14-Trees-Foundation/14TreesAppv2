@@ -1495,7 +1495,7 @@ export const getTimeDiffString = (time) => {
     const year = 365 * day;
     
     if (diffInSeconds < minute) {
-        return diffInSeconds === 1 ? "1 second ago" : `${diffInSeconds} seconds ago`;
+        return 'few seconds ago';
     } else if (diffInSeconds < hour) {
         const minutes = Math.floor(diffInSeconds / minute);
         return minutes === 1 ? "1 min ago" : `${minutes} min ago`;

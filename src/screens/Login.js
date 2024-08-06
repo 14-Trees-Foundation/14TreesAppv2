@@ -8,6 +8,7 @@ import { Utils, Constants } from '../services/Utils';
 import { CustomButtonStyles, commonStyles, loginStyles } from "../services/Styles";
 import GlobalContext from '../context/GlobalContext ';
 import { Button, HelperText, Text, TextInput } from 'react-native-paper';
+import InternetBanner from '../components/InternetInfo';
 
 const LoginScreen = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -79,7 +80,28 @@ const LoginScreen = ({ navigation }) => {
       };
 
       console.log('Sending user data to server.', userDataPayload);
-      const isSignedIn = await DataService.loginUser(userDataPayload);
+      let isSignedIn = null;
+      try {
+        isSignedIn = await DataService.loginUser(userDataPayload);
+      } catch(error) {
+        Alert.alert(Strings.alertMessages.LoginFailed,
+          [
+            {
+              onPress: () => {
+                setPhoneNumber('');
+                setPinNumber('');
+              },
+            },
+          ]);
+
+        const stackTrace = error.stack;
+        const errorLog = {
+          msg: "happened while trying to store userId during login",
+          error: JSON.stringify(error),
+          stackTrace: stackTrace
+        }
+        await Utils.logException(JSON.stringify(errorLog));
+      }
       if (!isSignedIn) {
         stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
         return false;
@@ -204,6 +226,7 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={loginStyles.outerContainer}>
+      <InternetBanner/>
       <View style={loginStyles.inputContainer}>
         <View style={{ marginVertical: 10}}>
           <View style={{ marginVertical: 5, justifyContent: 'center', alignItems: 'center'}}>

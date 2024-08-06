@@ -10,6 +10,7 @@ import { CreateSiteRequest, Site } from "../model/sites";
 import { TouchableOpacity } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import SearchBar from "../components/Searchbar";
+import InternetBanner from "../components/InternetInfo";
 
 
 interface SitesInputProps {
@@ -17,9 +18,12 @@ interface SitesInputProps {
 }
 
 
-const Sites: React.FC<SitesInputProps> = ({ navigation })  => {
+const Sites: React.FC<SitesInputProps> = ({ navigation }) => {
 
-    const { lightTheme } = useContext(GlobalContext);
+    const { langChanged } = useContext(GlobalContext);
+    useEffect(() => {
+        console.log('langChanged inside Sites: ', langChanged);
+    }, [langChanged]);
     const [stateChange, setStateChange] = useState(0);
     const [isFormVisible, setIsFormVisible] = useState(false);
     const [isInfoModalVisible, setInfoModalVisible] = useState(false);
@@ -31,13 +35,12 @@ const Sites: React.FC<SitesInputProps> = ({ navigation })  => {
     let daoClient: DaoClient;
     DaoClient.authenticate().then((client) => { daoClient = client; });
 
-   
     useFocusEffect(
         useCallback(() => {
-          setIsFormVisible(false);
-          setStateChange(prev => prev + 1);
-          return () => {
-          };
+            setIsFormVisible(false);
+            setStateChange(prev => prev + 1);
+            return () => {
+            };
         }, [])
     );
 
@@ -67,8 +70,8 @@ const Sites: React.FC<SitesInputProps> = ({ navigation })  => {
         }, 1000)
     }, [searchQuery, stateChange])
 
-    const handleSave = (data: Site| CreateSiteRequest) => {
-        setTimeout(async() => {
+    const handleSave = (data: Site | CreateSiteRequest) => {
+        setTimeout(async () => {
             if (changeMode === 'add') {
                 let request = JSON.parse(JSON.stringify(data)) as CreateSiteRequest;
                 await daoClient.sites.createSite(request)
@@ -82,52 +85,55 @@ const Sites: React.FC<SitesInputProps> = ({ navigation })  => {
 
     const handleDelete = () => {
         if (selectedSite) {
-            setTimeout(async() => {
+            setTimeout(async () => {
                 await daoClient.sites.deleteSite(selectedSite.local_id);
             }, 1000)
         }
     }
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            {!isFormVisible && <View style={styles.header}>
-                <SearchBar query={searchQuery} onChange={setSearchQuery}/>
-            </View>}
-            {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems: 'center'}}>
-                {sites.map((site, index) => (
-                    <View style={{ width: '95%' }} key={index}>
-                        <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.9} key={index} onPress={() => {
-                            setSelectedSite(site);
-                            setInfoModalVisible(true);
-                        }}>
-                            <SiteCard
-                                site={site}
-                            />
-                        </TouchableOpacity>
-                    </View>
-                ))}
-            </ScrollView>}
-            {/* {!isFormVisible && <AddIconButton onClick={() => {
+        <View style={{ flex: 1 }}>
+            <InternetBanner />
+            <SafeAreaView style={styles.safeArea}>
+                {!isFormVisible && <View style={styles.header}>
+                    <SearchBar query={searchQuery} onChange={setSearchQuery} />
+                </View>}
+                {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{ alignItems: 'center' }}>
+                    {sites.map((site, index) => (
+                        <View style={{ width: '95%' }} key={index}>
+                            <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.9} key={index} onPress={() => {
+                                setSelectedSite(site);
+                                setInfoModalVisible(true);
+                            }}>
+                                <SiteCard
+                                    site={site}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    ))}
+                </ScrollView>}
+                {/* {!isFormVisible && <AddIconButton onClick={() => {
                 setIsFormVisible(true);
                 setSelectedVisit(null);
                 setChangeModel('add');
             }} />} */}
 
-            {isFormVisible && <SiteForm
-                changeMode={changeMode}
-                onCancel={() => setIsFormVisible(false)}
-                onSubmit={handleSave}
-                site={selectedSite}
-            />}
+                {isFormVisible && <SiteForm
+                    changeMode={changeMode}
+                    onCancel={() => setIsFormVisible(false)}
+                    onSubmit={handleSave}
+                    site={selectedSite}
+                />}
 
-            {selectedSite && <SiteInfo
-                isVisible={isInfoModalVisible}
-                onClose={() => { setInfoModalVisible(false) }}
-                onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
-                onDelete={handleDelete}
-                site={selectedSite}
-            />}
-        </SafeAreaView>
+                {selectedSite && <SiteInfo
+                    isVisible={isInfoModalVisible}
+                    onClose={() => { setInfoModalVisible(false) }}
+                    onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
+                    onDelete={handleDelete}
+                    site={selectedSite}
+                />}
+            </SafeAreaView>
+        </View>
     );
 };
 
@@ -137,26 +143,11 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     header: {
-        flexDirection: 'row',
         alignItems: 'center',
         marginTop: 15,
         marginBottom: 10,
         height: 50,
         width: '95%'
-    },
-    searchInput: {
-        flex: 1,
-        width: '80%',
-        borderWidth: 1,
-        borderColor: 'black',
-        borderRadius: 5,
-        marginRight: 10,
-        color: 'black'
-    },
-    buttonAdd: {
-        width: '20%',
-        height: '100%',
-        justifyContent: 'center'
     },
     scrollView: {
         flex: 1,

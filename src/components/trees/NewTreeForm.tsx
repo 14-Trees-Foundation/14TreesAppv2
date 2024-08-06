@@ -264,7 +264,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
     return (
         <View style={{ height: "98%" }}>
-            <Text style={treeFormStyles.plotSapling}> {changeMode === 'add' ? 'Add Tree' : 'Edit Sapling: ' + saplingId} </Text>
+            <Text style={treeFormStyles.plotSapling}> {changeMode === 'add' ? Strings.messages.AddTree : Strings.messages.EditTree + ': ' + saplingId} </Text>
             <ScrollView
                 keyboardShouldPersistTaps='handled'
                 scrollEnabled={true}
@@ -333,7 +333,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
                     <View style={{ width: '100%', marginTop: 10 }}>
                         <ImageSelector
-                            label='Tree Image'
+                            label={Strings.buttonLabels.TreeImage}
                             onChange={handleImageChange}
                             imageUri={imageUri ? imageUri : undefined}
                         />
@@ -342,7 +342,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
                     <View style={{ marginTop: 10 }}>
                         <Checkbox.Item
-                            label="Add Visitor Details?"
+                            label={Strings.messages.AddVisitorDetails}
                             status={visitEnabled ? "checked" : 'unchecked'}
                             onPress={() => { setVisitEnabled(prev => !prev) }}
                             color='#4CAF50'
@@ -378,7 +378,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
                         <View style={{ width: '100%', marginTop: 10 }}>
                             <ImageSelector
-                                label='User Tree Image'
+                                label={Strings.buttonLabels.UserTreeImage}
                                 onChange={handleUserTreeImageChange}
                                 imageUri={userTreeImageUri ? userTreeImageUri : undefined}
                             />
@@ -386,7 +386,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
                         <View style={{ width: '100%', marginTop: 10 }}>
                             <ImageSelector
-                                label='User with Card'
+                                label={Strings.buttonLabels.UserCardImage}
                                 onChange={handleUserCardImageChange}
                                 imageUri={userCardImageUri ? userCardImageUri : undefined}
                             />

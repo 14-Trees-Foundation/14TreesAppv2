@@ -98,13 +98,13 @@ export class TreesDao {
 
     createTree = async (data: CreateTreeRequest) => {
         const query = `
-            INSERT INTO ${this.tableName}
+            INSERT OR IGNORE INTO ${this.tableName}
             (sapling_id, plant_type_id, plot_id, location, tree_status, planted_by, assigned_to, assigned_at, visit_id , change_type, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'add', ?, ?)
         `
 
         const timeStamp = new Date().toISOString();
-        await this.db.executeSql(query, [
+        const [resp] = await this.db.executeSql(query, [
             data.sapling_id, 
             data.plant_type_id,
             data.plot_id,
@@ -117,6 +117,8 @@ export class TreesDao {
             timeStamp,
             timeStamp
         ]);
+        
+        return resp.rowsAffected > 0;
     }
 
     updateTree = async (data: Tree) => {

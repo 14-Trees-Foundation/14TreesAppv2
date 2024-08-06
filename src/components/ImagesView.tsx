@@ -26,7 +26,7 @@ const ImagesView: React.FC<ImagesViewInputProps> = ({ title, images, onDelete })
             {images.map((image, index) => (
             <TouchableOpacity key={index} onPress={() => handleImageClick(index)} activeOpacity={0.9}>
               <Card style={styles.card}>
-                <Card.Cover source={{ uri: typeof image === 'string' ? image : image.uri }} style={styles.cardCover} />
+                <Card.Cover source={{ uri: typeof image === 'string' ? image : image.uri }} defaultSource={require('../../assets/placeholder.png')} style={styles.cardCover} />
                 { onDelete !== undefined && typeof image !== 'string' && 
                   <IconButton
                     icon="close"

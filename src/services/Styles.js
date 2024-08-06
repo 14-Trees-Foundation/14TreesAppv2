@@ -899,10 +899,10 @@ export const loginStyles = StyleSheet.create({
   outerContainer: { 
     backgroundColor: 'white', 
     height: '100%', 
-    paddingTop: 40,
   },
   inputContainer: {
-    marginVertical: 8,
+    marginTop: 48,
+    marginBottom: 8,
     marginHorizontal: 10,
     borderRadius: 10,
     borderColor: '#ccc',

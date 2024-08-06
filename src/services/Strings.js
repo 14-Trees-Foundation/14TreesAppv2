@@ -129,6 +129,35 @@ export class Strings {
             // users
             NewUsers: "New Users",
 
+            // Analytics
+            TotalTrees: 'Total Trees Planted Till Date',
+            YearTrees: 'Trees Planted This Year',
+            MonthTrees: 'Trees Planted This Month',
+            PersonTrees: 'Trees Planted By You!',
+
+            // Sync
+            LocalChanges: 'Local Changes',
+            New: 'New',
+            Updated: 'Updated',
+            Deleted: 'Deleted',
+            VisitImages: 'Visit Images',
+            TreeImages: 'Tree Images',
+            Completed: 'Completed',
+
+            UploadingLocal: 'Uploading Local Changes!',
+            FetchingChanges: 'Fetching New Changes from Server!',
+
+            // Visits
+            AddVisit: 'Add Visit',
+            EditVisit: 'Edit Visit',
+
+            // Trees
+            AddVisitorDetails: 'Add Visitor Details?',
+            AddTree: 'Add Tree',
+            EditTree: 'Edit Tree',
+            AddTreeImages: 'Add Tree Images For Sapling',
+            TreeImages: 'Tree Images',
+            ImageDate: "Image date different than today's date?",
         },
         "mr": {
             SignIn: "साइन इन करा",
@@ -192,6 +221,36 @@ export class Strings {
 
             // users
             NewUsers: "नवीन वापरकर्ते",
+
+            // Analytics
+            TotalTrees: 'आजपर्यंत लावलेली एकूण झाडे',
+            YearTrees: 'यावर्षी लावलेली झाडे',
+            MonthTrees: 'या महिन्यात लावलेली झाडे',
+            PersonTrees: 'तुम्ही लावलेली झाडे!',
+
+            // Sync
+            LocalChanges: 'स्थानिक बदल',
+            New: 'नवीन',
+            Updated: 'अपडेट केले',
+            Deleted: 'हटवले',
+            VisitImages: 'प्रतिमांना भेट द्या',
+            TreeImages: 'वृक्ष प्रतिमा',
+            Completed: 'पूर्ण झाले',
+
+            UploadingLocal: 'स्थानिक बदल अपलोड करत आहे!',
+            FetchingChanges: 'सर्व्हरवरून नवीन बदल आणत आहे!',
+
+            // Visits
+            AddVisit: 'भेट जोडा',
+            EditVisit: 'भेट संपादित करा',
+
+            // Trees
+            AddVisitorDetails: 'अभ्यागत तपशील जोडायचे?',
+            AddTree: 'झाड जोडा',
+            EditTree: 'झाड संपादित करा',
+            AddTreeImages: 'रोपट्यासाठी वृक्ष प्रतिमा जोडा',
+            TreeImages: 'वृक्ष प्रतिमा',
+            ImageDate: "चित्राची तारीख आजच्या तारखेपेक्षा वेगळी आहे का?",
         },
     });
     static alertMessages = new LocalizedStrings({
@@ -439,6 +498,14 @@ export class Strings {
 
             // Users
             AddUser: "Add User",
+
+            // Visits
+            AddVisitImages: 'Add Visit Images',
+
+            // Trees
+            TreeImage: 'Tree Image',
+            UserTreeImage: 'User Tree Image',
+            UserCardImage: 'User Card Image',
         },
         "mr": {
             // home
@@ -492,6 +559,14 @@ export class Strings {
 
             // Users
             AddUser: "वापरकर्ता जोडा",
+
+            // Visits
+            AddVisitImages: 'भेट प्रतिमा जोडा',
+
+            // Trees
+            TreeImage: 'झाडाची प्रतिमा',
+            UserTreeImage: 'वापरकर्ता वृक्ष प्रतिमा',
+            UserCardImage: 'वापरकर्ता कार्ड प्रतिमा',
         }
     })
     static labels = new LocalizedStrings({

@@ -12,6 +12,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { AddIconButton } from "../components/FABplusIcon";
 import SearchBar from "../components/Searchbar";
 import { Image } from "../model/common";
+import InternetBanner from "../components/InternetInfo";
 
 interface VisitsInputProps {
     navigation: any
@@ -19,7 +20,10 @@ interface VisitsInputProps {
 
 const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
 
-    const { lightTheme } = useContext(GlobalContext);
+    const { langChanged } = useContext(GlobalContext);
+    useEffect(() => {
+        console.log('langChanged inside Visits: ', langChanged);
+    }, [langChanged]);
     const [stateChange, setStateChange] = useState(0);
     const [isFormVisible, setIsFormVisible] = useState(false);
     const [isInfoModalVisible, setInfoModalVisible] = useState(false);
@@ -33,10 +37,10 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
 
     useFocusEffect(
         useCallback(() => {
-          setIsFormVisible(false);
-          setStateChange(prev => prev + 1);
-          return () => {
-          };
+            setIsFormVisible(false);
+            setStateChange(prev => prev + 1);
+            return () => {
+            };
         }, [])
     );
 
@@ -97,74 +101,63 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
     }
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            {!isFormVisible && <View style={styles.header}>
-                <SearchBar query={searchQuery} onChange={setSearchQuery}/>
-            </View>}
-            {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems: 'center'}}>
-                {visits.map((visit, index) => (
-                    <View style={{ width: '95%' }} key={index}>
-                        <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.9} key={index} onPress={() => {
-                            setSelectedVisit(visit);
-                            setInfoModalVisible(true);
-                        }}>
-                            <VisitCard
-                                visit={visit}
-                            />
-                        </TouchableOpacity>
-                    </View>
-                ))}
-            </ScrollView>}
-            {/* {!isFormVisible && <AddIconButton onClick={() => {
+        <View style={{ flex: 1 }}>
+            <InternetBanner />
+            <View style={styles.safeArea}>
+                {!isFormVisible && <View style={styles.header}>
+                    <SearchBar query={searchQuery} onChange={setSearchQuery} />
+                </View>}
+                {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{ alignItems: 'center' }}>
+                    {visits.map((visit, index) => (
+                        <View style={{ width: '95%' }} key={index}>
+                            <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.9} key={index} onPress={() => {
+                                setSelectedVisit(visit);
+                                setInfoModalVisible(true);
+                            }}>
+                                <VisitCard
+                                    visit={visit}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    ))}
+                </ScrollView>}
+                {/* {!isFormVisible && <AddIconButton onClick={() => {
                 setIsFormVisible(true);
                 setSelectedVisit(null);
                 setChangeModel('add');
             }} />} */}
 
-            {isFormVisible && <VisitForm
-                changeMode={changeMode}
-                onCancel={() => setIsFormVisible(false)}
-                onSubmit={handleSave}
-                visit={selectedVisit}
-            />}
+                {isFormVisible && <VisitForm
+                    changeMode={changeMode}
+                    onCancel={() => setIsFormVisible(false)}
+                    onSubmit={handleSave}
+                    visit={selectedVisit}
+                />}
 
-            {selectedVisit && <VisitInfo
-                isVisible={isInfoModalVisible}
-                onClose={() => { setInfoModalVisible(false) }}
-                onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
-                onDelete={handleDelete}
-                visit={selectedVisit}
-            />}
-        </SafeAreaView>
+                {selectedVisit && <VisitInfo
+                    isVisible={isInfoModalVisible}
+                    onClose={() => { setInfoModalVisible(false) }}
+                    onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
+                    onDelete={handleDelete}
+                    visit={selectedVisit}
+                />}
+            </View>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
+        width: '100%',
         alignItems: 'center'
     },
     header: {
-        flexDirection: 'row',
         alignItems: 'center',
         marginTop: 15,
         marginBottom: 10,
         height: 50,
         width: '95%'
-    },
-    searchInput: {
-        flex: 1,
-        width: '80%',
-        borderWidth: 1,
-        borderColor: 'black',
-        borderRadius: 5,
-        marginRight: 10,
-        color: 'black'
-    },
-    buttonAdd: {
-        width: '20%',
-        height: '100%',
-        justifyContent: 'center'
     },
     scrollView: {
         flex: 1,

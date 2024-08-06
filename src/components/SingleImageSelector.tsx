@@ -31,7 +31,7 @@ export const ImageSelector: React.FC<ImageSelectorInputProps> = ({ label, imageU
                         right={(props) => <IconButton icon='close' size={props.size} onPress={handleRemoveImage}/>}
                     />
                     <TouchableOpacity onPress={() => setIsVisible(true)} activeOpacity={0.9}>
-                        <Card.Cover source={{ uri: imageUri }}/>
+                        <Card.Cover source={{ uri: imageUri }} defaultSource={require('../../assets/placeholder.png')}/>
                     </TouchableOpacity>
                 </Card> 
                 <ImageView
@@ -42,7 +42,7 @@ export const ImageSelector: React.FC<ImageSelectorInputProps> = ({ label, imageU
                 />
             </View>
             }
-            { !imageUri && <ImageOptions buttonLabel={'Add ' + label} onChange={handleChange}/> }
+            { !imageUri && <ImageOptions buttonLabel={label} onChange={handleChange}/> }
         </View>
     );
 }
