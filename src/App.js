@@ -1,17 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import React, { useContext, useEffect, useState } from 'react';
-import { Alert, Platform, RootTagContext, TouchableOpacity } from 'react-native';
-import { PERMISSIONS, request } from 'react-native-permissions';
+import React, { useContext, useEffect } from 'react';
+import { Alert, Platform, RootTagContext, TouchableOpacity, SafeAreaView } from 'react-native';
+import { PERMISSIONS } from 'react-native-permissions';
 import { DrawerNavigator } from './components/DrawerNavigator';
 import LoadingScreen from './screens/LoadingScreen';
 import LoginScreen from './screens/Login';
 import { Strings } from './services/Strings';
 import { Constants, Utils } from './services/Utils';
 import { checkMultiplePermissions } from './services/check_permissions';
-import DeviceInfo from 'react-native-device-info';
-import { DataService } from './services/DataService';
 import { commonStyles } from './services/Styles';
 import GlobalContext from './context/GlobalContext ';
 import AddTreeShift from './screens/AddTreeShift';
@@ -27,6 +25,7 @@ import RNRestart from 'react-native-restart';
 import AddImageShift from './screens/AddImageShift';
 import UpdatePlotShift from './screens/UpdatePlotShift';
 import EditLocalAddImage from './screens/EditLocalAddImage';
+import { APP_VERSION } from './constants/constants';
 
 
 const errorHandler = async (e, isFatal) => {
@@ -117,95 +116,13 @@ const App = () => {
   const checkSignInStatus = async () => {
     console.log('app roottag app.js1: ')
     try {
-
-      let phoneNumber;
-
-      try {
-        phoneNumber = await DeviceInfo.getPhoneNumber();
-      } catch (error) {
-        const stackTrace = error.stack;
-
-        const errorLog = {
-          msg: "happened while trying to auto login when user starts the app inside app.js",
-          error: JSON.stringify(error),
-          stackTrace: stackTrace
-        }
-
-        await Utils.logException(JSON.stringify(errorLog));
-      }
-
-
-      const userDataPayload = {
-        phone: phoneNumber,
-      }
-
-      if (!phoneNumber) {
-        // User is not signed in, navigate to LoginScreen
-        stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
-        return false;
-      }
-
-      const isSignedIn = await DataService.loginUser(userDataPayload);
-
-      if (!isSignedIn) {
-        stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
-        return false;
-      }
-
-      const response = isSignedIn.data;
-      console.log("response data inside app.js: ", response);
-
-      if (response.success === false) {  // User is not signed in, navigate to LoginScreen
-        stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
-        return false;
-      }
-
-      if (response.user.adminID) {
-        await AsyncStorage.setItem(Constants.adminIdKey, response.user.adminID);
-        const admin_id = await AsyncStorage.getItem(Constants.adminIdKey);
-        console.log('adminId stored from async: ', admin_id);
-        console.log('adminId : ', response.user.adminID);
-      } else {
-        console.log('adminId not stored');
-      }
-
-      try {
-
-        await AsyncStorage.setItem(Constants.userIdKey, response.user._id);
-        console.log('userId stored: ', response.user._id);
-        response.data = { ...response.user, image: '' };
-        //console.log("response data modified: ", response.data);
-        await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
-        console.log('userDetails stored');
-
-        let userKeyDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
-        if (userKeyDetails) {
-          userKeyDetails = JSON.parse(userKeyDetails);
-          let name = userKeyDetails.name;
-          if (name) {
-            const firstName = name.split(' ')[0];
-            console.log("user name in app.js and header---- ", firstName);
-            setUserName(firstName);
-          }
-        }
-      } catch (error) {
-        console.log('Error storing userId', error);
-        const stackTrace = error.stack;
-        const errorLog = {
-          msg: "happened while trying to store userId during auto login inside app.js",
-          error: JSON.stringify(error),
-          stackTrace: stackTrace
-        }
-        await Utils.logException(JSON.stringify(errorLog));
-      }
-
-      return true;
-
+      const token = await AsyncStorage.getItem(Constants.authToken)
+      return token && token !== ''
     } catch (error) {
       console.error('Error checking sign-in status:', error);
       const stackTrace = error.stack;
       const errorLog = {
-        msg: "happened while trying to auto login inside app.js",
+        msg: "happened while login status in side app.js",
         error: JSON.stringify(error),
         stackTrace: stackTrace
       }
@@ -277,7 +194,7 @@ const App = () => {
                 marginRight: 30, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 7, marginTop: 5, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -305,7 +222,7 @@ const App = () => {
                 marginRight: 30, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -334,7 +251,7 @@ const App = () => {
                 marginRight: 30, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -368,7 +285,7 @@ const App = () => {
             ),
             headerRight: () => (
               <View style={{ height: 35, marginRight: 13, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
               </View>
             ),
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
@@ -386,7 +303,7 @@ const App = () => {
                 marginRight: 35, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 {/* <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -440,7 +357,7 @@ const App = () => {
                 marginRight: 35, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 {/* <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -477,7 +394,7 @@ const App = () => {
               }}>
                 <View
                   style={{ height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 {/* <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -497,7 +414,6 @@ const App = () => {
           }} />
       </Stack.Navigator>
     </NavigationContainer>
-
   )
 };
 

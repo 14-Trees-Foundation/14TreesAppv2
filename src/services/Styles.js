@@ -119,7 +119,6 @@ export const commonStyles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     color: 'black',
     textAlign: 'center',
-    fontWeight: 'bold',
     fontSize: 20,
   },
   defaultButtonTextStyle: {
@@ -286,7 +285,6 @@ export const commonStyles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     backgroundColor: 'white',
-    marginTop: 10,
     marginBottom: 10,
     padding: 10,
     color: '#333', // Change font color here
@@ -441,9 +439,10 @@ export const customDropdownStyles = StyleSheet.create({
   }),
   clearButton: {
     position: 'absolute',
-    top: 22,
+    top: 14,
     right: 29,
     zIndex: 1,
+    opacity: 0.7,
   },
 });
 
@@ -688,21 +687,25 @@ export const treeFormStyles = StyleSheet.create({
     marginTop: 25,
     fontWeight: '300',
   },
-  textInput: (lightTheme, saplingid) => ({
+  textInput: (lightTheme) => ({
     ...commonStyles.txtInput,
     color: lightTheme ? '#333' : 'black',
     fontSize: 15,
     borderRadius: 13,
-    fontWeight: saplingid ? '800' : 'normal',
+    fontWeight: 'normal',
   }),
+  inputLabel: {
+    ...commonStyles.text4,
+    fontSize: 14,
+    paddingLeft: 15,
+  },
   imageContainer: {
     flexDirection: 'column',
-    marginHorizontal: 20,
-    marginTop: 10,
+    marginHorizontal: 12,
     marginBottom: 15,
     alignItems: 'center',
     justifyContent: 'space-around',
-    // width: "98%"
+    width: "93%"
   },
   imagePicker: {
     flex: 1,

@@ -52,10 +52,10 @@ const Shifts = ({ navigation }) => {
         ];
 
         combinedList.sort((a, b) => {
-            if ((a.shiftuploadcomplete == 1) && (b.shiftuploadcomplete == 0)) {
+            if ((a.shift_upload_complete == 1) && (b.shift_upload_complete == 0)) {
                 return 1; // Move uploaded trees to the end
             }
-            if ((a.shiftuploadcomplete == 0) && (b.shiftuploadcomplete == 1)) {
+            if ((a.shift_upload_complete == 0) && (b.shift_upload_complete == 1)) {
                 return -1; // Keep non-uploaded trees before uploaded trees
             }
             return 0; // Maintain the original order
@@ -163,7 +163,7 @@ const Shifts = ({ navigation }) => {
                                             </Text>
                                         </View>
                                     )}
-                                    keyExtractor={(item) => item.id ? item.id.toString() : item.shift_id.toString()}
+                                    keyExtractor={(item) => item.id ? item.id.toString() : item.shift_id.toString() + item.user_id}
                                     data={finalList}
                                     scrollEnabled={false}
                                     renderItem={({ item }) => {

@@ -8,8 +8,10 @@ import { CustomButtonStyles, commonStyles, syncButtonStyles, syncDisplayStyles }
 import GlobalContext from '../context/GlobalContext ';
 import { Button } from 'react-native-paper';
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { DaoClient } from '../services/db/dao';
+import { uploadTreesData } from '../services/sync/tree';
 
-const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount) => {
+const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setTreesCount) => {
   const lsdate = await Utils.getLastSyncDate();
   if (lsdate) {
     setSyncDate(Utils.getReadableDate(lsdate));
@@ -23,6 +25,10 @@ const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount) => {
   const shiftsCount = await Utils.getShiftsCounts();
   setShiftsCount(shiftsCount);
   console.log('setting counts: ', counts, "setting shifts count: ", shiftsCount);
+
+  const daoClient = await DaoClient.authenticate();
+  const resp = await daoClient.trees.countTreesByChangeTye();
+  setTreesCount(resp)
 }
 
 const getReadableProgress = (progress) => {
@@ -39,6 +45,7 @@ const SyncDisplay = ({ navigation }) => {
   const [failedImagesTrees, setFailedImagesTrees] = useState([]);
   const [failedPlotTrees, setFailedPlotTrees] = useState([]);
   const [shiftsCount, setShiftsCount] = useState(null);
+  const [treesCount, setTreesCount] = useState(null);
   const { lightTheme, shiftID, shiftDone } = useContext(GlobalContext);
 
   useEffect(() => {
@@ -54,7 +61,7 @@ const SyncDisplay = ({ navigation }) => {
 
 
   useFocusEffect(useCallback(() => {
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount);
     console.log('sync date updated', shiftID)
   }, []))
 
@@ -99,7 +106,7 @@ const SyncDisplay = ({ navigation }) => {
     setFailedShifts(responseFromSyncShifts.failures);
 
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -128,7 +135,7 @@ const SyncDisplay = ({ navigation }) => {
 
     setFailedTrees(failures)
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -147,7 +154,7 @@ const SyncDisplay = ({ navigation }) => {
     //console.log("----------------treesinNewImageTable-----------", treesinNewImageTable[0].uploaded)
     setFailedImagesTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -168,7 +175,7 @@ const SyncDisplay = ({ navigation }) => {
     console.log("---------failedPlotTreesMessages------", failures)
     setFailedPlotTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -181,7 +188,8 @@ const SyncDisplay = ({ navigation }) => {
     if (
       treeCounts &&
       treeCounts.pending.treesUpload === 0 && treeCounts.pending.plotUpload === 0 && treeCounts.pending.imagesUpload === 0 &&
-      shiftsCount && shiftsCount.pending === 0) {
+      shiftsCount && shiftsCount.pending === 0 
+      && treesCount && treesCount.add === 0 && treesCount.edit === 0 && treesCount.delete === 0) {
       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
       return;
     }
@@ -265,6 +273,21 @@ const SyncDisplay = ({ navigation }) => {
       await Utils.logException(JSON.stringify(errorLog));
     }
 
+    try {
+      await uploadTreesData();
+      updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount);
+    } catch (error) {
+      console.log('unable to sync trees---', error);
+      const stackTrace = error.stack;
+      const errorLog = {
+        msg: 'happened while trying to sync trees(inside sync display)',
+        error: JSON.stringify(error),
+        stackTrace: stackTrace,
+      };
+      await Utils.logException(JSON.stringify(errorLog));
+    }
+
+    setShowProgress(false);
   };
 
   return (
@@ -305,6 +328,12 @@ const SyncDisplay = ({ navigation }) => {
               </Text>
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
                 {Strings.screenNames.Shifts}: {shiftsCount?.pending}
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "bold", paddingBottom: 4 }}>
+                {Strings.screenNames.TreesPage}: 
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                [ added: {treesCount?.add || 0}, edited: {treesCount?.edit || 0}, deleted: {treesCount?.delete || 0}]
               </Text>
             </View>
           </View>

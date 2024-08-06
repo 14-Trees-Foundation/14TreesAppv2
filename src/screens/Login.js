@@ -3,6 +3,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { Alert, Text, View, TextInput } from 'react-native';
 import { DataService } from '../services/DataService';
 import LanguageModal from '../components/Languagemodal';
+import DeviceInfo from 'react-native-device-info';
 import { Strings } from '../services/Strings';
 import { Utils, Constants } from '../services/Utils';
 import { CustomButtonStyles, commonStyles, loginStyles } from "../services/Styles";
@@ -21,6 +22,30 @@ const LoginScreen = ({ navigation }) => {
       title: Strings.screenNames.LogIn
     });
   }, [langChanged]);
+
+  useEffect(() => {
+    autoSetPhoneNumber();
+  }, [])
+
+  const autoSetPhoneNumber = async () => {
+    try {
+      const phone = await DeviceInfo.getPhoneNumber();
+      if (phone) {
+        if (phone.startsWith("91") && phone.length > 10) phone = phone.substring(2);
+        if (phone.length === 10) setPhoneNumber(phone);
+      }
+    } catch (error) {
+      const stackTrace = error.stack;
+  
+      const errorLog = {
+        msg: "happened while trying to auto login when user inside Login.js",
+        error: JSON.stringify(error),
+        stackTrace: stackTrace
+      }
+  
+      await Utils.logException(JSON.stringify(errorLog));
+    }
+  }
 
   const loginUser = async () => {
     console.log("phone: ", phoneNumber, "pin: ", pinNumber);
@@ -57,11 +82,11 @@ const LoginScreen = ({ navigation }) => {
         console.log("user: ", user);
 
         if (user) {
-          const userRole = user.userRole;
-          console.log("userRole: ", userRole);
+          const userRoles = user.roles;
+          console.log("userRoles: ", userRoles);
 
           let message = Strings.alertMessages.IncorrectUser;
-          if (userRole === null) {
+          if (!userRoles || userRoles.length === 0) {
             message = Strings.alertMessages.userNotAuthorized;
           } else {
             message = Strings.alertMessages.userNotSetup;
@@ -95,22 +120,19 @@ const LoginScreen = ({ navigation }) => {
         console.log("logs from local db: ", logData);
       }
 
-      if (response.user.adminID) {
-        await AsyncStorage.setItem(Constants.adminIdKey, response.user.adminID);
-        const admin_id = await AsyncStorage.getItem(Constants.adminIdKey);
-        console.log('adminId stored from async: ', admin_id);
-        console.log('adminId : ', response.user.adminID);
-      } else {
-        console.log('adminId not stored');
+      if (response.user.roles) {
+        if (response.user.roles.includes('admin')) await AsyncStorage.setItem(Constants.userRole, 'admin');
+        else if (response.user.roles.includes('treelogging')) await AsyncStorage.setItem(Constants.userRole, 'treelogging');
       }
 
       try {
-        await AsyncStorage.setItem(Constants.userIdKey, response.user._id);
-        console.log('userId stored: ', response.user._id);
-        await AsyncStorage.setItem(Constants.phoneNumber, response.user.phone.toString());
+        await AsyncStorage.setItem(Constants.userIdKey, response.user.id.toString());
+        console.log('userId stored: ', response.user.id);
+        await AsyncStorage.setItem(Constants.phoneNumber, response.user.phone);
         response.data = { ...response.user, image: '' };
         await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
         console.log('userDetails stored');
+        await AsyncStorage.setItem(Constants.authToken, response.user.token);
 
         let userKeyDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
         if (userKeyDetails) {
