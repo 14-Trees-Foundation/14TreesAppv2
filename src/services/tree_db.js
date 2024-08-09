@@ -290,7 +290,7 @@ export class LocalDatabase {
                     let item = result.rows.item(i);
                     let saplings = JSON.parse(item.saplings);
                     // Remove the uploaded field from each sapling
-                    saplings = saplings.map(({ uploaded, ...rest }) => rest);
+                    saplings = saplings ? saplings.map(({ uploaded, ...rest }) => rest) : [];
                     item = { ...item, saplings: saplings };
                     shiftData.push(item);
                 }
