@@ -299,6 +299,7 @@ export class Utils {
         await daoClient.sites.createTable();
         await daoClient.visits.createTable();
         await daoClient.visitImages.createTable();
+        await daoClient.syncInfo.createTable();
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
         await this.localdb.createSaplingTbl();
@@ -1470,6 +1471,9 @@ export class Constants {
 
     // tree analytics for home screen
     static treeAnalyticsDataKey = 'tree_analytics'
+
+    // for sync screen
+    static lastSyncInfo = 'last_sync_info'
 }
 
 export const getImageSourceObject = (src) => {
@@ -1520,10 +1524,47 @@ export const getTimeDiffString = (time) => {
     }
 }
 
+export function formatDuration(milliseconds) {
+    const seconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+
+    const remainingSeconds = seconds % 60;
+    const remainingMinutes = minutes % 60;
+
+    let result = '';
+
+    if (hours > 0) {
+        result += `${hours} hour${hours > 1 ? 's' : ''}`;
+        if (remainingMinutes > 0 || remainingSeconds > 0) {
+            result += `, `;
+        }
+    }
+
+    if (remainingMinutes > 0) {
+        result += `${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''}`;
+        if (remainingSeconds > 0) {
+            result += `, `;
+        }
+    }
+
+    if (remainingSeconds > 0 || result === '') {
+        result += `${remainingSeconds} second${remainingSeconds > 1 ? 's' : ''}`;
+    }
+
+    return result;
+}
+
 export const getHumanReadableDate = (dateStr) => {
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) return '';
     return moment(dateStr).format('MMMM D, YYYY');
+}
+
+export const getHumanReadableDateTime = (dateStr) => {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    return moment(dateStr).format('MMMM D, YYYY HH:mm');
 }
 
 export const getReadableProgress = (progress) => {

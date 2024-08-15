@@ -88,20 +88,20 @@ export const uploadTreesData = async () => {
     const editedTrees = trees.filter(tree => tree.change_type === 'edit');
     const deletedTrees = trees.filter(tree => tree.change_type === 'delete');
 
-    await uploadDeletedTreesData(deletedTrees);
-    deletedTrees.forEach(async (tree) => {
-        await daoClient.trees.deleteLocalTree(tree.local_id);
-    })
+    await uploadDeletedTreesData(daoClient, deletedTrees);
+    // deletedTrees.forEach(async (tree) => {
+    //     await daoClient.trees.deleteLocalTree(tree.local_id);
+    // })
 
-    await uploadEditedTreesData(editedTrees, saplingIdToImgMap);
-    editedTrees.forEach(async (tree) => {
-        await daoClient.trees.updateTreeUploadStatus(tree.local_id);
-    })
+    await uploadEditedTreesData(daoClient, editedTrees, saplingIdToImgMap);
+    // editedTrees.forEach(async (tree) => {
+    //     await daoClient.trees.updateTreeUploadStatus(tree.local_id);
+    // })
 
-    await uploadNewTreesData(newTrees, saplingIdToImgMap);
-    newTrees.forEach(async (tree) => {
-        await daoClient.trees.deleteLocalTree(tree.local_id);
-    })
+    await uploadNewTreesData(daoClient, newTrees, saplingIdToImgMap);
+    // newTrees.forEach(async (tree) => {
+    //     await daoClient.trees.deleteLocalTree(tree.local_id);
+    // })
 
     for (let images of Object.values(saplingIdToImgMap)) {
         images['tree_image'] && await daoClient.treeImages.markImageUploaded(images['tree_image'].local_id);
@@ -111,7 +111,7 @@ export const uploadTreesData = async () => {
     await daoClient.treeImages.deleteUploadedImages();
 }
 
-export const uploadNewTreesData = async (trees: Tree[], saplingIdToImgMap: Record<string, any>) => {
+export const uploadNewTreesData = async (daoClient: DaoClient, trees: Tree[], saplingIdToImgMap: Record<string, any>) => {
     let apiClient = new ApiClient()
     let data = trees.map(tree => {
         const location = tree.location ? JSON.parse(tree.location) : { coordinates: [0, 0] };
@@ -124,12 +124,13 @@ export const uploadNewTreesData = async (trees: Tree[], saplingIdToImgMap: Recor
         return treeReq;
     })
 
-    for (let i = 0; i < data.length; i += 5) {
-        await apiClient.trees.uploadTrees(data.slice(i, i + 5));
+    for (let i = 0; i < data.length; i ++) {
+        await apiClient.trees.uploadTrees([data[i]]);
+        daoClient.trees.deleteLocalTree(data[i].local_id)
     }
 }
 
-export const uploadEditedTreesData = async (trees: Tree[], saplingIdToImgMap: any) => {
+export const uploadEditedTreesData = async (daoClient: DaoClient, trees: Tree[], saplingIdToImgMap: any) => {
     let apiClient = new ApiClient()
     let data = trees.map(tree => {
         const location = tree.location ? JSON.parse(tree.location) : null;
@@ -143,12 +144,14 @@ export const uploadEditedTreesData = async (trees: Tree[], saplingIdToImgMap: an
 
     for (let i = 0; i < data.length; i++) {
         await apiClient.trees.updateTree(data[i]);
+        await daoClient.trees.updateTreeUploadStatus(data[i].local_id);
     }
 }
 
-export const uploadDeletedTreesData = async (trees: Tree[]) => {
+export const uploadDeletedTreesData = async (daoClient: DaoClient,trees: Tree[]) => {
     let apiClient = new ApiClient()
     for (let i = 0; i < trees.length; i++) {
         await apiClient.trees.deleteTree(trees[i]);
+        await daoClient.trees.deleteLocalTree(trees[i].local_id);
     }
 }

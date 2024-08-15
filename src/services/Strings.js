@@ -26,6 +26,7 @@ export class Strings {
             AddImageShift: "Add Tree Image",
             UpdatePlotShift: "Update Tree Plot",
             AppInfo: "App Info",
+            Dev: "Dev",
             TreesInShift: "Trees In Shift", //manjur
             PlotSelect: "Select Plot",
             SyncDisplay: "Sync Data", //manjur
@@ -54,6 +55,7 @@ export class Strings {
             AddImageShift: "अ‍ॅड सॅपलिंग इमेज",
             UpdatePlotShift: "सॅपलिंग प्लॉट अपडेट",
             AppInfo: "अ‍ॅपची माहिती",
+            Dev: "देव",
             TreesInShift: "शिफ्ट मधील झाडे", //manjur
             PlotSelect: "प्लॉट निवडा", //manjur
             SyncDisplay: "सिंक डेटा",

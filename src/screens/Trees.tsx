@@ -28,7 +28,7 @@ interface TreesInputProps {
 
 const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
 
-    const { langChanged } = useContext(GlobalContext);
+    const { langChanged, setPlaySound } = useContext(GlobalContext);
     useEffect(() => {
         console.log('langChanged inside Trees: ', langChanged);
     }, [langChanged]);
@@ -107,8 +107,10 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                 data = JSON.parse(JSON.stringify(data)) as CreateTreeRequest;
                 try {
                     const success = await localClient.trees.createTree(data)
-                    if (success) ToastAndroid.show("Added Tree Locally!", ToastAndroid.SHORT)
-                    else {
+                    if (success) {
+                        setPlaySound(true);
+                        ToastAndroid.show("Added Tree Locally!", ToastAndroid.SHORT);
+                    } else {
                         ToastAndroid.show("Tree with given sapling id already exists!", ToastAndroid.LONG)
                         hasError = true;
                     }
@@ -122,6 +124,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
 
                 try {
                     await localClient.trees.updateTree(data)
+                    setPlaySound(true);
                     ToastAndroid.show("Updated Tree Locally!", ToastAndroid.SHORT)
                 } catch (err: any) {
                     hasError = true;
@@ -167,6 +170,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                     await daoClient.treeSnapshots.deleteTreeSnapshot(imageId);
                 }
                 await daoClient.treeSnapshots.insertTreeSnapshots(selectedTree.sapling_id, userDetails.id, images)
+                setPlaySound(true);
                 ToastAndroid.show("Added Tree images locally!", ToastAndroid.LONG)
             }
         }, 10)
@@ -177,6 +181,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
             setTimeout(async () => {
                 try {
                     await localClient.trees.deleteTree(selectedTree.local_id);
+                    setPlaySound(true);
                     ToastAndroid.show("Deleted tree locally!", ToastAndroid.SHORT)
                 } catch (err: any) {
                     ToastAndroid.show("Failed to delete tree!", ToastAndroid.SHORT)

@@ -20,7 +20,7 @@ interface VisitsInputProps {
 
 const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
 
-    const { langChanged } = useContext(GlobalContext);
+    const { langChanged, setPlaySound } = useContext(GlobalContext);
     useEffect(() => {
         console.log('langChanged inside Visits: ', langChanged);
     }, [langChanged]);
@@ -83,6 +83,7 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
 
                 if (images && images.length > 0 && request.id) {
                     await daoClient.visitImages.insertVisitImages(request.id, images);
+                    setPlaySound(true);
                     ToastAndroid.show("Added Visit images locally!", ToastAndroid.LONG)
                 }
             };

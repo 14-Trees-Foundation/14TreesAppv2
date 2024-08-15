@@ -51,6 +51,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
     const [validationErrors, setValidationErrors] = useState({
         saplingId: false,
+        saplingExists: false,
         plantType: false,
         plot: false,
         image: false,
@@ -61,6 +62,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     const resetValidationErrors = () => {
         setValidationErrors({
             saplingId: false,
+            saplingExists: false,
             plantType: false,
             plot: false,
             image: false,
@@ -175,6 +177,18 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
         }, 1000);
     }, []);
 
+    useEffect(() => {
+        setTimeout(async () => {
+            if (saplingId.length > 0 && changeMode === 'add') {
+                const daoClient = await DaoClient.authenticate();
+                const exists = await daoClient.trees.checkIfSaplingExists(saplingId);
+                setValidationErrors(prev => ({ ...prev, saplingExists: exists }))
+            } else if (saplingId.length === 0) {
+                setValidationErrors(prev => ({ ...prev, saplingExists: false }))
+            }
+        }, 10)
+    }, [saplingId])
+
     const handleUserSearch = (txt: string) => {
         if (txt.length > 0) {
             setTimeout(async () => {
@@ -209,7 +223,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
         if (saplingId === '') setValidationErrors(prev => ({ ...prev, saplingId: true }))
         if (lat === 0) setValidationErrors(prev => ({ ...prev, coordinates: true }))
 
-        if (!selectedPlot || !selectedPlantType || !treeStatus || !imageUri || saplingId === '' || lat === 0) return;
+        if (!selectedPlot || !selectedPlantType || !treeStatus || !imageUri || saplingId === '' || lat === 0 || validationErrors.saplingExists) return;
 
         let location = {
             type: 'Point',
@@ -279,6 +293,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                             mode='outlined'
                         />
                         {validationErrors.saplingId && <HelperText visible={true} type='error'>Please Enter Sapling Id</HelperText>}
+                        {validationErrors.saplingExists && <HelperText visible={true} type='error'>Sapling Id already exists</HelperText>}
                     </View>
 
                     <View style={{ marginTop: 10 }}>

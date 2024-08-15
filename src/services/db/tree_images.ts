@@ -47,8 +47,7 @@ export class TreeImagesDao {
             )
 
             if (result.rows.length === 1) {
-                const existingImage = result.rows.item(0) as TreeImage; 
-                console.log(existingImage)
+                const existingImage = result.rows.item(0) as TreeImage;
                 await this.db.executeSql(
                     `UPDATE ${this.tableName}
                     SET
@@ -63,7 +62,7 @@ export class TreeImagesDao {
                 return;
             }
         }
-        console.log(data);
+
         const query = `
             INSERT INTO ${this.tableName} (sapling_id, name, data, type, is_uploaded, is_active, user_id, timestamp)
             VALUES (?, ?, ?, ?, 0, ?, ?, ?)

@@ -7,6 +7,7 @@ import { SitesDao } from './sites';
 import { VisitsDao } from './visits';
 import { VisitImagesDao } from './visit_images';
 import { TreeSnapshotsDao } from './tree_snapshots';
+import { SyncInfoDao } from './sync_info';
 
 enablePromise(true);
 
@@ -27,6 +28,7 @@ export class DaoClient {
     public visits: VisitsDao;
     public visitImages: VisitImagesDao;
     public treeSnapshots: TreeSnapshotsDao;
+    public syncInfo: SyncInfoDao;
 
     constructor(dbConnection: SQLiteDatabase) {
         this.trees = new TreesDao(dbConnection);
@@ -37,6 +39,7 @@ export class DaoClient {
         this.visits = new VisitsDao(dbConnection);
         this.visitImages = new VisitImagesDao(dbConnection);
         this.treeSnapshots = new TreeSnapshotsDao(dbConnection);
+        this.syncInfo = new SyncInfoDao(dbConnection);
     }
 
     static async authenticate() {

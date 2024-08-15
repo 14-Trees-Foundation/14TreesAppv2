@@ -78,6 +78,18 @@ export class TreesDao {
         return trees;
     }
 
+    checkIfSaplingExists = async (saplingId: string) => {
+        const query = `
+            SELECT EXISTS(SELECT 1 FROM ${this.tableName} WHERE sapling_id = ?) AS does_exists;
+        `
+        const [results] = await this.db.executeSql(query, [saplingId])
+        return results.rows.length === 0
+                ? false
+                : results.rows.item(0)?.does_exists === 1
+                    ? true
+                    : false
+    }
+
     countTreesByChangeTye = async (isUploaded?: boolean): Promise<any> => {
         const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
         const query = `SELECT change_type, COUNT(*) as count FROM ${this.tableName}
@@ -382,4 +394,15 @@ export class TreesDao {
         return trees;
     }
 
+    // Dev Only
+    deleteDummyTree = async () => {
+        // locally added tree: HARD DELETE
+        await this.db.executeSql(
+            `UPDATE ${this.tableName}
+            SET
+                is_uploaded = 0,
+                change_type = 'delete'
+            WHERE planted_by = 'Dummy';`,
+        )
+    }
 };

@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import React, { useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect } from 'react';
 import { Alert, Platform, RootTagContext, TouchableOpacity, SafeAreaView } from 'react-native';
 import { PERMISSIONS } from 'react-native-permissions';
 import { DrawerNavigator } from './components/DrawerNavigator';
@@ -26,6 +26,7 @@ import UpdatePlotShift from './screens/UpdatePlotShift';
 import EditLocalAddImage from './screens/EditLocalAddImage';
 import { APP_VERSION } from './constants/constants';
 import Sync from './screens/Sync';
+import Sound from 'react-native-sound';
 
 
 const errorHandler = async (e, isFatal) => {
@@ -110,7 +111,31 @@ const App = () => {
   const rootTag = useContext(RootTagContext);
   //console.log('app roottag app.js: ')
 
-  const { userName, setUserName, lightTheme } = useContext(GlobalContext);
+  const { userName, lightTheme, playSound, setPlaySound } = useContext(GlobalContext);
+  const playBackgroundSound = useCallback(() => {
+    var sound = new Sound('livechat.mp3', Sound.MAIN_BUNDLE, (error) => {
+      if (error) {
+        console.log('failed to load the sound', error);
+        return;
+      }
+
+      // Play the sound with an onEnd callback
+      sound.play((success) => {
+        if (success) {
+          console.log('successfully finished playing');
+        } else {
+          console.log('playback failed due to audio decoding errors');
+        }
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    if (playSound) {
+      playBackgroundSound();
+      setPlaySound(false);
+    }
+  }, [playSound])
 
   AsyncStorage.setItem(Constants.appRootTagKey, rootTag.toString());
 

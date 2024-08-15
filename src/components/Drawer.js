@@ -146,6 +146,15 @@ export const DrawerContent = (props) => {
             </Drawer.Section>
             <DrawerItem 
               icon={({size, color}) => (
+                <Button icon='tools' size={size + 20} color={color}/>
+              )}
+              label={Strings.screenNames.Dev} 
+              style={{marginVertical: -5}}
+              labelStyle={{ marginLeft: -40 }} 
+              onPress={() => props.navigation.navigate(Strings.screenNames.getString('Dev', Strings.english))}
+            />
+            <DrawerItem 
+              icon={({size, color}) => (
                 <Button icon='information-outline' size={size + 20} color={color}/>
               )}
               label={Strings.screenNames.AppInfo} 
