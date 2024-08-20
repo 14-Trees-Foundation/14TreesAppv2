@@ -4,21 +4,26 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Constants, Utils } from "../Utils";
 import { Plot } from  "../../model/plot";
 import { ToastAndroid } from "react-native";
+import { INITIAL_TIMESTAMP } from "../../constants/constants";
 
-export const fetchAndStorePlots = async () => {
+export const fetchAndStorePlots = async (siteId?: number) => {
     // fetch data from the backend
     const apiClient = new ApiClient();
     const daoClient = await DaoClient.authenticate();
 
     let plotIds = await daoClient.plots.getLivePlotIds()
-    const timestamp = await AsyncStorage.getItem(Constants.lastPlotsFetchedAt) || '2020-01-01T00:00:00Z'
+    let timestamp = await AsyncStorage.getItem(Constants.lastPlotsFetchedAt) || INITIAL_TIMESTAMP
+    if (siteId) {
+        const resp = await daoClient.siteSync.getSiteLastSyncTime(siteId, Constants.lastPlotsFetchedAt);
+        if (resp && new Date(timestamp).getTime() < new Date(resp.created_at).getTime()) timestamp = resp.created_at;
+    }
     
     try {
         const now = new Date().toISOString();
 
         let offset: number = 0;
         while (true) {
-            const response = await apiClient.plots.fetchChanges(timestamp, plotIds, offset)
+            const response = await apiClient.plots.fetchChanges(timestamp, plotIds, offset, siteId)
             const plots = response.plots;
 
             // upload plot in local db
@@ -38,7 +43,9 @@ export const fetchAndStorePlots = async () => {
             if (offset >= response.total) break;
         }
 
-        await AsyncStorage.setItem(Constants.lastPlotsFetchedAt, now);
+        if (siteId) await daoClient.siteSync.createLastSyncTime(siteId, Constants.lastPlotsFetchedAt, now);
+        else await AsyncStorage.setItem(Constants.lastPlotsFetchedAt, now);
+
         console.log('Plots fetch Done!')
         ToastAndroid.show('Plots data upto date!', ToastAndroid.LONG)
     } catch (error: any) {

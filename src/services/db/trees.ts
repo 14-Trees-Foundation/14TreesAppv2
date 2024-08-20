@@ -104,7 +104,7 @@ export class TreesDao {
                 [row.change_type]: row.count,
             }
         }
-        console.log(response)
+        // console.log(response)
         return response;
     }
 

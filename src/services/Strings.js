@@ -27,6 +27,7 @@ export class Strings {
             UpdatePlotShift: "Update Tree Plot",
             AppInfo: "App Info",
             Dev: "Dev",
+            Map: "Map",
             TreesInShift: "Trees In Shift", //manjur
             PlotSelect: "Select Plot",
             SyncDisplay: "Sync Data", //manjur
@@ -56,6 +57,7 @@ export class Strings {
             UpdatePlotShift: "सॅपलिंग प्लॉट अपडेट",
             AppInfo: "अ‍ॅपची माहिती",
             Dev: "देव",
+            Map: "नकाशा",
             TreesInShift: "शिफ्ट मधील झाडे", //manjur
             PlotSelect: "प्लॉट निवडा", //manjur
             SyncDisplay: "सिंक डेटा",
@@ -149,6 +151,21 @@ export class Strings {
             UploadingLocal: 'Uploading Local Changes!',
             FetchingChanges: 'Fetching New Changes from Server!',
 
+            SyncHistory: 'Sync History',
+            CurrentSync: 'Current Sync',
+            SyncedAt: 'Synced At',
+            UploadTime: 'Upload Time',
+            UploadError: 'Upload Error',
+            FetchTime: 'Fetch Time',
+            FetchError: 'Fetch Error',
+            CurrentSyncDetails: 'Current sync details',
+            NoDataUploaded: 'No data was uploaded in this sync.',
+            UploadingChanges: 'Uploading changes...',
+
+            NetworkSpeed: 'Network Speed',
+            EstimatedTimeToSync: 'Estimated Time to Sync',
+            WishToContinue: 'Do you wish to sync the data?',
+
             // Visits
             AddVisit: 'Add Visit',
             EditVisit: 'Edit Visit',
@@ -241,6 +258,21 @@ export class Strings {
 
             UploadingLocal: 'स्थानिक बदल अपलोड करत आहे!',
             FetchingChanges: 'सर्व्हरवरून नवीन बदल आणत आहे!',
+
+            SyncHistory: 'सिंक इतिहास',
+            CurrentSync: 'वर्तमान समक्रमण',
+            SyncedAt: 'येथे समक्रमित केले',
+            UploadTime: 'अपलोड वेळ',
+            UploadError: 'अपलोड त्रुटी',
+            FetchTime: 'वेळ आणा',
+            FetchError: 'आणणे त्रुटी',
+            CurrentSyncDetails: 'वर्तमान समक्रमण तपशील',
+            NoDataUploaded: 'या सिंकमध्ये कोणताही डेटा अपलोड केला गेला नाही.',
+            UploadingChanges: 'बदल अपलोड करत आहे...',
+
+            NetworkSpeed: 'नेटवर्क गती',
+            EstimatedTimeToSync: 'सिंक करण्यासाठी अंदाजे वेळ',
+            WishToContinue: 'तुम्ही डेटा समक्रमित करू इच्छिता?',
 
             // Visits
             AddVisit: 'भेट जोडा',
@@ -508,6 +540,9 @@ export class Strings {
             TreeImage: 'Tree Image',
             UserTreeImage: 'User Tree Image',
             UserCardImage: 'User Card Image',
+
+            DownloadData: 'Download Data',
+            UploadData: 'Upload Data'
         },
         "mr": {
             // home
@@ -569,6 +604,9 @@ export class Strings {
             TreeImage: 'झाडाची प्रतिमा',
             UserTreeImage: 'वापरकर्ता वृक्ष प्रतिमा',
             UserCardImage: 'वापरकर्ता कार्ड प्रतिमा',
+
+            DownloadData: 'डेटा डाउनलोड करा',
+            UploadData: 'डेटा अपलोड करा'
         }
     })
     static labels = new LocalizedStrings({

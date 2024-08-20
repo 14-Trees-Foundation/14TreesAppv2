@@ -305,6 +305,16 @@ export class SitesDao {
         return null;
     }
 
+    getSiteByLocalId = async (id: number) => {
+        const query =  `
+            SELECT * FROM ${this.tableName} 
+            WHERE local_id = ?;
+        `
+        const [results] = await this.db.executeSql(query, [id]);
+        if (results.rows.length === 1) return results.rows.item(0) as Site;
+        return null;
+    }
+
     getLiveSiteIds = async () => {
         const query =  `SELECT id FROM ${this.tableName} WHERE id IS NOT NULL;`
         const [result] = await this.db.executeSql(query);

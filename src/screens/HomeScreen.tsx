@@ -10,9 +10,12 @@ import InternetBanner from "../components/InternetInfo";
 import { fetchDeltaChanges } from "../services/sync/sync";
 import { Loading } from "../components/Loading";
 import GlobalContext from "../context/GlobalContext ";
+import Autocomplete from "../components/AutocompleteModal";
+import { DaoClient } from "../services/db/dao";
+import { Site } from "../model/sites";
 
 
-const Home: React.FC<{navigation: any}> = ({ navigation }) => {
+const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const intervalId = useRef<any>(null);
   const { langChanged } = useContext(GlobalContext);
   useEffect(() => {
@@ -24,6 +27,9 @@ const Home: React.FC<{navigation: any}> = ({ navigation }) => {
   const [analytics, setAnalytics] = useState<TreeAnalytics | null>(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSite, setSelectedSite] = useState<Site | null>(null);
+  const [sites, setSites] = useState<Site[]>([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -79,26 +85,56 @@ const Home: React.FC<{navigation: any}> = ({ navigation }) => {
   const handleAnalytics = async () => {
     const data = await AsyncStorage.getItem(Constants.treeAnalyticsDataKey);
     if (data) {
-        const analytics: TreeAnalytics = JSON.parse(data);
-        setAnalytics(analytics);
-      }
+      const analytics: TreeAnalytics = JSON.parse(data);
+      setAnalytics(analytics);
+    }
   }
 
   useFocusEffect(
-      useCallback(() => {
-        handleLastSyncDate();
-        handleAnalytics();
-        return () => {
-        };
-      }, [])
+    useCallback(() => {
+      handleLastSyncDate();
+      handleAnalytics();
+      return () => {
+      };
+    }, [])
   );
 
   useEffect(() => {
     setTimeout(async () => {
-        const userData = await AsyncStorage.getItem(Constants.userDetailsKey)
-        if (userData) setUserDetails(JSON.parse(userData));
-    })
+      const userData = await AsyncStorage.getItem(Constants.userDetailsKey)
+      if (userData) setUserDetails(JSON.parse(userData));
+
+      const daoClient = await DaoClient.authenticate();
+      const siteId = await AsyncStorage.getItem(Constants.selectedSiteId)
+      let site: Site | null = null;
+      if (siteId) {
+        site = await daoClient.sites.getSiteByLiveId(parseInt(siteId));
+        setSelectedSite(site);
+      }
+      const sites = await daoClient.sites.getSites(0, 100)
+      if (site) {
+        const idx = sites.findIndex(value => value.id === site?.id);
+        if (idx < 0) setSites([site, ...sites]);
+        else setSites(sites);
+      }
+      else setSites(sites);
+    }, 10)
   }, [])
+
+  useEffect(() => {
+    if (searchQuery.length < 1) return;
+    setTimeout(async () => {
+      const daoClient = await DaoClient.authenticate();
+      let sites = await daoClient.sites.searchSites(searchQuery, 0, 100);
+      setSites(sites);
+    }, 10)
+  }, [searchQuery])
+
+  const handleSiteSelection = (site: Site | null) => {
+    setSelectedSite(site);
+    if (site !== null && site.id) AsyncStorage.setItem(Constants.selectedSiteId, site.id.toString());
+    else AsyncStorage.removeItem(Constants.selectedSiteId);
+  }
 
   const getName = () => {
     const name = userDetails?.name || 'User'
@@ -129,18 +165,18 @@ const Home: React.FC<{navigation: any}> = ({ navigation }) => {
         }}
         elevation={3}
       >
-        <View style={{marginTop: 10}}>
+        <View style={{ marginTop: 10 }}>
           <Icon source={icon} size={50} color="#2aafdb"></Icon>
         </View>
         <Text variant='displaySmall' style={{ fontWeight: 'bold', paddingVertical: 15, color: 'black', alignItems: 'center' }}>{getCountValueStr(value)}</Text>
-        <Text 
-          variant='titleMedium' 
+        <Text
+          variant='titleMedium'
           style={{
-            color: 'black', 
+            color: 'black',
             paddingHorizontal: 15,
             marginVertical: 3,
             textAlign: 'center'
-          }} 
+          }}
           textBreakStrategy='highQuality'
           numberOfLines={2}
         >
@@ -152,7 +188,7 @@ const Home: React.FC<{navigation: any}> = ({ navigation }) => {
 
   return (
     <View style={{ height: '97%' }}>
-      <Loading loading={loading} text="Sync in Progress..."/>
+      <Loading loading={loading} text="Sync in Progress..." />
       <InternetBanner />
       <Text style={{ paddingHorizontal: 15, paddingVertical: 15, fontWeight: 'bold', alignSelf: 'flex-end' }} variant='titleLarge'>Welcome, {getName()}!</Text>
       <ScrollView>
@@ -172,16 +208,32 @@ const Home: React.FC<{navigation: any}> = ({ navigation }) => {
             {card('account-outline', Strings.messages.PersonTrees, analytics?.trees_planted_by_you || 0)}
           </View>
         </View>
+        {!loading && <View
+          style={{
+            padding: 15
+          }}>
+          <Autocomplete
+            label="Select a Site"
+            value={selectedSite}
+            options={sites}
+            keyGetter={(option) => option ? option.local_id : ''}
+            valueGetter={(option) => option ? option.name_english : ''}
+            onSelect={handleSiteSelection}
+            onSearch={(text) => setSearchQuery(text)}
+            variant='outlined'
+          />
+        </View>}
         <View style={{ marginVertical: 30 }}></View>
       </ScrollView>
 
-      {loading && <View 
+
+      {loading && <View
         style={{ position: 'absolute', bottom: 80, left: 20, right: 20 }}>
-        <Text style={{ textAlign: 'center', marginBottom: 5}}>
+        <Text style={{ textAlign: 'center', marginBottom: 5 }}>
           Fetching Data from the Server!
         </Text>
-        <ProgressBar visible={loading} progress={progress} style={{backgroundColor: '#bf8686'}} fillStyle={{ backgroundColor: '#02ab4e' }} />
-        <Text style={{ textAlign: 'center', marginTop: 2}}>Completed: {getReadableProgress(progress)}</Text>
+        <ProgressBar visible={loading} progress={progress} style={{ backgroundColor: '#bf8686' }} fillStyle={{ backgroundColor: '#02ab4e' }} />
+        <Text style={{ textAlign: 'center', marginTop: 2 }}>Completed: {getReadableProgress(progress)}</Text>
       </View>}
 
 
@@ -189,7 +241,7 @@ const Home: React.FC<{navigation: any}> = ({ navigation }) => {
         <Text variant='bodySmall' style={{ color: 'black', alignSelf: 'center', marginBottom: 4 }}>
           {Strings.messages.LastSynced} {lastSyncDate === '' ? Strings.messages.Never : getTimeDiffString(lastSyncDate)}
         </Text>
-        <Button mode='elevated' style={{ backgroundColor: 'lightgreen' }} textColor="black"  onPress={() => {
+        <Button mode='elevated' style={{ backgroundColor: 'lightgreen' }} textColor="black" onPress={() => {
           navigation.navigate(
             Strings.screenNames.getString('SyncDisplay', Strings.english),
             { data: 0 },

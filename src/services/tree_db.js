@@ -1584,6 +1584,7 @@ export class LocalDatabase {
     updateSaplingTbl = async (saplingDocs) => {
         if (!Array.isArray(saplingDocs) || saplingDocs.length === 0) {
             console.log("empty sapling array in tree_db.js")
+            return;
         }
         //Delete all existing records
         console.log("----------Deleting old data and inserting latest--------- ")

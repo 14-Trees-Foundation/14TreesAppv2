@@ -1,6 +1,5 @@
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
 import { Tree, TreeAnalytics, TreeHelperDataResponse } from "../../model/tree"
-import { handleApiError } from "./handleError";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Constants } from "../Utils";
 
@@ -11,14 +10,10 @@ export class TreeService {
         this.api = api;
     }
 
-    async fetchChanges(timestamp: string, tree_ids: number[], offset?: number, limit?: number): Promise<TreeHelperDataResponse> {
-        const url = `/api/appv2/fetchHelperData/trees?`;
-        try {
-            const response = await this.api.post<TreeHelperDataResponse>(url, { timestamp, tree_ids, offset, limit: 10000 });
-            return response.data;
-        } catch (error: any) {
-            return handleApiError("TreeService::fetchChanges:", error)
-        }
+    async fetchChanges(timestamp: string, tree_ids: number[], offset?: number, site_id?: number): Promise<TreeHelperDataResponse> {
+        const url = `/api/appv2/fetchHelperData/trees`;
+        const response = await this.api.post<TreeHelperDataResponse>(url, { site_id, timestamp, tree_ids, offset, limit: 10000 });
+        return response.data;
     }
 
     async uploadTrees(trees: any[]) {

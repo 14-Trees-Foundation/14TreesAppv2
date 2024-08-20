@@ -18,9 +18,11 @@ export class SyncInfoDao {
                 trees TEXT NOT NULL,
                 tree_images TEXT NULL,
                 visit_images TEXT NULL,
-                synced_at TEXT,
-                upload_time iNTEGER NULL,
-                fetch_time iNTEGER NULL,
+                synced_at TEXT UNIQUE,
+                upload_time INTEGER NULL,
+                fetch_time INTEGER NULL,
+                upload_error TEXT NULL,
+                fetch_error TEXT NULL,
                 is_uploaded INTEGER DEFAULT 0 CHECK (is_uploaded IN (0, 1)),
                 change_type TEXT DEFAULT 'none' CHECK (change_type IN ('none', 'add', 'edit', 'delete')),
                 created_at TEXT NOT NULL,
@@ -61,9 +63,9 @@ export class SyncInfoDao {
 
     createSyncInfo = async (data: CreateSyncInfoRequest) => {
         const query = `
-            INSERT INTO ${this.tableName}
-            (trees, tree_images, visit_images, synced_at, upload_time, fetch_time, is_uploaded, change_type, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, 0, 'add', ?, ?)
+            INSERT OR REPLACE INTO ${this.tableName}
+            (trees, tree_images, visit_images, synced_at, upload_time, fetch_time, upload_error, fetch_error, is_uploaded, change_type, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'add', ?, ?)
         `
 
         const timeStamp = new Date().toISOString();
@@ -74,6 +76,8 @@ export class SyncInfoDao {
             data.synced_at,
             data.upload_time,
             data.fetch_time,
+            data.upload_error,
+            data.fetch_error,
             timeStamp,
             timeStamp
         ]);

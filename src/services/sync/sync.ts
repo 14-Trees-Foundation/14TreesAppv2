@@ -10,7 +10,7 @@ import { fetchAndStoreVisits } from "./visits";
 import { ApiClient } from "../api/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const uploadLocalData = async (setProgress: React.Dispatch<React.SetStateAction<number>>, changesCount: any) => {
+export const uploadLocalData = async (changesCount: any) => {
     const total = changesCount.trees.add + changesCount.trees.edit + changesCount.trees.delete
                     + changesCount.tree_images.add + changesCount.tree_images.delete 
                     + changesCount.visit_images.add + changesCount.visit_images.delete + 1;
@@ -28,7 +28,6 @@ export const uploadLocalData = async (setProgress: React.Dispatch<React.SetState
         };
         await Utils.logException(JSON.stringify(errorLog));
     }
-    setProgress(prev => prev + 0.1);
     
     count = changesCount.trees.add + changesCount.trees.edit + changesCount.trees.delete;
     try {
@@ -42,7 +41,6 @@ export const uploadLocalData = async (setProgress: React.Dispatch<React.SetState
         };
         await Utils.logException(JSON.stringify(errorLog));
     }
-    setProgress((count/total) * 0.9);
 
     count = changesCount.tree_images.add + changesCount.tree_images.delete 
     try {
@@ -57,7 +55,6 @@ export const uploadLocalData = async (setProgress: React.Dispatch<React.SetState
         await Utils.logException(JSON.stringify(errorLog));
     }
     let progress = (count/total) * 0.9;
-    setProgress(prev => prev + progress);
 
     count = changesCount.visit_images.add + changesCount.visit_images.delete
     try {
@@ -72,7 +69,6 @@ export const uploadLocalData = async (setProgress: React.Dispatch<React.SetState
         await Utils.logException(JSON.stringify(errorLog));
     }
     progress = (count/total) * 0.9;
-    setProgress(prev => prev + progress);
 }
 
 export const fetchDeltaChanges = async (setProgress: React.Dispatch<React.SetStateAction<number>>) => {
@@ -84,16 +80,22 @@ export const fetchDeltaChanges = async (setProgress: React.Dispatch<React.SetSta
         await AsyncStorage.setItem(Constants.treeAnalyticsDataKey, JSON.stringify(analytics))
     }
 
+    const selectedSiteId = await AsyncStorage.getItem(Constants.selectedSiteId);
+    let siteId: number | undefined = undefined;
+    if (selectedSiteId) {
+        siteId = parseInt(selectedSiteId);
+    }
+
     await Utils.fetchAndStoreHelperData();
     setProgress(0.1);
 
     await fetchAndStoreUsers();
     setProgress(0.2);
 
-    await fetchAndStoreTrees();
+    await fetchAndStoreTrees(siteId);
     setProgress(0.5);
 
-    await fetchAndStorePlots();
+    await fetchAndStorePlots(siteId);
     setProgress(0.6);
 
     await fetchAndStoreSites();

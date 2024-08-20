@@ -81,7 +81,7 @@ export class TreeImagesDao {
         };
         const [result] = await this.db.executeSql(
             `SELECT * FROM ${this.tableName}
-            WHERE sapling_id = ? and type != 'tree_snapshot' ${uploaded === undefined ? '' : `AND is_uploaded = ${uploaded}`};`,
+            WHERE sapling_id = ? and type != 'tree_snapshot' ${uploaded === undefined ? '' : `AND is_uploaded = ${uploaded ? 1 : 0}`};`,
             [saplingId]
         )
 

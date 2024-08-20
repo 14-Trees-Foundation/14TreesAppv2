@@ -48,10 +48,10 @@ export class PlotService {
         }
     }
 
-    async fetchChanges(timestamp: string, plot_ids: number[], offset: number): Promise<PlotHelperDataResponse> {
+    async fetchChanges(timestamp: string, plot_ids: number[], offset: number, site_id?: number): Promise<PlotHelperDataResponse> {
         const url = `/api/appv2/fetchHelperData/plots`;
         try {
-            const response = await this.api.post<PlotHelperDataResponse>(url, { timestamp, plot_ids, offset });
+            const response = await this.api.post<PlotHelperDataResponse>(url, { site_id, timestamp, plot_ids, offset });
             return response.data;
         } catch (error: any) {
             return handleApiError("PlotService::fetchChanges:", error)

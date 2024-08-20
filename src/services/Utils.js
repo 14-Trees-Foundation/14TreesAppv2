@@ -300,6 +300,7 @@ export class Utils {
         await daoClient.visits.createTable();
         await daoClient.visitImages.createTable();
         await daoClient.syncInfo.createTable();
+        await daoClient.siteSync.createTable();
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
         await this.localdb.createSaplingTbl();
@@ -949,6 +950,14 @@ export class Utils {
     static async getLastSyncDate() {
         return await AsyncStorage.getItem(Constants.syncDateKey);
     }
+    
+    static async getNetworkSpeed() {
+        return await AsyncStorage.getItem(Constants.networkSpeed);
+    }
+
+    static async removeNetworkSpeed() {
+        await AsyncStorage.removeItem(Constants.networkSpeed);
+    }
 
     static async upload(onProgress = undefined) {
         const final = await Utils.fetchTreesFromLocalDB(0);//not uploaded.
@@ -1384,10 +1393,6 @@ export class Utils {
                 );
 
                 const resizedImageSize = resizedImage.size;
-                console.log("resizedImage----:", resizedImageSize);
-
-
-
                 if (resizedImageSize > maxsz) {
                     // Image size is still too large, reduce quality
                     maxQuality = compressedQuality;
@@ -1474,6 +1479,10 @@ export class Constants {
 
     // for sync screen
     static lastSyncInfo = 'last_sync_info'
+    static networkSpeed = 'network_speed'
+
+    // selected Site to work with
+    static selectedSiteId = 'selected_site_id'
 }
 
 export const getImageSourceObject = (src) => {

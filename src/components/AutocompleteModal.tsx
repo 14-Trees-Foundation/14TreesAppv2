@@ -7,7 +7,7 @@ import SearchBar from './Searchbar';
 
 interface AutocompleteInputProps<T> {
   label: string
-  value: T,
+  value: T | null,
   options: T[],
   keyGetter: (option: T) => any
   valueGetter: (option: T) => string

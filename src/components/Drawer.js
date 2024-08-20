@@ -144,7 +144,16 @@ export const DrawerContent = (props) => {
                 onPress={handleLanguageChanges}
               />
             </Drawer.Section>
-            <DrawerItem 
+            {/* <DrawerItem 
+              icon={({size, color}) => (
+                <Button icon='google-maps' size={size + 20} color={color}/>
+              )}
+              label={Strings.screenNames.Map} 
+              style={{marginVertical: -5}}
+              labelStyle={{ marginLeft: -40 }} 
+              onPress={() => props.navigation.navigate(Strings.screenNames.getString('Map', Strings.english))}
+            /> */}
+            {isAdmin && <DrawerItem 
               icon={({size, color}) => (
                 <Button icon='tools' size={size + 20} color={color}/>
               )}
@@ -152,7 +161,7 @@ export const DrawerContent = (props) => {
               style={{marginVertical: -5}}
               labelStyle={{ marginLeft: -40 }} 
               onPress={() => props.navigation.navigate(Strings.screenNames.getString('Dev', Strings.english))}
-            />
+            />}
             <DrawerItem 
               icon={({size, color}) => (
                 <Button icon='information-outline' size={size + 20} color={color}/>

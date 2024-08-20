@@ -9,6 +9,8 @@ import { VisitService } from './visits';
 import { VisitImageService } from './visit_images';
 import { API_HOST } from '../../constants/constants';
 import { TreeSnapshotService } from './tree_snapshots';
+import { dummyFileData } from './dummy_file';
+
 
 axios.interceptors.response.use(function (response) {
     return response;
@@ -50,8 +52,18 @@ axios.interceptors.response.use(function (response) {
 
 export class ApiClient {
     private serverBase = API_HOST;
+    private uploadDuration: number | null = null;
+
     private api = axios.create({
         baseURL: this.serverBase,
+        onUploadProgress: progressEvent => {
+            if (progressEvent.loaded === progressEvent.total) {
+                const endTime = performance.now();
+                if (this.uploadDuration) {
+                  this.uploadDuration = endTime - this.uploadDuration;
+                }
+            }
+        }
     });
     public users = new UserService(this.api);
     public trees = new TreeService(this.api);
@@ -60,4 +72,12 @@ export class ApiClient {
     public visits = new VisitService(this.api);
     public visitImages = new VisitImageService(this.api);
     public treeSnapshots = new TreeSnapshotService(this.api);
+
+    //  this is to check network speed
+    async uploadDummyFile(): Promise<number> {
+      const url = `/api/appv2/test-upload`;
+      this.uploadDuration = performance.now();
+      const response = await this.api.post<void>(url, { data: dummyFileData });
+      return this.uploadDuration;
+    }
 } 

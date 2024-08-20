@@ -8,6 +8,8 @@ export type SyncInfo = {
     synced_at: string,
     upload_time: number | null,
     fetch_time: number | null,
+    upload_error: string | null,
+    fetch_error: string | null,
     is_uploaded: 0 | 1,
     change_type: 'none' | 'add' | 'edit' | 'delete',
     created_at: string,
@@ -21,4 +23,6 @@ export type CreateSyncInfoRequest = {
     synced_at: string,
     upload_time: number | null,
     fetch_time: number | null,
+    upload_error: string | null,
+    fetch_error: string | null,
 }
