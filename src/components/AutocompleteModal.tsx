@@ -64,6 +64,7 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
               disabled={disabled}
               style={{ fontWeight: (boldSelection && value) ? 'bold' : 'normal' }}
               numberOfLines={2}
+              multiline={value ? valueGetter(value).length > 50 : false}
             />
         </View>
       </TouchableWithoutFeedback>

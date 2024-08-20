@@ -188,7 +188,6 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   return (
     <View style={{ height: '97%' }}>
-      <Loading loading={loading} text="Sync in Progress..." />
       <InternetBanner />
       <Text style={{ paddingHorizontal: 15, paddingVertical: 15, fontWeight: 'bold', alignSelf: 'flex-end' }} variant='titleLarge'>Welcome, {getName()}!</Text>
       <ScrollView>
@@ -235,7 +234,6 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
         <ProgressBar visible={loading} progress={progress} style={{ backgroundColor: '#bf8686' }} fillStyle={{ backgroundColor: '#02ab4e' }} />
         <Text style={{ textAlign: 'center', marginTop: 2 }}>Completed: {getReadableProgress(progress)}</Text>
       </View>}
-
 
       <View style={{ position: 'absolute', bottom: 10, left: 20, right: 20 }}>
         <Text variant='bodySmall' style={{ color: 'black', alignSelf: 'center', marginBottom: 4 }}>

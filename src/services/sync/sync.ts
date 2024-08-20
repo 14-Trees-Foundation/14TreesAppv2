@@ -10,7 +10,7 @@ import { fetchAndStoreVisits } from "./visits";
 import { ApiClient } from "../api/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const uploadLocalData = async (changesCount: any) => {
+export const uploadLocalData = async (changesCount: any, syncTime: string) => {
     const total = changesCount.trees.add + changesCount.trees.edit + changesCount.trees.delete
                     + changesCount.tree_images.add + changesCount.tree_images.delete 
                     + changesCount.visit_images.add + changesCount.visit_images.delete + 1;
@@ -31,7 +31,7 @@ export const uploadLocalData = async (changesCount: any) => {
     
     count = changesCount.trees.add + changesCount.trees.edit + changesCount.trees.delete;
     try {
-        if (count !== 0) await uploadTreesData();
+        if (count !== 0) await uploadTreesData(syncTime);
     } catch (error: any) {
         const stackTrace = error.stack;
         const errorLog = {
@@ -44,7 +44,7 @@ export const uploadLocalData = async (changesCount: any) => {
 
     count = changesCount.tree_images.add + changesCount.tree_images.delete 
     try {
-        if (count !== 0) await uploadTreeSnapshotsData();
+        if (count !== 0) await uploadTreeSnapshotsData(syncTime);
     } catch (error: any) {
         const stackTrace = error.stack;
         const errorLog = {
@@ -58,7 +58,7 @@ export const uploadLocalData = async (changesCount: any) => {
 
     count = changesCount.visit_images.add + changesCount.visit_images.delete
     try {
-        if (count !== 0) await uploadVisitImagesData();
+        if (count !== 0) await uploadVisitImagesData(syncTime);
     } catch (error: any) {
         const stackTrace = error.stack;
         const errorLog = {

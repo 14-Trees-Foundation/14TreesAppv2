@@ -61,6 +61,17 @@ export class SyncInfoDao {
         return syncInfo;
     }
 
+    getSyncInfoBySyncTime = async (syncTime: string): Promise<SyncInfo> => {
+        const query = `SELECT * FROM ${this.tableName}
+            WHERE synced_at = ?;
+        `
+
+        const [results] = await this.db.executeSql(query, [syncTime])
+        if (results.rows.length === 0) throw new Error('Sync Information not found!')
+
+        return results.rows.item(0);
+    }
+
     createSyncInfo = async (data: CreateSyncInfoRequest) => {
         const query = `
             INSERT OR REPLACE INTO ${this.tableName}

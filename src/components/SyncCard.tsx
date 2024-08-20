@@ -48,8 +48,7 @@ const SyncCard: React.FC<SyncCardProps> = ({ syncedAt, trees, treeImages, visitI
 
     return (
         <View style={styles.card}>
-            {syncedAt !== '' && <Text style={styles.syncedAtTitle}>{Strings.messages.SyncedAt}: <Text style={styles.syncedAt}>{syncedAt}</Text></Text>}
-            {syncedAt === '' && <Text style={styles.syncedAtTitle}>Current sync details:</Text>}
+            {syncedAt !== '' && <Text style={styles.syncedAtTitle}>{Strings.messages.StartTime}: <Text style={styles.syncedAt}>{syncedAt}</Text></Text>}
 
             {treesData.length !== 0 && <View style={styles.sectionContainer}>
                 <Text style={styles.sectionTitle}>{Strings.messages.Trees}: </Text>

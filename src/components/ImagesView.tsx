@@ -47,6 +47,7 @@ const ImagesView: React.FC<ImagesViewInputProps> = ({ title, images, onDelete })
           visible={isVisible}
           onRequestClose={() => setIsVisible(false)}
           FooterComponent={(props) => ( <Text style={{ textAlign: 'center', color: 'white' }}>{(props.imageIndex + 1) + "/" + images.length}</Text> )}
+          keyExtractor={(src, index) => index.toString()}
         />
     </View>
   );

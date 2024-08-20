@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Constants, Utils } from "../Utils";
 import { ToastAndroid } from "react-native";
 import { VisitImage } from "../../model/visit_image";
+import { saveSyncInfo } from "./sync_info";
 
 export const fetchAndStoreVisitImages = async () => {
     // fetch data from the backend
@@ -52,20 +53,23 @@ export const fetchAndStoreVisitImages = async () => {
     }
 }
 
-export const uploadVisitImagesData = async () => {
+export const uploadVisitImagesData = async (syncTime: string) => {
     
     const daoClient = await DaoClient.authenticate();
     const visitImages = await daoClient.visitImages.getVisitImages(false);
     const deletedImages = visitImages.filter(image => image.is_deleted === 1)
     const newImages = visitImages.filter(image => image.is_deleted === 0)
 
-    await deleteImages(daoClient, deletedImages);
-    await uploadNewImages(daoClient, newImages);
+    const resp = await daoClient.syncInfo.getSyncInfoBySyncTime(syncTime);
+    const syncInfo = { ...resp, trees: JSON.parse(resp.trees), tree_images: JSON.parse(resp.tree_images), visit_images: JSON.parse(resp.visit_images) }
+
+    await deleteImages(daoClient, deletedImages, syncInfo);
+    await uploadNewImages(daoClient, newImages, syncInfo);
 
     await daoClient.visitImages.deleteUploadedImages();
 }
 
-const deleteImages = async (daoClient: DaoClient, images: VisitImage[]) => {
+const deleteImages = async (daoClient: DaoClient, images: VisitImage[], syncInfo: any) => {
     const apiClient = new ApiClient();
     let imageIds: number[] = [] 
     images.forEach(image => { if (image.id) imageIds.push(image.id) });
@@ -73,11 +77,14 @@ const deleteImages = async (daoClient: DaoClient, images: VisitImage[]) => {
     await apiClient.visitImages.deleteVisitImages(imageIds);
 
     for (const image of images) {
-        await daoClient.visitImages.markImageUploaded(image.local_id)
+        await daoClient.visitImages.markImageUploaded(image.local_id);
+        syncInfo.visit_images.delete += 1;
+        syncInfo.upload_time = new Date().getTime() - new Date(syncInfo.synced_at).getTime();
+        await saveSyncInfo(daoClient, syncInfo);
     }
 }
 
-const uploadNewImages = async (daoClient: DaoClient, visitImages: VisitImage[]) => {
+const uploadNewImages = async (daoClient: DaoClient, visitImages: VisitImage[], syncInfo: any) => {
     const apiClient = new ApiClient();
 
     let visitIds: number[] = [];
@@ -96,7 +103,10 @@ const uploadNewImages = async (daoClient: DaoClient, visitImages: VisitImage[]) 
         await apiClient.visitImages.createVisitImages(visitId, images)
 
         for (const image of images) {
-            await daoClient.visitImages.markImageUploaded(image.local_id)
+            await daoClient.visitImages.markImageUploaded(image.local_id);
+            syncInfo.visit_images.add += 1;
+            syncInfo.upload_time = new Date().getTime() - new Date(syncInfo.synced_at).getTime();
+            await saveSyncInfo(daoClient, syncInfo);
         }
     }
 }

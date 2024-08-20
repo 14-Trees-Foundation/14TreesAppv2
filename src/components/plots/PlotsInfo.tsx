@@ -11,10 +11,11 @@ interface PlotsInfoInputProps {
     plot: Plot
     onClose: () => void
     onEdit: () => void
+    onSaplingEdit: () => void
     onDelete: () => void
 }
 
-export const PlotsInfo: React.FC<PlotsInfoInputProps> = ({ isVisible, plot, onClose, onDelete, onEdit }) => {
+export const PlotsInfo: React.FC<PlotsInfoInputProps> = ({ isVisible, plot, onClose, onDelete, onEdit, onSaplingEdit }) => {
 
     const [isDelete, setIsDelete] = useState(false);
 
@@ -28,6 +29,9 @@ export const PlotsInfo: React.FC<PlotsInfoInputProps> = ({ isVisible, plot, onCl
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.title}>Plots Information</Text>
+                    <TouchableOpacity style={styles.icons} onPress={() => { onClose(); onSaplingEdit(); }}>
+                        <Icon name="edit" size={24} color="green" />
+                    </TouchableOpacity>
                     {/* <TouchableOpacity style={styles.icons} onPress={() => { onClose(); onEdit(); }}>
                         <Icon name="edit" size={24} color="green" />
                     </TouchableOpacity>

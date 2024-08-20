@@ -176,6 +176,28 @@ export class TreesDao {
         }
     }
 
+    updateTreesPlot = async (saplingIds: string[], plotId: number) => {
+        const now = new Date().toISOString();
+        const saplingIdsStr = saplingIds.map(id => `'${id}'`).join(',');
+    
+        await this.db.executeSql(
+            `UPDATE ${this.tableName}
+            SET 
+                plot_id = ?,
+                is_uploaded = 0,
+                change_type = CASE 
+                                WHEN change_type = 'add' THEN 'add' 
+                                ELSE 'edit' 
+                             END,
+                updated_at = ?
+            WHERE sapling_id IN (${saplingIdsStr});`,
+            [
+                plotId, now
+            ]
+        );
+    }
+    
+
     upsertLiveTreeIntoLocalDb = async (data: Tree) => {
         if (!data.id) return;
 
@@ -398,11 +420,17 @@ export class TreesDao {
     deleteDummyTree = async () => {
         // locally added tree: HARD DELETE
         await this.db.executeSql(
+            `DELETE FROM ${this.tableName}
+            WHERE change_type = 'add' AND is_uploaded = 0 AND planted_by = 'Dummy';`,
+        )
+
+        await this.db.executeSql(
             `UPDATE ${this.tableName}
             SET
                 is_uploaded = 0,
                 change_type = 'delete'
             WHERE planted_by = 'Dummy';`,
         )
+
     }
 };

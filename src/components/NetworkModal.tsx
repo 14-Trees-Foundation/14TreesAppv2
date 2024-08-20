@@ -33,7 +33,8 @@ const NetworkSpeedModal: React.FC<NetworkSpeedModalProps> = ({ visible, dataSize
             const requiredTime = dataSize / (8 * 1024 * speedInKBps)
 
             setNetworkSpeed(speedInKBps)
-            setSyncTime(formatDuration(requiredTime * 1000))
+            if (requiredTime < 10 ) setSyncTime('few seconds')
+            else setSyncTime(formatDuration(requiredTime * 1000))
         } catch (err: any) {
             setError(err.message);
         }

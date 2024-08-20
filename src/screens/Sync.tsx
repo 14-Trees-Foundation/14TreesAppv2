@@ -34,7 +34,6 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [currentSyncDetails, setCurrentSyncDetails] = useState(syncDetailsTemplate)
 
     const [state, setState] = useState(0);
-    const [syncState, setSyncState] = useState(0);
     const [visible, setVisible] = useState(false);
     const [syncDisabled, setSyncDisabled] = useState(true);
     const [internetSpeedCheck, setInternetSpeedCheck] = useState(false);
@@ -46,11 +45,6 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [treeImagesCount, setTreeImagesCount] = useState<any>(null);
     const [visitImagesCount, setVisitImagesCount] = useState<any>(null);
     const [syncInfoList, setSyncInfoList] = useState<any[]>([]);
-    const currentSyncDetailsRef = useRef(currentSyncDetails);
-
-    useEffect(() => {
-        currentSyncDetailsRef.current = currentSyncDetails;
-    }, [currentSyncDetails]);
 
     useEffect(() => {
         const backAction = () => {
@@ -96,22 +90,6 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         }
     }
 
-    // specifically for saving sync details in local db
-    useEffect(() => {
-        if (syncState === 0) return;
-
-        const timeoutId = setTimeout(async () => {
-            await saveSyncInfo(currentSyncDetailsRef.current);
-            if (currentSyncDetailsRef.current.upload_time !== 0) {
-                setSyncState(0);
-                setCurrentSyncDetails(syncDetailsTemplate);
-            }
-            getSyncInfo();
-        }, 10);
-
-        return () => clearTimeout(timeoutId);
-    }, [syncState]);
-
     useEffect(() => {
         if (visible) {
             setCurrentSyncDetails(prev => ({
@@ -133,24 +111,24 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         }
 
         const total = treeChanges?.add || 0 + treeChanges?.edit || 0 + treeChanges?.delete || 0
-                        + treeImagesCount?.add || 0 + treeImagesCount?.delete || 0
-                        + visitImagesCount?.add || 0 + visitImagesCount?.delete || 0
+            + treeImagesCount?.add || 0 + treeImagesCount?.delete || 0
+            + visitImagesCount?.add || 0 + visitImagesCount?.delete || 0
         if (total === 0) setSyncDisabled(true);
         else setSyncDisabled(false);
-        
+
     }, [visible, treeChanges, treeImagesCount, visitImagesCount]);
 
     useEffect(() => {
         if (visible && syncType === 'upload') {
             const total = initialChanges.trees.add + initialChanges.trees.edit + initialChanges.trees.delete
-                        + initialChanges.tree_images.add + initialChanges.tree_images.delete
-                        + initialChanges.visit_images.add + initialChanges.visit_images.delete
-            
+                + initialChanges.tree_images.add + initialChanges.tree_images.delete
+                + initialChanges.visit_images.add + initialChanges.visit_images.delete
+
             const synced = currentSyncDetails.trees.add + currentSyncDetails.trees.edit + currentSyncDetails.trees.delete
-            + currentSyncDetails.tree_images.add + currentSyncDetails.tree_images.delete
-            + currentSyncDetails.visit_images.add + currentSyncDetails.visit_images.delete
-    
-            if (total !== 0) setProgress(synced/total);
+                + currentSyncDetails.tree_images.add + currentSyncDetails.tree_images.delete
+                + currentSyncDetails.visit_images.add + currentSyncDetails.visit_images.delete
+
+            if (total !== 0) setProgress(synced / total);
             else setProgress(0);
         }
     }, [visible, syncType, initialChanges, currentSyncDetails]);
@@ -202,6 +180,13 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
             ...localChangesCount
         }
         setInitialChanges(syncDetails);
+        setCurrentSyncDetails(prev => {
+            return {
+                ...prev,
+                synced_at: syncDetails.synced_at,
+            }
+        })
+        await saveSyncInfo({ ...syncDetailsTemplate, synced_at: syncDetails.synced_at });
 
         let timeNow = new Date().getTime();
 
@@ -210,7 +195,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         setVisible(true);
 
         try {
-            await uploadLocalData(localChangesCount);
+            await uploadLocalData(localChangesCount, syncDetails.synced_at);
         } catch (error: any) {
             syncDetails.upload_error = error.message;
             const stackTrace = error.stack;
@@ -223,19 +208,15 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         }
 
         syncDetails.upload_time = new Date().getTime() - timeNow;
-        setCurrentSyncDetails(prev => {
-            return {
-                ...prev,
-                upload_error: syncDetails.upload_error,
-                synced_at: syncDetails.synced_at,
-                upload_time: syncDetails.upload_time
-            }
-        })
-        setTimeout(() => {
-            setSyncState(prev => prev + 1);
-            setVisible(false);
-        }, 3000) // save after some time. allow states to get updated
 
+        const daoClient = await DaoClient.authenticate();
+        const syncInfo = await daoClient.syncInfo.getSyncInfoBySyncTime(syncDetails.synced_at);
+        syncInfo.upload_error = syncDetails.upload_error;
+        syncInfo.upload_time = syncDetails.upload_time;
+        await daoClient.syncInfo.createSyncInfo(syncInfo);
+        getSyncInfo();
+
+        setVisible(false);
         Utils.setLastSyncDateNow();
         Utils.removeNetworkSpeed();
     }
@@ -258,7 +239,9 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         setVisible(false);
     }
 
-    const saveSyncInfo = async (data: any) => {
+    const saveSyncInfo = async (info: any) => {
+        const data = JSON.parse(JSON.stringify(info)); // copy
+
         data.trees = JSON.stringify(data.trees);
         data.tree_images = JSON.stringify(data.tree_images);
         data.visit_images = JSON.stringify(data.visit_images);
@@ -288,6 +271,14 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         return formatDuration((items * 1024 * 1000) / parseInt(networkSpeed))
     }
 
+    const getNetworkSpeed = () => {
+        let speed = networkSpeed + ' KBps'
+        if (parseInt(networkSpeed) >= 1024) {
+            speed = (parseInt(networkSpeed) / 1024).toFixed(2) + ' MBps'
+        }
+        return speed
+    }
+
     const getChipIcon = (props: any, synced: boolean) => {
         return (
             <Icon source={'cloud-sync-outline'} size={props.size} color={synced ? "green" : "red"} />
@@ -298,7 +289,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={{ height: '100%', width: '100%' }}>
             <InternetBanner />
             <View style={styles.screen}>
-                <Loading loading={visible} text="Sync in Progress..." />
+                <Loading loading={visible && syncType === 'upload'} text="Sync in Progress..." />
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text variant='titleMedium' style={{ color: 'black', fontWeight: 'bold', paddingRight: 8 }}>{Strings.messages.LastSynced}</Text>
                     <Chip icon='cloud-sync-outline' style={styles.chip} >
@@ -307,6 +298,14 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                 </View>
 
                 <View style={{ marginTop: 20 }}>
+                    <Button
+                        mode='contained-tonal'
+                        buttonColor="#93faa9"
+                        labelStyle={{ color: 'black', fontWeight: 'bold' }}
+                        style={{ marginHorizontal: 4, flexGrow: 1, marginBottom: 5 }}
+                        disabled={visible}
+                        onPress={fetchData}
+                    >{Strings.buttonLabels.DownloadData}</Button>
                     <Text variant='titleLarge' style={{ color: 'black', fontWeight: 'bold', paddingRight: 10 }}>{Strings.messages.LocalChanges}:</Text>
                     <View style={{ justifyContent: 'center', marginVertical: 5 }}>
                         <Text variant='titleMedium' style={{ color: 'black', paddingRight: 10 }}>{Strings.messages.Trees}:</Text>
@@ -332,22 +331,15 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                     </View>
                 </View>
 
-                <View style={{ marginTop: 20, justifyContent: 'center', flexDirection: 'row' }}>
+                <View style={{ marginTop: 20, justifyContent: 'center' }}>
                     <Button
                         mode='contained-tonal'
                         buttonColor="#93faa9"
                         labelStyle={{ color: 'black', fontWeight: 'bold' }}
                         style={{ marginHorizontal: 4, flexGrow: 1 }}
                         onPress={() => setInternetSpeedCheck(true)}
-                        disabled={syncDisabled}
+                        disabled={syncDisabled || visible}
                     >{Strings.buttonLabels.UploadData}</Button>
-                    <Button
-                        mode='contained-tonal'
-                        buttonColor="#93faa9"
-                        labelStyle={{ color: 'black', fontWeight: 'bold' }}
-                        style={{ marginHorizontal: 4, flexGrow: 1 }}
-                        onPress={fetchData}
-                    >{Strings.buttonLabels.DownloadData}</Button>
                 </View>
 
                 {!visible && syncInfoList.length !== 0 && <View style={{ flex: 1, width: '100%', marginTop: 20 }}>
@@ -394,7 +386,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                     style={{ position: 'absolute', bottom: 70, left: 20, right: 20 }}>
                     <Text style={{ textAlign: 'center', marginBottom: 5 }}>
                         {syncType === 'upload' && networkSpeed !== ''
-                            ? 'Remaining Time ' + getRemainingUploadTime() + ` (${parseInt(networkSpeed) >= 1024 ? (parseInt(networkSpeed) / 1024) + ' MBps' : networkSpeed + 'KBps'} )`
+                            ? 'Remaining Time ' + getRemainingUploadTime() + ` (${getNetworkSpeed()})`
                             : ''}
                     </Text>
                     <Text style={{ textAlign: 'center', marginBottom: 5 }}>

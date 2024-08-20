@@ -11,6 +11,7 @@ import { CreatePlotRequest, Plot } from "../model/plot";
 import { useFocusEffect } from "@react-navigation/native";
 import SearchBar from "../components/Searchbar";
 import InternetBanner from "../components/InternetInfo";
+import { Strings } from "../services/Strings";
 
 interface PlotsInputProps {
     navigation: any
@@ -128,6 +129,12 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
                     isVisible={isInfoModalVisible}
                     onClose={() => { setInfoModalVisible(false) }}
                     onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
+                    onSaplingEdit={() => {
+                        navigation.navigate(
+                            Strings.screenNames.getString('ChangePlot', Strings.english),
+                            { selectedPlot },
+                        )
+                    }}
                     onDelete={handleDelete}
                     plot={selectedPlot}
                 />}

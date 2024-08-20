@@ -144,15 +144,15 @@ export const DrawerContent = (props) => {
                 onPress={handleLanguageChanges}
               />
             </Drawer.Section>
-            {/* <DrawerItem 
+            <DrawerItem 
               icon={({size, color}) => (
                 <Button icon='google-maps' size={size + 20} color={color}/>
               )}
-              label={Strings.screenNames.Map} 
+              label={Strings.screenNames.ChangePlot} 
               style={{marginVertical: -5}}
               labelStyle={{ marginLeft: -40 }} 
-              onPress={() => props.navigation.navigate(Strings.screenNames.getString('Map', Strings.english))}
-            /> */}
+              onPress={() => props.navigation.navigate(Strings.screenNames.getString('ChangePlot', Strings.english))}
+            />
             {isAdmin && <DrawerItem 
               icon={({size, color}) => (
                 <Button icon='tools' size={size + 20} color={color}/>

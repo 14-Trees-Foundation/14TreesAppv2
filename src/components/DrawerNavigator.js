@@ -27,6 +27,7 @@ import LoginScreen from '../screens/Login';
 import Home from '../screens/HomeScreen';
 import Dev from '../screens/Dev';
 import { MapScreen } from './Map';
+import PlotSaplings from '../screens/PlotSaplings';
 
 const CustomDrawerToggleButton = ({ navigation }) => (
     <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
@@ -304,13 +305,6 @@ export const DrawerNavigator = () => {
                 component={Dev}
                 options={{
                     title: Strings.screenNames.Dev,
-                }}
-            />
-            <Drawer.Screen
-                name={Strings.screenNames.getString('Map', Strings.english)}
-                component={MapScreen}
-                options={{
-                    title: Strings.screenNames.Map,
                 }}
             />
         </Drawer.Navigator >

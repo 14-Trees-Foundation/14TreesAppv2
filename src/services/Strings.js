@@ -27,7 +27,7 @@ export class Strings {
             UpdatePlotShift: "Update Tree Plot",
             AppInfo: "App Info",
             Dev: "Dev",
-            Map: "Map",
+            ChangePlot: "Change Plot",
             TreesInShift: "Trees In Shift", //manjur
             PlotSelect: "Select Plot",
             SyncDisplay: "Sync Data", //manjur
@@ -57,7 +57,7 @@ export class Strings {
             UpdatePlotShift: "सॅपलिंग प्लॉट अपडेट",
             AppInfo: "अ‍ॅपची माहिती",
             Dev: "देव",
-            Map: "नकाशा",
+            ChangePlot: "प्लॉट बदला",
             TreesInShift: "शिफ्ट मधील झाडे", //manjur
             PlotSelect: "प्लॉट निवडा", //manjur
             SyncDisplay: "सिंक डेटा",
@@ -153,12 +153,11 @@ export class Strings {
 
             SyncHistory: 'Sync History',
             CurrentSync: 'Current Sync',
-            SyncedAt: 'Synced At',
+            StartTime: 'Start Time',
             UploadTime: 'Upload Time',
             UploadError: 'Upload Error',
             FetchTime: 'Fetch Time',
             FetchError: 'Fetch Error',
-            CurrentSyncDetails: 'Current sync details',
             NoDataUploaded: 'No data was uploaded in this sync.',
             UploadingChanges: 'Uploading changes...',
 
@@ -261,12 +260,11 @@ export class Strings {
 
             SyncHistory: 'सिंक इतिहास',
             CurrentSync: 'वर्तमान समक्रमण',
-            SyncedAt: 'येथे समक्रमित केले',
+            StartTime: 'प्रारंभ वेळ',
             UploadTime: 'अपलोड वेळ',
             UploadError: 'अपलोड त्रुटी',
             FetchTime: 'वेळ आणा',
             FetchError: 'आणणे त्रुटी',
-            CurrentSyncDetails: 'वर्तमान समक्रमण तपशील',
             NoDataUploaded: 'या सिंकमध्ये कोणताही डेटा अपलोड केला गेला नाही.',
             UploadingChanges: 'बदल अपलोड करत आहे...',
 
