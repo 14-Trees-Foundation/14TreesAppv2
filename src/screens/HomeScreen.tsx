@@ -211,12 +211,17 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           style={{
             padding: 15
           }}>
+          <Text variant='bodyMedium'>{Strings.messages.SelectTheSiteYouAreAt}:</Text>
           <Autocomplete
             label="Select a Site"
             value={selectedSite}
             options={sites}
             keyGetter={(option) => option ? option.local_id : ''}
-            valueGetter={(option) => option ? option.name_english : ''}
+            valueGetter={(option) => {
+              return option.plot_count && option.plot_count > 0
+              ? `${option.name_english} (Plots: ${option.plot_count})`
+              : option.name_english
+            }}
             onSelect={handleSiteSelection}
             onSearch={(text) => setSearchQuery(text)}
             variant='outlined'
@@ -224,7 +229,6 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
         </View>}
         <View style={{ marginVertical: 30 }}></View>
       </ScrollView>
-
 
       {loading && <View
         style={{ position: 'absolute', bottom: 80, left: 20, right: 20 }}>

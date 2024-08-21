@@ -1,8 +1,7 @@
 
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
-import { Button } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { Button, IconButton } from 'react-native-paper';
 import { useState } from 'react';
 import { Plot } from '../../model/plot';
 
@@ -28,10 +27,8 @@ export const PlotsInfo: React.FC<PlotsInfoInputProps> = ({ isVisible, plot, onCl
         >
             <View style={styles.container}>
                 <View style={styles.header}>
-                    <Text style={styles.title}>Plots Information</Text>
-                    <TouchableOpacity style={styles.icons} onPress={() => { onClose(); onSaplingEdit(); }}>
-                        <Icon name="edit" size={24} color="green" />
-                    </TouchableOpacity>
+                    <Text style={styles.title}>Plot Info</Text>
+                    <IconButton icon='map-marker-distance' style={styles.icons} iconColor='green' onPress={() => { onClose(); onSaplingEdit(); }}/>
                     {/* <TouchableOpacity style={styles.icons} onPress={() => { onClose(); onEdit(); }}>
                         <Icon name="edit" size={24} color="green" />
                     </TouchableOpacity>

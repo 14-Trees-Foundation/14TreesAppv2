@@ -49,18 +49,20 @@ export class SitesDao {
     }
 
     // Data manipulation operations
-    getSites = async (offset: number = 0, limit: number = 10, isUploaded?: boolean ,isDeleted: boolean = false) => {
+    getSites = async (offset: number = 0, limit: number = 10, isUploaded?: boolean, isDeleted: boolean = false) => {
         const site: Site[] = []
-        const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
-        const query = `SELECT * FROM ${this.tableName}
-            WHERE 1=1 ${isDeleted ? '' : ` AND change_type != 'delete'`} ${isUploaded !== undefined ? 'AND ' + whereCondition : ""}
-            ORDER BY local_id DESC 
+        const whereCondition = `${this.tableName}.is_uploaded = ${isUploaded ? 1 : 0}`
+        const query = `SELECT ${this.tableName}.*, COUNT(plots.id) as plot_count FROM ${this.tableName}
+            LEFT JOIN plots on ${this.tableName}.id = plots.site_id
+            WHERE 1=1 ${isDeleted ? '' : ` AND ${this.tableName}.change_type != 'delete'`} ${isUploaded !== undefined ? 'AND ' + whereCondition : ""}
+            GROUP BY ${this.tableName}.local_id
+            ORDER BY ${this.tableName}.local_id DESC 
             ${limit < 0 ? '' : `LIMIT ${limit} OFFSET ${offset}`};
         `
 
         const [results] = await this.db.executeSql(query)
         for (let index = 0; index < results.rows.length; index++) {
-          site.push(results.rows.item(index));
+            site.push(results.rows.item(index));
         }
 
         return site;
@@ -108,7 +110,7 @@ export class SitesDao {
 
         const timeStamp = new Date().toISOString();
         const [results] = await this.db.executeSql(query, [
-            data.name_marathi, 
+            data.name_marathi,
             data.name_english,
             data.owner,
             data.land_type,
@@ -128,7 +130,7 @@ export class SitesDao {
     updateSite = async (data: Site) => {
         const now = new Date().toISOString();
         let changeType = 'edit';
-        
+
         const [response] = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
             [data.local_id]
@@ -161,7 +163,7 @@ export class SitesDao {
                     updated_at = ?
                 WHERE local_id = ?;`,
                 [
-                    data.name_english, 
+                    data.name_english,
                     data.name_marathi,
                     data.owner,
                     data.land_type,
@@ -172,12 +174,12 @@ export class SitesDao {
                     data.area_acres,
                     data.length_km,
                     data.grove_type,
-                    changeType, 
-                    now, 
+                    changeType,
+                    now,
                     data.local_id
                 ]
             )
-        } catch(err: any) {
+        } catch (err: any) {
             console.log(err);
         }
     }
@@ -213,8 +215,8 @@ export class SitesDao {
                     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 'none'
                 );`,
                 [
-                    data.id, data.name_marathi, data.name_english, data.owner, data.land_type, 
-                    data.land_strata, data.district, data.taluka, data.village, data.area_acres, 
+                    data.id, data.name_marathi, data.name_english, data.owner, data.land_type,
+                    data.land_strata, data.district, data.taluka, data.village, data.area_acres,
                     data.length_km, data.grove_type, data.created_at, data.updated_at
                 ]
             )
@@ -240,8 +242,8 @@ export class SitesDao {
                     updated_at = ?
                     WHERE id = ?;`,
                 [
-                    data.name_english, data.name_marathi, data.owner, data.land_type, 
-                    data.land_strata, data.district, data.taluka, data.village, data.area_acres, 
+                    data.name_english, data.name_marathi, data.owner, data.land_type,
+                    data.land_strata, data.district, data.taluka, data.village, data.area_acres,
                     data.length_km, data.grove_type, data.created_at, data.updated_at, data.id
                 ]
             )
@@ -296,7 +298,7 @@ export class SitesDao {
     }
 
     getSiteByLiveId = async (id: number) => {
-        const query =  `
+        const query = `
             SELECT * FROM ${this.tableName} 
             WHERE id = ?;
         `
@@ -306,7 +308,7 @@ export class SitesDao {
     }
 
     getSiteByLocalId = async (id: number) => {
-        const query =  `
+        const query = `
             SELECT * FROM ${this.tableName} 
             WHERE local_id = ?;
         `
@@ -316,10 +318,10 @@ export class SitesDao {
     }
 
     getLiveSiteIds = async () => {
-        const query =  `SELECT id FROM ${this.tableName} WHERE id IS NOT NULL;`
+        const query = `SELECT id FROM ${this.tableName} WHERE id IS NOT NULL;`
         const [result] = await this.db.executeSql(query);
 
-        const site_ids: number [] = [];
+        const site_ids: number[] = [];
         for (let i = 0; i < result.rows.length; i++) {
             const row = result.rows.item(i);
             site_ids.push(row.id);
@@ -330,14 +332,17 @@ export class SitesDao {
 
     searchSites = async (searchStr: string, offset: number, limit: number) => {
         let sites: Site[] = [];
-        const query =  `
-            SELECT * FROM ${this.tableName} 
-            WHERE change_type != 'delete' AND (name_english LIKE ? OR name_marathi LIKE ? OR village LIKE ?)
-            ORDER BY updated_at DESC
+        const query = `
+            SELECT ${this.tableName}.*, COUNT(plots.id) as plot_count FROM ${this.tableName}
+            LEFT JOIN plots on ${this.tableName}.id = plots.site_id
+            WHERE ${this.tableName}.change_type != 'delete' AND (${this.tableName}.name_english LIKE ? OR ${this.tableName}.name_marathi LIKE ? OR ${this.tableName}.village LIKE ?)
+            GROUP BY ${this.tableName}.local_id
+            ORDER BY ${this.tableName}.updated_at DESC
             LIMIT ? OFFSET ?;
         `
+        
         const likeStr = `%${searchStr}%`
-        const [results] = await this.db.executeSql(query, [ likeStr, likeStr, likeStr, limit, offset]);
+        const [results] = await this.db.executeSql(query, [likeStr, likeStr, likeStr, limit, offset]);
         for (let index = 0; index < results.rows.length; index++) {
             sites.push(results.rows.item(index));
         }

@@ -164,6 +164,8 @@ export class Strings {
             NetworkSpeed: 'Network Speed',
             EstimatedTimeToSync: 'Estimated Time to Sync',
             WishToContinue: 'Do you wish to sync the data?',
+            SelectTheSiteYouAreAt: 'Select the site you are at',
+            SelectNewPlot: 'Select a new plot name',
 
             // Visits
             AddVisit: 'Add Visit',
@@ -271,6 +273,8 @@ export class Strings {
             NetworkSpeed: 'नेटवर्क गती',
             EstimatedTimeToSync: 'सिंक करण्यासाठी अंदाजे वेळ',
             WishToContinue: 'तुम्ही डेटा समक्रमित करू इच्छिता?',
+            SelectTheSiteYouAreAt: 'तुम्ही ज्या साइटवर आहात ते निवडा',
+            SelectNewPlot: 'नवीन प्लॉटचे नाव निवडा',
 
             // Visits
             AddVisit: 'भेट जोडा',
@@ -540,7 +544,10 @@ export class Strings {
             UserCardImage: 'User Card Image',
 
             DownloadData: 'Download Data',
-            UploadData: 'Upload Data'
+            UploadData: 'Upload Data',
+            DownloadSitesPlots: 'Download Sites & Plots Data',
+
+            ChangePlot: 'Change Plot',
         },
         "mr": {
             // home
@@ -604,7 +611,10 @@ export class Strings {
             UserCardImage: 'वापरकर्ता कार्ड प्रतिमा',
 
             DownloadData: 'डेटा डाउनलोड करा',
-            UploadData: 'डेटा अपलोड करा'
+            UploadData: 'डेटा अपलोड करा',
+            DownloadSitesPlots: 'साइट्स आणि प्लॉट डेटा डाउनलोड करा',
+
+            ChangePlot: 'प्लॉट बदला',
         }
     })
     static labels = new LocalizedStrings({
@@ -659,6 +669,12 @@ export class Strings {
 
             // Trees
             ImageDate: 'Image Date',
+
+            Selected: 'Selected',
+            NotSelected: 'Not Selected',
+            Total: 'Total',
+            ChangeSaplingsFromPlot: 'Change saplings from plot',
+            To: 'To',
         },
         "mr": {
             //add tree
@@ -711,6 +727,12 @@ export class Strings {
 
             // Trees
             ImageDate: 'प्रतिमा/चित्र तारीख',
+
+            Selected: 'निवडलेले',
+            NotSelected: 'निवडलेले नाही',
+            Total: 'एकूण',
+            ChangeSaplingsFromPlot: 'प्लॉटमधून रोपे बदला',
+            To: 'ला',
         }
     })
     static english = 'en';

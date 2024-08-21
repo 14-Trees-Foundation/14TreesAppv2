@@ -1,12 +1,14 @@
 import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { BackHandler, SafeAreaView, ToastAndroid, View } from 'react-native';
 import SaplingChipList from '../components/plots/SaplingChipList';
-import { Button, Divider, Text } from 'react-native-paper';
+import { Button, Divider, Icon, Text } from 'react-native-paper';
 import Autocomplete from '../components/AutocompleteModal';
 import { Plot } from '../model/plot';
 import { DaoClient } from '../services/db/dao';
 import ChangePlotModal from '../components/plots/ChangePlotModal';
 import GlobalContext from '../context/GlobalContext ';
+import { CircleSnail } from 'react-native-progress';
+import { Strings } from '../services/Strings';
 
 interface PlotSaplingsProps {
     navigation: any,
@@ -20,6 +22,7 @@ const PlotSaplings: FC<PlotSaplingsProps> = ({ navigation, route }) => {
         console.log('langChanged inside PlotSaplings: ', langChanged);
     }, [langChanged]);
 
+    const [loading, setLoading] = useState(false)
     const [selectedSaplings, setSelectedSapling] = useState<string[]>([])
     const [saplings, setSaplings] = useState<string[]>([])
     const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null)
@@ -61,8 +64,10 @@ const PlotSaplings: FC<PlotSaplingsProps> = ({ navigation, route }) => {
 
         const fetchData = async () => {
             const daoClient = await DaoClient.authenticate();
+            setLoading(true);
             await getSaplings(daoClient);
             await getPlots(daoClient);
+            setLoading(false);
         }
 
         fetchData();
@@ -90,14 +95,14 @@ const PlotSaplings: FC<PlotSaplingsProps> = ({ navigation, route }) => {
         <SafeAreaView style={{ flex: 1 }}>
             <View style={{ flex: 1 }}>
 
-                <View style={{ margin: 10, paddingLeft: 10, flexDirection: 'row', flexWrap: 'wrap' }}>
-                    <Text variant='titleLarge' style={{ fontWeight: 'bold' }}>Plot: </Text>
+                <View style={{ margin: 10, paddingLeft: 10, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <Text variant='titleLarge' style={{ fontWeight: 'bold' }}>{Strings.labels.Plot}: </Text>
                     <Text variant='titleLarge'>{plot.name}</Text>
                 </View>
                 <View style={{ marginHorizontal: 10, marginBottom: 10, paddingLeft: 10 }}>
-                <Text variant='titleSmall'>Select a new plot name:</Text>
+                <Text variant='titleSmall'>{Strings.messages.SelectNewPlot}:</Text>
                     <Autocomplete 
-                        label='Select a new Plot'
+                        label={selectedPlot ? Strings.labels.SelectedPlot : Strings.labels.SelectPlot}
                         value={selectedPlot}
                         options={plots}
                         keyGetter={(option) => option.local_id}
@@ -108,21 +113,38 @@ const PlotSaplings: FC<PlotSaplingsProps> = ({ navigation, route }) => {
                     />
                 </View>
                 <Divider />
-                <SaplingChipList 
+                {loading && <View style={{ alignItems: 'center', justifyContent: 'center', alignContent: 'center', flexGrow: 1}}>
+                    <CircleSnail size={100} color={'#059636'}
+                        thickness={10} duration={700} spinDuration={2000} />
+                </View>}
+                {!loading && <SaplingChipList 
                     items={saplings} 
                     selectedItems={selectedSaplings} 
                     onSelectionChange={setSelectedSapling}
-                />
+                />}
                 <Divider />
                 <View style={{ margin: 10, paddingLeft: 10, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <Text variant='titleSmall' style={{ fontWeight: 'bold' }}>Trees selected: </Text>
-                    <Text variant='titleSmall' style={{ flexGrow: 1 }}>{selectedSaplings.length}</Text>
+                    <View style={{ flexGrow: 1 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <Icon source='checkbox-blank' size={20} color='#82b398' />
+                            <Text variant='titleSmall' style={{ marginRight: 10 }}> {Strings.labels.Selected}</Text>
+                            <Icon source='checkbox-blank' size={20} color='#daf7dc' />
+                            <Text variant='titleSmall'> {Strings.labels.NotSelected}</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row' }}>
+                            <Text variant='titleSmall' style={{ fontWeight: 'bold' }}>{Strings.labels.Selected}: </Text>
+                            <Text variant='titleSmall' >{selectedSaplings.length}</Text>
+                            <Text variant='titleSmall' style={{ fontWeight: 'bold', marginLeft: 10 }}>{Strings.labels.Total}: </Text>
+                            <Text variant='titleSmall' >{saplings.length}</Text>
+                        </View>
+                    </View>
                     <Button 
-                        style={{ marginHorizontal: 3, backgroundColor: '#93faa9' }} 
+                        style={{ marginHorizontal: 3 }} 
                         mode='elevated'
+                        buttonColor='#93faa9'
                         disabled={ selectedPlot === null || selectedSaplings.length === 0 }
                         onPress={() => setModalOpen(true)}
-                    >Change Plot</Button>
+                    >{Strings.buttonLabels.ChangePlot}</Button>
                 </View>
 
                 {selectedPlot && <ChangePlotModal 

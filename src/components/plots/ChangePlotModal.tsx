@@ -2,6 +2,7 @@ import { FC } from "react";
 import { Modal, ScrollView, StyleSheet, View } from "react-native";
 import { Button, Text } from "react-native-paper";
 import SaplingChipList from "./SaplingChipList";
+import { Strings } from "../../services/Strings";
 
 interface ChangePlotModalProps {
     visible: boolean,
@@ -23,9 +24,9 @@ const ChangePlotModal: FC<ChangePlotModalProps> = ({ visible, fromPlot, toPlot, 
         >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
-                    <Text variant='bodyMedium' style={{ fontWeight: 'bold', color: 'black' }}>Change saplings plot from:</Text>
+                    <Text variant='bodyMedium' style={{ fontWeight: 'bold', color: 'black' }}>{Strings.labels.ChangeSaplingsFromPlot}:</Text>
                     <Text variant='bodyMedium' style={{ color: 'black' }}>{fromPlot}</Text>
-                    <Text variant='bodyMedium' style={{ fontWeight: 'bold', color: 'black' }}>To:</Text>
+                    <Text variant='bodyMedium' style={{ fontWeight: 'bold', color: 'black' }}>{Strings.labels.To}:</Text>
                     <Text variant='bodyMedium' style={{ color: 'black' }}>{toPlot}</Text>
                     <ScrollView>
                         <SaplingChipList 
@@ -39,10 +40,10 @@ const ChangePlotModal: FC<ChangePlotModalProps> = ({ visible, fromPlot, toPlot, 
                         alignItems: 'center',
                     }}>
                         <Button mode="contained" onPress={onClose} style={{...styles.closeButton, backgroundColor: '#FF6666'}}>
-                            Cancel
+                            {Strings.buttonLabels.cancel}
                         </Button>
                         <Button mode="contained" onPress={onSubmit} style={{ ...styles.closeButton, backgroundColor: '#4CAF50' }}>
-                            Submit
+                            {Strings.buttonLabels.Submit}
                         </Button>
                     </View>
                 </View>

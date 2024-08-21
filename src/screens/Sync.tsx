@@ -299,7 +299,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                         style={{ marginHorizontal: 4, flexGrow: 1, marginBottom: 10 }}
                         disabled={visible}
                         onPress={fetchData}
-                    >{Strings.buttonLabels.DownloadData}</Button>
+                    >{Strings.buttonLabels.DownloadSitesPlots}</Button>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text variant='titleMedium' style={{ color: 'black', fontWeight: 'bold', paddingRight: 8 }}>{Strings.messages.LastSynced}</Text>

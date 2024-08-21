@@ -17,6 +17,7 @@ export type Site = {
   site_data_check: string | null;
   is_uploaded: 0 | 1,
   change_type: 'none' | 'add' | 'edit' | 'delete',
+  plot_count?: number | null,
   created_at: string;
   updated_at: string;
 }
