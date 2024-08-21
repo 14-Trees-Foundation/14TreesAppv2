@@ -191,22 +191,22 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       <InternetBanner />
       <Text style={{ paddingHorizontal: 15, paddingVertical: 15, fontWeight: 'bold', alignSelf: 'flex-end' }} variant='titleLarge'>Welcome, {getName()}!</Text>
       <ScrollView>
-        <View style={{ minHeight: '55%', margin: 10 }}>
+        {analytics !== null && <View style={{ minHeight: '55%', margin: 10 }}>
           <View style={{
             flex: 1,
             flexDirection: 'row'
           }}>
-            {card('chart-line', Strings.messages.TotalTrees, analytics?.total_trees_planted || 120000)}
-            {card('calendar-month-outline', Strings.messages.YearTrees, analytics?.trees_planted_this_year || 0)}
+            {card('chart-line', Strings.messages.TotalTrees, analytics.total_trees_planted)}
+            {card('calendar-month-outline', Strings.messages.YearTrees, analytics.trees_planted_this_year)}
           </View>
           <View style={{
             flex: 1,
             flexDirection: 'row'
           }}>
-            {card('arm-flex-outline', Strings.messages.MonthTrees, analytics?.trees_planted_this_month || 0)}
-            {card('account-outline', Strings.messages.PersonTrees, analytics?.trees_planted_by_you || 0)}
+            {card('arm-flex-outline', Strings.messages.MonthTrees, analytics.trees_planted_this_month)}
+            {card('account-outline', Strings.messages.PersonTrees, analytics.trees_planted_by_you)}
           </View>
-        </View>
+        </View>}
         {!loading && <View
           style={{
             padding: 15

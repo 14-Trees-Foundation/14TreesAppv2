@@ -10,6 +10,7 @@ import { VisitImageService } from './visit_images';
 import { API_HOST } from '../../constants/constants';
 import { TreeSnapshotService } from './tree_snapshots';
 import { dummyFileData } from './dummy_file';
+import { SyncInfoService } from './sync_info';
 
 
 axios.interceptors.response.use(function (response) {
@@ -72,6 +73,7 @@ export class ApiClient {
     public visits = new VisitService(this.api);
     public visitImages = new VisitImageService(this.api);
     public treeSnapshots = new TreeSnapshotService(this.api);
+    public syncInfo = new SyncInfoService(this.api);
 
     //  this is to check network speed
     async uploadDummyFile(): Promise<number> {

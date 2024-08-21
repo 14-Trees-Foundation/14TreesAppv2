@@ -133,4 +133,28 @@ export class SyncInfoDao {
         }
     }
 
+    upsertLiveSyncInfo = async (data: SyncInfo) => {
+        const query = `
+            INSERT OR REPLACE INTO ${this.tableName}
+            (id, trees, tree_images, visit_images, synced_at, upload_time, upload_error, fetch_time, fetch_error, is_uploaded, change_type, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 0, '', 1, 'none', ?, ?)
+        `
+
+        await this.db.executeSql(query, [
+            data.id,
+            data.trees, 
+            data.tree_images,
+            data.visit_images,
+            data.synced_at,
+            data.upload_time,
+            data.upload_error,
+            data.created_at,
+            data.updated_at
+        ]);
+    }
+
+    updateSyncInfoUploadStatus = async (id: number) => {
+        const query = `UPDATE ${this.tableName} SET is_uploaded = 1, change_type = 'none' WHERE local_id = ${id};`
+        await this.db.executeSql(query)
+    }
 };

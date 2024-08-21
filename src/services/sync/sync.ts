@@ -9,11 +9,10 @@ import { fetchAndStorePlots } from "./plots";
 import { fetchAndStoreVisits } from "./visits";
 import { ApiClient } from "../api/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { fetchAndStoreDeltaSyncInformation, uploadSyncInfoData } from "./sync_info";
 
 export const uploadLocalData = async (changesCount: any, syncTime: string) => {
-    const total = changesCount.trees.add + changesCount.trees.edit + changesCount.trees.delete
-                    + changesCount.tree_images.add + changesCount.tree_images.delete 
-                    + changesCount.visit_images.add + changesCount.visit_images.delete + 1;
+
     let count = 0;
     try {
         const response = await Utils.syncLogs();
@@ -54,7 +53,6 @@ export const uploadLocalData = async (changesCount: any, syncTime: string) => {
         };
         await Utils.logException(JSON.stringify(errorLog));
     }
-    let progress = (count/total) * 0.9;
 
     count = changesCount.visit_images.add + changesCount.visit_images.delete
     try {
@@ -68,7 +66,18 @@ export const uploadLocalData = async (changesCount: any, syncTime: string) => {
         };
         await Utils.logException(JSON.stringify(errorLog));
     }
-    progress = (count/total) * 0.9;
+
+    try {
+        await uploadSyncInfoData();
+    } catch (error: any) {
+        const stackTrace = error.stack;
+        const errorLog = {
+            msg: 'Error uploading local sync history',
+            error: JSON.stringify(error),
+            stackTrace: stackTrace,
+        };
+        await Utils.logException(JSON.stringify(errorLog));
+    }
 }
 
 export const fetchDeltaChanges = async (setProgress: React.Dispatch<React.SetStateAction<number>>) => {
@@ -108,5 +117,8 @@ export const fetchDeltaChanges = async (setProgress: React.Dispatch<React.SetSta
     setProgress(0.9);
 
     await fetchAndStoreTreeSnapshots();
+    setProgress(0.95);
+
+    await fetchAndStoreDeltaSyncInformation();
     setProgress(1);
 }

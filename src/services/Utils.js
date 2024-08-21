@@ -1473,6 +1473,7 @@ export class Constants {
     static lastVisitsFetchedAt = 'last_visits_fetched_at'
     static lastVisitImagesFetchedAt = 'last_visit_images_fetched_at'
     static lastTreeSnapshotsFetchedAt = 'last_tree_snapshots_fetched_at'
+    static lastSyncInfoFetchedAt = 'last_sync_info_fetched_at'
 
     // tree analytics for home screen
     static treeAnalyticsDataKey = 'tree_analytics'

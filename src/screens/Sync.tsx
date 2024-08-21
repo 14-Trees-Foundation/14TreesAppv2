@@ -291,6 +291,17 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
             <View style={styles.screen}>
                 <Loading loading={visible && syncType === 'upload'} text="Sync in Progress..." />
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Button
+                        mode='contained-tonal'
+                        icon='download'
+                        buttonColor="#93faa9"
+                        labelStyle={{ color: 'black', fontWeight: 'bold' }}
+                        style={{ marginHorizontal: 4, flexGrow: 1, marginBottom: 10 }}
+                        disabled={visible}
+                        onPress={fetchData}
+                    >{Strings.buttonLabels.DownloadData}</Button>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text variant='titleMedium' style={{ color: 'black', fontWeight: 'bold', paddingRight: 8 }}>{Strings.messages.LastSynced}</Text>
                     <Chip icon='cloud-sync-outline' style={styles.chip} >
                         {lastSyncDate === '' ? Strings.messages.Never : getTimeDiffString(lastSyncDate)}
@@ -298,14 +309,6 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                 </View>
 
                 <View style={{ marginTop: 20 }}>
-                    <Button
-                        mode='contained-tonal'
-                        buttonColor="#93faa9"
-                        labelStyle={{ color: 'black', fontWeight: 'bold' }}
-                        style={{ marginHorizontal: 4, flexGrow: 1, marginBottom: 5 }}
-                        disabled={visible}
-                        onPress={fetchData}
-                    >{Strings.buttonLabels.DownloadData}</Button>
                     <Text variant='titleLarge' style={{ color: 'black', fontWeight: 'bold', paddingRight: 10 }}>{Strings.messages.LocalChanges}:</Text>
                     <View style={{ justifyContent: 'center', marginVertical: 5 }}>
                         <Text variant='titleMedium' style={{ color: 'black', paddingRight: 10 }}>{Strings.messages.Trees}:</Text>
@@ -333,6 +336,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
 
                 <View style={{ marginTop: 20, justifyContent: 'center' }}>
                     <Button
+                        icon='upload'
                         mode='contained-tonal'
                         buttonColor="#93faa9"
                         labelStyle={{ color: 'black', fontWeight: 'bold' }}

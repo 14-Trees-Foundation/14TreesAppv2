@@ -26,3 +26,8 @@ export type CreateSyncInfoRequest = {
     upload_error: string | null,
     fetch_error: string | null,
 }
+
+export type DeltaChangesResponse = {
+    total: number,
+    sync_histories: SyncInfo[]
+}
