@@ -20,12 +20,6 @@ const InternetBanner: React.FC<{}> = () => {
     return (
         <Banner
             visible={!hasInternet}
-            // actions={[
-            //     {
-            //         label: 'Ok',
-            //         onPress: () => setHasInternet(true),
-            //     },
-            // ]}
             icon='wifi-off'
         >
             <Text variant='titleSmall'>This device is not connected to network!</Text>

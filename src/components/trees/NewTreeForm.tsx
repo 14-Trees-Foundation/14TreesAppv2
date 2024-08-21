@@ -13,6 +13,8 @@ import Autocomplete from '../AutocompleteModal';
 import { ImageSelector } from '../SingleImageSelector';
 import { Image } from '../../model/common';
 import { Visit } from '../../model/visits';
+import { Plot } from '../../model/plot';
+import { Site } from '../../model/sites';
 
 interface TreeFormInputProps {
     tree: Tree | null,
@@ -37,14 +39,16 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     const [userCardImageUri, setUserCardImageUri] = useState<string | null>(null);
 
     const [plantTypes, setPlantTypes] = useState<any[]>([]);
-    const [plots, setPlots] = useState<any[]>([]);
     const [users, setUsers] = useState<User[]>([]);
     const [visits, setVisits] = useState<Visit[]>([]);
     const [assignedTo, setAssignedTo] = useState<User | null>(null);
     const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
 
     const [selectedPlantType, setSelectedPlantType] = useState<any>(null);
-    const [selectedPlot, setSelectedPlot] = useState<any>(null);
+    const [plotSearchQuery, setPlotSearchQuery] = useState('');
+    const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null);
+    const [plots, setPlots] = useState<Plot[]>([]);
+    const [selectedSite, setSelectedSite] = useState<Site | null>(null);
     const [userDetails, setUserDetails] = useState<any>(null);
 
     const [visitEnabled, setVisitEnabled] = useState(false);
@@ -160,9 +164,8 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
             try {
                 const userData = await AsyncStorage.getItem(Constants.userDetailsKey)
                 if (userData) setUserDetails(JSON.parse(userData));
-                let { treeTypes, plots } = await Utils.getLocalTreeTypesAndPlots();
+                let { treeTypes } = await Utils.getLocalTreeTypesAndPlots();
                 if (treeTypes) setPlantTypes(treeTypes);
-                if (plots) setPlots(plots);
             } catch (error: any) {
                 console.error(error);
                 const stackTrace = error.stack;
@@ -188,6 +191,36 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
             }
         }, 10)
     }, [saplingId])
+
+    useEffect(() => {
+        if (plotSearchQuery.length !== 0) return;
+        setTimeout(async () => {
+            const daoClient = await DaoClient.authenticate();
+            let resp = await daoClient.plots.getPlots(0, 100, undefined, false, selectedSite?.id);
+            setPlots(resp)
+        }, 100)
+    }, [plotSearchQuery, selectedSite])
+
+    useEffect(() => {
+        if (plotSearchQuery.length < 1) return;
+        setTimeout(async () => {
+            const daoClient = await DaoClient.authenticate();
+            let plots = await daoClient.plots.searchPlots(plotSearchQuery, 0, 100, selectedSite?.id);
+            setPlots(plots);
+        }, 100)
+    }, [plotSearchQuery, selectedSite])
+
+    useEffect(() => {
+        setTimeout(async () => {
+
+            const daoClient = await DaoClient.authenticate();
+            const siteId = await AsyncStorage.getItem(Constants.selectedSiteId)
+            if (siteId) {
+                const site = await daoClient.sites.getSiteByLiveId(parseInt(siteId));
+                setSelectedSite(site);
+            }
+        }, 10)
+    }, [])
 
     const handleUserSearch = (txt: string) => {
         if (txt.length > 0) {
@@ -313,11 +346,12 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                         <Autocomplete
                             value={selectedPlot}
                             options={plots}
-                            label={Strings.labels.SelectPlot}
+                            label={selectedPlot ? Strings.labels.SelectedPlot : Strings.labels.SelectPlot}
                             onSelect={(data) => { setSelectedPlot(data); }}
                             valueGetter={(data) => data.name}
-                            keyGetter={(data) => data.value}
+                            keyGetter={(data) => data.id}
                             variant='outlined'
+                            onSearch={setPlotSearchQuery}
                         />
                         {validationErrors.plot && <HelperText visible={true} type='error'>Please select a plot</HelperText>}
                     </View>

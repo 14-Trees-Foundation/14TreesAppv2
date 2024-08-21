@@ -12,6 +12,10 @@ import { useFocusEffect } from "@react-navigation/native";
 import SearchBar from "../components/Searchbar";
 import InternetBanner from "../components/InternetInfo";
 import { Strings } from "../services/Strings";
+import Autocomplete from "../components/AutocompleteModal";
+import { Site } from "../model/sites";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Constants } from "../services/Utils";
 
 interface PlotsInputProps {
     navigation: any
@@ -30,6 +34,9 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null);
     const [plots, setPlots] = useState<Plot[]>([]);
+    const [siteSearchQuery, setSiteSearchQuery] = useState('');
+    const [selectedSite, setSelectedSite] = useState<Site | null>(null);
+    const [sites, setSites] = useState<Site[]>([]);
 
     let daoClient: DaoClient;
     DaoClient.authenticate().then((client) => { daoClient = client; });
@@ -56,18 +63,18 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
     useEffect(() => {
         if (searchQuery.length !== 0) return;
         setTimeout(async () => {
-            let resp = await daoClient.plots.getPlots(0, 100);
+            let resp = await daoClient.plots.getPlots(0, 100, undefined, false, selectedSite?.id);
             setPlots(resp)
         }, 100)
-    }, [stateChange, searchQuery])
+    }, [stateChange, searchQuery, selectedSite])
 
     useEffect(() => {
         if (searchQuery.length < 1) return;
         setTimeout(async () => {
-            let plots = await daoClient.plots.searchPlots(searchQuery, 0, 100);
+            let plots = await daoClient.plots.searchPlots(searchQuery, 0, 100, selectedSite?.id);
             setPlots(plots);
         }, 100)
-    }, [stateChange, searchQuery])
+    }, [stateChange, searchQuery, selectedSite])
 
     const handleSave = (data: Plot | CreatePlotRequest) => {
         setIsFormVisible(false);
@@ -91,10 +98,64 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
         }
     }
 
+    useFocusEffect(
+        useCallback(() => {
+            const getSitesData = async () => {
+                const daoClient = await DaoClient.authenticate();
+                const siteId = await AsyncStorage.getItem(Constants.selectedSiteId)
+                let site: Site | null = null;
+                if (siteId) {
+                    site = await daoClient.sites.getSiteByLiveId(parseInt(siteId));
+                    setSelectedSite(site);
+                } else {
+                    setSelectedSite(null);
+                }
+                const sites = await daoClient.sites.getSites(0, 100)
+                if (site) {
+                    const idx = sites.findIndex(value => value.id === site?.id);
+                    if (idx < 0) setSites([site, ...sites]);
+                    else setSites(sites);
+                }
+                else setSites(sites);
+            }
+
+            getSitesData();
+            return () => { }
+        }, [])
+    )
+
+    useEffect(() => {
+        if (siteSearchQuery.length < 1) return;
+        setTimeout(async () => {
+            const daoClient = await DaoClient.authenticate();
+            let sites = await daoClient.sites.searchSites(siteSearchQuery, 0, 100);
+            setSites(sites);
+        }, 10)
+    }, [siteSearchQuery])
+
+    const handleSiteSelection = (site: Site | null) => {
+        setSelectedSite(site);
+    }
+
     return (
         <View style={{ flex: 1 }}>
             <InternetBanner />
             <SafeAreaView style={styles.safeArea}>
+                {!isFormVisible && <View style={{ height: 'auto', alignItems: 'center', width: "96%" }}>
+                    <View style={{ width: '100%', flexGrow: 1, marginTop: 15 }}>
+                        <Autocomplete
+                            label={selectedSite ? Strings.labels.SelectedSite : Strings.labels.SelectSite}
+                            options={sites}
+                            value={selectedSite}
+                            onSelect={handleSiteSelection}
+                            valueGetter={(data) => data.name_english}
+                            keyGetter={(data) => data.id}
+                            variant="outlined"
+                            boldSelection
+                            onSearch={setSiteSearchQuery}
+                        />
+                    </View>
+                </View>}
                 {!isFormVisible && <View style={styles.header}>
                     <SearchBar query={searchQuery} onChange={setSearchQuery} />
                 </View>}

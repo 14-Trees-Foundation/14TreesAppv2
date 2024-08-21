@@ -43,11 +43,11 @@ export class PlotsDao {
     }
 
     // Data manipulation operations
-    getPlots = async (offset: number = 0, limit: number = 10, isUploaded?: boolean ,isDeleted: boolean = false) => {
+    getPlots = async (offset: number = 0, limit: number = 10, isUploaded?: boolean, isDeleted: boolean = false, siteId?: number) => {
         const plots: Plot[] = []
         const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
         const query =`SELECT * FROM ${this.tableName}
-            WHERE 1=1 ${isDeleted ? '' : ` AND change_type != 'delete'`} ${isUploaded !== undefined ? 'AND ' + whereCondition : ""}
+            WHERE 1=1 ${isDeleted ? '' : ` AND change_type != 'delete'`} ${siteId !== undefined ? `AND site_id = ${siteId}` : ""} ${isUploaded !== undefined ? 'AND ' + whereCondition : ""}
             ORDER BY local_id DESC 
             ${limit < 0 ? '' : `LIMIT ${limit} OFFSET ${offset}`};  `
        
@@ -276,11 +276,11 @@ export class PlotsDao {
         return plot_ids;
     }
 
-    searchPlots = async (searchStr: string, offset: number, limit: number) => {
+    searchPlots = async (searchStr: string, offset: number, limit: number, siteId?: number) => {
         let plots: Plot[] = [];
         const query =  `
             SELECT * FROM ${this.tableName} 
-            WHERE change_type != 'delete' AND (name LIKE ? OR plot_id LIKE ?)
+            WHERE change_type != 'delete' AND (name LIKE ? OR plot_id LIKE ?) ${siteId ? `AND site_id = ${siteId}`: ''}
             ORDER BY updated_at DESC
             LIMIT ? OFFSET ?;
         `

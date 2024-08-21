@@ -15,12 +15,14 @@ import SearchBar from "../components/Searchbar";
 import { AddIconButton } from "../components/FABplusIcon";
 import { TreeImageType } from "../model/tree_image";
 import TreeImageForm from "../components/trees/TreeImagesForm";
-import { Image } from "../model/common";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Loading } from "../components/Loading";
 import { CreateTreeSnapshotRequest } from "../model/tree_snapshot";
 import InternetBanner from "../components/InternetInfo";
 import GlobalContext from "../context/GlobalContext ";
+import SiteBanner from "../components/SiteBanner";
+import { Plot } from "../model/plot";
+import { Site } from "../model/sites";
 
 interface TreesInputProps {
     navigation: any
@@ -43,8 +45,11 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
     const [trees, setTrees] = useState<Tree[]>([]);
     const [plantTypes, setPlantTypes] = useState<any[]>([]);
-    const [plots, setPlots] = useState<any[]>([]);
-    const [selectedPlot, setSelectedPlot] = useState<any>(null);
+    const [plotSearchQuery, setPlotSearchQuery] = useState('');
+    const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null);
+    const [plots, setPlots] = useState<Plot[]>([]);
+    const [allPlots, setAllPlots] = useState<Plot[]>([]);
+    const [selectedSite, setSelectedSite] = useState<Site | null>(null);
     const [userDetails, setUserDetails] = useState<any>(null);
 
     let localClient: DaoClient;
@@ -74,10 +79,9 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
         setTimeout(async () => {
             const userData = await AsyncStorage.getItem(Constants.userDetailsKey)
             if (userData) setUserDetails(JSON.parse(userData));
-            const { treeTypes, plots } = await Utils.getLocalTreeTypesAndPlots();
+            const { treeTypes } = await Utils.getLocalTreeTypesAndPlots();
 
             treeTypes && setPlantTypes(treeTypes);
-            plots && setPlots(plots);
         })
     }, [])
 
@@ -98,6 +102,47 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
             setLoading(false);
         }, 1000)
     }, [searchQuery, stateChange, selectedPlot])
+
+    useEffect(() => {
+        if (plotSearchQuery.length !== 0) return;
+        setTimeout(async () => {
+            const daoClient = await DaoClient.authenticate();
+            let resp = await daoClient.plots.getPlots(0, 100, undefined, false, selectedSite?.id);
+            setPlots(resp)
+        }, 100)
+    }, [plotSearchQuery, selectedSite])
+
+    useEffect(() => {
+        if (plotSearchQuery.length < 1) return;
+        setTimeout(async () => {
+            const daoClient = await DaoClient.authenticate();
+            let plots = await daoClient.plots.searchPlots(plotSearchQuery, 0, 100, selectedSite?.id);
+            setPlots(plots);
+        }, 100)
+    }, [plotSearchQuery, selectedSite])
+
+    useEffect(() => {
+        const getAllPlots = async () => {
+            const daoClient = await DaoClient.authenticate();
+            let plots = await daoClient.plots.getPlots(0, -1);
+            setAllPlots(plots);
+        }
+        getAllPlots();
+    }, [])
+
+    useEffect(() => {
+        setTimeout(async () => {
+
+            const daoClient = await DaoClient.authenticate();
+            const siteId = await AsyncStorage.getItem(Constants.selectedSiteId)
+            if (siteId) {
+                const site = await daoClient.sites.getSiteByLiveId(parseInt(siteId));
+                setSelectedSite(site);
+            } else {
+                setSelectedSite(null);
+            }
+        }, 10)
+    }, [stateChange])
 
     const handleSave = (data: Tree | CreateTreeRequest, images?: any) => {
         let hasError = false;
@@ -194,6 +239,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     return (
         <View style={{ flex: 1 }}>
             <InternetBanner />
+            <SiteBanner />
             <SafeAreaView style={styles.safeArea}>
                 {!(isFormVisible || isImageFormVisible) && <View style={{ height: 'auto', alignItems: 'center', width: "96%" }}>
                     <View style={{ width: '100%', flexGrow: 1, marginTop: 15 }}>
@@ -222,7 +268,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                                 <TreeCard
                                     tree={tree}
                                     plantTypeName={plantTypes.find(plantType => plantType.id === tree.plant_type_id)?.name || ''}
-                                    plotName={plots.find(plot => plot.id === tree.plot_id)?.name || ''}
+                                    plotName={allPlots.find(plot => plot.id === tree.plot_id)?.name || ''}
                                 />
                             </TouchableOpacity>
                         </View>
@@ -252,7 +298,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                 {selectedTree && <TreeInfo
                     isVisible={isInfoModalVisible}
                     plantType={plantTypes.find(plantType => plantType.id === selectedTree.plant_type_id)?.name || ''}
-                    plot={plots.find(plot => plot.id === selectedTree.plot_id)?.name || ''}
+                    plot={allPlots.find(plot => plot.id === selectedTree.plot_id)?.name || ''}
                     onClose={() => { setInfoModalVisible(false) }}
                     onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
                     onImageAdd={() => { setIsImageFormVisible(true); }}
