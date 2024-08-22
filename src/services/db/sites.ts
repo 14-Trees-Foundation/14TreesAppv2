@@ -238,7 +238,7 @@ export class SitesDao {
                     grove_type = ?,
                     is_uploaded = 0,
                     change_type = 'none',
-                    created_at = ?
+                    created_at = ?,
                     updated_at = ?
                     WHERE id = ?;`,
                 [

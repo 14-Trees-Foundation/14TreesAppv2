@@ -148,6 +148,8 @@ export class Strings {
             TreeImages: 'Tree Images',
             Completed: 'Completed',
 
+            NoImages: 'No Images',
+
             UploadingLocal: 'Uploading Local Changes!',
             FetchingChanges: 'Fetching New Changes from Server!',
 
@@ -178,6 +180,7 @@ export class Strings {
             AddTreeImages: 'Add Tree Images For Sapling',
             TreeImages: 'Tree Images',
             ImageDate: "Image date different than today's date?",
+            WhatIsTreeStatus: "What is the health status of the tree?",
         },
         "mr": {
             SignIn: "साइन इन करा",
@@ -257,6 +260,8 @@ export class Strings {
             TreeImages: 'वृक्ष प्रतिमा',
             Completed: 'पूर्ण झाले',
 
+            NoImages: 'प्रतिमा नाहीत',
+
             UploadingLocal: 'स्थानिक बदल अपलोड करत आहे!',
             FetchingChanges: 'सर्व्हरवरून नवीन बदल आणत आहे!',
 
@@ -287,6 +292,7 @@ export class Strings {
             AddTreeImages: 'रोपट्यासाठी वृक्ष प्रतिमा जोडा',
             TreeImages: 'वृक्ष प्रतिमा',
             ImageDate: "चित्राची तारीख आजच्या तारखेपेक्षा वेगळी आहे का?",
+            WhatIsTreeStatus: "झाडाच्या आरोग्याची स्थिती काय आहे?",
         },
     });
     static alertMessages = new LocalizedStrings({
@@ -539,12 +545,14 @@ export class Strings {
             AddVisitImages: 'Add Visit Images',
 
             // Trees
-            TreeImage: 'Tree Image',
-            UserTreeImage: 'User Tree Image',
-            UserCardImage: 'User Card Image',
+            AddNewImage: 'Add New Image',
+            AddTreeImage: 'Add Tree Image',
+            AddUserTreeImage: 'Add User Tree Image',
+            AddUserCardImage: 'Add User Card Image',
 
             DownloadData: 'Download Data',
             UploadData: 'Upload Data',
+            UploadInProgress: 'Upload in progress',
             DownloadSitesPlots: 'Download Sites & Plots Data',
 
             ChangePlot: 'Change Plot',
@@ -606,12 +614,14 @@ export class Strings {
             AddVisitImages: 'भेट प्रतिमा जोडा',
 
             // Trees
-            TreeImage: 'झाडाची प्रतिमा',
-            UserTreeImage: 'वापरकर्ता वृक्ष प्रतिमा',
-            UserCardImage: 'वापरकर्ता कार्ड प्रतिमा',
+            AddNewImage: 'नवीन प्रतिमा जोडा',
+            AddTreeImage: 'झाडाची प्रतिमा जोडा',
+            AddUserTreeImage: 'वापरकर्ता वृक्ष प्रतिमा जोडा',
+            AddUserCardImage: 'वापरकर्ता कार्ड प्रतिमा जोडा',
 
             DownloadData: 'डेटा डाउनलोड करा',
             UploadData: 'डेटा अपलोड करा',
+            UploadInProgress: 'अपलोड प्रगतीपथावर आहे',
             DownloadSitesPlots: 'साइट्स आणि प्लॉट डेटा डाउनलोड करा',
 
             ChangePlot: 'प्लॉट बदला',
@@ -669,6 +679,9 @@ export class Strings {
 
             // Trees
             ImageDate: 'Image Date',
+            TreeImage: 'Tree Image',
+            UserTreeImage: 'User Tree Image',
+            UserCardImage: 'User Card Image',
 
             Selected: 'Selected',
             NotSelected: 'Not Selected',
@@ -727,6 +740,9 @@ export class Strings {
 
             // Trees
             ImageDate: 'प्रतिमा/चित्र तारीख',
+            TreeImage: 'झाडाची प्रतिमा',
+            UserTreeImage: 'वापरकर्ता वृक्ष प्रतिमा',
+            UserCardImage: 'वापरकर्ता कार्ड प्रतिमा',
 
             Selected: 'निवडलेले',
             NotSelected: 'निवडलेले नाही',

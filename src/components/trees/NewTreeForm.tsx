@@ -125,9 +125,13 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     }, [tree, plantTypes])
 
     useEffect(() => {
+        const getPlotForPlotId = async (plotId: number) => {
+            const daoClient = await DaoClient.authenticate();
+            const plot = await daoClient.plots.getPlotByLiveId(plotId);
+            setSelectedPlot(plot);
+        }
         if (tree) {
-            const plot = plots.find((item) => item.id === tree.plot_id) || null;
-            setSelectedPlot(plot)
+            getPlotForPlotId(tree.plot_id);
         }
     }, [tree, plots])
 
@@ -196,18 +200,18 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
         if (plotSearchQuery.length !== 0) return;
         setTimeout(async () => {
             const daoClient = await DaoClient.authenticate();
-            let resp = await daoClient.plots.getPlots(0, 100, undefined, false, selectedSite?.id);
+            let resp = await daoClient.plots.getPlots(0, 50, undefined, false, selectedSite?.id);
             setPlots(resp)
-        }, 100)
+        }, 10)
     }, [plotSearchQuery, selectedSite])
 
     useEffect(() => {
         if (plotSearchQuery.length < 1) return;
         setTimeout(async () => {
             const daoClient = await DaoClient.authenticate();
-            let plots = await daoClient.plots.searchPlots(plotSearchQuery, 0, 100, selectedSite?.id);
+            let plots = await daoClient.plots.searchPlots(plotSearchQuery, 0, 50, selectedSite?.id);
             setPlots(plots);
-        }, 100)
+        }, 10)
     }, [plotSearchQuery, selectedSite])
 
     useEffect(() => {
@@ -382,7 +386,8 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
                     <View style={{ width: '100%', marginTop: 10 }}>
                         <ImageSelector
-                            label={Strings.buttonLabels.TreeImage}
+                            label={Strings.labels.TreeImage}
+                            buttonLabel={Strings.buttonLabels.AddTreeImage}
                             onChange={handleImageChange}
                             imageUri={imageUri ? imageUri : undefined}
                         />
@@ -427,7 +432,8 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
                         <View style={{ width: '100%', marginTop: 10 }}>
                             <ImageSelector
-                                label={Strings.buttonLabels.UserTreeImage}
+                                label={Strings.labels.UserTreeImage}
+                                buttonLabel={Strings.buttonLabels.AddUserTreeImage}
                                 onChange={handleUserTreeImageChange}
                                 imageUri={userTreeImageUri ? userTreeImageUri : undefined}
                             />
@@ -435,7 +441,8 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
                         <View style={{ width: '100%', marginTop: 10 }}>
                             <ImageSelector
-                                label={Strings.buttonLabels.UserCardImage}
+                                label={Strings.labels.UserCardImage}
+                                buttonLabel={Strings.buttonLabels.AddUserCardImage}
                                 onChange={handleUserCardImageChange}
                                 imageUri={userCardImageUri ? userCardImageUri : undefined}
                             />

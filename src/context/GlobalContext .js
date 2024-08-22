@@ -17,6 +17,11 @@ export const GlobalContextProvider = ({ children }) => {
     const [shiftType, setShiftType] = useState(null);
     const [newPlotSelected, setNewPlotSelected] = useState(null);
 
+    const [uploadInProgress, setUploadInProgress] = useState(false);
+    const [downloadInProgress, setDownloadInProgress] = useState(false);
+    const [currentSyncTime, setCurrentSyncTime] = useState(null);
+    const [syncProgress, setSyncProgress] = useState(0);
+
     return (
         <GlobalContext.Provider value={{
             langChanged, setLangChanged,
@@ -29,7 +34,11 @@ export const GlobalContextProvider = ({ children }) => {
             shiftID, setShiftID,
             playSound, setPlaySound,
             shiftType, setShiftType,
-            newPlotSelected, setNewPlotSelected
+            newPlotSelected, setNewPlotSelected,
+            uploadInProgress, setUploadInProgress,
+            downloadInProgress, setDownloadInProgress,
+            currentSyncTime, setCurrentSyncTime,
+            syncProgress, setSyncProgress,
         }}>
             {children}
         </GlobalContext.Provider>

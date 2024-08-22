@@ -7,11 +7,12 @@ import ImageView from "react-native-image-viewing";
 
 interface ImageSelectorInputProps {
     label: string
+    buttonLabel: string
     imageUri?: string,
     onChange: (data: Image | null) => void
 }
 
-export const ImageSelector: React.FC<ImageSelectorInputProps> = ({ label, imageUri, onChange }) => {
+export const ImageSelector: React.FC<ImageSelectorInputProps> = ({ label, buttonLabel, imageUri, onChange }) => {
     const [isVisible, setIsVisible] = useState(false);
     const handleChange = (data?: Image) => {
         if (data) onChange(data);
@@ -42,7 +43,7 @@ export const ImageSelector: React.FC<ImageSelectorInputProps> = ({ label, imageU
                 />
             </View>
             }
-            { !imageUri && <ImageOptions buttonLabel={label} onChange={handleChange}/> }
+            { !imageUri && <ImageOptions buttonLabel={buttonLabel} onChange={handleChange}/> }
         </View>
     );
 }

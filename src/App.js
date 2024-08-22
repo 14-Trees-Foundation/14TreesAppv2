@@ -112,7 +112,7 @@ const App = () => {
   const rootTag = useContext(RootTagContext);
   //console.log('app roottag app.js: ')
 
-  const { userName, lightTheme, playSound, setPlaySound } = useContext(GlobalContext);
+  const { userName, lightTheme, playSound, setPlaySound, setUploadInProgress, setDownloadInProgress, setCurrentSyncTime } = useContext(GlobalContext);
   const playBackgroundSound = useCallback(() => {
     var sound = new Sound('livechat.mp3', Sound.MAIN_BUNDLE, (error) => {
       if (error) {
@@ -189,6 +189,9 @@ const App = () => {
 
   const initializeApp = async () => {
     await requestPermissions();
+    setUploadInProgress(false);
+    setDownloadInProgress(false);
+    setCurrentSyncTime(null);
     await initTasks();
   };
 

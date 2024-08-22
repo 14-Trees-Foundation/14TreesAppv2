@@ -1,10 +1,9 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { BackHandler, ScrollView, StyleSheet, ToastAndroid, View } from "react-native";
+import { BackHandler, ScrollView, StyleSheet, View } from "react-native";
 import { Button, Chip, Icon, ProgressBar, Text } from "react-native-paper";
 import { Utils, formatDuration, getHumanReadableDateTime, getReadableProgress, getTimeDiffString } from "../services/Utils";
 import { DaoClient } from "../services/db/dao";
 import { fetchDeltaChanges, uploadLocalData } from "../services/sync/sync";
-import { Loading } from "../components/Loading";
 import { Strings } from "../services/Strings";
 import InternetBanner from "../components/InternetInfo";
 import GlobalContext from "../context/GlobalContext ";
@@ -25,20 +24,20 @@ const syncDetailsTemplate = {
 
 const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
     const intervalId = useRef<any>(null);
-    const { langChanged } = useContext(GlobalContext);
+    const { langChanged, uploadInProgress, setUploadInProgress,
+        downloadInProgress, setDownloadInProgress, currentSyncTime, setCurrentSyncTime,
+        syncProgress, setSyncProgress
+    } = useContext(GlobalContext);
     useEffect(() => {
         console.log('langChanged inside SyncScreen: ', langChanged);
     }, [langChanged]);
 
-    const [initialChanges, setInitialChanges] = useState(syncDetailsTemplate)
+    const [remaining, setRemaining] = useState(syncDetailsTemplate)
     const [currentSyncDetails, setCurrentSyncDetails] = useState(syncDetailsTemplate)
 
     const [state, setState] = useState(0);
-    const [visible, setVisible] = useState(false);
     const [syncDisabled, setSyncDisabled] = useState(true);
     const [internetSpeedCheck, setInternetSpeedCheck] = useState(false);
-    const [progress, setProgress] = useState(0);
-    const [syncType, setSyncType] = useState<'upload' | 'fetch'>('upload');
     const [networkSpeed, setNetworkSpeed] = useState<string>('');
     const [lastSyncDate, setLastSyncDate] = useState('');
     const [treeChanges, setTreeChanges] = useState<any>(null);
@@ -83,6 +82,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
             setLastSyncDate(lsSate);
         }
     }
+
     const handleNetworkSpeed = async () => {
         const speed = await Utils.getNetworkSpeed();
         if (speed) {
@@ -91,48 +91,65 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
 
     useEffect(() => {
-        if (visible) {
-            setCurrentSyncDetails(prev => ({
-                ...prev,
-                trees: treeChanges ? {
-                    add: initialChanges.trees.add - (treeChanges?.add || 0),
-                    edit: initialChanges.trees.edit - (treeChanges?.edit || 0),
-                    delete: initialChanges.trees.delete - (treeChanges?.delete || 0),
-                } : prev.trees,
-                tree_images: treeImagesCount ? {
-                    add: initialChanges.tree_images.add - (treeImagesCount?.add || 0),
-                    delete: initialChanges.tree_images.delete - (treeImagesCount?.delete || 0),
-                } : prev.tree_images,
-                visit_images: visitImagesCount ? {
-                    add: initialChanges.visit_images.add - (visitImagesCount?.add || 0),
-                    delete: initialChanges.visit_images.delete - (visitImagesCount?.delete || 0),
-                } : prev.visit_images,
-            }));
-        }
-
-        const total = treeChanges?.add || 0 + treeChanges?.edit || 0 + treeChanges?.delete || 0
-            + treeImagesCount?.add || 0 + treeImagesCount?.delete || 0
-            + visitImagesCount?.add || 0 + visitImagesCount?.delete || 0
-        if (total === 0) setSyncDisabled(true);
-        else setSyncDisabled(false);
-
-    }, [visible, treeChanges, treeImagesCount, visitImagesCount]);
+        setRemaining(prev => ({
+            ...prev,
+            trees: treeChanges ? {
+                add: treeChanges?.add || 0,
+                edit: treeChanges?.edit || 0,
+                delete: treeChanges?.delete || 0,
+            } : prev.trees,
+            tree_images: treeImagesCount ? {
+                add: treeImagesCount?.add || 0,
+                delete: treeImagesCount?.delete || 0,
+            } : prev.tree_images,
+            visit_images: visitImagesCount ? {
+                add: visitImagesCount?.add || 0,
+                delete: visitImagesCount?.delete || 0,
+            } : prev.visit_images,
+        }));
+    }, [treeChanges, treeImagesCount, visitImagesCount]);
 
     useEffect(() => {
-        if (visible && syncType === 'upload') {
-            const total = initialChanges.trees.add + initialChanges.trees.edit + initialChanges.trees.delete
-                + initialChanges.tree_images.add + initialChanges.tree_images.delete
-                + initialChanges.visit_images.add + initialChanges.visit_images.delete
+        const pending = remaining.trees.add + remaining.trees.edit + remaining.trees.delete
+                    + remaining.tree_images.add + remaining.tree_images.delete 
+                    + remaining.visit_images.delete + remaining.visit_images.delete 
 
-            const synced = currentSyncDetails.trees.add + currentSyncDetails.trees.edit + currentSyncDetails.trees.delete
-                + currentSyncDetails.tree_images.add + currentSyncDetails.tree_images.delete
-                + currentSyncDetails.visit_images.add + currentSyncDetails.visit_images.delete
+        if (pending === 0) setSyncDisabled(true);
+        else setSyncDisabled(false);
 
-            if (total !== 0) setProgress(synced / total);
-            else setProgress(0);
+        if (uploadInProgress && currentSyncTime) {
+            const updateCurrentSyncInfo = async () => {
+                const syncInfo = await getSyncInfoByTime();
+                const completed = syncInfo.trees.add + syncInfo.trees.edit + syncInfo.trees.delete
+                            + syncInfo.tree_images.add + syncInfo.tree_images.delete 
+                            + syncInfo.visit_images.delete + syncInfo.visit_images.delete 
+    
+    
+                if (pending + completed !== 0) {
+                    const progress = completed / (pending + completed);
+                    setSyncProgress((prev: any) => prev < progress ? progress : prev);
+                }
+                else setSyncProgress(0);
+    
+                setCurrentSyncDetails(syncInfo);
+            }
+            updateCurrentSyncInfo();
         }
-    }, [visible, syncType, initialChanges, currentSyncDetails]);
+    }, [state, uploadInProgress, currentSyncTime, remaining])
 
+    const getSyncInfoByTime = async () => {
+        const daoClient = await DaoClient.authenticate();
+        const resp = await daoClient.syncInfo.getSyncInfoBySyncTime(currentSyncTime);
+        const syncInfo: any = {
+            ...resp,
+            key: resp.local_id,
+            trees: JSON.parse(resp.trees),
+            tree_images: JSON.parse(resp.tree_images),
+            visit_images: JSON.parse(resp.visit_images),
+
+        }
+        return syncInfo;
+    }
 
     const getSyncInfo = async () => {
         const daoClient = await DaoClient.authenticate();
@@ -179,7 +196,10 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
             fetch_error: '',
             ...localChangesCount
         }
-        setInitialChanges(syncDetails);
+
+        setSyncProgress(0);
+        setCurrentSyncTime(syncDetails.synced_at);
+        setUploadInProgress(true);
         setCurrentSyncDetails(prev => {
             return {
                 ...prev,
@@ -189,10 +209,6 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         await saveSyncInfo({ ...syncDetailsTemplate, synced_at: syncDetails.synced_at });
 
         let timeNow = new Date().getTime();
-
-        setSyncType('upload');
-        setProgress(0);
-        setVisible(true);
 
         try {
             await uploadLocalData(localChangesCount, syncDetails.synced_at);
@@ -216,17 +232,17 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         await daoClient.syncInfo.createSyncInfo(syncInfo);
         getSyncInfo();
 
-        setVisible(false);
+        setUploadInProgress(false);
+        setCurrentSyncTime(null);
         Utils.setLastSyncDateNow();
         Utils.removeNetworkSpeed();
     }
 
     const fetchData = async () => {
-        setProgress(0);
-        setSyncType('fetch');
-        setVisible(true);
+        setSyncProgress(0);
+        setDownloadInProgress(true);
         try {
-            await fetchDeltaChanges(setProgress);
+            await fetchDeltaChanges(setSyncProgress);
         } catch (error: any) {
             const stackTrace = error.stack;
             const errorLog = {
@@ -236,7 +252,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
             };
             await Utils.logException(JSON.stringify(errorLog));
         }
-        setVisible(false);
+        setDownloadInProgress(false);
     }
 
     const saveSyncInfo = async (info: any) => {
@@ -289,15 +305,15 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={{ height: '100%', width: '100%' }}>
             <InternetBanner />
             <View style={styles.screen}>
-                <Loading loading={visible && syncType === 'upload'} text="Sync in Progress..." />
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Button
                         mode='contained-tonal'
-                        icon='download'
+                        icon={'download'}
+                        loading={downloadInProgress}
                         buttonColor="#93faa9"
                         labelStyle={{ color: 'black', fontWeight: 'bold' }}
                         style={{ marginHorizontal: 4, flexGrow: 1, marginBottom: 10 }}
-                        disabled={visible}
+                        disabled={downloadInProgress || uploadInProgress}
                         onPress={fetchData}
                     >{Strings.buttonLabels.DownloadSitesPlots}</Button>
                 </View>
@@ -336,17 +352,18 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
 
                 <View style={{ marginTop: 20, justifyContent: 'center' }}>
                     <Button
-                        icon='upload'
+                        icon={'upload'}
+                        loading={uploadInProgress}
                         mode='contained-tonal'
                         buttonColor="#93faa9"
                         labelStyle={{ color: 'black', fontWeight: 'bold' }}
                         style={{ marginHorizontal: 4, flexGrow: 1 }}
                         onPress={() => setInternetSpeedCheck(true)}
-                        disabled={syncDisabled || visible}
-                    >{Strings.buttonLabels.UploadData}</Button>
+                        disabled={syncDisabled || downloadInProgress || uploadInProgress}
+                    >{uploadInProgress ? Strings.buttonLabels.UploadInProgress: Strings.buttonLabels.UploadData}</Button>
                 </View>
 
-                {!visible && syncInfoList.length !== 0 && <View style={{ flex: 1, width: '100%', marginTop: 20 }}>
+                {!(uploadInProgress || downloadInProgress) && syncInfoList.length !== 0 && <View style={{ flex: 1, width: '100%', marginTop: 20 }}>
                     <Text variant='titleLarge' style={{ color: 'black', fontWeight: 'bold', paddingRight: 10 }}>{Strings.messages.SyncHistory}:</Text>
                     <ScrollView style={{ flex: 1, width: '100%' }}>
                         {
@@ -368,7 +385,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                     </ScrollView>
                 </View>}
 
-                {visible && syncType === 'upload' && <View style={{ flex: 1, width: '100%', marginTop: 20 }}>
+                {uploadInProgress && <View style={{ flex: 1, width: '100%', marginTop: 20 }}>
                     <Text variant='titleLarge' style={{ color: 'black', fontWeight: 'bold', paddingRight: 10 }}>{Strings.messages.CurrentSync}:</Text>
                     <ScrollView style={{ flex: 1, width: '100%' }}>
                         <View style={{ marginHorizontal: 5, marginVertical: 3 }}>
@@ -386,20 +403,20 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                     </ScrollView>
                 </View>}
 
-                {visible && <View
+                {(uploadInProgress || downloadInProgress) && <View
                     style={{ position: 'absolute', bottom: 70, left: 20, right: 20 }}>
                     <Text style={{ textAlign: 'center', marginBottom: 5 }}>
-                        {syncType === 'upload' && networkSpeed !== ''
+                        {uploadInProgress && networkSpeed !== ''
                             ? 'Remaining Time ' + getRemainingUploadTime() + ` (${getNetworkSpeed()})`
                             : ''}
                     </Text>
                     <Text style={{ textAlign: 'center', marginBottom: 5 }}>
-                        {syncType === 'upload'
+                        {uploadInProgress
                             ? Strings.messages.UploadingLocal
                             : Strings.messages.FetchingChanges}
                     </Text>
-                    <ProgressBar visible={visible} progress={progress} style={{ backgroundColor: '#bf8686' }} fillStyle={{ backgroundColor: '#02ab4e' }} />
-                    <Text style={{ textAlign: 'center', marginTop: 2 }}>{Strings.messages.Completed}: {getReadableProgress(progress)}</Text>
+                    <ProgressBar visible={uploadInProgress || downloadInProgress} progress={syncProgress} style={{ backgroundColor: '#bf8686' }} fillStyle={{ backgroundColor: '#02ab4e' }} />
+                    <Text style={{ textAlign: 'center', marginTop: 2 }}>{Strings.messages.Completed}: {getReadableProgress(syncProgress)}</Text>
                 </View>}
 
                 <NetworkSpeedModal

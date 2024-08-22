@@ -111,7 +111,7 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_sta
 
                     <View style={{ marginTop: 15, flexGrow: 1 }}>
                         <ImagesView
-                            title={Strings.messages.TreeImages}
+                            title={images.length > 0 ? Strings.messages.TreeImages : Strings.messages.NoImages}
                             images={ images.map(item => item).reverse() }
                             onDelete={handleImageDelete}
                         />
@@ -132,6 +132,7 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_sta
                         />
                     </View>}
                     <View style={{ marginTop: 10, flexGrow: 1 }}>
+                        <Text style={{ color: 'black', paddingLeft: 10, fontSize: 16, marginBottom: 5 }}>{Strings.messages.WhatIsTreeStatus}</Text>
                         <SegmentedButtons
                             value={treeStatus}
                             onValueChange={setTreeStatus}
@@ -142,7 +143,7 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_sta
                             ]}
                         />
                     </View>
-                    <ImageOptions buttonLabel={Strings.messages.TreeImages} onChange={handleImageChange} multiple/>
+                    <ImageOptions buttonLabel={Strings.buttonLabels.AddNewImage} onChange={handleImageChange} multiple/>
 
                     <View style={CustomButtonStyles.container}>
                         <View style={CustomButtonStyles.buttonRow}>

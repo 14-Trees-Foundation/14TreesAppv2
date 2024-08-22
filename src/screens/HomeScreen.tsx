@@ -8,7 +8,6 @@ import { Strings } from "../services/Strings";
 import { TreeAnalytics } from "../model/tree";
 import InternetBanner from "../components/InternetInfo";
 import { fetchDeltaChanges } from "../services/sync/sync";
-import { Loading } from "../components/Loading";
 import GlobalContext from "../context/GlobalContext ";
 import Autocomplete from "../components/AutocompleteModal";
 import { DaoClient } from "../services/db/dao";
@@ -17,7 +16,7 @@ import { Site } from "../model/sites";
 
 const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const intervalId = useRef<any>(null);
-  const { langChanged } = useContext(GlobalContext);
+  const { langChanged, downloadInProgress, setDownloadInProgress, syncProgress, setSyncProgress } = useContext(GlobalContext);
   useEffect(() => {
     console.log('langChanged inside HomeScreen: ', langChanged);
   }, [langChanged]);
@@ -26,7 +25,6 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [userDetails, setUserDetails] = useState<any>(null);
   const [analytics, setAnalytics] = useState<TreeAnalytics | null>(null);
   const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
   const [sites, setSites] = useState<Site[]>([]);
@@ -76,8 +74,10 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       setLastSyncDate(lsSate);
     } else {
       setLoading(true);
-      await fetchDeltaChanges(setProgress);
+      setDownloadInProgress(true);
+      await fetchDeltaChanges(setSyncProgress);
       setLoading(false);
+      setDownloadInProgress(false);
       Utils.setLastSyncDateNow();
       updateLastSyncState();
     }
@@ -90,13 +90,28 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
   }
 
+  const handleDownloadInProgress = async () => {
+    // check if is it first sync
+    const lsSate = await Utils.getLastSyncDate();
+    if (lsSate) {
+      // if not avoid showing progress bar on home screen
+      setLastSyncDate(lsSate);
+    } else {
+      setLoading(true);
+    }
+  }
+
   useFocusEffect(
     useCallback(() => {
-      handleLastSyncDate();
+      if (downloadInProgress) {
+        handleDownloadInProgress();
+      } else {
+        handleLastSyncDate();
+      }
       handleAnalytics();
       return () => {
       };
-    }, [])
+    }, [downloadInProgress])
   );
 
   useEffect(() => {
@@ -219,8 +234,8 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
             keyGetter={(option) => option ? option.local_id : ''}
             valueGetter={(option) => {
               return option.plot_count && option.plot_count > 0
-              ? `${option.name_english} (Plots: ${option.plot_count})`
-              : option.name_english
+                ? `${option.name_english} (Plots: ${option.plot_count})`
+                : option.name_english
             }}
             onSelect={handleSiteSelection}
             onSearch={(text) => setSearchQuery(text)}
@@ -235,8 +250,8 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
         <Text style={{ textAlign: 'center', marginBottom: 5 }}>
           Fetching Data from the Server!
         </Text>
-        <ProgressBar visible={loading} progress={progress} style={{ backgroundColor: '#bf8686' }} fillStyle={{ backgroundColor: '#02ab4e' }} />
-        <Text style={{ textAlign: 'center', marginTop: 2 }}>Completed: {getReadableProgress(progress)}</Text>
+        <ProgressBar visible={loading} progress={syncProgress} style={{ backgroundColor: '#bf8686' }} fillStyle={{ backgroundColor: '#02ab4e' }} />
+        <Text style={{ textAlign: 'center', marginTop: 2 }}>Completed: {getReadableProgress(syncProgress)}</Text>
       </View>}
 
       <View style={{ position: 'absolute', bottom: 10, left: 20, right: 20 }}>
