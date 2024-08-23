@@ -447,7 +447,7 @@ export class LocalDatabase {
         try {
             const trees = [];
             const results = await this.db.executeSql(
-                `SELECT sapling_id, plant_type_id, plot_id, user_id, lat,lng, tree_status, timestamp FROM ${treeTableName} where uploaded=${uploaded} LIMIT 50 OFFSET 0;`,
+                `SELECT sapling_id, plant_type_id, plot_id, user_id, lat,lng, tree_status, timestamp FROM ${treeTableName} where uploaded=${uploaded} LIMIT 10 OFFSET 0;`,
             );
             results.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {

@@ -951,10 +951,10 @@ export class Utils {
         const count = await Utils.getTreesCountFromLocalDb(0);
         while(true) {
             const final = await Utils.fetchTreesFromLocalDB(0);//not uploaded.
-            for (let i = 0; i < final.length; i += MIN_BATCH_SIZE) {
-                const batchFailures = await Utils.batchUpload(final.slice(i, i + MIN_BATCH_SIZE));
+            for (let i = 0; i < final.length; i += 1) {
+                const batchFailures = await Utils.batchUpload(final[i]);
                 failures.push(...batchFailures);
-                completed += MIN_BATCH_SIZE;
+                completed += 1;
                 if (onProgress) {
                     onProgress(completed / count);
                 }
