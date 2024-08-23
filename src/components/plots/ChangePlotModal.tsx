@@ -30,7 +30,7 @@ const ChangePlotModal: FC<ChangePlotModalProps> = ({ visible, fromPlot, toPlot, 
                     <Text variant='bodyMedium' style={{ color: 'black' }}>{toPlot}</Text>
                     <ScrollView>
                         <SaplingChipList 
-                            items={selectedSaplings}
+                            items={selectedSaplings.map(sapling => ({sapling}))}
                         />
                     </ScrollView>
                     <View style={{

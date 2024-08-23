@@ -28,6 +28,7 @@ import { APP_VERSION } from './constants/constants';
 import Sync from './screens/Sync';
 import Sound from 'react-native-sound';
 import PlotSaplings from './screens/PlotSaplings';
+import PlotAudit from './screens/PlotAudit';
 
 
 const errorHandler = async (e, isFatal) => {
@@ -342,6 +343,28 @@ const App = () => {
             headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
             headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
             title: Strings.screenNames.ChangePlot,
+          }}
+        />
+        <Stack.Screen
+          name={Strings.screenNames.getString('PlotAudit', Strings.english)}
+          component={PlotAudit}
+          options={{
+            headerLeft: () => (
+              <View style={{ marginLeft: 10 }}>
+                <TouchableOpacity onPress={() => {
+                  stackNavRef.current.goBack() // Go back when the button is pressed
+                }}>
+                  <Icon name="arrow-back" size={24} color="black" />
+                </TouchableOpacity>
+              </View>
+            ),
+            headerRight: () => (
+              <ScreenHeaderContent />
+            ),
+            headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+            headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+            headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+            title: Strings.screenNames.PlotAudit,
           }}
         />
         <Stack.Screen

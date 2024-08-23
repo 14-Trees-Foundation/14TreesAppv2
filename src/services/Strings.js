@@ -28,6 +28,7 @@ export class Strings {
             AppInfo: "App Info",
             Dev: "Dev",
             ChangePlot: "Change Plot",
+            PlotAudit: "Plot Audit",
             TreesInShift: "Trees In Shift", //manjur
             PlotSelect: "Select Plot",
             SyncDisplay: "Sync Data", //manjur
@@ -58,6 +59,7 @@ export class Strings {
             AppInfo: "अ‍ॅपची माहिती",
             Dev: "देव",
             ChangePlot: "प्लॉट बदला",
+            PlotAudit: 'प्लॉट ऑडिट',
             TreesInShift: "शिफ्ट मधील झाडे", //manjur
             PlotSelect: "प्लॉट निवडा", //manjur
             SyncDisplay: "सिंक डेटा",
@@ -640,6 +642,7 @@ export class Strings {
             SelectVisit: "Select Visit",
             SelectSite: "Select a Site",
             SelectedSite: "Selected Site",
+            ClickSiteFromDropdown: "Click the site name from dropdown",
 
             //local data view
             UploadStatus: "Upload Status",
@@ -685,6 +688,8 @@ export class Strings {
 
             Selected: 'Selected',
             NotSelected: 'Not Selected',
+            Audited: 'Audited',
+            NotAudited: 'Not Audited',
             Total: 'Total',
             ChangeSaplingsFromPlot: 'Change saplings from plot',
             To: 'To',
@@ -700,6 +705,7 @@ export class Strings {
             SelectVisit: "भेट द्या निवडा",
             SelectSite: "एक साइट निवडा",
             SelectedSite: "निवडलेली साइट",
+            ClickSiteFromDropdown: "ड्रॉपडाउनमधून साइटच्या नावावर क्लिक करा",
 
             //local data view
             UploadStatus: "अपलोड स्थिती",
@@ -746,6 +752,8 @@ export class Strings {
 
             Selected: 'निवडलेले',
             NotSelected: 'निवडलेले नाही',
+            Audited: 'ऑडिट केले',
+            NotAudited: 'ऑडिट केलेले नाही',
             Total: 'एकूण',
             ChangeSaplingsFromPlot: 'प्लॉटमधून रोपे बदला',
             To: 'ला',

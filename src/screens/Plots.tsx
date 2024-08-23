@@ -196,6 +196,12 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
                             { selectedPlot },
                         )
                     }}
+                    onSaplingAudit={() => {
+                        navigation.navigate(
+                            Strings.screenNames.getString('PlotAudit', Strings.english),
+                            { selectedPlot },
+                        )
+                    }}
                     onDelete={handleDelete}
                     plot={selectedPlot}
                 />}

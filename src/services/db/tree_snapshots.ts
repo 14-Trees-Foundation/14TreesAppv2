@@ -221,4 +221,23 @@ export class TreeSnapshotsDao {
         return resp;
     }
 
+    countTreeSnapshotImagesForSaplingId = async (saplingId: string, isUploaded?: boolean) => {
+        const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
+        const query = `SELECT is_deleted, COUNT(*) as count FROM ${this.tableName}
+            WHERE sapling_id = ? ${isUploaded !== undefined ? ' AND ' + whereCondition : ''} GROUP BY is_deleted;`
+
+        const [results] = await this.db.executeSql(query, [saplingId])
+        const resp = { add: 0, delete: 0 }
+        if (results.rows.item(0)) {
+            if (results.rows.item(0).is_deleted === 0) resp.add = results.rows.item(0).count;
+            else resp.delete = results.rows.item(0).count
+        }
+        if (results.rows.item(1)) {
+            if (results.rows.item(1).is_deleted === 0) resp.add = results.rows.item(1).count;
+            else resp.delete = results.rows.item(1).count
+        }
+
+        return resp;
+    }
+
 };

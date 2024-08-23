@@ -228,7 +228,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           }}>
           <Text variant='bodyMedium'>{Strings.messages.SelectTheSiteYouAreAt}:</Text>
           <Autocomplete
-            label="Select a Site"
+            label={Strings.labels.ClickSiteFromDropdown}
             value={selectedSite}
             options={sites}
             keyGetter={(option) => option ? option.local_id : ''}

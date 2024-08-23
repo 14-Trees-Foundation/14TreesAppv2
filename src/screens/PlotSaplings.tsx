@@ -91,6 +91,16 @@ const PlotSaplings: FC<PlotSaplingsProps> = ({ navigation, route }) => {
         navigation.goBack();
     }
 
+    const handleChipPress = (item: string) => {
+        let newSelectedItems = [...selectedSaplings];
+        if (newSelectedItems.includes(item)) {
+            newSelectedItems = newSelectedItems.filter(chip => chip !== item);
+        } else {
+            newSelectedItems.push(item);
+        }
+        setSelectedSapling(newSelectedItems);
+    };
+
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={{ flex: 1 }}>
@@ -100,8 +110,8 @@ const PlotSaplings: FC<PlotSaplingsProps> = ({ navigation, route }) => {
                     <Text variant='titleLarge'>{plot.name}</Text>
                 </View>
                 <View style={{ marginHorizontal: 10, marginBottom: 10, paddingLeft: 10 }}>
-                <Text variant='titleSmall'>{Strings.messages.SelectNewPlot}:</Text>
-                    <Autocomplete 
+                    <Text variant='titleSmall'>{Strings.messages.SelectNewPlot}:</Text>
+                    <Autocomplete
                         label={selectedPlot ? Strings.labels.SelectedPlot : Strings.labels.SelectPlot}
                         value={selectedPlot}
                         options={plots}
@@ -113,14 +123,14 @@ const PlotSaplings: FC<PlotSaplingsProps> = ({ navigation, route }) => {
                     />
                 </View>
                 <Divider />
-                {loading && <View style={{ alignItems: 'center', justifyContent: 'center', alignContent: 'center', flexGrow: 1}}>
+                {loading && <View style={{ alignItems: 'center', justifyContent: 'center', alignContent: 'center', flexGrow: 1 }}>
                     <CircleSnail size={100} color={'#059636'}
                         thickness={10} duration={700} spinDuration={2000} />
                 </View>}
-                {!loading && <SaplingChipList 
-                    items={saplings} 
-                    selectedItems={selectedSaplings} 
-                    onSelectionChange={setSelectedSapling}
+                {!loading && <SaplingChipList
+                    items={saplings.map(sapling => ({ sapling }))}
+                    selectedItems={selectedSaplings.map(sapling => ({ sapling }))}
+                    onSelectionChange={handleChipPress}
                 />}
                 <Divider />
                 <View style={{ margin: 10, paddingLeft: 10, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -138,16 +148,16 @@ const PlotSaplings: FC<PlotSaplingsProps> = ({ navigation, route }) => {
                             <Text variant='titleSmall' >{saplings.length}</Text>
                         </View>
                     </View>
-                    <Button 
-                        style={{ marginHorizontal: 3 }} 
+                    <Button
+                        style={{ marginHorizontal: 3 }}
                         mode='elevated'
                         buttonColor='#93faa9'
-                        disabled={ selectedPlot === null || selectedSaplings.length === 0 }
+                        disabled={selectedPlot === null || selectedSaplings.length === 0}
                         onPress={() => setModalOpen(true)}
                     >{Strings.buttonLabels.ChangePlot}</Button>
                 </View>
 
-                {selectedPlot && <ChangePlotModal 
+                {selectedPlot && <ChangePlotModal
                     visible={modalOpen}
                     fromPlot={plot.name}
                     toPlot={selectedPlot.name}
