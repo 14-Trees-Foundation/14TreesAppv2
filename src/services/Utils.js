@@ -960,8 +960,8 @@ export class Utils {
                 }
             }
 
-            const finalSaplingIds = final.map(item => item.sapling_id);
-            finalSaplings.push(...finalSaplingIds);
+            const batchSaplingIds = final.map(item => item.sapling_id);
+            finalSaplings.push(...batchSaplingIds);
             if (completed >= count) break;
         }
         await Utils.setLastSyncDateNow();
