@@ -10,7 +10,7 @@ import RNFS from 'react-native-fs';
 import ReactNativeForegroundService from '@supersami/rn-foreground-service';
 import { shiftTypes } from "../screens/Shifts";
 import { DaoClient } from "./db/dao";
-const MIN_BATCH_SIZE = 5
+const MIN_BATCH_SIZE = 1
 
 const shiftTypesObject = {
     addSapling: 0,
@@ -951,10 +951,10 @@ export class Utils {
         const count = await Utils.getTreesCountFromLocalDb(0);
         while(true) {
             const final = await Utils.fetchTreesFromLocalDB(0);//not uploaded.
-            for (let i = 0; i < final.length; i += 1) {
-                const batchFailures = await Utils.batchUpload(final[i]);
+            for (let i = 0; i < final.length; i += MIN_BATCH_SIZE) {
+                const batchFailures = await Utils.batchUpload(final.slice(i, i + MIN_BATCH_SIZE));
                 failures.push(...batchFailures);
-                completed += 1;
+                completed += MIN_BATCH_SIZE;
                 if (onProgress) {
                     onProgress(completed / count);
                 }
