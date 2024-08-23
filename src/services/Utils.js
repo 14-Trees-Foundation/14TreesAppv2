@@ -680,8 +680,10 @@ export class Utils {
     }
 
     static async getTreesCounts() {
-        const pendingTrees = (await Utils.fetchTreesFromLocalDB(0)).length;
-        const uploadedTrees = (await Utils.fetchTreesFromLocalDB(1)).length;
+        // const pendingTrees = (await Utils.fetchTreesFromLocalDB(0)).length;
+        // const uploadedTrees = (await Utils.fetchTreesFromLocalDB(1)).length;
+        const pendingTrees = await Utils.getTreesCountFromLocalDb(0);
+        const uploadedTrees = await Utils.getTreesCountFromLocalDb(1);
 
         const treesWithNewImages = (await Utils.fetchTreesWithNewImage(0)).length;
         const uploadedImages = (await Utils.fetchTreesWithNewImage(1)).length;
@@ -943,14 +945,24 @@ export class Utils {
     }
 
     static async upload(onProgress = undefined) {
-        const final = await Utils.fetchTreesFromLocalDB(0);//not uploaded.
         const failures = [];
-        for (let i = 0; i < final.length; i += MIN_BATCH_SIZE) {
-            const batchFailures = await Utils.batchUpload(final.slice(i, i + MIN_BATCH_SIZE));
-            failures.push(...batchFailures);
-            if (onProgress) {
-                onProgress(i / final.length);
+        const finalSaplings = [];
+        let completed = 0
+        const count = await Utils.getTreesCountFromLocalDb(0);
+        while(true) {
+            const final = await Utils.fetchTreesFromLocalDB(0);//not uploaded.
+            for (let i = 0; i < final.length; i += MIN_BATCH_SIZE) {
+                const batchFailures = await Utils.batchUpload(final.slice(i, i + MIN_BATCH_SIZE));
+                failures.push(...batchFailures);
+                completed += MIN_BATCH_SIZE;
+                if (onProgress) {
+                    onProgress(completed / count);
+                }
             }
+
+            const finalSaplingIds = final.map(item => item.sapling_id);
+            finalSaplings.push(...finalSaplingIds);
+            if (completed >= count) break;
         }
         await Utils.setLastSyncDateNow();
         console.log("failed upload: ---", failures);
@@ -960,8 +972,7 @@ export class Utils {
         else {
             Alert.alert(Strings.alertMessages.SyncFailureForTrees, Strings.alertMessages.ContactExpert);
         }
-        const finalSaplingIds = final.map(item => item.sapling_id);
-        const uploadedSaplings = finalSaplingIds.filter(sapling_id => !failures.includes(sapling_id));
+        const uploadedSaplings = finalSaplings.filter(sapling_id => !failures.includes(sapling_id));
         return { failures: failures, uploadedSaplings: uploadedSaplings };
     };
 
@@ -1114,6 +1125,11 @@ export class Utils {
             final.push(tree);
         }
         return final;
+    }
+
+    static async getTreesCountFromLocalDb(uploaded = 0) {
+        const res = await this.localdb.getTreeCountByUploadStatus(uploaded);
+        return res;
     }
 
     static async formatLocalTreeToJSON(element) {

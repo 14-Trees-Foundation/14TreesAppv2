@@ -447,7 +447,7 @@ export class LocalDatabase {
         try {
             const trees = [];
             const results = await this.db.executeSql(
-                `SELECT sapling_id, plant_type_id, plot_id, user_id, lat,lng, tree_status, timestamp FROM ${treeTableName} where uploaded=${uploaded}`,
+                `SELECT sapling_id, plant_type_id, plot_id, user_id, lat,lng, tree_status, timestamp FROM ${treeTableName} where uploaded=${uploaded} LIMIT 2 OFFSET 0;`,
             );
             results.forEach(result => {
                 for (let index = 0; index < result.rows.length; index++) {
@@ -462,6 +462,28 @@ export class LocalDatabase {
             const stackTrace = error.stack;
             const errorLog = {
                 msg: "happened while trying to get tree data(inside tree_tb(getAllTreesByUploadStatus))",
+                error: JSON.stringify(error),
+                stackTrace: stackTrace
+            }
+            await this.logExceptionLocalDB(JSON.stringify(errorLog));
+        }
+    };
+
+    getTreeCountByUploadStatus = async (uploaded) => {
+        try {
+            const [results] = await this.db.executeSql(
+                `SELECT COUNT(*) as count FROM ${treeTableName} where uploaded=${uploaded};`,
+            );
+            const resp = results.rows.item(0)
+            console.log(resp);
+            return resp?.count || 0;
+        } catch (error) {
+            //TODO: remove raw throw. Convert to Alert.
+            console.error(error);
+            Alert.alert(Strings.alertMessages.getString('FailedGetTreeCount', Strings.english));
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: "happened while trying to get tree data(inside tree_tb(getTreeCountByUploadStatus))",
                 error: JSON.stringify(error),
                 stackTrace: stackTrace
             }
