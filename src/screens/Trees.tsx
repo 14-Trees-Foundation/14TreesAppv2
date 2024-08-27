@@ -245,7 +245,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                     <View style={{ width: '100%', flexGrow: 1, marginTop: 15 }}>
                         <Autocomplete
                             label={selectedPlot ? Strings.labels.SelectedPlot : Strings.labels.SelectPlot}
-                            options={plots}
+                            options={allPlots}
                             value={selectedPlot}
                             onSelect={setSelectedPlot}
                             valueGetter={(data) => data.name}
