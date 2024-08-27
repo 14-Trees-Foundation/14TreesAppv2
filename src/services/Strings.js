@@ -27,6 +27,7 @@ export class Strings {
             UpdatePlotShift: "Update Tree Plot",
             AppInfo: "App Info",
             Dev: "Dev",
+            Map: "Map",
             ChangePlot: "Change Plot",
             PlotAudit: "Plot Audit",
             TreesInShift: "Trees In Shift", //manjur
@@ -58,6 +59,7 @@ export class Strings {
             UpdatePlotShift: "सॅपलिंग प्लॉट अपडेट",
             AppInfo: "अ‍ॅपची माहिती",
             Dev: "देव",
+            Map: "नकाशा",
             ChangePlot: "प्लॉट बदला",
             PlotAudit: 'प्लॉट ऑडिट',
             TreesInShift: "शिफ्ट मधील झाडे", //manjur

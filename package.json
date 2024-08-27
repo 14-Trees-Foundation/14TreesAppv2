@@ -32,7 +32,7 @@
     "react-native-image-resizer": "^1.4.5",
     "react-native-image-viewing": "^0.2.2",
     "react-native-localization": "^2.3.2",
-    "react-native-maps": "1.15.4",
+    "react-native-maps": "^1.15.4",
     "react-native-modal": "^13.0.1",
     "react-native-paper": "^5.12.3",
     "react-native-permissions": "^3.9.2",
