@@ -153,7 +153,7 @@ export const DrawerContent = (props) => {
               labelStyle={{ marginLeft: -40 }} 
               onPress={() => props.navigation.navigate(Strings.screenNames.getString('Dev', Strings.english))}
             />}
-            {/* <DrawerItem 
+            {isAdmin && <DrawerItem 
               icon={({size, color}) => (
                 <Button icon='map' size={size + 20} color={color}/>
               )}
@@ -161,7 +161,7 @@ export const DrawerContent = (props) => {
               style={{marginVertical: -5}}
               labelStyle={{ marginLeft: -40 }} 
               onPress={() => props.navigation.navigate(Strings.screenNames.getString('Map', Strings.english))}
-            /> */}
+            />}
             <DrawerItem 
               icon={({size, color}) => (
                 <Button icon='information-outline' size={size + 20} color={color}/>

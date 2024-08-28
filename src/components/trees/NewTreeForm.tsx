@@ -22,9 +22,10 @@ interface TreeFormInputProps {
     onSubmit: (data: Tree | CreateTreeRequest, images?: any) => void,
     onCancel: () => void,
     defaultPlot?: any
+    defaultLocation?: { latitude: number, longitude: number }
 }
 
-export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCancel, onSubmit, defaultPlot }) => {
+export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCancel, onSubmit, defaultPlot, defaultLocation }) => {
 
     const [saplingId, setSaplingId] = useState('');
     const [lat, setlat] = useState(0);
@@ -116,6 +117,13 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
             })
         }
     }, [tree])
+
+    useEffect(() => {
+        if (defaultLocation) {
+            setlat(defaultLocation.latitude);
+            setlng(defaultLocation.longitude);
+        }
+    }, [defaultLocation])
 
     useEffect(() => {
         if (tree) {
