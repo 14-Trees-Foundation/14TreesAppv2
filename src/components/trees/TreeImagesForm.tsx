@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, ToastAndroid, View } from 'react-native';
 import { Strings } from "../../services/Strings";
 import { CustomButtonStyles, treeFormStyles } from "../../services/Styles";
 import { Button, Checkbox, SegmentedButtons } from 'react-native-paper';
@@ -16,6 +16,7 @@ const getImageDescription = (imageDate: string, treeStatus: string) => {
         'healthy': 'Healthy',
         'diseased': 'Diseased',
         'dead': 'Dead',
+        'lost': 'Lost',
     }
     return `${getHumanReadableDate(imageDate)} (${treeStatusMap[treeStatus]})`
 }
@@ -23,7 +24,7 @@ const getImageDescription = (imageDate: string, treeStatus: string) => {
 interface TreeImageFormInputProps {
     sapling_id: string,
     tree_status: string,
-    onSubmit: (images: CreateTreeSnapshotRequest[], deleted: number[]) => void,
+    onSubmit: (images: CreateTreeSnapshotRequest[], deleted: number[], treeStatus: string) => void,
     onCancel: () => void,
 }
 
@@ -44,7 +45,7 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_sta
 
                 const uris = treeSnapshots.map(treeImage => {
                     const description = getImageDescription(treeImage.created_at, treeImage.tree_status);
-                    let imageUri = `data:image/jpg;base64,${treeImage.data}`;
+                    let imageUri = treeImage.data ? `data:image/jpg;base64,${treeImage.data}`: undefined;
                     if (treeImage.image) imageUri = treeImage.image;
 
                     return {
@@ -74,7 +75,11 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_sta
                 });
             }
         });
-        onSubmit(newImages, deletedImages);
+        if ((treeStatus === 'healthy' || treeStatus === 'diseased') && (newImages.length === 0 || deletedImages.length === 0)) {
+            ToastAndroid.show('Images are required for tree audit!', ToastAndroid.LONG);
+            return;
+        }
+        onSubmit(newImages, deletedImages, treeStatus);
     }
 
     const handleImageChange = (image?: Image) => {
@@ -116,21 +121,7 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_sta
                             onDelete={handleImageDelete}
                         />
                     </View>
-                    <View style={{ marginTop: 10 }}>
-                        <Checkbox.Item
-                            label={Strings.messages.ImageDate}
-                            status={dateEnabled ? "checked" : 'unchecked'}
-                            onPress={() => { setDateEnabled(prev => !prev) }}
-                            color='#4CAF50'
-                        />
-                    </View>
-                    {dateEnabled && <View style={{ marginTop: 10, flexGrow: 1 }}>
-                        <DatePicker
-                            label={Strings.labels.ImageDate}
-                            value={date}
-                            onChange={setDate}
-                        />
-                    </View>}
+
                     <View style={{ marginTop: 10, flexGrow: 1 }}>
                         <Text style={{ color: 'black', paddingLeft: 10, fontSize: 16, marginBottom: 5 }}>{Strings.messages.WhatIsTreeStatus}</Text>
                         <SegmentedButtons
@@ -140,10 +131,28 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_sta
                                 { value: 'healthy', label: 'Healthy', style: { backgroundColor: treeStatus === 'healthy' ? 'lightgreen' : 'white' } },
                                 { value: 'diseased', label: 'Diseased', style: { backgroundColor: treeStatus === 'diseased' ? 'lightgreen' : 'white' } },
                                 { value: 'dead', label: 'Dead', style: { backgroundColor: treeStatus === 'dead' ? 'lightgreen' : 'white' } },
+                                { value: 'lost', label: 'Lost', style: { backgroundColor: treeStatus === 'lost' ? 'lightgreen' : 'white' } },
                             ]}
                         />
                     </View>
-                    <ImageOptions buttonLabel={Strings.buttonLabels.AddNewImage} onChange={handleImageChange} multiple/>
+
+                    {(treeStatus === 'healthy' || treeStatus === 'diseased') && <View style={{ marginTop: 10 }}>
+                        <Checkbox.Item
+                            label={Strings.messages.ImageDate}
+                            status={dateEnabled ? "checked" : 'unchecked'}
+                            onPress={() => { setDateEnabled(prev => !prev) }}
+                            color='#4CAF50'
+                        />
+                    </View>}
+                    {dateEnabled && <View style={{ marginTop: 10, flexGrow: 1 }}>
+                        <DatePicker
+                            label={Strings.labels.ImageDate}
+                            value={date}
+                            onChange={setDate}
+                        />
+                    </View>}
+                    
+                    {(treeStatus === 'healthy' || treeStatus === 'diseased') && <ImageOptions buttonLabel={Strings.buttonLabels.AddNewImage} onChange={handleImageChange} multiple/>}
 
                     <View style={CustomButtonStyles.container}>
                         <View style={CustomButtonStyles.buttonRow}>

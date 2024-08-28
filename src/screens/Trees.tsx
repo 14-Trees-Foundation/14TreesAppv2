@@ -206,15 +206,16 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
 
     };
 
-    const handleImagesSave = (images: CreateTreeSnapshotRequest[], deleted: number[]) => {
+    const handleImagesSave = (images: CreateTreeSnapshotRequest[], deleted: number[], treeStatus: string) => {
         setIsImageFormVisible(false);
         setTimeout(async () => {
-            if (images.length > 0 && selectedTree) {
+            if (selectedTree) {
                 const daoClient = await DaoClient.authenticate();
                 for (const imageId of deleted) {
                     await daoClient.treeSnapshots.deleteTreeSnapshot(imageId);
                 }
-                await daoClient.treeSnapshots.insertTreeSnapshots(selectedTree.sapling_id, userDetails.id, images)
+                if (images.length > 0) await daoClient.treeSnapshots.insertTreeSnapshots(selectedTree.sapling_id, userDetails.id, images);
+                else await daoClient.treeSnapshots.insertTreeAdit(selectedTree.sapling_id, userDetails.id, treeStatus)
                 setPlaySound(true);
                 ToastAndroid.show("Added Tree images locally!", ToastAndroid.LONG)
             }

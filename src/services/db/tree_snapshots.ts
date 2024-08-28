@@ -59,6 +59,16 @@ export class TreeSnapshotsDao {
         await this.db.executeSql( query, values);
     }
 
+    insertTreeAdit = async (saplingId: string, userId: number, treeStatus: string) => {
+        const now = new Date().toISOString();
+        const query = `
+            INSERT INTO ${this.tableName} (sapling_id, user_id, name, data, image_date, tree_status, is_uploaded, is_deleted, created_at)
+            VALUES (?, ?, NULL, NULL, NULL, ?, 0, 0, ?);
+        `
+
+        await this.db.executeSql( query, [saplingId, userId, treeStatus, now]);
+    }
+
     getTreeSnapshotsBySaplingId = async (saplingId: string, uploaded?: boolean) => {
         const [result] = await this.db.executeSql(
             `SELECT * FROM ${this.tableName}
