@@ -63,10 +63,10 @@ export class TreeSnapshotsDao {
         const now = new Date().toISOString();
         const query = `
             INSERT INTO ${this.tableName} (sapling_id, user_id, name, data, image_date, tree_status, is_uploaded, is_deleted, created_at)
-            VALUES (?, ?, NULL, NULL, NULL, ?, 0, 0, ?);
+            VALUES (?, ?, NULL, NULL, ?, ?, 0, 0, ?);
         `
 
-        await this.db.executeSql( query, [saplingId, userId, treeStatus, now]);
+        await this.db.executeSql( query, [saplingId, userId, now, treeStatus, now]);
     }
 
     getTreeSnapshotsBySaplingId = async (saplingId: string, uploaded?: boolean) => {
@@ -231,10 +231,11 @@ export class TreeSnapshotsDao {
         return resp;
     }
 
-    countTreeSnapshotImagesForSaplingId = async (saplingId: string, isUploaded?: boolean) => {
-        const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
+    countTreeSnapshotImagesForSaplingId = async (saplingId: string, isUploaded?: boolean, date?: string) => {
+        const uploadedCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
+        const dateCondition = `image_date > '${date}'`
         const query = `SELECT is_deleted, COUNT(*) as count FROM ${this.tableName}
-            WHERE sapling_id = ? ${isUploaded !== undefined ? ' AND ' + whereCondition : ''} GROUP BY is_deleted;`
+            WHERE sapling_id = ? ${isUploaded !== undefined ? ' AND ' + uploadedCondition : ''} ${date !== undefined ? 'AND ' + dateCondition : ''} GROUP BY is_deleted;`
 
         const [results] = await this.db.executeSql(query, [saplingId])
         const resp = { add: 0, delete: 0 }

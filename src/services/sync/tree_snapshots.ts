@@ -103,13 +103,17 @@ const uploadNewTreeSnapshots = async (daoClient: DaoClient, treeSnapshots: TreeS
 
     for (const saplingId of saplingIds) {
         const images = treeSnapshotsMap[saplingId];
-        await apiClient.treeSnapshots.createTreeSnapshots(saplingId, userId, images)
+        const treeSnapshots = await apiClient.treeSnapshots.createTreeSnapshots(saplingId, userId, images)
 
         for (const image of images) {
             await daoClient.treeSnapshots.markImageUploaded(image.local_id);
             syncInfo.tree_images.add += 1;
             syncInfo.upload_time = new Date().getTime() - new Date(syncInfo.synced_at).getTime();
             await saveSyncInfo(daoClient, syncInfo);
+        }
+
+        for (const treeSnapshot of treeSnapshots) {
+            await daoClient.treeSnapshots.upsertLiveTreeSnapshotIntoLocalDb(treeSnapshot);
         }
     }
 }

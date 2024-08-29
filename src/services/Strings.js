@@ -185,6 +185,7 @@ export class Strings {
             TreeImages: 'Tree Images',
             ImageDate: "Image date different than today's date?",
             WhatIsTreeStatus: "Health status?",
+            SelectAuditStartDate: "Select audit start date",
         },
         "mr": {
             SignIn: "साइन इन करा",
@@ -298,6 +299,7 @@ export class Strings {
             TreeImages: 'वृक्ष प्रतिमा',
             ImageDate: "चित्राची तारीख आजच्या तारखेपेक्षा वेगळी आहे का?",
             WhatIsTreeStatus: "आरोग्य स्थिती?",
+            SelectAuditStartDate: "ऑडिट सुरू होण्याची तारीख निवडा",
         },
     });
     static alertMessages = new LocalizedStrings({
@@ -693,6 +695,7 @@ export class Strings {
             NotSelected: 'Not Selected',
             Audited: 'Audited',
             NotAudited: 'Not Audited',
+            LocalChanges: 'Local Changes',
             Total: 'Total',
             ChangeSaplingsFromPlot: 'Change saplings from plot',
             To: 'To',
@@ -757,6 +760,7 @@ export class Strings {
             NotSelected: 'निवडलेले नाही',
             Audited: 'ऑडिट केले',
             NotAudited: 'ऑडिट केलेले नाही',
+            LocalChanges: 'स्थानिक बदल',
             Total: 'एकूण',
             ChangeSaplingsFromPlot: 'प्लॉटमधून रोपे बदला',
             To: 'ला',
