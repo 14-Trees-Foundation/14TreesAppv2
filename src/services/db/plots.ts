@@ -1,5 +1,7 @@
 import { SQLiteDatabase } from 'react-native-sqlite-storage';
-import { CreatePlotRequest , Plot } from '../../model/plot';
+import { CreatePlotRequest, Plot } from '../../model/plot';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Constants } from '../Utils';
 
 
 export class PlotsDao {
@@ -8,6 +10,33 @@ export class PlotsDao {
 
     constructor(db: SQLiteDatabase) {
         this.db = db;
+    };
+
+    releaseChanges = async () => {
+        // adding new column to plots
+        try {
+            // Query to get the table schema
+            const query = `PRAGMA table_info(${this.tableName});`;
+            const results = await this.db.executeSql(query);
+
+            // Extract the column names from the results
+            const columns = results[0].rows.raw().map(row => row.name);
+
+            // Check if the column exists
+            if (!columns.includes('boundaries')) {
+                // Add the column if it does not exist
+                const alterQuery = `ALTER TABLE ${this.tableName} ADD COLUMN boundaries TEXT;`;
+                await this.db.executeSql(alterQuery);
+                console.log(`Column boundaries added to ${this.tableName}.`);
+            } else {
+                console.log(`Column boundaries already exists in ${this.tableName}.`);
+            }
+            // remove tables last synced details
+            await AsyncStorage.removeItem(Constants.lastPlotsFetchedAt)
+        } catch (error) {
+            console.error('Error adding column:', error);
+        }
+
     };
 
     // Create necessary tables
@@ -32,6 +61,7 @@ export class PlotsDao {
 
             await this.db.executeSql(query);
             console.log('Plots table created successfully!');
+            await this.releaseChanges();
         } catch (error) {
             console.log('error creating plots table:', error);
         }
@@ -47,12 +77,12 @@ export class PlotsDao {
     getPlots = async (offset: number = 0, limit: number = 10, isUploaded?: boolean, isDeleted: boolean = false, siteId?: number) => {
         const plots: Plot[] = []
         const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
-        const query =`SELECT * FROM ${this.tableName}
+        const query = `SELECT * FROM ${this.tableName}
             WHERE 1=1 ${isDeleted ? '' : ` AND change_type != 'delete'`} ${siteId !== undefined ? `AND site_id = ${siteId}` : ""} ${isUploaded !== undefined ? 'AND ' + whereCondition : ""}
             ORDER BY local_id DESC 
             ${limit < 0 ? '' : `LIMIT ${limit} OFFSET ${offset}`};  `
-       
-            const [results] = await this.db.executeSql(query)
+
+        const [results] = await this.db.executeSql(query)
         for (let index = 0; index < results.rows.length; index++) {
             plots.push(results.rows.item(index));
         }
@@ -96,11 +126,11 @@ export class PlotsDao {
 
         const timeStamp = new Date().toISOString();
         const [results] = await this.db.executeSql(query, [
-            data.name, 
+            data.name,
             data.plot_id,
             data.tags,
-            data.gat, 
-            data.category, 
+            data.gat,
+            data.category,
             timeStamp,
             timeStamp
         ]);
@@ -110,7 +140,7 @@ export class PlotsDao {
     updatePlot = async (data: Plot) => {
         const now = new Date().toISOString();
         let changeType = 'edit';
-        
+
         const [response] = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
             [data.local_id]
@@ -139,19 +169,19 @@ export class PlotsDao {
                     is_uploaded = 0
                 WHERE local_id = ?;`,
                 [
-                    data.name, 
+                    data.name,
                     data.plot_id,
                     data.tags,
                     data.status,
-                    data.gat, 
-                    data.category, 
+                    data.gat,
+                    data.category,
                     data.site_id,
                     now,
                     changeType,
                     data.local_id
                 ]
             )
-        } catch(err: any) {
+        } catch (err: any) {
             console.log(err);
         }
     }
@@ -209,14 +239,14 @@ export class PlotsDao {
                 WHERE id = ?;`,
                 [
                     data.name, data.plot_id, data.tags, data.category, data.gat,
-                    data.status, data. site_id, data.boundaries, data.created_at, data.updated_at, data.id
+                    data.status, data.site_id, data.boundaries, data.created_at, data.updated_at, data.id
                 ]
             )
         }
     }
 
 
-  
+
     deletePlot = async (id: number) => {
         const [response] = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
@@ -232,7 +262,7 @@ export class PlotsDao {
                         `DELETE FROM ${this.tableName} WHERE local_id = ?;`,
                         [id]
                     )
-                }else {
+                } else {
                     // Live PLot
                     await this.db.executeSql(
                         `UPDATE ${this.tableName}
@@ -245,7 +275,7 @@ export class PlotsDao {
                 }
             }
         }
-    } 
+    }
 
     deleteLivePlotFromLocalDb = async (id: number) => {
         await this.db.executeSql(
@@ -267,10 +297,10 @@ export class PlotsDao {
     }
 
     getLivePlotIds = async () => {
-        const query =  `SELECT id FROM ${this.tableName} WHERE id IS NOT NULL;`
+        const query = `SELECT id FROM ${this.tableName} WHERE id IS NOT NULL;`
         const [result] = await this.db.executeSql(query);
 
-        const plot_ids: number [] = [];
+        const plot_ids: number[] = [];
         for (let i = 0; i < result.rows.length; i++) {
             const row = result.rows.item(i);
             plot_ids.push(row.id);
@@ -281,14 +311,14 @@ export class PlotsDao {
 
     searchPlots = async (searchStr: string, offset: number, limit: number, siteId?: number) => {
         let plots: Plot[] = [];
-        const query =  `
+        const query = `
             SELECT * FROM ${this.tableName} 
-            WHERE change_type != 'delete' AND (name LIKE ? OR plot_id LIKE ?) ${siteId ? `AND site_id = ${siteId}`: ''}
+            WHERE change_type != 'delete' AND (name LIKE ? OR plot_id LIKE ?) ${siteId ? `AND site_id = ${siteId}` : ''}
             ORDER BY updated_at DESC
             LIMIT ? OFFSET ?;
         `
         const likeStr = `%${searchStr}%`
-        const [results] = await this.db.executeSql(query, [ likeStr, likeStr, limit, offset]);
+        const [results] = await this.db.executeSql(query, [likeStr, likeStr, limit, offset]);
         for (let index = 0; index < results.rows.length; index++) {
             plots.push(results.rows.item(index));
         }
@@ -296,7 +326,7 @@ export class PlotsDao {
     }
 
     getPlotByLiveId = async (id: number) => {
-        const query =  `
+        const query = `
             SELECT * FROM ${this.tableName} 
             WHERE id = ?;
         `
