@@ -388,6 +388,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                             inLng={lng}
                             onSetLat={(item: number) => setlat(item)}
                             onSetLng={(item: number) => setlng(item)}
+                            disabled={ defaultLocation ? true : false }
                         />
                         {validationErrors.coordinates && <HelperText visible={true} type='error'>Tree coordinates are required</HelperText>}
                     </View>

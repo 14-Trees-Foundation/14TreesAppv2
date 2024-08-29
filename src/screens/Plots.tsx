@@ -168,6 +168,24 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
                             }}>
                                 <PlotsCard
                                     plot={plot}
+                                    onPlotChangePress={() => {
+                                        navigation.navigate(
+                                            Strings.screenNames.getString('ChangePlot', Strings.english),
+                                            { selectedPlot: plot },
+                                        )
+                                    }}
+                                    onAuditPress={() => {
+                                        navigation.navigate(
+                                            Strings.screenNames.getString('PlotAudit', Strings.english),
+                                            { selectedPlot: plot },
+                                        )
+                                    }}
+                                    onTreesMapPress={() => {
+                                        navigation.navigate(
+                                            Strings.screenNames.getString('Map', Strings.english),
+                                            { selectedPlot: plot },
+                                        )
+                                    }}
                                 />
                             </TouchableOpacity>
                         </View>
@@ -190,18 +208,6 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
                     isVisible={isInfoModalVisible}
                     onClose={() => { setInfoModalVisible(false) }}
                     onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
-                    onSaplingEdit={() => {
-                        navigation.navigate(
-                            Strings.screenNames.getString('ChangePlot', Strings.english),
-                            { selectedPlot },
-                        )
-                    }}
-                    onSaplingAudit={() => {
-                        navigation.navigate(
-                            Strings.screenNames.getString('PlotAudit', Strings.english),
-                            { selectedPlot },
-                        )
-                    }}
                     onDelete={handleDelete}
                     plot={selectedPlot}
                 />}

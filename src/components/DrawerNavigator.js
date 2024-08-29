@@ -307,13 +307,6 @@ export const DrawerNavigator = () => {
                     title: Strings.screenNames.Dev,
                 }}
             />
-            <Drawer.Screen
-                name={Strings.screenNames.getString('Map', Strings.english)}
-                component={MapScreen}
-                options={{
-                    title: Strings.screenNames.Map,
-                }}
-            />
         </Drawer.Navigator >
     );
 };

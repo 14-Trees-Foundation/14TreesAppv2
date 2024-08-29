@@ -181,10 +181,10 @@ export class Strings {
             AddVisitorDetails: 'Add Visitor Details?',
             AddTree: 'Add Tree',
             EditTree: 'Edit Tree',
-            AddTreeImages: 'Add Tree Images For Sapling',
+            Sapling: 'Sapling',
             TreeImages: 'Tree Images',
             ImageDate: "Image date different than today's date?",
-            WhatIsTreeStatus: "What is the health status of the tree?",
+            WhatIsTreeStatus: "Health status?",
         },
         "mr": {
             SignIn: "साइन इन करा",
@@ -294,9 +294,10 @@ export class Strings {
             AddTree: 'झाड जोडा',
             EditTree: 'झाड संपादित करा',
             AddTreeImages: 'रोपट्यासाठी वृक्ष प्रतिमा जोडा',
+            Sapling: 'रोप',
             TreeImages: 'वृक्ष प्रतिमा',
             ImageDate: "चित्राची तारीख आजच्या तारखेपेक्षा वेगळी आहे का?",
-            WhatIsTreeStatus: "झाडाच्या आरोग्याची स्थिती काय आहे?",
+            WhatIsTreeStatus: "आरोग्य स्थिती?",
         },
     });
     static alertMessages = new LocalizedStrings({

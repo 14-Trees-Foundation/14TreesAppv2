@@ -23,17 +23,16 @@ const getImageDescription = (imageDate: string, treeStatus: string) => {
 
 interface TreeImageFormInputProps {
     sapling_id: string,
-    tree_status: string,
     onSubmit: (images: CreateTreeSnapshotRequest[], deleted: number[], treeStatus: string) => void,
     onCancel: () => void,
 }
 
-const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_status, onCancel, onSubmit }) => {
+const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, onCancel, onSubmit }) => {
 
     const [images, setImages] = useState<(ImageSource | CreateTreeSnapshotRequest)[]>([]);
     const [deletedImages, setDeletedImages] = useState<number[]>([]);
     const [date, setDate] = useState(new Date());
-    const [treeStatus, setTreeStatus] = useState(tree_status);
+    const [treeStatus, setTreeStatus] = useState('healthy');
     const [dateEnabled, setDateEnabled] = useState(false);
 
     useEffect(() => {
@@ -75,7 +74,7 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_sta
                 });
             }
         });
-        if ((treeStatus === 'healthy' || treeStatus === 'diseased') && (newImages.length === 0 || deletedImages.length === 0)) {
+        if ((treeStatus === 'healthy' || treeStatus === 'diseased') && (newImages.length === 0 && deletedImages.length === 0)) {
             ToastAndroid.show('Images are required for tree audit!', ToastAndroid.LONG);
             return;
         }
@@ -107,7 +106,7 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_sta
 
     return (
         <View style={{ height: "97%", width: '100%', flexGrow: 1 }}>
-            <Text style={treeFormStyles.plotSapling}> { Strings.messages.AddTreeImages + ": " + sapling_id } </Text>
+            <Text style={treeFormStyles.plotSapling}> { Strings.messages.Sapling + " " + sapling_id } </Text>
             <ScrollView
                 keyboardShouldPersistTaps='handled'
                 scrollEnabled={true}
@@ -136,7 +135,7 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_sta
                         />
                     </View>
 
-                    {(treeStatus === 'healthy' || treeStatus === 'diseased') && <View style={{ marginTop: 10 }}>
+                    {/* {(treeStatus === 'healthy' || treeStatus === 'diseased') && <View style={{ marginTop: 10 }}>
                         <Checkbox.Item
                             label={Strings.messages.ImageDate}
                             status={dateEnabled ? "checked" : 'unchecked'}
@@ -150,9 +149,9 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, tree_sta
                             value={date}
                             onChange={setDate}
                         />
-                    </View>}
+                    </View>} */}
                     
-                    {(treeStatus === 'healthy' || treeStatus === 'diseased') && <ImageOptions buttonLabel={Strings.buttonLabels.AddNewImage} onChange={handleImageChange} multiple/>}
+                    {(treeStatus !== 'lost') && <ImageOptions buttonLabel={Strings.buttonLabels.AddNewImage} onChange={handleImageChange} multiple/>}
 
                     <View style={CustomButtonStyles.container}>
                         <View style={CustomButtonStyles.buttonRow}>

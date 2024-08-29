@@ -30,7 +30,9 @@ interface TreesInputProps {
 
 const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
 
-    const { langChanged, setPlaySound } = useContext(GlobalContext);
+    const { langChanged, setPlaySound, uploadInProgress, setUploadInProgress,
+        downloadInProgress, currentSyncTime, setCurrentSyncTime,
+        syncProgress, setSyncProgress } = useContext(GlobalContext);
     useEffect(() => {
         console.log('langChanged inside Trees: ', langChanged);
     }, [langChanged]);
@@ -261,7 +263,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                 </View>}
                 {!(isFormVisible || isImageFormVisible) && <ScrollView style={styles.scrollView} contentContainerStyle={{ alignItems: 'center' }}>
                     {trees.map((tree, index) => (
-                        <View style={{ width: '95%', marginVertical: 5 }} key={index}>
+                        <View style={{ width: '95%' }} key={index}>
                             <TouchableOpacity style={{ width: '100%' }} activeOpacity={0.91} onPress={() => {
                                 setSelectedTree(tree);
                                 setInfoModalVisible(true);
@@ -270,6 +272,9 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                                     tree={tree}
                                     plantTypeName={plantTypes.find(plantType => plantType.id === tree.plant_type_id)?.name || ''}
                                     plotName={allPlots.find(plot => plot.id === tree.plot_id)?.name || ''}
+                                    onEdit={() => { setSelectedTree(tree); setChangeModel('edit'); setIsFormVisible(true); }}
+                                    onAudit={() => { setSelectedTree(tree); setIsImageFormVisible(true); }}
+                                    onTreeMap={() => {} }
                                 />
                             </TouchableOpacity>
                         </View>
@@ -293,7 +298,6 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                     onCancel={() => setIsImageFormVisible(false)}
                     onSubmit={handleImagesSave}
                     sapling_id={selectedTree?.sapling_id}
-                    tree_status={selectedTree?.tree_status}
                 />}
 
                 {selectedTree && <TreeInfo

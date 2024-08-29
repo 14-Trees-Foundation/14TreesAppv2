@@ -433,4 +433,14 @@ export class TreesDao {
         )
 
     }
+
+    getTreeByLocalId = async (localId: number) => {
+        const [result] = await this.db.executeSql(`
+            SELECT * from ${this.tableName} WHERE local_id = ?
+        `, [localId]);
+
+        if (result.rows.length === 1) return result.rows.item(0) as Tree;
+        return null;
+
+    }
 };

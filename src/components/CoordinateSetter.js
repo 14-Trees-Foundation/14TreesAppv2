@@ -45,7 +45,8 @@ const isLocationAllowed = async () => {
     })
 }
 
-const requestLocation = async (onSetLat, onSetLng, setLat, setLng) => {
+const requestLocation = async (onSetLat, onSetLng, setLat, setLng, disabled) => {
+    if (disabled) return;
     //console.log('requesting location');
     Geolocation.getCurrentPosition(
         (position) => {
@@ -64,13 +65,13 @@ const requestLocation = async (onSetLat, onSetLng, setLat, setLng) => {
             }
 
         },
-        { enableHighAccuracy: false, timeout: 20000 },
+        { enableHighAccuracy: true, timeout: 20000 },
     );
 
 };
 
 
-export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng }) => {
+export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng, disabled = false }) => {
     const [lat, setLat] = useState(inLat);
     const [lng, setLng] = useState(inLng);
     const { lightTheme } = useContext(GlobalContext);
@@ -123,7 +124,7 @@ export const CoordinateSetter = ({ inLat, inLng, onSetLat, onSetLng }) => {
         <View style={{ flexDirection: 'column' }}>
             <View style={coordinateSetterStyles.innerContainer}>
                 <TouchableOpacity style={{ flexDirection: 'column', width: '93%' }}
-                    onPress={() => requestLocation(onSetLat, onSetLng, setLat, setLng)}
+                    onPress={() => requestLocation(onSetLat, onSetLng, setLat, setLng, disabled)}
                 >
                     <CoordinatesDisplay latitude={lat} longitude={lng} />
                 </TouchableOpacity>

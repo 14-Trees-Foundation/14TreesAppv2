@@ -22,6 +22,7 @@ export class PlotsDao {
                 tags TEXT DEFAULT NULL,
                 gat TEXT DEFAULT NULL,
                 status TEXT DEFAULT NULL,
+                boundaries TEXT DEFAULT NULL,
                 site_id INTEGER DEFAULT NULL,
                 is_uploaded INTEGER DEFAULT 0 CHECK(is_uploaded IN (0, 1)) NOT NULL,
                 change_type TEXT DEFAULT 'none' CHECK(change_type IN ('none', 'add', 'edit', 'delete')) NOT NULL,
@@ -173,17 +174,18 @@ export class PlotsDao {
                     category,
                     gat,
                     status,
+                    boundaries,
                     site_id,
                     change_type,
                     is_uploaded,
                     created_at,
                     updated_at
                 ) VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                 );`,
                 [
                     data.id, data.name, data.plot_id, data.tags,
-                    data.category, data.gat, data.status, data.site_id,
+                    data.category, data.gat, data.status, data.boundaries, data.site_id,
                     'none', 1, data.created_at, data.updated_at
                 ]
             )
@@ -199,6 +201,7 @@ export class PlotsDao {
                     gat = ?,
                     status = ?,
                     site_id = ?,
+                    boundaries = ?,
                     change_type = 'none',
                     is_uploaded = 1,
                     created_at = ?,
@@ -206,7 +209,7 @@ export class PlotsDao {
                 WHERE id = ?;`,
                 [
                     data.name, data.plot_id, data.tags, data.category, data.gat,
-                    data.status, data. site_id, data.created_at, data.updated_at, data.id
+                    data.status, data. site_id, data.boundaries, data.created_at, data.updated_at, data.id
                 ]
             )
         }

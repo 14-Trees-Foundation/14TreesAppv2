@@ -8,6 +8,7 @@ export type Plot = {
   tags: string | null;
   gat: string | null;
   status: string | null;
+  boundaries: string | null;
   site_id: number | null;
   is_uploaded: 0 | 1
   change_type: 'none' | 'add' | 'edit' | 'delete',

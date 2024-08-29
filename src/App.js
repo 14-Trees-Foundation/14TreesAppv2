@@ -29,6 +29,7 @@ import Sync from './screens/Sync';
 import Sound from 'react-native-sound';
 import PlotSaplings from './screens/PlotSaplings';
 import PlotAudit from './screens/PlotAudit';
+import MapScreen from './screens/Map';
 
 
 const errorHandler = async (e, isFatal) => {
@@ -365,6 +366,28 @@ const App = () => {
             headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
             headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
             title: Strings.screenNames.PlotAudit,
+          }}
+        />
+        <Stack.Screen
+          name={Strings.screenNames.getString('Map', Strings.english)}
+          component={MapScreen}
+          options={{
+            headerLeft: () => (
+              <View style={{ marginLeft: 10 }}>
+                <TouchableOpacity onPress={() => {
+                  stackNavRef.current.goBack() // Go back when the button is pressed
+                }}>
+                  <Icon name="arrow-back" size={24} color="black" />
+                </TouchableOpacity>
+              </View>
+            ),
+            headerRight: () => (
+              <ScreenHeaderContent />
+            ),
+            headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+            headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+            headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+            title: Strings.screenNames.Map,
           }}
         />
         <Stack.Screen

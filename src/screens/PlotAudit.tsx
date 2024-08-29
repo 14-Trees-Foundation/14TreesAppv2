@@ -112,7 +112,7 @@ const PlotAudit: FC<PlotSaplingsProps> = ({ navigation, route }) => {
                     <Text variant='titleLarge' style={{ fontWeight: 'bold' }}>{Strings.labels.Plot}: </Text>
                     <Text variant='titleMedium'>{plot.name}</Text>
                 </View>
-                {!isFormVisible && <View style={{ flexGrow: 1 }}>
+                {!isFormVisible && <View style={{ flex: 1, flexGrow: 1 }}>
                     <Divider />
                     {loading && <View style={{ alignItems: 'center', justifyContent: 'center', alignContent: 'center', flexGrow: 1 }}>
                         <CircleSnail size={100} color={'#059636'}
@@ -144,7 +144,6 @@ const PlotAudit: FC<PlotSaplingsProps> = ({ navigation, route }) => {
 
                 {isFormVisible && selectedSapling && <TreeImageForm
                     sapling_id={selectedSapling}
-                    tree_status='healthy'
                     onSubmit={handleSaplingSubmit}
                     onCancel={() => setIsFormVisible(false)}
                 />}

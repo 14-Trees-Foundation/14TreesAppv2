@@ -2,48 +2,85 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Tree } from '../../model/tree';
+import { Button } from 'react-native-paper';
 
 
 interface TreeCardInputProps {
   tree: Tree
   plantTypeName: string
   plotName: string
+  onEdit: () => void
+  onAudit: () => void
+  onTreeMap: () => void
 }
 
-const TreeCard: React.FC<TreeCardInputProps> = ({ tree, plantTypeName, plotName }) => {
+const TreeCard: React.FC<TreeCardInputProps> = ({ tree, plantTypeName, plotName, onEdit, onAudit, onTreeMap }) => {
   return (
-    <View style={styles.card}>
-      <Text style={styles.header}>{tree.sapling_id}</Text>
-      <Text style={styles.sub_fields}>{plantTypeName}</Text>
-      <Text style={styles.sub_fields}>{plotName}</Text>
-    </View>
-  );
+    <View style={styles.container}>
+      <View style={styles.info}>
+        <Text style={styles.title}>{tree.sapling_id}</Text>
+        <Text style={styles.text}>{plantTypeName}</Text>
+        <Text style={styles.text}>{plotName}</Text>
+      </View>
+      <View style={styles.actionContainer}>
+        <Button
+          style={styles.action} 
+          labelStyle={styles.actionLabel}
+          onPress={onEdit}
+          icon='circle-edit-outline'
+        >Edit</Button>
+        <Button 
+          style={styles.action}
+          labelStyle={styles.actionLabel}
+          onPress={onAudit}
+          icon='image-edit'
+        >Audit</Button>
+        <Button 
+          style={styles.action}
+          labelStyle={styles.actionLabel}
+          onPress={onTreeMap}
+          icon='map-marker-radius'
+        >Tree Map</Button>
+      </View>
+    </View >
+  );;
 };
 
 const styles = StyleSheet.create({
-  card: {
+  container: {
+    alignItems: 'center',
     backgroundColor: '#dff0d8', // Light green color
     width: '100%',
-    padding: 10,
+    padding: 5,
+    margin: 5,
     borderRadius: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 3,
   },
-  header: {
+  info: {
+    marginHorizontal: 16,
+    flexGrow: 1,
+    alignSelf: 'flex-start'
+  },
+  actionContainer: {
+    flexDirection: 'row',
+  },
+  action: {
+    flexGrow: 1,
+  },
+  actionLabel: {
+    color: 'green'
+  },
+  title: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
     color: 'black'
   },
-  sub_fields: {
-    fontSize: 16,
-    color: 'black',
-  },
-  tree_location: {
-    fontSize: 16,
+  text: {
+    fontSize: 14,
     color: 'black',
   },
 });
