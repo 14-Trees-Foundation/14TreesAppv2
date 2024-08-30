@@ -3,6 +3,8 @@ import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Card, IconButton, Text } from 'react-native-paper';
 import ImageView from "react-native-image-viewing";
 import { ImageSource } from '../model/common';
+import ConfirmationModal from './ConfirmationModal';
+import { Strings } from '../services/Strings';
 
 interface ImagesViewInputProps {
   title: string;
@@ -13,6 +15,8 @@ interface ImagesViewInputProps {
 const ImagesView: React.FC<ImagesViewInputProps> = ({ title, images, onDelete }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [confirmation, setConfirmation] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState(-1);
 
   const handleImageClick = (index: number) => {
     setCurrentIndex(index);
@@ -27,34 +31,41 @@ const ImagesView: React.FC<ImagesViewInputProps> = ({ title, images, onDelete })
 
   return (
     <View style={styles.container}>
-        <Text>{title}</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
-            {images.map((image, index) => (
-            <TouchableOpacity key={index} onPress={() => handleImageClick(index)} activeOpacity={0.9}>
-              <Card style={styles.card}>
-                <Card.Cover source={getImageSource(image)} defaultSource={require('../../assets/placeholder.png')} style={styles.cardCover} />
-                { onDelete !== undefined && typeof image !== 'string' && 
-                  <IconButton
-                    icon="close"
-                    size={15}
-                    style={styles.deleteIcon}
-                    onPress={() => onDelete(index)}
-                  /> 
-                }
-                {typeof image !== 'string' && image.description && <Card.Content><Text>{image.description}</Text></Card.Content>}
-              </Card>
-            </TouchableOpacity>
-            ))}
-        </ScrollView>
+      <Text>{title}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
+        {images.map((image, index) => (
+          <TouchableOpacity key={index} onPress={() => handleImageClick(index)} activeOpacity={0.9}>
+            <Card style={styles.card}>
+              <Card.Cover source={getImageSource(image)} defaultSource={require('../../assets/placeholder.png')} style={styles.cardCover} />
+              {onDelete !== undefined && typeof image !== 'string' &&
+                <IconButton
+                  icon="close"
+                  size={15}
+                  style={styles.deleteIcon}
+                  onPress={() => { setDeleteIndex(index); setConfirmation(true);  }}
+                />
+              }
+              {typeof image !== 'string' && image.description && <Card.Content><Text>{image.description}</Text></Card.Content>}
+            </Card>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
-        <ImageView
-          images={images.map(image =>({uri: typeof image === 'string' ? image : image.uri}))}
-          imageIndex={currentIndex}
-          visible={isVisible}
-          onRequestClose={() => setIsVisible(false)}
-          FooterComponent={(props) => ( <Text style={{ textAlign: 'center', color: 'white' }}>{(props.imageIndex + 1) + "/" + images.length}</Text> )}
-          keyExtractor={(src, index) => index.toString()}
-        />
+      <ImageView
+        images={images.map(image => ({ uri: typeof image === 'string' ? image : image.uri }))}
+        imageIndex={currentIndex}
+        visible={isVisible}
+        onRequestClose={() => setIsVisible(false)}
+        FooterComponent={(props) => (<Text style={{ textAlign: 'center', color: 'white' }}>{(props.imageIndex + 1) + "/" + images.length}</Text>)}
+        keyExtractor={(src, index) => index.toString()}
+      />
+
+      <ConfirmationModal
+        visible={confirmation}
+        text={Strings.messages.DeleteImageConfirmation}
+        onCancel={() => setConfirmation(false)}
+        onSubmit={() => { onDelete && onDelete(deleteIndex); setConfirmation(false); }}
+      />
     </View>
   );
 };

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, Text, ToastAndroid, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, ToastAndroid, View } from 'react-native';
 import { Strings } from "../../services/Strings";
 import { CustomButtonStyles, treeFormStyles } from "../../services/Styles";
 import { Button, Checkbox, SegmentedButtons } from 'react-native-paper';
@@ -106,7 +106,7 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, onCancel
 
     return (
         <View style={{ height: "97%", width: '100%', flexGrow: 1 }}>
-            <Text style={treeFormStyles.plotSapling}> { Strings.messages.Sapling + " " + sapling_id } </Text>
+            <Text style={styles.saplingHeaderKey}>{Strings.messages.Sapling + ": "}<Text style={styles.saplingHeaderValue}>{sapling_id}</Text></Text>
             <ScrollView
                 keyboardShouldPersistTaps='handled'
                 scrollEnabled={true}
@@ -184,5 +184,29 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, onCancel
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+   saplingHeaderKey: {
+    color: '#113160',
+    fontFamily: 'Inter-Regular',
+    fontSize: 20,
+    textAlign: 'left',
+    justifyContent: 'center',
+    marginTop: 20,
+    fontWeight: 'bold',
+    padding: 5,
+    marginHorizontal: 15
+   },
+   saplingHeaderValue: {
+    color: '#113160',
+    fontFamily: 'Inter-Regular',
+    fontSize: 20,
+    textAlign: 'center',
+    justifyContent: 'center',
+    marginTop: 25,
+    fontWeight: '300',
+    padding: 5
+   } 
+})
 
 export default TreeImageForm;

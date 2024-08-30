@@ -74,6 +74,15 @@ export const DrawerContent = (props) => {
                 labelStyle={{ marginLeft: -40 }} 
                 onPress={() => props.navigation.navigate(Strings.screenNames.getString('HomePage', Strings.english))}
               />
+              <DrawerItem
+                icon={({size, color}) => (
+                  <Button icon='cloud-sync-outline' size={size + 20} color={color}/>
+                )}
+                label={Strings.screenNames.SyncDisplay} 
+                style={{marginVertical: -5}}
+                labelStyle={{ marginLeft: -40 }} 
+                onPress={() => props.navigation.navigate(Strings.screenNames.getString('SyncDisplay', Strings.english))}
+              />
             </Drawer.Section>
             <Drawer.Section>
               <DrawerItem 

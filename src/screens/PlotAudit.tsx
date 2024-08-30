@@ -90,7 +90,7 @@ const PlotAudit: FC<PlotSaplingsProps> = ({ navigation, route }) => {
                     await daoClient.treeSnapshots.deleteTreeSnapshot(imageId);
                 }
                 if (images.length > 0 ) await daoClient.treeSnapshots.insertTreeSnapshots(selectedSapling, userDetails.id, images);
-                else await daoClient.treeSnapshots.insertTreeAdit(selectedSapling, userDetails.id, treeStatus);
+                else if (deleted.length === 0) await daoClient.treeSnapshots.insertTreeAdit(selectedSapling, userDetails.id, treeStatus);
                 const resp = await getImagesCountForSapling(selectedSapling, date)
                 
                 const idx = saplings.findIndex(item => item.sapling === selectedSapling);

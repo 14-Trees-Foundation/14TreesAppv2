@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, View, StyleSheet, Keyboard, TouchableWithoutFeedback } from 'react-native';
-import { TextInput, Button, List, Icon, IconButton } from 'react-native-paper';
+import { TextInput, Button, List, IconButton } from 'react-native-paper';
 import { FlatList, TouchableOpacity } from 'react-native';
 import SearchBar from './Searchbar';
 
@@ -86,7 +86,7 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <SearchBar onChange={handleSearch}/>
+            <SearchBar onChange={handleSearch} autoFocus />
             <FlatList
               keyboardShouldPersistTaps={'handled'}
               style={{ maxHeight: '70%', marginTop: 20 }}

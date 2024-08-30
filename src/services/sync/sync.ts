@@ -1,8 +1,8 @@
 import React from "react";
 import { Constants, Utils } from "../Utils";
-import { fetchAndStoreTrees, uploadNewSingleTreeData, uploadTreesData } from "./tree"
+import { fetchAndStoreTrees, uploadSingleTreeData, uploadTreesData } from "./tree"
 import { fetchAndStoreVisitImages, uploadVisitImagesData } from "./visit_images";
-import { fetchAndStoreTreeSnapshots, uploadTreeSnapshotsData } from "./tree_snapshots";
+import { fetchAndStoreTreeSnapshots, uploadSingleTreeSnapshotsData, uploadTreeSnapshotsData } from "./tree_snapshots";
 import { fetchAndStoreUsers } from "./users";
 import { fetchAndStoreSites } from "./sites";
 import { fetchAndStorePlots } from "./plots";
@@ -11,7 +11,6 @@ import { ApiClient } from "../api/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchAndStoreDeltaSyncInformation, saveSyncInfo, uploadSyncInfoData } from "./sync_info";
 import { DaoClient } from "../db/dao";
-import { ToastAndroid } from "react-native";
 
 export const uploadLocalData = async (changesCount: any, syncTime: string) => {
 
@@ -29,7 +28,7 @@ export const uploadLocalData = async (changesCount: any, syncTime: string) => {
         };
         await Utils.logException(JSON.stringify(errorLog));
     }
-    
+
     count = changesCount.trees.add + changesCount.trees.edit + changesCount.trees.delete;
     try {
         if (count !== 0) await uploadTreesData(syncTime);
@@ -43,15 +42,15 @@ export const uploadLocalData = async (changesCount: any, syncTime: string) => {
         await Utils.logException(JSON.stringify(errorLog));
     }
 
-    count = changesCount.tree_images.add + changesCount.tree_images.delete 
+    count = changesCount.tree_images.add + changesCount.tree_images.delete
     try {
         if (count !== 0) await uploadTreeSnapshotsData(syncTime);
     } catch (error: any) {
         const stackTrace = error.stack;
         const errorLog = {
-          msg: 'happened while trying to sync tree images(inside sync display)',
-          error: JSON.stringify(error),
-          stackTrace: stackTrace,
+            msg: 'happened while trying to sync tree images(inside sync display)',
+            error: JSON.stringify(error),
+            stackTrace: stackTrace,
         };
         await Utils.logException(JSON.stringify(errorLog));
     }
@@ -134,16 +133,10 @@ export const fetchDeltaChanges = async (setProgress: React.Dispatch<React.SetSta
 */
 
 
-export const syncSingleTree = async (localId: number, timeStamp: string) => {
+export const syncSingleTree = async (localId: number, saplingId: string, timeStamp: string) => {
 
-    const daoClient = await DaoClient.authenticate();
-    const tree = await daoClient.trees.getTreeByLocalId(localId);
-
-    if (!tree) {
-        ToastAndroid.show("Tree doesn't exists!", ToastAndroid.LONG);
-    } else if (tree.is_uploaded) {
-        ToastAndroid.show("Tree is already sync!", ToastAndroid.LONG);
-    } else {
+    try {
+        const daoClient = await DaoClient.authenticate();
         const syncInfoRequest = {
             synced_at: timeStamp,
             upload_time: 0,
@@ -154,27 +147,39 @@ export const syncSingleTree = async (localId: number, timeStamp: string) => {
             tree_images: { add: 0, delete: 0 },
             visit_images: { add: 0, delete: 0 },
         }
-        const startTime = new Date().getTime();
-        // create a sync info
         await saveSyncInfo(daoClient, syncInfoRequest);
+    } catch (error: any) {
+        const stackTrace = error.stack;
+        const errorLog = {
+            msg: 'Error in single tree sync feature (while initiating sync)',
+            error: JSON.stringify(error),
+            stackTrace: stackTrace,
+        };
+        await Utils.logException(JSON.stringify(errorLog));
+    }
+    
 
-        try {
-            // upload a single tree
-            await uploadNewSingleTreeData(daoClient, tree);
-            syncInfoRequest.trees.add += 1;
-        } catch(error : any) {
-            syncInfoRequest.upload_error = error.message;
-            const stackTrace = error.stack;
-            const errorLog = {
-                msg: 'Error in single tree sync feature',
-                error: JSON.stringify(error),
-                stackTrace: stackTrace,
-            };
-            await Utils.logException(JSON.stringify(errorLog));
-        }
-        
-        const timeTaken = new Date().getTime() - startTime;
-        syncInfoRequest.upload_time = timeTaken;
-        await saveSyncInfo(daoClient, syncInfoRequest)
+    try {
+        await uploadSingleTreeData(localId, timeStamp)
+    } catch (error: any) {
+        const stackTrace = error.stack;
+        const errorLog = {
+            msg: 'Error in single tree sync feature (upload tree details)',
+            error: JSON.stringify(error),
+            stackTrace: stackTrace,
+        };
+        await Utils.logException(JSON.stringify(errorLog));
+    }
+
+    try {
+        await uploadSingleTreeSnapshotsData(saplingId, timeStamp)
+    } catch (error: any) {
+        const stackTrace = error.stack;
+        const errorLog = {
+            msg: 'Error in single tree sync feature (upload tree audit)',
+            error: JSON.stringify(error),
+            stackTrace: stackTrace,
+        };
+        await Utils.logException(JSON.stringify(errorLog));
     }
 }

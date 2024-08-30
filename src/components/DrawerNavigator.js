@@ -28,6 +28,7 @@ import Home from '../screens/HomeScreen';
 import Dev from '../screens/Dev';
 import PlotSaplings from '../screens/PlotSaplings';
 import MapScreen from '../screens/Map';
+import Sync from '../screens/Sync';
 
 const CustomDrawerToggleButton = ({ navigation }) => (
     <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
@@ -126,6 +127,16 @@ export const DrawerNavigator = () => {
                     //     backgroundColor: '#f0f3f7',
                     //     fontFamily: 'Inter-Regular'
                     // }
+                }}
+            />
+            <Drawer.Screen
+                name={Strings.screenNames.getString('SyncDisplay', Strings.english)}
+                component={Sync}
+                options={{
+                    headerRight: () => (
+                        <ScreenHeaderContent />
+                    ),
+                    title: Strings.screenNames.SyncDisplay,
                 }}
             />
             <Drawer.Screen

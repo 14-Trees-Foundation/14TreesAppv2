@@ -166,9 +166,13 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         setSyncInfoList(list);
     }
 
-    useEffect(() => {
-        getSyncInfo();
-    }, [])
+    useFocusEffect(
+        useCallback(() => {
+            getSyncInfo();
+            return () => {
+            };
+        }, [])
+    );
 
     const uploadData = async (netSpeedInKBps: number) => {
         setNetworkSpeed(netSpeedInKBps.toFixed(0))

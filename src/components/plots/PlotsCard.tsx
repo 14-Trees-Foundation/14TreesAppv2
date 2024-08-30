@@ -3,6 +3,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Plot } from '../../model/plot';
 import { Button } from 'react-native-paper';
+import { Strings } from '../../services/Strings';
 
 interface PlotsCardInputProps {
   plot: Plot
@@ -25,19 +26,19 @@ const PlotsCard: React.FC<PlotsCardInputProps> = ({ plot, onPlotChangePress, onA
           labelStyle={styles.actionLabel}
           onPress={onPlotChangePress}
           icon='map-marker-distance'
-        >Change Plot</Button>
+        >{Strings.buttonLabels.MoveTrees}</Button>
         <Button 
           style={styles.action}
           labelStyle={styles.actionLabel}
           onPress={onAuditPress}
           icon='image-edit'
-        >Audit</Button>
+        >{Strings.buttonLabels.MoveTrees}</Button>
         <Button 
           style={styles.action}
           labelStyle={styles.actionLabel}
           onPress={onTreesMapPress}
           icon='map-marker-radius'
-        >Tree Map</Button>
+        >{Strings.buttonLabels.TreeMap}</Button>
       </View>
     </View >
   );

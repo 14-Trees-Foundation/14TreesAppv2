@@ -84,9 +84,6 @@ export const uploadSyncInfoData = async () => {
 
     for (const info of newInfos) {
         const resp = await apiClient.syncInfo.createSyncInfo(info, userId);
-        console.log('Before:', resp.synced_at)
-        resp.synced_at = new Date(resp.synced_at).toISOString();
-        console.log(resp.synced_at)
         if (resp) await daoClient.syncInfo.upsertLiveSyncInfo(resp);
     }
 }

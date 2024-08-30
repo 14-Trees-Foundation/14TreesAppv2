@@ -11,12 +11,10 @@ interface TreeInfoInputProps {
     plantType: string
     plot: string
     onClose: () => void
-    onEdit: () => void
     onDelete: () => void
-    onImageAdd: () => void
 }
 
-export const TreeInfo: React.FC<TreeInfoInputProps> = ({ isVisible, tree, plantType, plot, onClose, onDelete, onEdit, onImageAdd }) => {
+export const TreeInfo: React.FC<TreeInfoInputProps> = ({ isVisible, tree, plantType, plot, onClose, onDelete }) => {
 
     const [isDelete, setIsDelete] = useState(false);
 
@@ -26,12 +24,11 @@ export const TreeInfo: React.FC<TreeInfoInputProps> = ({ isVisible, tree, plantT
             onBackdropPress={onClose}
             backdropColor="black"
             backdropOpacity={0.5}
+            style={{ alignItems: 'center' }}
         >
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.title}>Tree Information</Text>
-                    <IconButton icon='file-image-plus-outline' style={styles.icons} iconColor='green' onPress={() => { onClose(); onImageAdd(); }}/>
-                    <IconButton icon='circle-edit-outline' style={styles.icons} iconColor='green' onPress={() => { onClose(); onEdit(); }}/>
                     <IconButton icon='delete-outline' style={styles.icons} iconColor='red' onPress={ () => { setIsDelete(true) }}/>
                 </View>
                 <Text style={styles.label}>Sapling Id:</Text>

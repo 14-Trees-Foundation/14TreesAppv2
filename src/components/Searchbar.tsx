@@ -5,10 +5,12 @@ import { Strings } from '../services/Strings';
 interface SearchBarInputProps {
   query?: string,
   onChange?: (text: string) => void
+  autoFocus?: boolean
 }
 
-const SearchBar: React.FC<SearchBarInputProps> = ({ query, onChange }) => {
+const SearchBar: React.FC<SearchBarInputProps> = ({ query, autoFocus, onChange }) => {
   const [searchQuery, setSearchQuery] = React.useState('');
+  const ref = React.useRef<any>(null)
 
   React.useEffect(() => {
     if (query !== undefined) setSearchQuery(query);
@@ -19,8 +21,15 @@ const SearchBar: React.FC<SearchBarInputProps> = ({ query, onChange }) => {
     onChange && onChange(text);
   }
 
+  React.useEffect(() => {
+    if (autoFocus && ref.current) {
+      ref.current.focus();
+    }
+  }, [autoFocus])
+
   return (
     <Searchbar
+      ref={ref}
       placeholder={Strings.buttonLabels.Search}
       onChangeText={handleChange}
       value={searchQuery}

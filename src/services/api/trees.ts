@@ -28,7 +28,8 @@ export class TreeService {
     async updateTree(sapling: any) {
         const token =  await AsyncStorage.getItem(Constants.authToken);
         const url = `/api/appv2/updateSapling`;
-        return await this.api.post(url, sapling, { headers: { 'x-access-token': token } });
+        const response = await this.api.post(url, sapling, { headers: { 'x-access-token': token } });
+        return response.data;
     }
 
     async deleteTree(tree: Tree) {

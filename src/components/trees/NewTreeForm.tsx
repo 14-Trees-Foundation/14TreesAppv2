@@ -322,7 +322,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     }
 
     return (
-        <View style={{ height: "98%" }}>
+        <View style={{ height: "98%", width: "95%" }}>
             <Text style={treeFormStyles.plotSapling}> {changeMode === 'add' ? Strings.messages.AddTree : Strings.messages.EditTree + ': ' + saplingId} </Text>
             <ScrollView
                 keyboardShouldPersistTaps='handled'
@@ -368,7 +368,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                         {validationErrors.plot && <HelperText visible={true} type='error'>Please select a plot</HelperText>}
                     </View>
 
-                    {changeMode === 'edit' && <View style={{ marginTop: 10 }}>
+                    {(changeMode === 'edit' && !defaultLocation) && <View style={{ marginTop: 10 }}>
                         <Autocomplete
                             value={treeStatus}
                             options={treeStatusList}
@@ -381,7 +381,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                         {validationErrors.status && <HelperText visible={true} type='error'>Please select tree status</HelperText>}
                     </View>}
 
-                    <View style={{ width: '100%', marginTop: 10 }}>
+                    {!defaultLocation && <View style={{ width: '100%', marginTop: 10 }}>
                         <Text style={treeFormStyles.inputLabel}>{Strings.messages.Location}:</Text>
                         <CoordinateSetter
                             inLat={lat}
@@ -391,7 +391,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                             disabled={ defaultLocation ? true : false }
                         />
                         {validationErrors.coordinates && <HelperText visible={true} type='error'>Tree coordinates are required</HelperText>}
-                    </View>
+                    </View>}
 
                     <View style={{ width: '100%', marginTop: 10 }}>
                         <ImageSelector

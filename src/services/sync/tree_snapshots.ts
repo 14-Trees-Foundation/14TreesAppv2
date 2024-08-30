@@ -61,7 +61,23 @@ export const uploadTreeSnapshotsData = async (syncTime: string) => {
 
     const resp = await daoClient.syncInfo.getSyncInfoBySyncTime(syncTime);
     const syncInfo = { ...resp, trees: JSON.parse(resp.trees), tree_images: JSON.parse(resp.tree_images), visit_images: JSON.parse(resp.visit_images) }
-    
+
+    await deleteTreeSnapshots(daoClient, deletedImages, syncInfo);
+    await uploadNewTreeSnapshots(daoClient, newImages, syncInfo);
+
+    await daoClient.treeSnapshots.deleteUploadedImages();
+}
+
+export const uploadSingleTreeSnapshotsData = async (saplingId: string, syncTime: string) => {
+    const daoClient = await DaoClient.authenticate();
+
+    const treeSnapshots = await daoClient.treeSnapshots.getTreeSnapshotsBySaplingId(saplingId, false);
+    const deletedImages = treeSnapshots.filter(image => image.is_deleted === 1)
+    const newImages = treeSnapshots.filter(image => image.is_deleted === 0)
+
+    const resp = await daoClient.syncInfo.getSyncInfoBySyncTime(syncTime);
+    const syncInfo = { ...resp, trees: JSON.parse(resp.trees), tree_images: JSON.parse(resp.tree_images), visit_images: JSON.parse(resp.visit_images) }
+
     await deleteTreeSnapshots(daoClient, deletedImages, syncInfo);
     await uploadNewTreeSnapshots(daoClient, newImages, syncInfo);
 
@@ -70,10 +86,12 @@ export const uploadTreeSnapshotsData = async (syncTime: string) => {
 
 const deleteTreeSnapshots = async (daoClient: DaoClient, images: TreeSnapshot[], syncInfo: any) => {
     const apiClient = new ApiClient();
-    let imageIds: number[] = [] 
+    let imageIds: number[] = []
     images.forEach(image => { if (image.id) imageIds.push(image.id) });
 
-    await apiClient.treeSnapshots.deleteTreeSnapshots(imageIds);
+    if (imageIds.length > 0) {
+        await apiClient.treeSnapshots.deleteTreeSnapshots(imageIds);
+    }
 
     for (const image of images) {
         await daoClient.treeSnapshots.markImageUploaded(image.local_id);

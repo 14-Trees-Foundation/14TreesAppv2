@@ -12,11 +12,14 @@ interface TreeCardInputProps {
   onEdit: () => void
   onAudit: () => void
   onTreeMap: () => void
+  onSync: () => void
+  currentTreeSync?: boolean
+  syncInProgress?: boolean
 }
 
-const TreeCard: React.FC<TreeCardInputProps> = ({ tree, plantTypeName, plotName, onEdit, onAudit, onTreeMap }) => {
+const TreeCard: React.FC<TreeCardInputProps> = ({ tree, plantTypeName, plotName, currentTreeSync, syncInProgress, onEdit, onAudit, onTreeMap, onSync }) => {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: tree.is_uploaded ? '#dff0d8' : '#ffe7b3' }]}>
       <View style={styles.info}>
         <Text style={styles.title}>{tree.sapling_id}</Text>
         <Text style={styles.text}>{plantTypeName}</Text>
@@ -40,7 +43,15 @@ const TreeCard: React.FC<TreeCardInputProps> = ({ tree, plantTypeName, plotName,
           labelStyle={styles.actionLabel}
           onPress={onTreeMap}
           icon='map-marker-radius'
-        >Tree Map</Button>
+        >Map View</Button>
+        {tree.is_uploaded === 0 && <Button 
+          loading={currentTreeSync}
+          disabled={syncInProgress}
+          style={styles.action}
+          labelStyle={syncInProgress ? { color: 'grey' } : styles.actionLabel}
+          onPress={onSync}
+          icon='cloud-sync-outline'
+        >Sync</Button>}
       </View>
     </View >
   );;
@@ -66,6 +77,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start'
   },
   actionContainer: {
+    marginHorizontal: 16,
     flexDirection: 'row',
   },
   action: {

@@ -186,6 +186,7 @@ export class Strings {
             ImageDate: "Image date different than today's date?",
             WhatIsTreeStatus: "Health status?",
             SelectAuditStartDate: "Select audit start date",
+            DeleteImageConfirmation: "Do you want to delete this image?",
         },
         "mr": {
             SignIn: "साइन इन करा",
@@ -300,6 +301,7 @@ export class Strings {
             ImageDate: "चित्राची तारीख आजच्या तारखेपेक्षा वेगळी आहे का?",
             WhatIsTreeStatus: "आरोग्य स्थिती?",
             SelectAuditStartDate: "ऑडिट सुरू होण्याची तारीख निवडा",
+            DeleteImageConfirmation: "तुम्हाला ही इमेज हटवायची आहे का?",
         },
     });
     static alertMessages = new LocalizedStrings({
@@ -544,6 +546,7 @@ export class Strings {
             Settings: "Settings",
             ChangeLanguage: "Change Language",
             ChangeTheme: "Change Theme",
+            Yes: 'Yes',
 
             // Users
             AddUser: "Add User",
@@ -563,6 +566,9 @@ export class Strings {
             DownloadSitesPlots: 'Download Sites & Plots Data',
 
             ChangePlot: 'Change Plot',
+            MoveTrees: 'Move Trees',
+            Audit: 'Audit',
+            TreeMap: 'Tree Map',
         },
         "mr": {
             // home
@@ -613,6 +619,7 @@ export class Strings {
             Settings: "सेटिंग्ज",
             ChangeLanguage: "भाषा बदला",
             ChangeTheme: "थीम बदला",
+            Yes: 'होय',
 
             // Users
             AddUser: "वापरकर्ता जोडा",
@@ -632,6 +639,9 @@ export class Strings {
             DownloadSitesPlots: 'साइट्स आणि प्लॉट डेटा डाउनलोड करा',
 
             ChangePlot: 'प्लॉट बदला',
+            MoveTrees: 'झाडे हलवा',
+            Audit: 'ऑडिट',
+            TreeMap: 'झाडाचा नकाशा',
         }
     })
     static labels = new LocalizedStrings({

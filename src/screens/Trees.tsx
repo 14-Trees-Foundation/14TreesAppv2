@@ -23,6 +23,7 @@ import GlobalContext from "../context/GlobalContext ";
 import SiteBanner from "../components/SiteBanner";
 import { Plot } from "../model/plot";
 import { Site } from "../model/sites";
+import { syncSingleTree } from "../services/sync/sync";
 
 interface TreesInputProps {
     navigation: any
@@ -53,6 +54,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     const [allPlots, setAllPlots] = useState<Plot[]>([]);
     const [selectedSite, setSelectedSite] = useState<Site | null>(null);
     const [userDetails, setUserDetails] = useState<any>(null);
+    const [syncTree, setSyncTree] = useState<Tree | null>(null);
 
     let localClient: DaoClient;
     DaoClient.authenticate().then((client) => { localClient = client; });
@@ -89,20 +91,37 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
 
     useEffect(() => {
         if (searchQuery.length !== 0) return;
-        setTimeout(async () => {
+        const getTrees = async () => {
+            const localClient = await DaoClient.authenticate();
             let resp = await localClient.trees.getTrees(0, 100, undefined, false, selectedPlot?.id);
+            for (let i = 0; i < resp.length; i++) {
+                const count = await getPendingImagesCountForSapling(resp[i].sapling_id);
+                if (count > 0) {
+                    console.log(resp[i].sapling_id, count);
+                    resp[i].is_uploaded = 0;
+                }
+            }
             setTrees(resp)
             setLoading(false);
-        }, 1000)
+        }
+        
+        getTrees();
     }, [searchQuery, stateChange, selectedPlot])
 
     useEffect(() => {
         if (searchQuery.length < 1) return;
-        setTimeout(async () => {
+        const searchTrees = async () => {
+            const localClient = await DaoClient.authenticate();
             let trees = await localClient.trees.searchTrees(searchQuery, 0, 100, selectedPlot?.id);
+            for (let i = 0; i < trees.length; i++) {
+                const count = await getPendingImagesCountForSapling(trees[i].sapling_id);
+                if (count > 0) trees[i].is_uploaded = 0;
+            }
             setTrees(trees);
             setLoading(false);
-        }, 1000)
+        }
+
+        searchTrees();
     }, [searchQuery, stateChange, selectedPlot])
 
     useEffect(() => {
@@ -146,10 +165,18 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
         }, 10)
     }, [stateChange])
 
+    const getPendingImagesCountForSapling = async (saplingId: string) => {
+        const daoClient = await DaoClient.authenticate();
+        const notSynced = await daoClient.treeSnapshots.countTreeSnapshotImagesForSaplingId(saplingId, false);
+        return notSynced.add + notSynced.delete
+    }
+
     const handleSave = (data: Tree | CreateTreeRequest, images?: any) => {
         let hasError = false;
-        setTimeout(async () => {
+
+        const saveTree = async () => {
             setLoading(true);
+            const localClient = await DaoClient.authenticate();
             if (changeMode === 'add') {
                 data = JSON.parse(JSON.stringify(data)) as CreateTreeRequest;
                 try {
@@ -168,7 +195,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                 }
             } else {
                 data = JSON.parse(JSON.stringify(data)) as Tree;
-
+    
                 try {
                     await localClient.trees.updateTree(data)
                     setPlaySound(true);
@@ -178,7 +205,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                     ToastAndroid.show("Failed to update tree locally!", ToastAndroid.SHORT)
                 }
             };
-
+    
             const upsertImage = async (type: TreeImageType) => {
                 if (images[type]) {
                     try {
@@ -195,33 +222,38 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                     }
                 }
             }
-
+    
             if (!hasError) {
                 upsertImage('tree_image')
                 upsertImage('user_card_image')
                 upsertImage('user_tree_image')
                 ToastAndroid.show("Updated Tree images locally!", ToastAndroid.SHORT)
             }
-
+    
             setStateChange(prev => prev + 1);
-        }, 1000)
+        }
+        
+        saveTree();
 
     };
 
     const handleImagesSave = (images: CreateTreeSnapshotRequest[], deleted: number[], treeStatus: string) => {
         setIsImageFormVisible(false);
-        setTimeout(async () => {
+        const saveImagesChange = async () => {
             if (selectedTree) {
                 const daoClient = await DaoClient.authenticate();
                 for (const imageId of deleted) {
                     await daoClient.treeSnapshots.deleteTreeSnapshot(imageId);
                 }
                 if (images.length > 0) await daoClient.treeSnapshots.insertTreeSnapshots(selectedTree.sapling_id, userDetails.id, images);
-                else await daoClient.treeSnapshots.insertTreeAdit(selectedTree.sapling_id, userDetails.id, treeStatus)
+                else if (deleted.length === 0) await daoClient.treeSnapshots.insertTreeAdit(selectedTree.sapling_id, userDetails.id, treeStatus)
                 setPlaySound(true);
+                setStateChange(prev => prev + 1);
                 ToastAndroid.show("Added Tree images locally!", ToastAndroid.LONG)
             }
-        }, 10)
+        }
+        
+        saveImagesChange();
     }
 
     const handleDelete = () => {
@@ -237,6 +269,22 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                 setStateChange(prev => prev + 1);
             }, 1000)
         }
+    }
+
+    const handleSingleTreeSync = async (tree: Tree) => {
+        const syncStartTime = new Date().toISOString();
+        setSyncTree(tree);
+        setUploadInProgress(true);
+        setCurrentSyncTime(syncStartTime);
+        setSyncProgress(0);
+
+        await syncSingleTree(tree.local_id, tree.sapling_id, syncStartTime);
+        setStateChange(prev => prev + 1);
+
+        setSyncTree(null);
+        setSyncProgress(1);
+        setUploadInProgress(false);
+        setCurrentSyncTime(null);
     }
 
     return (
@@ -264,7 +312,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                 {!(isFormVisible || isImageFormVisible) && <ScrollView style={styles.scrollView} contentContainerStyle={{ alignItems: 'center' }}>
                     {trees.map((tree, index) => (
                         <View style={{ width: '95%' }} key={index}>
-                            <TouchableOpacity style={{ width: '100%' }} activeOpacity={0.91} onPress={() => {
+                            <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.91} onPress={() => {
                                 setSelectedTree(tree);
                                 setInfoModalVisible(true);
                             }}>
@@ -274,7 +322,18 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                                     plotName={allPlots.find(plot => plot.id === tree.plot_id)?.name || ''}
                                     onEdit={() => { setSelectedTree(tree); setChangeModel('edit'); setIsFormVisible(true); }}
                                     onAudit={() => { setSelectedTree(tree); setIsImageFormVisible(true); }}
-                                    onTreeMap={() => {} }
+                                    onTreeMap={() => {
+                                        navigation.navigate(
+                                            Strings.screenNames.getString('Map', Strings.english),
+                                            { 
+                                                selectedPlot: selectedPlot ? selectedPlot :  allPlots.find(plot => plot.id === tree.plot_id),
+                                                sapling: tree.sapling_id
+                                            },
+                                        )
+                                    } }
+                                    onSync={() => handleSingleTreeSync(tree)}
+                                    syncInProgress={uploadInProgress}
+                                    currentTreeSync={tree.local_id === syncTree?.local_id}
                                 />
                             </TouchableOpacity>
                         </View>
@@ -305,8 +364,6 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                     plantType={plantTypes.find(plantType => plantType.id === selectedTree.plant_type_id)?.name || ''}
                     plot={allPlots.find(plot => plot.id === selectedTree.plot_id)?.name || ''}
                     onClose={() => { setInfoModalVisible(false) }}
-                    onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
-                    onImageAdd={() => { setIsImageFormVisible(true); }}
                     onDelete={handleDelete}
                     tree={selectedTree}
                 />}
