@@ -1549,6 +1549,7 @@ export class Constants {
     static lastTreeSnapshotsFetchedAt = 'last_tree_snapshots_fetched_at'
     static lastSyncInfoFetchedAt = 'last_sync_info_fetched_at'
 
+    static recentPlantTypes = 'recent_plant_types'
     // tree analytics for home screen
     static treeAnalyticsDataKey = 'tree_analytics'
 

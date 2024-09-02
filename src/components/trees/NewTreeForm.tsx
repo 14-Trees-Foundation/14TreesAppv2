@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { ScrollView, Text, ToastAndroid, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
 import { Strings } from "../../services/Strings";
 import { Constants, Utils } from "../../services/Utils";
 import { CoordinateSetter } from "../CoordinateSetter";
@@ -15,6 +15,8 @@ import { Image } from '../../model/common';
 import { Visit } from '../../model/visits';
 import { Plot } from '../../model/plot';
 import { Site } from '../../model/sites';
+import SelectMenu from '../SelectMenu';
+import { useFocusEffect } from '@react-navigation/native';
 
 interface TreeFormInputProps {
     tree: Tree | null,
@@ -28,7 +30,7 @@ interface TreeFormInputProps {
 
 export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, changeMode, onCancel, onSubmit, defaultPlot, defaultLocation }) => {
 
-    const  scrollViewRef = useRef<ScrollView>(null)
+    const scrollViewRef = useRef<ScrollView>(null)
     const [saplingId, setSaplingId] = useState('');
     const [lat, setlat] = useState(0);
     const [lng, setlng] = useState(0);
@@ -42,6 +44,9 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
     const [userCardImageUri, setUserCardImageUri] = useState<string | null>(null);
 
     const [plantTypes, setPlantTypes] = useState<any[]>([]);
+    const [recentPlantTypes, setRecentPlantTypes] = useState<any[]>([]);
+    const recentPlantTypesRef = useRef(recentPlantTypes);
+
     const [users, setUsers] = useState<User[]>([]);
     const [visits, setVisits] = useState<Visit[]>([]);
     const [assignedTo, setAssignedTo] = useState<User | null>(null);
@@ -88,6 +93,45 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
     useEffect(() => {
         Utils.addTasks();
     }, []);
+
+    // Update the ref whenever recentPlantTypes changes
+    useEffect(() => {
+        recentPlantTypesRef.current = recentPlantTypes;
+    }, [recentPlantTypes]);
+
+    useFocusEffect(
+        useCallback(() => {
+            const getRecentPTs = async () => {
+                try {
+                    const recentPTs = await AsyncStorage.getItem(Constants.recentPlantTypes);
+                    console.log(recentPTs);
+                    if (recentPTs) {
+                        setRecentPlantTypes(JSON.parse(recentPTs));
+                    }
+                } catch (error) {
+                    console.error("Error fetching recent plant types:", error);
+                }
+            };
+
+            getRecentPTs();
+
+            // Cleanup function to save recentPlantTypes if it has changed
+            return () => {
+                const saveRecentPTs = async () => {
+                    console.log(recentPlantTypesRef.current)
+                    try {
+                        await AsyncStorage.setItem(
+                            Constants.recentPlantTypes,
+                            JSON.stringify(recentPlantTypesRef.current)
+                        );
+                    } catch (error) {
+                        console.error("Error saving recent plant types:", error);
+                    }
+                };
+                saveRecentPTs();
+            };
+        }, [])
+    );
 
     useEffect(() => {
         if (tree) {
@@ -169,23 +213,29 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
 
     useEffect(() => {
         if (selectedVisit) return;
-        setTimeout(async () => {
+
+        const getVisit = async () => {
             if (tree && tree.visit_id) {
                 const daoClient = await DaoClient.authenticate();
                 const visit = await daoClient.visits.getVisitByLiveId(tree.visit_id)
                 setSelectedVisit(visit)
                 setVisitEnabled(true);
             }
-        }, 100)
+        }
+
+        getVisit();
     }, [tree, visits])
 
     useEffect(() => {
-        setTimeout(async () => {
+        const getDetails = async () => {
             try {
                 const userData = await AsyncStorage.getItem(Constants.userDetailsKey)
                 if (userData) setUserDetails(JSON.parse(userData));
-                let { treeTypes } = await Utils.getLocalTreeTypesAndPlots();
-                if (treeTypes) setPlantTypes(treeTypes);
+
+                if (plantTypes.length === 0) {
+                    let { treeTypes } = await Utils.getLocalTreeTypesAndPlots();
+                    if (treeTypes) setPlantTypes(treeTypes);
+                }
             } catch (error: any) {
                 console.error(error);
                 const stackTrace = error.stack;
@@ -197,8 +247,10 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
 
                 await Utils.logException(JSON.stringify(errorLog));
             }
-        }, 1000);
-    }, []);
+        }
+
+        getDetails();
+    }, [plantTypes]);
 
     useEffect(() => {
         setTimeout(async () => {
@@ -289,14 +341,14 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
             plot_id: selectedPlot.id,
             planted_by: userDetails?.name,
             tree_status: treeStatus.value,
-            assigned_to: ( visitEnabled && assignedTo) ? assignedTo.id : null,
-            assigned_at: ( visitEnabled && assignedTo) ? new Date().toISOString() : null,
-            visit_id: ( visitEnabled && selectedVisit) ? selectedVisit.id : null,
+            assigned_to: (visitEnabled && assignedTo) ? assignedTo.id : null,
+            assigned_at: (visitEnabled && assignedTo) ? new Date().toISOString() : null,
+            visit_id: (visitEnabled && selectedVisit) ? selectedVisit.id : null,
         }
 
-        const imageData = { 
-            tree_image: image, 
-            user_tree_image: visitEnabled ? userTreeImage : null, 
+        const imageData = {
+            tree_image: image,
+            user_tree_image: visitEnabled ? userTreeImage : null,
             user_card_image: visitEnabled ? userCardImage : null,
         }
 
@@ -336,6 +388,17 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
         }
     }
 
+    const handlePlantTypeSelect = (pt: any) => {
+        setSelectedPlantType(pt);
+        if (pt) {
+            setRecentPlantTypes(prev => {
+                const updated = prev.filter(item => item.id !== pt.id);  // Remove if already exists
+                updated.unshift(pt); // Add to the top
+                return updated.slice(0, 20); // Limit recent selections to 20 items
+            });
+        }
+    }
+
     return (
         <View style={{ height: "98%", width: "95%" }}>
             <Text style={treeFormStyles.plotSapling}> {changeMode === 'add' ? Strings.messages.AddTree : Strings.messages.EditTree + ': ' + saplingId} </Text>
@@ -358,11 +421,12 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
                     </View>
 
                     <View style={{ marginTop: 10 }}>
-                        <Autocomplete
+                        <SelectMenu
                             value={selectedPlantType}
                             options={plantTypes}
+                            recentOptions={recentPlantTypes}
                             label={Strings.labels.SelectTreeType}
-                            onSelect={(data) => { setSelectedPlantType(data); }}
+                            onSelect={handlePlantTypeSelect}
                             valueGetter={(data) => data.name}
                             keyGetter={(data) => data.value}
                             variant='outlined'
@@ -391,7 +455,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
                             inLng={lng}
                             onSetLat={(item: number) => setlat(item)}
                             onSetLng={(item: number) => setlng(item)}
-                            disabled={ defaultLocation ? true : false }
+                            disabled={defaultLocation ? true : false}
                         />
                         {validationErrors.coordinates && <HelperText visible={true} type='error'>Tree coordinates are required</HelperText>}
                     </View>}
