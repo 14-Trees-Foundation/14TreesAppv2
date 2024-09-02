@@ -78,16 +78,32 @@ export class TreesDao {
         return trees;
     }
 
+    getTreesBySaplings = async (saplingIds: string[]) => {
+        const trees: Tree[] = []
+        const placeholders = saplingIds.map(() => '?').join(', ');
+        const query = `SELECT * FROM ${this.tableName}
+            WHERE change_type != 'delete' AND sapling_id IN (${placeholders})
+            ORDER BY local_id DESC;
+        `;
+
+        const [results] = await this.db.executeSql(query, saplingIds)
+        for (let index = 0; index < results.rows.length; index++) {
+            trees.push(results.rows.item(index));
+        }
+
+        return trees;
+    }
+
     checkIfSaplingExists = async (saplingId: string) => {
         const query = `
             SELECT EXISTS(SELECT 1 FROM ${this.tableName} WHERE sapling_id = ?) AS does_exists;
         `
         const [results] = await this.db.executeSql(query, [saplingId])
         return results.rows.length === 0
-                ? false
-                : results.rows.item(0)?.does_exists === 1
-                    ? true
-                    : false
+            ? false
+            : results.rows.item(0)?.does_exists === 1
+                ? true
+                : false
     }
 
     countTreesByChangeTye = async (isUploaded?: boolean): Promise<any> => {
@@ -117,7 +133,7 @@ export class TreesDao {
 
         const timeStamp = new Date().toISOString();
         const [resp] = await this.db.executeSql(query, [
-            data.sapling_id, 
+            data.sapling_id,
             data.plant_type_id,
             data.plot_id,
             data.location,
@@ -129,14 +145,14 @@ export class TreesDao {
             timeStamp,
             timeStamp
         ]);
-        
+
         return resp.rowsAffected > 0;
     }
 
     updateTree = async (data: Tree) => {
         const now = new Date().toISOString();
         let changeType = 'edit';
-        
+
         const [response] = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
             [data.local_id]
@@ -171,7 +187,7 @@ export class TreesDao {
                     data.assigned_at, data.assigned_to, data.tree_status, data.visit_id, changeType, now, data.local_id
                 ]
             )
-        } catch(err: any) {
+        } catch (err: any) {
             console.log(err);
         }
     }
@@ -179,7 +195,7 @@ export class TreesDao {
     updateTreesPlot = async (saplingIds: string[], plotId: number) => {
         const now = new Date().toISOString();
         const saplingIdsStr = saplingIds.map(id => `'${id}'`).join(',');
-    
+
         await this.db.executeSql(
             `UPDATE ${this.tableName}
             SET 
@@ -196,7 +212,7 @@ export class TreesDao {
             ]
         );
     }
-    
+
 
     upsertLiveTreeIntoLocalDb = async (data: Tree) => {
         if (!data.id) return;
@@ -240,10 +256,10 @@ export class TreesDao {
                     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?
                 );`,
                 [
-                    data.id, data.sapling_id, data.plant_type_id, data.plot_id, data.image, data.tags, 
+                    data.id, data.sapling_id, data.plant_type_id, data.plot_id, data.image, data.tags,
                     data.location, data.planted_by, data.mapped_to_user, data.mapped_to_group, data.mapped_at,
-                    data.sponsored_by_user, data.sponsored_by_group, data.gifted_by, data.gifted_to, 
-                    data.assigned_at, data.assigned_to, data.user_tree_image, data.user_card_image, data.description, data.event_id, 
+                    data.sponsored_by_user, data.sponsored_by_group, data.gifted_by, data.gifted_to,
+                    data.assigned_at, data.assigned_to, data.user_tree_image, data.user_card_image, data.description, data.event_id,
                     data.visit_id, data.memory_images, data.tree_status, data.created_at, data.updated_at
                 ]
             )
@@ -281,10 +297,10 @@ export class TreesDao {
                     updated_at = ?
                 WHERE id = ?;`,
                 [
-                    data.sapling_id, data.plant_type_id, data.plot_id, data.image, data.tags, 
+                    data.sapling_id, data.plant_type_id, data.plot_id, data.image, data.tags,
                     data.location, data.planted_by, data.mapped_to_user, data.mapped_to_group, data.mapped_at,
-                    data.sponsored_by_user, data.sponsored_by_group, data.gifted_by, data.gifted_to, 
-                    data.assigned_at, data.assigned_to, data.user_tree_image, data.user_card_image, data.description, data.event_id, 
+                    data.sponsored_by_user, data.sponsored_by_group, data.gifted_by, data.gifted_to,
+                    data.assigned_at, data.assigned_to, data.user_tree_image, data.user_card_image, data.description, data.event_id,
                     data.visit_id, data.memory_images, data.tree_status, data.created_at, data.updated_at, data.id
                 ]
             )
@@ -299,13 +315,13 @@ export class TreesDao {
             let valuesStr = '';
             trees.forEach(data => {
                 valuesStr += `(${data.id}, ?, ${data.plant_type_id}, ${data.plot_id}, ?, ?, ?, ${data.mapped_to_user}, ${data.mapped_to_group}, ?, ${data.sponsored_by_user}, ${data.sponsored_by_group}, ${data.gifted_by}, ${data.gifted_to}, ?, ${data.assigned_to}, ${data.visit_id}, ?, ?, ?, 1, ?, ?),`
-                replacement = [ ...replacement,
-                    data.sapling_id, data.image, data.location, data.planted_by, data.mapped_at, 
-                    data.assigned_at, data.user_tree_image, data.user_card_image, data.tree_status, data.created_at, data.updated_at 
+                replacement = [...replacement,
+                data.sapling_id, data.image, data.location, data.planted_by, data.mapped_at,
+                data.assigned_at, data.user_tree_image, data.user_card_image, data.tree_status, data.created_at, data.updated_at
                 ]
             })
             valuesStr = valuesStr.slice(0, -1);
-            
+
             // insert live tree
             await this.db.executeSql(
                 `INSERT OR REPLACE INTO ${this.tableName} (
@@ -387,10 +403,10 @@ export class TreesDao {
     }
 
     getLiveTreeIds = async () => {
-        const query =  `SELECT id FROM ${this.tableName} WHERE id IS NOT NULL;`
+        const query = `SELECT id FROM ${this.tableName} WHERE id IS NOT NULL;`
         const [result] = await this.db.executeSql(query);
 
-        const tree_ids: number [] = [];
+        const tree_ids: number[] = [];
         for (let i = 0; i < result.rows.length; i++) {
             const row = result.rows.item(i);
             tree_ids.push(row.id);
@@ -401,7 +417,7 @@ export class TreesDao {
 
     searchTrees = async (searchStr: string, offset: number, limit: number, plotId?: number) => {
         let trees: Tree[] = [];
-        const query =  `
+        const query = `
             SELECT * FROM ${this.tableName} 
             WHERE change_type != 'delete' AND sapling_id LIKE ?
             ${plotId !== undefined ? `AND plot_id = ${plotId}` : ''}

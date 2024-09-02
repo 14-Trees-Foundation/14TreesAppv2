@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollView, Text, ToastAndroid, View } from 'react-native';
 import { Strings } from "../../services/Strings";
 import { Constants, Utils } from "../../services/Utils";
@@ -22,11 +22,13 @@ interface TreeFormInputProps {
     onSubmit: (data: Tree | CreateTreeRequest, images?: any) => void,
     onCancel: () => void,
     defaultPlot?: any
+    saplingID?: string
     defaultLocation?: { latitude: number, longitude: number }
 }
 
-export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCancel, onSubmit, defaultPlot, defaultLocation }) => {
+export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, changeMode, onCancel, onSubmit, defaultPlot, defaultLocation }) => {
 
+    const  scrollViewRef = useRef<ScrollView>(null)
     const [saplingId, setSaplingId] = useState('');
     const [lat, setlat] = useState(0);
     const [lng, setlng] = useState(0);
@@ -123,7 +125,13 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
             setlat(defaultLocation.latitude);
             setlng(defaultLocation.longitude);
         }
-    }, [defaultLocation])
+    }, [defaultLocation]
+    )
+    useEffect(() => {
+        if (saplingID) {
+            setSaplingId(saplingID);
+        }
+    }, [saplingID])
 
     useEffect(() => {
         if (tree) {
@@ -321,10 +329,18 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
         else setUserCardImageUri(null);
     }
 
+    const handleImageLoadOnAdd = () => {
+        // only in case of add tree, scroll down to bottom on new image load
+        if (changeMode === 'add' && scrollViewRef.current) {
+            scrollViewRef.current.scrollToEnd();
+        }
+    }
+
     return (
         <View style={{ height: "98%", width: "95%" }}>
             <Text style={treeFormStyles.plotSapling}> {changeMode === 'add' ? Strings.messages.AddTree : Strings.messages.EditTree + ': ' + saplingId} </Text>
             <ScrollView
+                ref={scrollViewRef}
                 keyboardShouldPersistTaps='handled'
                 scrollEnabled={true}
                 style={{ ...treeFormStyles.detailsContainerOuter, marginHorizontal: 0, }} >
@@ -368,19 +384,6 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                         {validationErrors.plot && <HelperText visible={true} type='error'>Please select a plot</HelperText>}
                     </View>
 
-                    {(changeMode === 'edit' && !defaultLocation) && <View style={{ marginTop: 10 }}>
-                        <Autocomplete
-                            value={treeStatus}
-                            options={treeStatusList}
-                            label={Strings.labels.SelectTreeStatus}
-                            onSelect={(data) => { setTreeStatus(data); }}
-                            valueGetter={(data) => data.name}
-                            keyGetter={(data) => data.value}
-                            variant='outlined'
-                        />
-                        {validationErrors.status && <HelperText visible={true} type='error'>Please select tree status</HelperText>}
-                    </View>}
-
                     {!defaultLocation && <View style={{ width: '100%', marginTop: 10 }}>
                         <Text style={treeFormStyles.inputLabel}>{Strings.messages.Location}:</Text>
                         <CoordinateSetter
@@ -399,6 +402,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                             buttonLabel={Strings.buttonLabels.AddTreeImage}
                             onChange={handleImageChange}
                             imageUri={imageUri ? imageUri : undefined}
+                            onImageLoad={handleImageLoadOnAdd}
                         />
                         {validationErrors.image && <HelperText visible={true} type='error'>Tree Image is required</HelperText>}
                     </View>

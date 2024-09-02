@@ -21,6 +21,7 @@ interface AutocompleteInputProps<T> {
 function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSelect, onSearch, variant, disabled, boldSelection }: AutocompleteInputProps<T>) {
   const [filteredData, setFilteredData] = useState(options);
   const [visible, setVisible] = useState(false);
+  const [recentSelections, setRecentSelections] = useState<T[]>([]);
 
   useEffect(() => {
     setFilteredData(options);
@@ -33,15 +34,32 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
     }
 
     if (query) {
-      const newData = options.filter(item => {
+      const recentData = recentSelections.filter(item => {
         const value = valueGetter(item);
         return value.toLowerCase().includes(query.toLowerCase())
       });
-      setFilteredData(newData);
+
+      const newData = options.filter(item => {
+        const idx = recentData.findIndex(recent => keyGetter(recent) === keyGetter(item));
+        if (idx !== -1) return false;
+
+        const value = valueGetter(item);
+        return value.toLowerCase().includes(query.toLowerCase())
+      });
+
+      setFilteredData([...recentData, ...newData]);
     } else {
       setFilteredData(options);
     }
   };
+
+  useEffect(() => {
+    const filteredSelections = recentSelections.filter(item => options.includes(item));
+
+    const updatedOptions = options.filter(item => !filteredSelections.includes(item));
+
+    setFilteredData([...filteredSelections, ...updatedOptions]);
+  }, [recentSelections, options]);
 
   const handleClose = () => {
     setVisible(false);
@@ -50,6 +68,14 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
   const handleSelect = (option: T | null) => {
     onSelect(option);
     handleClose();
+
+    if (option) {
+      setRecentSelections(prev => {
+        const updated = prev.filter(item => keyGetter(item) !== keyGetter(option));  // Remove if already exists
+        updated.unshift(option); // Add to the top
+        return updated.slice(0, 20); // Limit recent selections to 20 items
+      });
+    }
     setFilteredData(options);
   }
 

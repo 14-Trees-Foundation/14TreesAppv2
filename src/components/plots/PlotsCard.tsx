@@ -10,9 +10,10 @@ interface PlotsCardInputProps {
   onPlotChangePress: () => void
   onAuditPress: () => void
   onTreesMapPress: () => void
+  onAddTreesPress: () => void
 }
 
-const PlotsCard: React.FC<PlotsCardInputProps> = ({ plot, onPlotChangePress, onAuditPress, onTreesMapPress }) => {
+const PlotsCard: React.FC<PlotsCardInputProps> = ({ plot, onPlotChangePress, onAuditPress, onTreesMapPress, onAddTreesPress }) => {
   return (
     <View style={styles.container}>
       <View style={styles.info}>
@@ -21,19 +22,26 @@ const PlotsCard: React.FC<PlotsCardInputProps> = ({ plot, onPlotChangePress, onA
         <Text style={styles.text}>{plot.category}</Text>
       </View>
       <View style={styles.actionContainer}>
-        <Button 
-          style={styles.action} 
+        <Button
+          style={styles.action}
+          labelStyle={styles.actionLabel}
+          onPress={onAddTreesPress}
+        >{Strings.buttonLabels.AddTrees}</Button>
+        <Button
+          style={styles.action}
           labelStyle={styles.actionLabel}
           onPress={onPlotChangePress}
           icon='map-marker-distance'
         >{Strings.buttonLabels.MoveTrees}</Button>
-        <Button 
+      </View>
+      <View style={styles.actionContainer}>
+        <Button
           style={styles.action}
           labelStyle={styles.actionLabel}
           onPress={onAuditPress}
           icon='image-edit'
-        >{Strings.buttonLabels.MoveTrees}</Button>
-        <Button 
+        >{Strings.buttonLabels.Audit}</Button>
+        <Button
           style={styles.action}
           labelStyle={styles.actionLabel}
           onPress={onTreesMapPress}
@@ -64,13 +72,17 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start'
   },
   actionContainer: {
+    flex: 1,
     flexDirection: 'row',
+    flexWrap: 'wrap'
   },
   action: {
+    flex: 1,
     flexGrow: 1,
   },
   actionLabel: {
-    color: 'green'
+    color: 'green',
+    flexWrap: 'wrap'
   },
   title: {
     fontSize: 18,

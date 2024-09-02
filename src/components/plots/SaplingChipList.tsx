@@ -5,7 +5,8 @@ import { Badge, Chip } from 'react-native-paper';
 export type SaplingChipItem = {
   sapling: string,
   badge?: number,
-  selected?: boolean
+  selected?: boolean,
+  local?: boolean,
 }
 
 type SaplingChipListProps = {
@@ -26,7 +27,16 @@ const SaplingChipList: React.FC<SaplingChipListProps> = ({ items, onSelectionCha
           <View key={index}>
             <Chip
               key={index}
-              style={{ margin: 4, backgroundColor: item.selected ? '#82b398' : '#daf7dc', borderColor: 'black', borderWidth: 0.7 }}
+              style={{ 
+                margin: 4, 
+                backgroundColor: item.selected 
+                                  ? '#82b398' 
+                                  : item.local 
+                                    ? '#ffe7b3'
+                                    : '#daf7dc', 
+                borderColor: 'black', 
+                borderWidth: 0.7 
+              }}
               onPress={() => {onSelectionChange && onSelectionChange(item.sapling)}}
             >
               {item.sapling}

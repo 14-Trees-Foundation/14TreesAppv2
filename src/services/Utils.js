@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { openCamera, openPicker } from "react-native-image-crop-picker";
 import { Alert, ToastAndroid } from "react-native";
 import { DataService } from "./DataService";
 import { LocalDatabase } from "./tree_db";
@@ -11,6 +10,7 @@ import ReactNativeForegroundService from '@supersami/rn-foreground-service';
 import { shiftTypes } from "../screens/Shifts";
 import { DaoClient } from "./db/dao";
 import moment from "moment";
+import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 const MIN_BATCH_SIZE = 5
 
 const shiftTypesObject = {
@@ -1351,6 +1351,80 @@ export class Utils {
 
         //return { newImage: newImage, imageForModal: imageForModal };
 
+
+    }
+
+    static async getImage(compressionRequired = false, selectionId, multiple = false) {
+
+        const options = {
+            mediaType: 'photo',
+            includeBase64: true,
+            maxHeight: 960,
+            maxWidth: 720,
+            selectionLimit: multiple ? 10 : 1
+        };
+
+        try {
+            let response = {}
+            if (selectionId === 0) {
+                response = await launchCamera(options);
+            } else {
+                response = await launchImageLibrary(options)
+            }
+
+
+            if (response.didCancel) {
+                console.log('User cancelled image picker');
+            } else if (response.errorMessage) {
+                throw new Error(response.errorMessage)
+            } else {
+
+                const timestamp = new Date().toISOString(); // only show time and not date
+                let images = response.assets;
+                let result = []
+                for (const image of images) {
+
+                    let filesz = response.assets[0].fileSize;
+                    let base64Data = response.assets[0].base64;
+    
+                    let imagePath = response.assets[0].uri;
+
+    
+                    if (compressionRequired) {
+                        const compressedData = await Utils.compressImageAt(filesz, imagePath);
+                        if (compressedData) {
+                            base64Data = compressedData;
+                        } else {
+                            console.log("could not compressed------");
+                        }
+                    }
+                    const newImage = {
+                        data: base64Data,
+                        meta: {
+                            capturetimestamp: timestamp,
+                            remark: Strings.messages.defaultRemark,
+    
+                        },
+                    };
+
+                    result.push(newImage);
+                }
+
+                return result;
+            }
+        } catch (error) {
+            console.log('An error occurred while accessing the camera:', error);
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: "Error occurred while accessing the camera (inside Utils)",
+                error: JSON.stringify(error),
+                stackTrace: stackTrace
+            };
+            await this.logException(JSON.stringify(errorLog));
+            return null;
+        }
+
+        return null;
 
     }
 

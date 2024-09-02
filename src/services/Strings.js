@@ -36,6 +36,7 @@ export class Strings {
             LoadingScreen: 'Load',
             UpdateSaplingsPlot: "UpdateSaplingsPlot",
             UsersPage: "Users",
+            BulkAddTrees: "Add Trees",
         },
         "mr": {
             HomePage: "मुख्य पृष्ठ",
@@ -68,6 +69,7 @@ export class Strings {
             LoadingScreen: 'लोड',
             UpdateSaplingsPlot: "झाडाचा प्लॉट अपडेट करा",
             UsersPage: "वापरकर्ते",
+            BulkAddTrees: "झाडे जोडा",
         }
     })
 
@@ -569,6 +571,7 @@ export class Strings {
             MoveTrees: 'Move Trees',
             Audit: 'Audit',
             TreeMap: 'Tree Map',
+            AddTrees: 'Add Trees',
         },
         "mr": {
             // home
@@ -642,6 +645,7 @@ export class Strings {
             MoveTrees: 'झाडे हलवा',
             Audit: 'ऑडिट',
             TreeMap: 'झाडाचा नकाशा',
+            AddTrees: 'झाडे जोडा',
         }
     })
     static labels = new LocalizedStrings({
@@ -709,6 +713,9 @@ export class Strings {
             Total: 'Total',
             ChangeSaplingsFromPlot: 'Change saplings from plot',
             To: 'To',
+            AlreadyExists: 'Already Exists',
+            Remaining: 'Remaining',
+            LocalNew: 'Local New',
         },
         "mr": {
             //add tree
@@ -774,6 +781,9 @@ export class Strings {
             Total: 'एकूण',
             ChangeSaplingsFromPlot: 'प्लॉटमधून रोपे बदला',
             To: 'ला',
+            AlreadyExists: 'आधीच अस्तित्वात आहे',
+            Remaining: 'बाकी',
+            LocalNew: 'स्थानिक नवीन',
         }
     })
     static english = 'en';

@@ -30,6 +30,7 @@ import Sound from 'react-native-sound';
 import PlotSaplings from './screens/PlotSaplings';
 import PlotAudit from './screens/PlotAudit';
 import MapScreen from './screens/Map';
+import BulkAddTrees from './screens/BulkAddTrees';
 
 
 const errorHandler = async (e, isFatal) => {
@@ -366,6 +367,28 @@ const App = () => {
             headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
             headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
             title: Strings.screenNames.PlotAudit,
+          }}
+        />
+        <Stack.Screen
+          name={Strings.screenNames.getString('BulkAddTrees', Strings.english)}
+          component={BulkAddTrees}
+          options={{
+            headerLeft: () => (
+              <View style={{ marginLeft: 10 }}>
+                <TouchableOpacity onPress={() => {
+                  stackNavRef.current.goBack() // Go back when the button is pressed
+                }}>
+                  <Icon name="arrow-back" size={24} color="black" />
+                </TouchableOpacity>
+              </View>
+            ),
+            headerRight: () => (
+              <ScreenHeaderContent />
+            ),
+            headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+            headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+            headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+            title: Strings.screenNames.BulkAddTrees,
           }}
         />
         <Stack.Screen

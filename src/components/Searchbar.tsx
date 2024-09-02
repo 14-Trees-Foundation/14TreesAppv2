@@ -22,9 +22,13 @@ const SearchBar: React.FC<SearchBarInputProps> = ({ query, autoFocus, onChange }
   }
 
   React.useEffect(() => {
-    if (autoFocus && ref.current) {
-      ref.current.focus();
-    }
+    const timeoutId = setTimeout(() => {
+      if (autoFocus && ref.current) {
+        ref.current.focus();
+      }
+    }, 100); // Delay to ensure the component is fully mounted
+
+    return () => clearTimeout(timeoutId);
   }, [autoFocus])
 
   return (

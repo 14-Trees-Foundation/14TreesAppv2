@@ -16,6 +16,7 @@ import Autocomplete from "../components/AutocompleteModal";
 import { Site } from "../model/sites";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Constants } from "../services/Utils";
+import SaplingRangeModal from "../components/plots/SaplingRangeModal";
 
 interface PlotsInputProps {
     navigation: any
@@ -30,6 +31,7 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
     const [stateChange, setStateChange] = useState(0);
     const [isFormVisible, setIsFormVisible] = useState(false);
     const [isInfoModalVisible, setInfoModalVisible] = useState(false);
+    const [bulkAddModal, setBulkAddModal] = useState(false);
     const [changeMode, setChangeModel] = useState<'add' | 'edit'>('add');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null);
@@ -186,6 +188,10 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
                                             { selectedPlot: plot },
                                         )
                                     }}
+                                    onAddTreesPress={() => {
+                                        setBulkAddModal(true);
+                                        setSelectedPlot(plot);
+                                    }}
                                 />
                             </TouchableOpacity>
                         </View>
@@ -211,6 +217,17 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
                     onDelete={handleDelete}
                     plot={selectedPlot}
                 />}
+
+                <SaplingRangeModal
+                    visible={bulkAddModal}
+                    onClose={() => { setBulkAddModal(false) }}
+                    onSubmit={(saplings) => {
+                        navigation.navigate(
+                            Strings.screenNames.getString('BulkAddTrees', Strings.english),
+                            { selectedPlot, saplings },
+                        )
+                    }}
+                />
             </SafeAreaView>
         </View>
     );

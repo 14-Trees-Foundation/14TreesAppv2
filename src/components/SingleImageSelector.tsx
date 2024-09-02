@@ -10,9 +10,10 @@ interface ImageSelectorInputProps {
     buttonLabel: string
     imageUri?: string,
     onChange: (data: Image | null) => void
+    onImageLoad?: () => void
 }
 
-export const ImageSelector: React.FC<ImageSelectorInputProps> = ({ label, buttonLabel, imageUri, onChange }) => {
+export const ImageSelector: React.FC<ImageSelectorInputProps> = ({ label, buttonLabel, imageUri, onChange, onImageLoad }) => {
     const [isVisible, setIsVisible] = useState(false);
     const handleChange = (data?: Image) => {
         if (data) onChange(data);
@@ -32,7 +33,7 @@ export const ImageSelector: React.FC<ImageSelectorInputProps> = ({ label, button
                         right={(props) => <IconButton icon='close' size={props.size} onPress={handleRemoveImage}/>}
                     />
                     <TouchableOpacity onPress={() => setIsVisible(true)} activeOpacity={0.9}>
-                        <Card.Cover source={{ uri: imageUri }} defaultSource={require('../../assets/placeholder.png')}/>
+                        <Card.Cover onLoad={() => { onImageLoad && onImageLoad(); }} source={{ uri: imageUri }} defaultSource={require('../../assets/placeholder.png')}/>
                     </TouchableOpacity>
                 </Card> 
                 <ImageView
