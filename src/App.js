@@ -130,6 +130,8 @@ const App = () => {
         } else {
           console.log('playback failed due to audio decoding errors');
         }
+
+        sound.release();
       });
     });
   }, []);
