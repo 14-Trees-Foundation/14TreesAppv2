@@ -8,12 +8,14 @@ import {
   Text,
 } from 'react-native';
 import { IconButton } from 'react-native-paper';
+import MapRadiusSelector from './MapRadiusSelector';
 
 interface SlideUpComponentProps {
   items: string[];
   onTreeEdit: (sapling: string) => void,
   onTreeDelete: (sapling: string) => void,
   onTreeSelect: (sapling: string) => void,
+  onRadiusChange: (radius: number) => void,
   visible: boolean
 }
 
@@ -49,7 +51,7 @@ const SaplingItem: React.FC<RenderItemProps> = ({ item, onTreeDelete, onTreeEdit
   );
 }
 
-const SlideUpComponent: React.FC<SlideUpComponentProps> = ({ items, visible, onTreeEdit, onTreeDelete, onTreeSelect }) => {
+const SlideUpComponent: React.FC<SlideUpComponentProps> = ({ items, visible, onTreeEdit, onTreeDelete, onTreeSelect, onRadiusChange }) => {
   const slideUpAnimation = useRef(new Animated.Value(-300)).current;
 
   useEffect(() => {
@@ -68,13 +70,20 @@ const SlideUpComponent: React.FC<SlideUpComponentProps> = ({ items, visible, onT
     }
   }, [visible])
 
+  const handleRadiusChange = (value: string | number) => {
+    if (typeof value === 'string') onRadiusChange(-1);
+    else onRadiusChange(value);
+  }
+
   return (
     visible
       ? (
         <Animated.View
           style={[styles.slideUpContainer, { bottom: slideUpAnimation }]}
         >
-          <Text style={styles.listTitle}>{items.length !== 0 ? 'Trees in near by area:' : 'There no trees in near by area!'}</Text>
+          <Text style={styles.radiusSelectorStyle}>Select area radius:</Text>
+          <MapRadiusSelector onSelect={handleRadiusChange}/>
+          <Text style={styles.listTitle}>{items.length !== 0 ? 'Trees in near by area:' : 'No trees in near by area!'}</Text>
           <FlatList
             data={items}
             renderItem={(item) => (
@@ -110,7 +119,13 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: 20,
   },
+  radiusSelectorStyle: {
+    color: 'black',
+    fontSize: 15,
+    marginBottom: 5,
+  },
   listTitle: {
+    marginTop: 10,
     color: 'black',
     fontSize: 18,
     fontWeight: 'bold',
