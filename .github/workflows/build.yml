@@ -1,0 +1,37 @@
+name: Build React Native App
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openjdk-17-jdk  # Install Java Development Kit
+          curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -  # Install Node.js (adjust version if needed)
+          sudo apt-get install -y nodejs
+          npm install -g yarn
+          yarn install
+
+      - name: Build with Gradle
+        run: ./gradlew assembleRelease
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-build
+          path: app/build/outputs/apk/release/
