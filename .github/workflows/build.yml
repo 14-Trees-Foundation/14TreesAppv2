@@ -27,12 +27,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-          cache: 'yarn'
+          cache: 'npm'
 
       - name: Run Yarn Install
         run: |
           npm i -g corepack
-          yarn install
+          npm install
 
       - name: Build application
         run: |
