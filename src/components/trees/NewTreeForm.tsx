@@ -104,7 +104,6 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
             const getRecentPTs = async () => {
                 try {
                     const recentPTs = await AsyncStorage.getItem(Constants.recentPlantTypes);
-                    console.log(recentPTs);
                     if (recentPTs) {
                         setRecentPlantTypes(JSON.parse(recentPTs));
                     }
@@ -118,7 +117,6 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
             // Cleanup function to save recentPlantTypes if it has changed
             return () => {
                 const saveRecentPTs = async () => {
-                    console.log(recentPlantTypesRef.current)
                     try {
                         await AsyncStorage.setItem(
                             Constants.recentPlantTypes,

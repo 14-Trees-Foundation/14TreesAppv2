@@ -11,6 +11,7 @@ import GlobalContext from "../context/GlobalContext ";
 import ConfirmationModal from "../components/ConfirmationModal";
 import SlideUpComponent from "../components/Map/SlideUpComponent";
 import { useFocusEffect } from "@react-navigation/native";
+import MapRadiusSelector from "../components/Map/MapRadiusSelector";
 
 // india
 const defaultRegion = {
@@ -110,6 +111,8 @@ const MapScreen: React.FC<MapScreenProps> = ({ navigation, route }) => {
     const [visibleCallout, setVisibleCallout] = useState(false);
     const [showTarget, setShowTarget] = useState(false);
     const [treeModal, setTreeModal] = useState(false);
+    const [isAddingTree, setIsAddingTree] = useState(false);
+    const [isMovingTree, setIsMovingTree] = useState(false);
     const [deleteConfirmation, setDeleteConfirmation] = useState(false);
     const [saplingListVisible, setSaplingListVisible] = useState(false);
     const [changeType, setChangeType] = useState<'edit' | 'add'>('add');
@@ -122,6 +125,8 @@ const MapScreen: React.FC<MapScreenProps> = ({ navigation, route }) => {
         setSelectedTree(null);
         setSelectedMarker(null);
         setShowTarget(false);
+        setIsAddingTree(false);
+        setIsMovingTree(false);
     }
 
     const handleMapMovement = (region: Region) => {
@@ -239,6 +244,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ navigation, route }) => {
             setShowTarget(false);
             setTreeModal(true);
         } else {
+            setIsAddingTree(true);
             setShowTarget(true);
             setSaplingListVisible(false);
         }
@@ -263,7 +269,9 @@ const MapScreen: React.FC<MapScreenProps> = ({ navigation, route }) => {
             }
 
             updateTree();
+            setIsMovingTree(false);
         } else {
+            setIsMovingTree(true);
             setShowTarget(true);
             setSaplingListVisible(false);
         }
@@ -329,6 +337,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ navigation, route }) => {
                 ToastAndroid.show("Updated Tree images locally!", ToastAndroid.SHORT)
             }
 
+            setIsAddingTree(false);
             setSelectedTree(null);
         }
 
@@ -337,6 +346,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ navigation, route }) => {
 
     const handleTreeFormClose = () => {
         setTreeModal(false);
+        setIsAddingTree(false);
     }
 
     const handleTreeDelete = async () => {
@@ -350,10 +360,9 @@ const MapScreen: React.FC<MapScreenProps> = ({ navigation, route }) => {
         }
     }
 
-    const handleTreeEditPress = (saplingId: string) => {
-        const idx = markers.findIndex(marker => marker.title === saplingId);
-        if (idx >= 0) {
-            const marker = markers[idx];
+    const handleTreeEditPress = () => {
+        if (selectedMarker) {
+            const marker = selectedMarker;
             if (marker.tree.location) {
                 const location = JSON.parse(marker.tree.location);
                 const coordinates = location.coordinates;
@@ -366,20 +375,23 @@ const MapScreen: React.FC<MapScreenProps> = ({ navigation, route }) => {
         }
     }
 
-    const handleTreeDeletePress = (saplingId: string) => {
-        const idx = markers.findIndex(marker => marker.title === saplingId);
-        if (idx >= 0) {
-            const marker = markers[idx];
+    const handleTreeDeletePress = () => {
+        if (selectedMarker) {
+            const marker = selectedMarker;
             setSelectedTree(marker.tree);
             setDeleteConfirmation(true);
         }
     }
 
-    const handleTreeSelectPress = (saplingId: string) => {
-        const idx = markers.findIndex(marker => marker.title === saplingId);
-        if (idx >= 0) {
-            const marker = markers[idx];
-            setSelectedMarker(marker);
+    const handleTreeSelectPress = (saplingId: string | null) => {
+        if (saplingId === null) {
+            setSelectedMarker(null);
+        } else {
+            const idx = markers.findIndex(marker => marker.title === saplingId);
+            if (idx >= 0) {
+                const marker = markers[idx];
+                setSelectedMarker(marker);
+            }
         }
     }
 
@@ -444,11 +456,12 @@ const MapScreen: React.FC<MapScreenProps> = ({ navigation, route }) => {
                 {saplingListVisible && (
                     <SlideUpComponent
                         items={regionalMarkers.map(marker => marker.title)}
+                        selectedItem={selectedMarker ? selectedMarker.title : null}
                         visible={saplingListVisible}
                         onTreeEdit={handleTreeEditPress}
                         onTreeDelete={handleTreeDeletePress}
                         onTreeSelect={handleTreeSelectPress}
-                        onRadiusChange={setRegionRadius}
+                        onTreeMove={handleTreeLocationChange}
                     />
                 )}
                 {showTarget && (
@@ -457,42 +470,44 @@ const MapScreen: React.FC<MapScreenProps> = ({ navigation, route }) => {
                     </View>
                 )}
             </View>
-            <View style={styles.toolbarContainer}>
-                <TouchableRipple style={styles.toolbarButton} onPress={() => { setSaplingListVisible(prev => !prev) }}>
-                    <View style={styles.iconContainer}>
-                        <Icon source={saplingListVisible ? "tree" : "tree-outline"} size={25} />
-                        <Text variant='bodySmall' style={styles.iconText}>Trees</Text>
-                    </View>
-                </TouchableRipple>
-                <TouchableRipple style={styles.toolbarButton} onPress={toggleCallout}>
-                    <View style={styles.iconContainer}>
-                        <Icon source={visibleCallout ? "label" : "label-off-outline"} size={25} />
-                        <Text variant='bodySmall' style={styles.iconText}>Show Tree Ids</Text>
-                    </View>
-                </TouchableRipple>
-                {selectedMarker && (
-                    <TouchableRipple style={styles.toolbarButton} onPress={handleTreeLocationChange}>
+            
+            <View>
+                <MapRadiusSelector radius={regionRadius} onSelect={setRegionRadius} />
+                <View style={styles.toolbarContainer}>
+                    <TouchableRipple style={styles.toolbarButton} onPress={() => { setSaplingListVisible(prev => !prev) }}>
                         <View style={styles.iconContainer}>
-                            <Icon source={showTarget ? 'map-marker-check' : 'map-marker-distance'} size={25} />
-                            <Text variant='bodySmall' style={styles.iconText}>Change Location</Text>
+                            <Icon source={saplingListVisible ? "tree" : "tree-outline"} size={25} />
+                            <Text variant='bodySmall' style={styles.iconText}>Trees</Text>
                         </View>
                     </TouchableRipple>
-                )}
-                {!selectedMarker && (
+                    <TouchableRipple style={styles.toolbarButton} onPress={toggleCallout}>
+                        <View style={styles.iconContainer}>
+                            <Icon source={visibleCallout ? "label" : "label-off-outline"} size={25} />
+                            <Text variant='bodySmall' style={styles.iconText}>Show Tree Ids</Text>
+                        </View>
+                    </TouchableRipple>
                     <TouchableRipple style={styles.toolbarButton} onPress={handleAddTreeMarker}>
                         <View style={styles.iconContainer}>
-                            <Icon source={showTarget ? 'palm-tree' : 'plus'} size={25} />
+                            <Icon source={isAddingTree ? 'palm-tree' : 'plus'} size={25} />
                             <Text variant='bodySmall' style={styles.iconText}>Add Tree</Text>
                         </View>
                     </TouchableRipple>
-                )}
+                    {isMovingTree && (
+                        <TouchableRipple style={styles.toolbarButton} onPress={handleTreeLocationChange}>
+                            <View style={styles.iconContainer}>
+                                <Icon source={'map-marker-check'} size={25} />
+                                <Text variant='bodySmall' style={styles.iconText}>Change Location</Text>
+                            </View>
+                        </TouchableRipple>
+                    )}
+                </View>
             </View>
 
             {treeModal && (
                 <View style={styles.treeFormContainer}>
                     <TreeForm
                         changeMode={changeType}
-                        tree={selectedTree}
+                        tree={changeType === 'add' ? null : selectedTree}
                         onCancel={handleTreeFormClose}
                         onSubmit={treeSave}
                         defaultPlot={plot}
@@ -517,41 +532,41 @@ const MapScreen: React.FC<MapScreenProps> = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
     toolbarContainer: {
-      backgroundColor: 'white',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      flexDirection: 'row',
-      paddingVertical: 10,
+        backgroundColor: 'white',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexDirection: 'row',
+        paddingVertical: 10,
     },
     toolbarButton: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      flexGrow: 1,
-      marginHorizontal: 5,
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexGrow: 1,
+        marginHorizontal: 5,
     },
     iconContainer: {
-      justifyContent: 'center',
-      alignItems: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     iconText: {
-      color: 'black',
+        color: 'black',
     },
     targetContainer: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1,
     },
     treeFormContainer: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#fff', // Semi-transparent background
-      zIndex: 10, // Make sure it's above the map
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff', // Semi-transparent background
+        zIndex: 10, // Make sure it's above the map
     },
-  });
+});
 
 export default MapScreen;

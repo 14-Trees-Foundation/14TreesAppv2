@@ -1,57 +1,24 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
-  FlatList,
   Animated,
-  TouchableOpacity,
   Text,
 } from 'react-native';
 import { IconButton } from 'react-native-paper';
-import MapRadiusSelector from './MapRadiusSelector';
+import SaplingChipList from '../plots/SaplingChipList';
 
 interface SlideUpComponentProps {
   items: string[];
-  onTreeEdit: (sapling: string) => void,
-  onTreeDelete: (sapling: string) => void,
-  onTreeSelect: (sapling: string) => void,
-  onRadiusChange: (radius: number) => void,
+  selectedItem: string | null
+  onTreeEdit: () => void,
+  onTreeDelete: () => void,
+  onTreeSelect: (sapling: string | null) => void,
+  onTreeMove: () => void,
   visible: boolean
 }
 
-interface RenderItemProps {
-  item: string;
-  onTreeEdit: () => void,
-  onTreeDelete: () => void,
-  onTreeSelect: () => void,
-}
-
-const SaplingItem: React.FC<RenderItemProps> = ({ item, onTreeDelete, onTreeEdit, onTreeSelect }: RenderItemProps) => {
-  return (
-    <TouchableOpacity
-      style={styles.listItem}
-      onPress={onTreeSelect}
-    >
-      <Text style={styles.itemText}>{item}</Text>
-      <View style={styles.iconContainer}>
-        <IconButton
-          icon="circle-edit-outline"
-          size={20}
-          iconColor='green'
-          onPress={onTreeEdit}
-        />
-        <IconButton
-          icon="delete-outline"
-          size={20}
-          iconColor='red'
-          onPress={onTreeDelete}
-        />
-      </View>
-    </TouchableOpacity>
-  );
-}
-
-const SlideUpComponent: React.FC<SlideUpComponentProps> = ({ items, visible, onTreeEdit, onTreeDelete, onTreeSelect, onRadiusChange }) => {
+const SlideUpComponent: React.FC<SlideUpComponentProps> = ({ items, selectedItem, visible, onTreeEdit, onTreeDelete, onTreeSelect, onTreeMove }) => {
   const slideUpAnimation = useRef(new Animated.Value(-300)).current;
 
   useEffect(() => {
@@ -70,9 +37,12 @@ const SlideUpComponent: React.FC<SlideUpComponentProps> = ({ items, visible, onT
     }
   }, [visible])
 
-  const handleRadiusChange = (value: string | number) => {
-    if (typeof value === 'string') onRadiusChange(-1);
-    else onRadiusChange(value);
+  const handleItemSelection = (item: string) => {
+    if ( selectedItem === item ) {
+      onTreeSelect(null);
+    } else {
+      onTreeSelect(item);
+    }
   }
 
   return (
@@ -81,22 +51,33 @@ const SlideUpComponent: React.FC<SlideUpComponentProps> = ({ items, visible, onT
         <Animated.View
           style={[styles.slideUpContainer, { bottom: slideUpAnimation }]}
         >
-          <Text style={styles.radiusSelectorStyle}>Select area radius:</Text>
-          <MapRadiusSelector onSelect={handleRadiusChange}/>
-          <Text style={styles.listTitle}>{items.length !== 0 ? 'Trees in near by area:' : 'No trees in near by area!'}</Text>
-          <FlatList
-            data={items}
-            renderItem={(item) => (
-              <SaplingItem
-                item={item.item}
-                onTreeEdit={() => onTreeEdit(item.item)}
-                onTreeDelete={() => onTreeDelete(item.item)}
-                onTreeSelect={() => onTreeSelect(item.item)}
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={styles.listTitle}>{items.length !== 0 ? 'Trees in near by area:' : 'No trees in near by area!'}</Text>
+            <View style={styles.iconContainer}>
+              <IconButton
+                icon="map-marker-distance"
+                size={20}
+                iconColor='green'
+                onPress={onTreeMove}
+                disabled={selectedItem === null}
               />
-            )}
-            keyExtractor={(item, index) => index.toString()}
-            contentContainerStyle={styles.listContent}
-          />
+              <IconButton
+                icon="circle-edit-outline"
+                size={20}
+                iconColor='green'
+                onPress={onTreeEdit}
+                disabled={selectedItem === null}
+              />
+              <IconButton
+                icon="delete-outline"
+                size={20}
+                iconColor='red'
+                onPress={onTreeDelete}
+                disabled={selectedItem === null}
+              />
+            </View>
+          </View>
+          <SaplingChipList items={items.map(sapling => ({ sapling, selected: sapling === selectedItem }))} onSelectionChange={handleItemSelection} />
         </Animated.View>
       )
       : (
@@ -110,25 +91,21 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    height: '50%',
+    height: '30%',
     backgroundColor: 'white',
     borderTopEndRadius: 10,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     zIndex: 2
   },
   listContent: {
     paddingBottom: 20,
   },
-  radiusSelectorStyle: {
-    color: 'black',
-    fontSize: 15,
-    marginBottom: 5,
-  },
   listTitle: {
-    marginTop: 10,
     color: 'black',
     fontSize: 18,
     fontWeight: 'bold',
+    flexGrow: 1,
   },
   listItem: {
     flexDirection: 'row',

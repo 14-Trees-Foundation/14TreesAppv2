@@ -19,11 +19,11 @@ interface SelectMenuInputProps<T> {
 }
 
 function SelectMenu<T>({ label, value, options, recentOptions, keyGetter, valueGetter, onSelect, onSearch, variant, disabled, boldSelection }: SelectMenuInputProps<T>) {
-    const [filteredData, setFilteredData] = useState(options);
+    const [filteredData, setFilteredData] = useState(options.slice(0, 50));
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
-        setFilteredData(options);
+        setFilteredData(options.slice(0, 50));
     }, [options])
 
     const handleSearch = (query: string) => {
@@ -38,9 +38,9 @@ function SelectMenu<T>({ label, value, options, recentOptions, keyGetter, valueG
                 return value.toLowerCase().includes(query.toLowerCase())
             });
 
-            setFilteredData(newData);
+            setFilteredData(newData.slice(0, 50));
         } else {
-            setFilteredData(options);
+            setFilteredData(options.slice(0, 50));
         }
     };
 
@@ -51,7 +51,7 @@ function SelectMenu<T>({ label, value, options, recentOptions, keyGetter, valueG
     const handleSelect = (option: T | null) => {
         onSelect(option);
         handleClose();
-        setFilteredData(options);
+        setFilteredData(options.slice(0, 50));
     }
 
     return (
@@ -116,12 +116,7 @@ function SelectMenu<T>({ label, value, options, recentOptions, keyGetter, valueG
                                     {filteredData.map((item, index) => (
                                         <Chip
                                             key={index}
-                                            style={{
-                                                margin: 4,
-                                                backgroundColor: '#daf7dc',
-                                                borderColor: 'black',
-                                                borderWidth: 0.5
-                                            }}
+                                            style={styles.chip}
                                             onPress={() => { handleSelect(item) }}
                                         >
                                             {valueGetter(item)}
@@ -176,6 +171,12 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         margin: 10,
         justifyContent: 'flex-start',
+    },
+    chip: {
+        margin: 4,
+        backgroundColor: '#daf7dc',
+        borderColor: 'black',
+        borderWidth: 0.5
     },
     iconButton: {
         position: 'absolute',
