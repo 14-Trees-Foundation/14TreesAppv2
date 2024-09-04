@@ -17,22 +17,31 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: 'openjdk'
+          distribution: adopt
+          cache: gradle
 
-      - name: Install Dependencies
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Run Yarn Install
         run: |
-          sudo apt-get update
-          sudo apt-get install -y openjdk-17-jdk  # Install Java Development Kit
-          curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -  # Install Node.js (adjust version if needed)
-          sudo apt-get install -y nodejs
-          npm install -g yarn
+          npm i -g corepack
           yarn install
 
-      - name: Build with Gradle
-        run: ./gradlew assembleRelease
+      - name: Build application
+        run: |
+          cd android
+          ./gradlew assembleRelease
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+      - name: Upload application
+        uses: actions/upload-artifact@v2
         with:
-          name: release-build
-          path: app/build/outputs/apk/release/
+          name: app
+          path: android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 3
