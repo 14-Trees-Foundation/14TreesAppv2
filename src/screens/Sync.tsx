@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { BackHandler, ScrollView, StyleSheet, View } from "react-native";
 import { Button, Chip, Icon, ProgressBar, Text } from "react-native-paper";
-import { Utils, formatDuration, getHumanReadableDateTime, getReadableProgress, getTimeDiffString } from "../services/Utils";
+import { Constants, Utils, formatDuration, getHumanReadableDateTime, getReadableProgress, getTimeDiffString } from "../services/Utils";
 import { DaoClient } from "../services/db/dao";
 import { fetchDeltaChanges, uploadLocalData } from "../services/sync/sync";
 import { Strings } from "../services/Strings";
@@ -10,6 +10,8 @@ import GlobalContext from "../context/GlobalContext ";
 import { useFocusEffect } from "@react-navigation/native";
 import SyncCard from "../components/SyncCard";
 import NetworkSpeedModal from "../components/NetworkModal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import MessageModal from "../components/MessageModal";
 
 const syncDetailsTemplate = {
     synced_at: '',
@@ -37,6 +39,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     const [state, setState] = useState(0);
     const [syncDisabled, setSyncDisabled] = useState(true);
+    const [stoppingSync, setStoppingSync] = useState(false);
     const [internetSpeedCheck, setInternetSpeedCheck] = useState(false);
     const [networkSpeed, setNetworkSpeed] = useState<string>('');
     const [lastSyncDate, setLastSyncDate] = useState('');
@@ -238,8 +241,14 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
 
         setUploadInProgress(false);
         setCurrentSyncTime(null);
+        setStoppingSync(false);
         Utils.setLastSyncDateNow();
         Utils.removeNetworkSpeed();
+    }
+
+    const stopUploadData = async () => {
+        setStoppingSync(true);
+        await AsyncStorage.setItem(Constants.isForceSyncStop, 'true');
     }
 
     const fetchData = async () => {
@@ -299,6 +308,14 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         return speed
     }
 
+    const handleUploadButtonPress = () => {
+        if (uploadInProgress) {
+            stopUploadData()
+        } else {
+            setInternetSpeedCheck(true)
+        }
+    }
+
     const getChipIcon = (props: any, synced: boolean) => {
         return (
             <Icon source={'cloud-sync-outline'} size={props.size} color={synced ? "green" : "red"} />
@@ -356,15 +373,14 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
 
                 <View style={{ marginTop: 20, justifyContent: 'center' }}>
                     <Button
-                        icon={'upload'}
-                        loading={uploadInProgress}
+                        icon={uploadInProgress ? 'stop-circle-outline' : 'upload'}
                         mode='contained-tonal'
-                        buttonColor="#93faa9"
+                        buttonColor={uploadInProgress ? "#FF6666" : "#93faa9"}
                         labelStyle={{ color: 'black', fontWeight: 'bold' }}
                         style={{ marginHorizontal: 4, flexGrow: 1 }}
-                        onPress={() => setInternetSpeedCheck(true)}
-                        disabled={syncDisabled || downloadInProgress || uploadInProgress}
-                    >{uploadInProgress ? Strings.buttonLabels.UploadInProgress: Strings.buttonLabels.UploadData}</Button>
+                        onPress={handleUploadButtonPress}
+                        disabled={syncDisabled || downloadInProgress}
+                    >{uploadInProgress ? Strings.buttonLabels.StopUpload: Strings.buttonLabels.UploadData}</Button>
                 </View>
 
                 {!(uploadInProgress || downloadInProgress) && syncInfoList.length !== 0 && <View style={{ flex: 1, width: '100%', marginTop: 20 }}>
@@ -428,6 +444,11 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                     visible={internetSpeedCheck}
                     onClose={() => setInternetSpeedCheck(false)}
                     onSubmit={uploadData}
+                />
+
+                <MessageModal 
+                    visible={stoppingSync}
+                    text={"Stopping the sync. Please wait..."}
                 />
 
             </View>

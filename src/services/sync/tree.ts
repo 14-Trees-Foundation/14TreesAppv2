@@ -91,6 +91,9 @@ export const uploadNewTreesData = async (daoClient: DaoClient, trees: Tree[], sy
     let apiClient = new ApiClient()
 
     for (let i = 0; i < trees.length; i++) {
+        const stopSync = await AsyncStorage.getItem(Constants.isForceSyncStop);
+        if (stopSync) break;
+
         const tree = trees[i]
         const images = await daoClient.treeImages.getTreeImagesForSaplingId(tree.sapling_id, false);
         let treeReq: any = getNewTreeRequest(tree, images)
@@ -121,6 +124,9 @@ export const uploadEditedTreesData = async (daoClient: DaoClient, trees: Tree[],
     let apiClient = new ApiClient()
 
     for (let i = 0; i < trees.length; i++) {
+        const stopSync = await AsyncStorage.getItem(Constants.isForceSyncStop);
+        if (stopSync) break;
+
         const tree = trees[i]
         const location = tree.location ? JSON.parse(tree.location) : { coordinates: [0, 0] };
         let treeReq: any = { tree: { ...tree, location: location } }
@@ -153,6 +159,9 @@ export const uploadEditedTreesData = async (daoClient: DaoClient, trees: Tree[],
 export const uploadDeletedTreesData = async (daoClient: DaoClient, trees: Tree[], syncInfo: any) => {
     let apiClient = new ApiClient()
     for (let i = 0; i < trees.length; i++) {
+        const stopSync = await AsyncStorage.getItem(Constants.isForceSyncStop);
+        if (stopSync) break;
+        
         await apiClient.trees.deleteTree(trees[i]);
         await daoClient.trees.deleteLocalTree(trees[i].local_id);
         syncInfo.trees.delete += 1;

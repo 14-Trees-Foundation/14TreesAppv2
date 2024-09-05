@@ -1556,6 +1556,7 @@ export class Constants {
     // for sync screen
     static lastSyncInfo = 'last_sync_info'
     static networkSpeed = 'network_speed'
+    static isForceSyncStop = 'force_sync_stop'
 
     // selected Site to work with
     static selectedSiteId = 'selected_site_id'

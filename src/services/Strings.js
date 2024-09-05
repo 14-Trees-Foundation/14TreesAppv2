@@ -565,6 +565,7 @@ export class Strings {
             DownloadData: 'Download Data',
             UploadData: 'Upload Data',
             UploadInProgress: 'Upload in progress',
+            StopUpload: 'Stop Uploading',
             DownloadSitesPlots: 'Download Sites & Plots Data',
 
             ChangePlot: 'Change Plot',
@@ -639,6 +640,7 @@ export class Strings {
             DownloadData: 'डेटा डाउनलोड करा',
             UploadData: 'डेटा अपलोड करा',
             UploadInProgress: 'अपलोड प्रगतीपथावर आहे',
+            StopUpload: 'अपलोड करणे थांबवा',
             DownloadSitesPlots: 'साइट्स आणि प्लॉट डेटा डाउनलोड करा',
 
             ChangePlot: 'प्लॉट बदला',

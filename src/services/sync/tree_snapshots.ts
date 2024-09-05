@@ -120,6 +120,9 @@ const uploadNewTreeSnapshots = async (daoClient: DaoClient, treeSnapshots: TreeS
     if (userId === 0) return;
 
     for (const saplingId of saplingIds) {
+        const stopSync = await AsyncStorage.getItem(Constants.isForceSyncStop);
+        if (stopSync) break;
+        
         const images = treeSnapshotsMap[saplingId];
         const treeSnapshots = await apiClient.treeSnapshots.createTreeSnapshots(saplingId, userId, images)
 

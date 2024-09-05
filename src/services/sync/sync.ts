@@ -13,6 +13,8 @@ import { fetchAndStoreDeltaSyncInformation, saveSyncInfo, uploadSyncInfoData } f
 import { DaoClient } from "../db/dao";
 
 export const uploadLocalData = async (changesCount: any, syncTime: string) => {
+    // remove force sync in order to allow the sync
+    await AsyncStorage.removeItem(Constants.isForceSyncStop);
 
     let count = 0;
     try {
@@ -134,7 +136,9 @@ export const fetchDeltaChanges = async (setProgress: React.Dispatch<React.SetSta
 
 
 export const syncSingleTree = async (localId: number, saplingId: string, timeStamp: string) => {
-
+    // remove force sync in order to allow the sync
+    await AsyncStorage.removeItem(Constants.isForceSyncStop);
+    
     try {
         const daoClient = await DaoClient.authenticate();
         const syncInfoRequest = {

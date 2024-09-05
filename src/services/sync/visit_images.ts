@@ -99,6 +99,9 @@ const uploadNewImages = async (daoClient: DaoClient, visitImages: VisitImage[], 
     }
 
     for (const visitId of visitIds) {
+        const stopSync = await AsyncStorage.getItem(Constants.isForceSyncStop);
+        if (stopSync) break;
+        
         const images = visitImagesMap[visitId];
         await apiClient.visitImages.createVisitImages(visitId, images)
 
