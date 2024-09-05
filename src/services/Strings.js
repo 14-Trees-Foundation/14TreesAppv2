@@ -400,7 +400,9 @@ export class Strings {
             MarkedSaplingDead: "You have marked this sapling dead.",
             ConfirmDeleteEntry: "Do you want to delete the entry?",
             EmptyField : "Empty Field!",
-            EmptySaplingField : "The sapling field is empty."
+            EmptySaplingField : "The sapling field is empty.",
+
+            SyncInProgress: "Sync already in progress. Stop the running or wait till it's finished."
 
         },
         "mr": {
@@ -496,7 +498,9 @@ export class Strings {
             MarkedSaplingDead: "तुम्ही हे रोपटे मृत मार्क केले आहे",
             ConfirmDeleteEntry: "तुम्हाला एंट्री हटवायची आहे का?",
             EmptyField : "रिकामे फील्ड!",
-            EmptySaplingField : "झाडाचे फील्ड रिकामे."
+            EmptySaplingField : "झाडाचे फील्ड रिकामे.",
+
+            SyncInProgress: "सिंक आधीच प्रगतीपथावर आहे. धावणे थांबवा किंवा ते पूर्ण होईपर्यंत प्रतीक्षा करा.",
         }
     })
     static buttonLabels = new LocalizedStrings({
@@ -549,6 +553,7 @@ export class Strings {
             ChangeLanguage: "Change Language",
             ChangeTheme: "Change Theme",
             Yes: 'Yes',
+            Ok: 'Ok',
 
             // Users
             AddUser: "Add User",
@@ -624,6 +629,7 @@ export class Strings {
             ChangeLanguage: "भाषा बदला",
             ChangeTheme: "थीम बदला",
             Yes: 'होय',
+            Ok: 'ठीक आहे',
 
             // Users
             AddUser: "वापरकर्ता जोडा",

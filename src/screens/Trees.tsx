@@ -24,6 +24,7 @@ import SiteBanner from "../components/SiteBanner";
 import { Plot } from "../model/plot";
 import { Site } from "../model/sites";
 import { syncSingleTree } from "../services/sync/sync";
+import MessageModal from "../components/MessageModal";
 
 interface TreesInputProps {
     navigation: any
@@ -43,6 +44,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     const [isFormVisible, setIsFormVisible] = useState(false);
     const [isImageFormVisible, setIsImageFormVisible] = useState(false);
     const [isInfoModalVisible, setInfoModalVisible] = useState(false);
+    const [showSyncInProgress, setShowSyncInProgress] = useState(false);
     const [changeMode, setChangeModel] = useState<'add' | 'edit'>('add');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
@@ -272,6 +274,11 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     }
 
     const handleSingleTreeSync = async (tree: Tree) => {
+        if (uploadInProgress) {
+            setShowSyncInProgress(true);
+            return;
+        }
+
         const syncStartTime = new Date().toISOString();
         setSyncTree(tree);
         setUploadInProgress(true);
@@ -332,7 +339,6 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                                         )
                                     } }
                                     onSync={() => handleSingleTreeSync(tree)}
-                                    syncInProgress={uploadInProgress}
                                     currentTreeSync={tree.local_id === syncTree?.local_id}
                                 />
                             </TouchableOpacity>
@@ -367,6 +373,12 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                     onDelete={handleDelete}
                     tree={selectedTree}
                 />}
+
+                <MessageModal 
+                    visible={showSyncInProgress}
+                    text={Strings.alertMessages.SyncInProgress}
+                    onClose={() => setShowSyncInProgress(false)}
+                />  
 
                 <Loading loading={loading} />
             </SafeAreaView>

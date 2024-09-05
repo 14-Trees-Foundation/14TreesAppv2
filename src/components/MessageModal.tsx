@@ -1,13 +1,15 @@
 import { FC } from "react";
 import { Modal, StyleSheet, View } from "react-native";
-import { Text } from "react-native-paper";
+import { Button, Text } from "react-native-paper";
+import { Strings } from "../services/Strings";
 
 interface MessageModalProps {
     visible: boolean;
     text: string;
+    onClose?: () => void
 }
 
-const MessageModal: FC<MessageModalProps> = ({ visible, text }) => {
+const MessageModal: FC<MessageModalProps> = ({ visible, text, onClose }) => {
     return (
         <Modal
             visible={visible}
@@ -17,6 +19,15 @@ const MessageModal: FC<MessageModalProps> = ({ visible, text }) => {
             <View style={styles.overlay}>
                 <View style={styles.container}>
                     <Text variant='bodyMedium'>{text}</Text>
+                    {onClose && <View style={styles.btnContainer}>
+                        <Button
+                            onPress={onClose}
+                            style={styles.closeBtn}
+                            labelStyle={styles.closeBtnLabel}
+                        >
+                            {Strings.buttonLabels.Ok}
+                        </Button>
+                    </View>}
                 </View>
             </View>
         </Modal>
@@ -41,6 +52,17 @@ const styles = StyleSheet.create({
         shadowRadius: 8,
         elevation: 5,
     },
+    btnContainer: {
+        marginTop: 10,
+        flexGrow: 1,
+        alignItems: 'flex-end'
+    },
+    closeBtn: {
+        flexGrow: 1,
+    },
+    closeBtnLabel: {
+        color: '#4CAF50',
+    }
 });
 
 export default MessageModal;
