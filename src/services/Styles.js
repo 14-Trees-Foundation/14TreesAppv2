@@ -524,10 +524,10 @@ export const drawerNavigatorStyles = StyleSheet.create({
   navigatorView: {
     flexDirection: 'column',
     alignItems: 'center',
-    marginTop: 50,
+    marginTop: 20,
     bottom: 0,
   },
-  image: { width: '50%', height: 150, marginLeft: 10, marginBottom: 2 },
+  image: { width: '40%', height: 150, marginLeft: 10, marginBottom: 2 },
   userDetails: {
     flexDirection: 'row',
     alignItems: 'center',

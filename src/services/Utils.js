@@ -1533,7 +1533,7 @@ export class Constants {
     static authToken = 'token'
     static userRole = 'user_role'
     static logoImage() {
-        return require('../../assets/14-trees-logo.png');
+        return require('../../assets/dark_logo.png');
     }
     static placeholderImage() {
         return require('../../assets/icon-profile.png');
