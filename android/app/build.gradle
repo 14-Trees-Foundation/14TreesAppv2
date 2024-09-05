@@ -70,6 +70,15 @@ def enableProguardInReleaseBuilds = false
  * give correct results when using with locales other than en-US. Note that
  * this variant is about 6MiB larger per architecture than default.
  */
+
+project.ext.envConfigFiles = [
+   prodDebug: ".env.production",
+   prodRelease: ".env.production",
+   devRelease: ".env.development",
+   devDebug: ".env.development",
+]
+apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
+
 def jscFlavor = 'org.webkit:android-jsc:+'
 Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream()) 
@@ -91,6 +100,7 @@ android {
         versionCode 1
         versionName "1.0"
         //multiDexEnabled true
+        resValue "string", "build_config_package", "com.androidappv2"
         manifestPlaceholders = [googleMapsAPIKey: googleMapsAPIKey]
     }
     
@@ -125,6 +135,17 @@ android {
             signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+
+    flavorDimensions "default"
+    productFlavors {
+        prod {
+            resValue "string", "app_name", "14 Trees"
+        }
+        dev {
+            applicationIdSuffix ".devlopment"
+            resValue "string", "app_name", "Dev Trees"
         }
     }
    

@@ -1,4 +1,6 @@
+import Config from 'react-native-config';
 
-export const APP_VERSION = '3.0.2'
-export const API_HOST = 'https://dev-api.14trees.org'
+export const APP_VERSION = Config.APP_VERSION
+export const ENV = Config.ENV
+export const API_HOST = Config.API_HOST
 export const INITIAL_TIMESTAMP = '2020-01-01T00:00:00Z'
