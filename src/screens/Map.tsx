@@ -209,7 +209,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ navigation, route }) => {
                 setFocusedCoors(markerRef.current.props.coordinate)
                 markerRef.current.showCallout();
             }
-        }, 500)
+        }, 2000)
 
         return () => clearTimeout(timeoutId);
     }, []);
