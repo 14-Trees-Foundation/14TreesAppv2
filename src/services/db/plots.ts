@@ -28,11 +28,12 @@ export class PlotsDao {
                 const alterQuery = `ALTER TABLE ${this.tableName} ADD COLUMN boundaries TEXT;`;
                 await this.db.executeSql(alterQuery);
                 console.log(`Column boundaries added to ${this.tableName}.`);
+                
+                // remove tables last synced details
+                await AsyncStorage.removeItem(Constants.lastPlotsFetchedAt)
             } else {
                 console.log(`Column boundaries already exists in ${this.tableName}.`);
             }
-            // remove tables last synced details
-            await AsyncStorage.removeItem(Constants.lastPlotsFetchedAt)
         } catch (error) {
             console.error('Error adding column:', error);
         }

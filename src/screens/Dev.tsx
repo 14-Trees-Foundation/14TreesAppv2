@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Utils } from "../services/Utils";
 import Autocomplete from "../components/AutocompleteModal";
 import { Strings } from "../services/Strings";
+import { DaoClient } from "../services/db/dao";
 
 const Dev: React.FC<{ navigation: any }> = ({ navigation }) => {
 
@@ -28,9 +29,11 @@ const Dev: React.FC<{ navigation: any }> = ({ navigation }) => {
     useEffect(() => {
         setTimeout(async () => {
             try {
-                let { treeTypes, plots } = await Utils.getLocalTreeTypesAndPlots();
-                if (treeTypes) setPlantTypes(treeTypes);
-                if (plots) setPlots(plots);
+                const daoClient = await DaoClient.authenticate();
+                const plantTypes = await daoClient.plantTypes.getPlantTypes(0, -1);
+                setPlantTypes(plantTypes);
+                const plots = await daoClient.plots.getPlots(0, -1);
+                setPlots(plots);
             } catch (error: any) {
                 console.error(error);
                 const stackTrace = error.stack;
@@ -78,7 +81,7 @@ const Dev: React.FC<{ navigation: any }> = ({ navigation }) => {
                         label={Strings.labels.SelectTreeType}
                         onSelect={(data) => { setSelectedPlantType(data); }}
                         valueGetter={(data) => data.name}
-                        keyGetter={(data) => data.value}
+                        keyGetter={(data) => data.id}
                         variant='outlined'
                     />
                 </View>
@@ -90,7 +93,7 @@ const Dev: React.FC<{ navigation: any }> = ({ navigation }) => {
                         label={Strings.labels.SelectPlot}
                         onSelect={(data) => { setSelectedPlot(data); }}
                         valueGetter={(data) => data.name}
-                        keyGetter={(data) => data.value}
+                        keyGetter={(data) => data.id}
                         variant='outlined'
                     />
                 </View>

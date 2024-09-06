@@ -231,8 +231,9 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
                 if (userData) setUserDetails(JSON.parse(userData));
 
                 if (plantTypes.length === 0) {
-                    let { treeTypes } = await Utils.getLocalTreeTypesAndPlots();
-                    if (treeTypes) setPlantTypes(treeTypes);
+                    const daoClient = await DaoClient.authenticate();
+                    let plantTypes = await daoClient.plantTypes.getPlantTypes(0, -1);
+                    setPlantTypes(plantTypes);
                 }
             } catch (error: any) {
                 console.error(error);

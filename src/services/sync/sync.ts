@@ -11,6 +11,7 @@ import { ApiClient } from "../api/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchAndStoreDeltaSyncInformation, saveSyncInfo, uploadSyncInfoData } from "./sync_info";
 import { DaoClient } from "../db/dao";
+import { fetchAndStoreDeltaPlantTypes } from "./plant_type";
 
 export const uploadLocalData = async (changesCount: any, syncTime: string) => {
     // remove force sync in order to allow the sync
@@ -98,7 +99,7 @@ export const fetchDeltaChanges = async (setProgress: React.Dispatch<React.SetSta
         siteId = parseInt(selectedSiteId);
     }
 
-    await Utils.fetchAndStoreHelperData();
+    await fetchAndStoreDeltaPlantTypes();
     setProgress(0.1);
 
     await fetchAndStoreUsers();

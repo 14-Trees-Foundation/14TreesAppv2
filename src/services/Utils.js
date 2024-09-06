@@ -301,6 +301,7 @@ export class Utils {
         await daoClient.visitImages.createTable();
         await daoClient.syncInfo.createTable();
         await daoClient.siteSync.createTable();
+        await daoClient.plantTypes.createTable();
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
         await this.localdb.createSaplingTbl();
@@ -1548,6 +1549,7 @@ export class Constants {
     static lastVisitImagesFetchedAt = 'last_visit_images_fetched_at'
     static lastTreeSnapshotsFetchedAt = 'last_tree_snapshots_fetched_at'
     static lastSyncInfoFetchedAt = 'last_sync_info_fetched_at'
+    static lastPlantTypesFetchedAt = 'last_plant_types_fetched_at'
 
     static recentPlantTypes = 'recent_plant_types'
     // tree analytics for home screen

@@ -82,13 +82,15 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     }, []);
 
     useEffect(() => {
-        setTimeout(async () => {
+        const fetchData = async () => {
             const userData = await AsyncStorage.getItem(Constants.userDetailsKey)
             if (userData) setUserDetails(JSON.parse(userData));
-            const { treeTypes } = await Utils.getLocalTreeTypesAndPlots();
+            const daoClient = await DaoClient.authenticate();
+            let plantTypes = await daoClient.plantTypes.getPlantTypes(0, -1);
+            setPlantTypes(plantTypes);
+        }
 
-            treeTypes && setPlantTypes(treeTypes);
-        })
+        fetchData();
     }, [])
 
     useEffect(() => {
