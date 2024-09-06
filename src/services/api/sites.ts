@@ -12,12 +12,8 @@ export class SiteService {
 
     async getSites(offset: number, limit: number, filters?: FilterItem[]): Promise<PaginatedResponse<Site>> {
         const url = `/api/sites/get?offset=${offset}&limit=${limit}`;
-        try {
-            const response = await this.api.post<PaginatedResponse<Site>>(url, { filters: filters });
-            return response.data;
-        } catch (error: any) {
-            return handleApiError("SitesClient::getSites:", error)
-        }
+        const response = await this.api.post<PaginatedResponse<Site>>(url, { filters: filters });
+        return response.data;
     }
 
     async createSite(data: Site): Promise<Site> {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, View, StyleSheet, Keyboard, TouchableWithoutFeedback } from 'react-native';
-import { TextInput, Button, List, IconButton } from 'react-native-paper';
+import { TextInput, Button, List, IconButton, Text } from 'react-native-paper';
 import { FlatList, TouchableOpacity } from 'react-native';
 import SearchBar from './Searchbar';
 
@@ -16,9 +16,10 @@ interface AutocompleteInputProps<T> {
   variant?: 'flat' | 'outlined'
   disabled?: boolean
   boldSelection?: boolean
+  helpedText?: string
 }
 
-function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSelect, onSearch, variant, disabled, boldSelection }: AutocompleteInputProps<T>) {
+function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSelect, onSearch, variant, disabled, boldSelection, helpedText }: AutocompleteInputProps<T>) {
   const [filteredData, setFilteredData] = useState(options);
   const [visible, setVisible] = useState(false);
   const [recentSelections, setRecentSelections] = useState<T[]>([]);
@@ -90,7 +91,7 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
               disabled={disabled}
               style={{ fontWeight: (boldSelection && value) ? 'bold' : 'normal' }}
               numberOfLines={2}
-              multiline={value ? valueGetter(value).length > 50 : false}
+              multiline={value ? valueGetter(value).length > 40 : false}
             />
         </View>
       </TouchableWithoutFeedback>
@@ -112,6 +113,7 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
+            {helpedText && <Text style={{ marginHorizontal: 10, marginBottom: 5, fontWeight: 'bold' }} variant='bodyLarge'>{helpedText}</Text>}
             <SearchBar onChange={handleSearch} autoFocus />
             <FlatList
               keyboardShouldPersistTaps={'handled'}

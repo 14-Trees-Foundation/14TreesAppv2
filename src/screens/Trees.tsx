@@ -156,17 +156,17 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     }, [])
 
     useEffect(() => {
-        setTimeout(async () => {
-
-            const daoClient = await DaoClient.authenticate();
-            const siteId = await AsyncStorage.getItem(Constants.selectedSiteId)
-            if (siteId) {
-                const site = await daoClient.sites.getSiteByLiveId(parseInt(siteId));
+        const getSelectedSite = async () => {
+            const data = await AsyncStorage.getItem(Constants.selectedSite);
+            if (data) {
+                const site = JSON.parse(data);
                 setSelectedSite(site);
             } else {
                 setSelectedSite(null);
             }
-        }, 10)
+        }
+
+        getSelectedSite();
     }, [stateChange])
 
     const getPendingImagesCountForSapling = async (saplingId: string) => {

@@ -93,10 +93,11 @@ export const fetchDeltaChanges = async (setProgress: React.Dispatch<React.SetSta
         await AsyncStorage.setItem(Constants.treeAnalyticsDataKey, JSON.stringify(analytics))
     }
 
-    const selectedSiteId = await AsyncStorage.getItem(Constants.selectedSiteId);
+    const data = await AsyncStorage.getItem(Constants.selectedSite);
     let siteId: number | undefined = undefined;
-    if (selectedSiteId) {
-        siteId = parseInt(selectedSiteId);
+    if (data) {
+        const site = JSON.parse(data);
+        siteId = site.id;
     }
 
     await fetchAndStoreDeltaPlantTypes();

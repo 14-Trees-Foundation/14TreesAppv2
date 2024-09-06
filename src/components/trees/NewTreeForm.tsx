@@ -282,15 +282,15 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
     }, [plotSearchQuery, selectedSite])
 
     useEffect(() => {
-        setTimeout(async () => {
-
-            const daoClient = await DaoClient.authenticate();
-            const siteId = await AsyncStorage.getItem(Constants.selectedSiteId)
-            if (siteId) {
-                const site = await daoClient.sites.getSiteByLiveId(parseInt(siteId));
+        const getSelectedSite = async () => {
+            const data = await AsyncStorage.getItem(Constants.selectedSite);
+            if (data) {
+                const site = JSON.parse(data);
                 setSelectedSite(site);
             }
-        }, 10)
+        }
+
+        getSelectedSite();
     }, [])
 
     const handleUserSearch = (txt: string) => {

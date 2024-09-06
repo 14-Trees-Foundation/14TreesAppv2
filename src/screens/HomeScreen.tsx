@@ -7,11 +7,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Strings } from "../services/Strings";
 import { TreeAnalytics } from "../model/tree";
 import InternetBanner from "../components/InternetInfo";
-import { fetchDeltaChanges } from "../services/sync/sync";
 import GlobalContext from "../context/GlobalContext ";
 import Autocomplete from "../components/AutocompleteModal";
-import { DaoClient } from "../services/db/dao";
 import { Site } from "../model/sites";
+import { ApiClient } from "../services/api/api";
 
 
 const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
@@ -21,6 +20,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     console.log('langChanged inside HomeScreen: ', langChanged);
   }, [langChanged]);
 
+  const apiClient = new ApiClient();
   const [lastSyncDate, setLastSyncDate] = useState('');
   const [userDetails, setUserDetails] = useState<any>(null);
   const [analytics, setAnalytics] = useState<TreeAnalytics | null>(null);
@@ -72,21 +72,27 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     const lsSate = await Utils.getLastSyncDate();
     if (lsSate) {
       setLastSyncDate(lsSate);
-    } else {
-      setLoading(true);
-      setDownloadInProgress(true);
-      await fetchDeltaChanges(setSyncProgress);
-      setLoading(false);
-      setDownloadInProgress(false);
-      Utils.setLastSyncDateNow();
-      updateLastSyncState();
-    }
+    } 
+    // else {
+    //   setLoading(true);
+    //   setDownloadInProgress(true);
+    //   await fetchDeltaChanges(setSyncProgress);
+    //   setLoading(false);
+    //   setDownloadInProgress(false);
+    //   Utils.setLastSyncDateNow();
+    //   updateLastSyncState();
+    // }
   }
   const handleAnalytics = async () => {
     const data = await AsyncStorage.getItem(Constants.treeAnalyticsDataKey);
     if (data) {
       const analytics: TreeAnalytics = JSON.parse(data);
       setAnalytics(analytics);
+    } else if (userDetails) {
+      const analytics = await apiClient.trees.analyticsCount(userDetails.name);
+      console.log(analytics);
+      setAnalytics(analytics)
+      await AsyncStorage.setItem(Constants.treeAnalyticsDataKey, JSON.stringify(analytics))
     }
   }
 
@@ -103,52 +109,51 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      if (downloadInProgress) {
-        handleDownloadInProgress();
-      } else {
-        handleLastSyncDate();
-      }
+      // if (downloadInProgress) {
+      //   handleDownloadInProgress();
+      // } else {
+      // }
+      handleLastSyncDate();
       handleAnalytics();
       return () => {
       };
-    }, [downloadInProgress])
+    }, [])
   );
 
   useEffect(() => {
-    setTimeout(async () => {
+    const fetchData = async () => {
       const userData = await AsyncStorage.getItem(Constants.userDetailsKey)
       if (userData) setUserDetails(JSON.parse(userData));
 
-      const daoClient = await DaoClient.authenticate();
-      const siteId = await AsyncStorage.getItem(Constants.selectedSiteId)
-      let site: Site | null = null;
-      if (siteId) {
-        site = await daoClient.sites.getSiteByLiveId(parseInt(siteId));
+      const data = await AsyncStorage.getItem(Constants.selectedSite)
+      if (data) {
+        const site: Site = JSON.parse(data);
         setSelectedSite(site);
       }
-      const sites = await daoClient.sites.getSites(0, 100)
-      if (site) {
-        const idx = sites.findIndex(value => value.id === site?.id);
-        if (idx < 0) setSites([site, ...sites]);
-        else setSites(sites);
+
+      if (searchQuery.length === 0) {
+        const sites = await apiClient.sites.getSites(0, 20)
+        setSites(sites.results);
       }
-      else setSites(sites);
-    }, 10)
-  }, [])
+    }
+
+    fetchData();
+  }, [searchQuery])
 
   useEffect(() => {
-    if (searchQuery.length < 1) return;
-    setTimeout(async () => {
-      const daoClient = await DaoClient.authenticate();
-      let sites = await daoClient.sites.searchSites(searchQuery, 0, 100);
-      setSites(sites);
-    }, 10)
+    if (searchQuery.length < 3) return;
+    const searchSites = async () => {
+      let sites = await apiClient.sites.getSites(0, 20, [{ columnField: 'name_english', value: searchQuery, operatorValue: 'contains' }]);
+      setSites(sites.results);
+    }
+
+    searchSites();
   }, [searchQuery])
 
   const handleSiteSelection = (site: Site | null) => {
     setSelectedSite(site);
-    if (site !== null && site.id) AsyncStorage.setItem(Constants.selectedSiteId, site.id.toString());
-    else AsyncStorage.removeItem(Constants.selectedSiteId);
+    if (site !== null) AsyncStorage.setItem(Constants.selectedSite, JSON.stringify(site))
+    else AsyncStorage.removeItem(Constants.selectedSite);
   }
 
   const getName = () => {
@@ -222,16 +227,16 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
             {card('account-outline', Strings.messages.PersonTrees, analytics.trees_planted_by_you)}
           </View>
         </View>}
-        {!loading && <View
+        {<View
           style={{
             padding: 15
           }}>
           <Text variant='bodyMedium'>{Strings.messages.SelectTheSiteYouAreAt}:</Text>
           <Autocomplete
-            label={Strings.labels.ClickSiteFromDropdown}
+            label={selectedSite ? Strings.labels.SelectedSite : Strings.labels.ClickSiteFromDropdown}
             value={selectedSite}
             options={sites}
-            keyGetter={(option) => option ? option.local_id : ''}
+            keyGetter={(option) => option ? option.id : ''}
             valueGetter={(option) => {
               return option.plot_count && option.plot_count > 0
                 ? `${option.name_english} (Plots: ${option.plot_count})`
@@ -240,6 +245,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
             onSelect={handleSiteSelection}
             onSearch={(text) => setSearchQuery(text)}
             variant='outlined'
+            helpedText={Strings.messages.SelectTheSiteYouAreAt}
           />
         </View>}
         <View style={{ marginVertical: 30 }}></View>

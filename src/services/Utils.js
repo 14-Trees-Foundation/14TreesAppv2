@@ -1562,6 +1562,7 @@ export class Constants {
 
     // selected Site to work with
     static selectedSiteId = 'selected_site_id'
+    static selectedSite = 'selected_site'
 }
 
 export const getImageSourceObject = (src) => {

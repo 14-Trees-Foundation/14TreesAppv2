@@ -104,21 +104,16 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
         useCallback(() => {
             const getSitesData = async () => {
                 const daoClient = await DaoClient.authenticate();
-                const siteId = await AsyncStorage.getItem(Constants.selectedSiteId)
-                let site: Site | null = null;
-                if (siteId) {
-                    site = await daoClient.sites.getSiteByLiveId(parseInt(siteId));
+                const data = await AsyncStorage.getItem(Constants.selectedSite);
+                if (data) {
+                    const site = JSON.parse(data);
                     setSelectedSite(site);
                 } else {
                     setSelectedSite(null);
                 }
+
                 const sites = await daoClient.sites.getSites(0, 100)
-                if (site) {
-                    const idx = sites.findIndex(value => value.id === site?.id);
-                    if (idx < 0) setSites([site, ...sites]);
-                    else setSites(sites);
-                }
-                else setSites(sites);
+                setSites(sites);
             }
 
             getSitesData();
