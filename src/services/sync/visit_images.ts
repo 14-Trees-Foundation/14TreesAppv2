@@ -6,21 +6,26 @@ import { Constants, Utils } from "../Utils";
 import { ToastAndroid } from "react-native";
 import { VisitImage } from "../../model/visit_image";
 import { saveSyncInfo } from "./sync_info";
+import { INITIAL_TIMESTAMP } from "../../constants/constants";
 
-export const fetchAndStoreVisitImages = async () => {
+export const fetchAndStoreVisitImages = async (siteId?: number) => {
     // fetch data from the backend
     const apiClient = new ApiClient();
     const daoClient = await DaoClient.authenticate();
 
     let visitImageIds = await daoClient.visitImages.getLiveVisitImageIds()
-    const timestamp = await AsyncStorage.getItem(Constants.lastVisitImagesFetchedAt) || '2020-01-01T00:00:00Z'
+    let timestamp = await AsyncStorage.getItem(Constants.lastVisitImagesFetchedAt) || INITIAL_TIMESTAMP
+    if (siteId) {
+        const resp = await daoClient.siteSync.getSiteLastSyncTime(siteId, Constants.lastVisitImagesFetchedAt);
+        if (resp && new Date(timestamp).getTime() < new Date(resp.created_at).getTime()) timestamp = resp.created_at;
+    }
 
     try {
         const now = new Date().toISOString();
 
         let offset = 0;
         while (true) {
-            const response = await apiClient.visitImages.fetchChanges(timestamp, visitImageIds, offset)
+            const response = await apiClient.visitImages.fetchChanges(timestamp, visitImageIds, offset, siteId)
             const visitImages = response.visit_images;
 
             // upload visit images in local db
@@ -39,7 +44,9 @@ export const fetchAndStoreVisitImages = async () => {
             if (offset >= response.total) break;
         }
 
-        await AsyncStorage.setItem(Constants.lastVisitImagesFetchedAt, now);
+        if (siteId) await daoClient.siteSync.createLastSyncTime(siteId, Constants.lastVisitImagesFetchedAt, now);
+        else await AsyncStorage.setItem(Constants.lastVisitImagesFetchedAt, now);
+        
         console.log('Visit images fetch Done!')
         ToastAndroid.show('Visit Images data upto date!', ToastAndroid.LONG)
     } catch (error: any) {

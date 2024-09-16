@@ -6,21 +6,26 @@ import { Constants, Utils } from "../Utils";
 import { ToastAndroid } from "react-native";
 import { TreeSnapshot } from "../../model/tree_snapshot";
 import { saveSyncInfo } from "./sync_info";
+import { INITIAL_TIMESTAMP } from "../../constants/constants";
 
-export const fetchAndStoreTreeSnapshots = async () => {
+export const fetchAndStoreTreeSnapshots = async (siteId?: number) => {
     // fetch data from the backend
     const apiClient = new ApiClient();
     const daoClient = await DaoClient.authenticate();
 
     let treeSnapshotIds = await daoClient.treeSnapshots.getLiveTreeSnapshotIds()
-    const timestamp = await AsyncStorage.getItem(Constants.lastTreeSnapshotsFetchedAt) || '2020-01-01T00:00:00Z'
+    let timestamp = await AsyncStorage.getItem(Constants.lastTreeSnapshotsFetchedAt) || INITIAL_TIMESTAMP
+    if (siteId) {
+        const resp = await daoClient.siteSync.getSiteLastSyncTime(siteId, Constants.lastTreeSnapshotsFetchedAt);
+        if (resp && new Date(timestamp).getTime() < new Date(resp.created_at).getTime()) timestamp = resp.created_at;
+    }
 
     try {
         const now = new Date().toISOString();
 
         let offset = 0;
         while (true) {
-            const response = await apiClient.treeSnapshots.fetchChanges(timestamp, treeSnapshotIds, offset)
+            const response = await apiClient.treeSnapshots.fetchChanges(timestamp, treeSnapshotIds, offset, siteId)
             const treeSnapshots = response.tree_snapshots;
 
             // upload visit images in local db
@@ -39,7 +44,9 @@ export const fetchAndStoreTreeSnapshots = async () => {
             if (offset >= response.total) break;
         }
 
-        await AsyncStorage.setItem(Constants.lastTreeSnapshotsFetchedAt, now);
+        if (siteId) await daoClient.siteSync.createLastSyncTime(siteId, Constants.lastTreeSnapshotsFetchedAt, now);
+        else await AsyncStorage.setItem(Constants.lastTreeSnapshotsFetchedAt, now);
+        
         console.log('Tree snapshots fetch Done!')
         ToastAndroid.show('Trees images data upto date!', ToastAndroid.LONG)
     } catch (error: any) {

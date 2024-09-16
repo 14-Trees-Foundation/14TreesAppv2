@@ -51,15 +51,14 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     const [trees, setTrees] = useState<Tree[]>([]);
     const [plantTypes, setPlantTypes] = useState<any[]>([]);
     const [plotSearchQuery, setPlotSearchQuery] = useState('');
+    const [plotsPage, setPlotsPage] = useState(0);
+    const [hasMorePlots, setHasMorePlots] = useState(true);
     const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null);
     const [plots, setPlots] = useState<Plot[]>([]);
     const [allPlots, setAllPlots] = useState<Plot[]>([]);
     const [selectedSite, setSelectedSite] = useState<Site | null>(null);
     const [userDetails, setUserDetails] = useState<any>(null);
     const [syncTree, setSyncTree] = useState<Tree | null>(null);
-
-    let localClient: DaoClient;
-    DaoClient.authenticate().then((client) => { localClient = client; });
 
     useFocusEffect(
         useCallback(() => {
@@ -130,21 +129,35 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
 
     useEffect(() => {
         if (plotSearchQuery.length !== 0) return;
-        setTimeout(async () => {
+        const getPlots = async () => {
             const daoClient = await DaoClient.authenticate();
-            let resp = await daoClient.plots.getPlots(0, 100, undefined, false, selectedSite?.id);
-            setPlots(resp)
-        }, 100)
-    }, [plotSearchQuery, selectedSite])
+            let resp = await daoClient.plots.getPlots(plotsPage * 10, 10, undefined, false, selectedSite?.id);
+            if (resp.length < 10) setHasMorePlots(false);
+            else setHasMorePlots(true);
+
+            if (plotsPage === 0) setPlots(resp);
+            else setPlots([...plots, ...resp]);
+        }
+
+        getPlots();
+    }, [plotsPage, plotSearchQuery, selectedSite])
 
     useEffect(() => {
         if (plotSearchQuery.length < 1) return;
-        setTimeout(async () => {
+
+        const getPlots = async () => {
             const daoClient = await DaoClient.authenticate();
-            let plots = await daoClient.plots.searchPlots(plotSearchQuery, 0, 100, selectedSite?.id);
-            setPlots(plots);
-        }, 100)
-    }, [plotSearchQuery, selectedSite])
+            let resp = await daoClient.plots.searchPlots(plotSearchQuery, plotsPage * 10, 10, selectedSite?.id);
+            if (resp.length < 10) setHasMorePlots(false);
+            else setHasMorePlots(true);
+
+            if (plotsPage === 0) setPlots(resp);
+            else setPlots([...plots, ...resp]);
+        }
+        
+        getPlots();
+        
+    }, [plotsPage, plotSearchQuery, selectedSite])
 
     useEffect(() => {
         const getAllPlots = async () => {
@@ -264,6 +277,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
         if (selectedTree) {
             setTimeout(async () => {
                 try {
+                    const localClient = await DaoClient.authenticate();
                     await localClient.trees.deleteTree(selectedTree.local_id);
                     setPlaySound(true);
                     ToastAndroid.show("Deleted tree locally!", ToastAndroid.SHORT)
@@ -305,13 +319,19 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                     <View style={{ width: '100%', flexGrow: 1, marginTop: 15 }}>
                         <Autocomplete
                             label={selectedPlot ? Strings.labels.SelectedPlot : Strings.labels.SelectPlot}
-                            options={allPlots}
+                            options={plots}
                             value={selectedPlot}
                             onSelect={setSelectedPlot}
                             valueGetter={(data) => data.name}
                             keyGetter={(data) => data.id}
                             variant="outlined"
                             boldSelection
+                            onSearch={(text: string) => { setPlotsPage(0); setPlotSearchQuery(text) }}
+                            paginationOptions={{
+                                hasMore: hasMorePlots,
+                                onPageChange: setPlotsPage,
+                                page: plotsPage
+                            }}
                         />
                     </View>
                 </View>}

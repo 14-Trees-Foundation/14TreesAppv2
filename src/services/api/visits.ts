@@ -48,10 +48,10 @@ export class VisitService {
         }
     }
 
-    async fetchChanges(timestamp: string, visit_ids: number[], offset: number): Promise<VisitHelperDataResponse> {
+    async fetchChanges(timestamp: string, visit_ids: number[], offset: number, site_id?: number): Promise<VisitHelperDataResponse> {
         const url = `/api/appv2/fetchHelperData/visits`;
         try {
-            const response = await this.api.post<VisitHelperDataResponse>(url, { timestamp, visit_ids, offset });
+            const response = await this.api.post<VisitHelperDataResponse>(url, { site_id, timestamp, visit_ids, offset });
             return response.data;
         } catch (error: any) {
             return handleApiError("VisitService::fetchChanges:", error)

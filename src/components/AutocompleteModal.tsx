@@ -153,7 +153,7 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
               )}
               ListFooterComponent={renderFooter}
               onEndReachedThreshold={paginationOptions ? 0.2 : undefined}
-              onEndReached={paginationOptions ? () => paginationOptions?.onPageChange(paginationOptions.page + 1) : undefined}
+              onEndReached={paginationOptions && paginationOptions.hasMore ? () => paginationOptions?.onPageChange(paginationOptions.page + 1) : undefined}
             />
             <View style={{
               marginTop: 20,

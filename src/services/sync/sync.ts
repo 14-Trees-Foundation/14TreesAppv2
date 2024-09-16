@@ -112,16 +112,16 @@ export const fetchDeltaChanges = async (setProgress: React.Dispatch<React.SetSta
     await fetchAndStorePlots(siteId);
     setProgress(0.3);
 
-    await fetchAndStoreVisits();
+    await fetchAndStoreVisits(siteId);
     setProgress(0.4);
 
-    await fetchAndStoreVisitImages();
+    await fetchAndStoreVisitImages(siteId);
     setProgress(0.5);
 
     await fetchAndStoreTrees(siteId);
     setProgress(0.9);
 
-    await fetchAndStoreTreeSnapshots();
+    await fetchAndStoreTreeSnapshots(siteId);
     setProgress(0.95);
 
     await fetchAndStoreDeltaSyncInformation();
