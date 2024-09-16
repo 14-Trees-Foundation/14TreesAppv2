@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, View, StyleSheet, Keyboard, TouchableWithoutFeedback } from 'react-native';
-import { TextInput, Button, List, IconButton, Text } from 'react-native-paper';
+import { TextInput, Button, List, IconButton, Text, ActivityIndicator } from 'react-native-paper';
 import { FlatList, TouchableOpacity } from 'react-native';
 import SearchBar from './Searchbar';
+
+interface PaginationOptions {
+  page: number;
+  onPageChange: (page: number) => void;
+  hasMore: boolean;
+}
 
 
 interface AutocompleteInputProps<T> {
@@ -17,9 +23,10 @@ interface AutocompleteInputProps<T> {
   disabled?: boolean
   boldSelection?: boolean
   helpedText?: string
+  paginationOptions?: PaginationOptions
 }
 
-function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSelect, onSearch, variant, disabled, boldSelection, helpedText }: AutocompleteInputProps<T>) {
+function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSelect, onSearch, variant, disabled, boldSelection, helpedText, paginationOptions }: AutocompleteInputProps<T>) {
   const [filteredData, setFilteredData] = useState(options);
   const [visible, setVisible] = useState(false);
   const [recentSelections, setRecentSelections] = useState<T[]>([]);
@@ -80,6 +87,19 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
     setFilteredData(options);
   }
 
+  const renderFooter = () => {
+    if (!paginationOptions) {
+      return undefined;
+    }
+
+    return (
+      <View style={styles.paginationContainer}>
+        {paginationOptions.hasMore && <ActivityIndicator />}
+        {!paginationOptions.hasMore && <Text>No more data</Text>}
+      </View>
+    )
+  }
+
   return (
     <View>
       <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); disabled || setVisible(true); }}>
@@ -118,6 +138,7 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
             <FlatList
               keyboardShouldPersistTaps={'handled'}
               style={{ maxHeight: '70%', marginTop: 20 }}
+              contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
               data={filteredData}
               keyExtractor={(item, index) => keyGetter(item)}
               renderItem={({ item }) => (
@@ -130,6 +151,9 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
                   />
                 </TouchableOpacity>
               )}
+              ListFooterComponent={renderFooter}
+              onEndReachedThreshold={paginationOptions ? 0.2 : undefined}
+              onEndReached={paginationOptions ? () => paginationOptions?.onPageChange(paginationOptions.page + 1) : undefined}
             />
             <View style={{
               marginTop: 20,
@@ -178,6 +202,11 @@ const styles = StyleSheet.create({
     right: 0,
     top: 8,  // Adjust this value as needed to align with the TextInput
   },
+  paginationContainer: {
+    marginTop: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 });
 
 export default Autocomplete;

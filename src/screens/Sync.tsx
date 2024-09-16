@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { BackHandler, ScrollView, StyleSheet, View } from "react-native";
+import { BackHandler, ScrollView, StyleSheet, ToastAndroid, View } from "react-native";
 import { Button, Chip, Icon, ProgressBar, Text } from "react-native-paper";
 import { Constants, Utils, formatDuration, getHumanReadableDateTime, getReadableProgress, getTimeDiffString } from "../services/Utils";
 import { DaoClient } from "../services/db/dao";
@@ -12,6 +12,7 @@ import SyncCard from "../components/SyncCard";
 import NetworkSpeedModal from "../components/NetworkModal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MessageModal from "../components/MessageModal";
+import { Site } from "../model/sites";
 
 const syncDetailsTemplate = {
     synced_at: '',
@@ -47,6 +48,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [treeImagesCount, setTreeImagesCount] = useState<any>(null);
     const [visitImagesCount, setVisitImagesCount] = useState<any>(null);
     const [syncInfoList, setSyncInfoList] = useState<any[]>([]);
+    const [selectedSite, setSelectedSite] = useState<Site | null>(null);
 
     useEffect(() => {
         const backAction = () => {
@@ -62,6 +64,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         useCallback(() => {
             // Update last sync date on UI every 2 second (2000 milliseconds)
             intervalId.current = setInterval(updateUI, 2000);
+            fetchSelectedSite();
 
             return () => {
                 clearInterval(intervalId.current);
@@ -71,6 +74,14 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     const updateUI = () => {
         setState(prev => prev + 1);
+    }
+
+    const fetchSelectedSite = async () => {
+        const selectedSite = await AsyncStorage.getItem(Constants.selectedSite);
+        if (selectedSite) {
+            return setSelectedSite(JSON.parse(selectedSite));
+        }
+        return setSelectedSite(null);
     }
 
     useEffect(() => {
@@ -252,6 +263,10 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
 
     const fetchData = async () => {
+        if (selectedSite === null) {
+            ToastAndroid.show('Please select a site first!', ToastAndroid.SHORT);
+            return;
+        }
         setSyncProgress(0);
         setDownloadInProgress(true);
         try {

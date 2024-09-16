@@ -1,8 +1,8 @@
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { BackHandler, ScrollView, View } from "react-native";
-import { Button, Icon, ProgressBar, Surface, Text } from "react-native-paper";
-import { Constants, Utils, getReadableProgress, getTimeDiffString } from "../services/Utils";
+import { Button, Icon, Surface, Text } from "react-native-paper";
+import { Constants, Utils, getTimeDiffString } from "../services/Utils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Strings } from "../services/Strings";
 import { TreeAnalytics } from "../model/tree";
@@ -15,7 +15,7 @@ import { ApiClient } from "../services/api/api";
 
 const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const intervalId = useRef<any>(null);
-  const { langChanged, downloadInProgress, setDownloadInProgress, syncProgress, setSyncProgress } = useContext(GlobalContext);
+  const { langChanged } = useContext(GlobalContext);
   useEffect(() => {
     console.log('langChanged inside HomeScreen: ', langChanged);
   }, [langChanged]);
@@ -24,10 +24,11 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [lastSyncDate, setLastSyncDate] = useState('');
   const [userDetails, setUserDetails] = useState<any>(null);
   const [analytics, setAnalytics] = useState<TreeAnalytics | null>(null);
-  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
   const [sites, setSites] = useState<Site[]>([]);
+  const [sitesPage, setSitesPage] = useState<number>(0);
+  const [hasMoreSites, setHasMoreSites] = useState<boolean>(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -57,7 +58,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   );
 
   const updateLastSyncOnUI = () => {
-    if (!loading) updateLastSyncState();
+    updateLastSyncState();
   }
 
   const updateLastSyncState = async () => {
@@ -72,16 +73,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     const lsSate = await Utils.getLastSyncDate();
     if (lsSate) {
       setLastSyncDate(lsSate);
-    } 
-    // else {
-    //   setLoading(true);
-    //   setDownloadInProgress(true);
-    //   await fetchDeltaChanges(setSyncProgress);
-    //   setLoading(false);
-    //   setDownloadInProgress(false);
-    //   Utils.setLastSyncDateNow();
-    //   updateLastSyncState();
-    // }
+    }
   }
   const handleAnalytics = async () => {
     const data = await AsyncStorage.getItem(Constants.treeAnalyticsDataKey);
@@ -90,29 +82,14 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       setAnalytics(analytics);
     } else if (userDetails) {
       const analytics = await apiClient.trees.analyticsCount(userDetails.name);
-      console.log(analytics);
       setAnalytics(analytics)
       await AsyncStorage.setItem(Constants.treeAnalyticsDataKey, JSON.stringify(analytics))
-    }
-  }
-
-  const handleDownloadInProgress = async () => {
-    // check if is it first sync
-    const lsSate = await Utils.getLastSyncDate();
-    if (lsSate) {
-      // if not avoid showing progress bar on home screen
-      setLastSyncDate(lsSate);
-    } else {
-      setLoading(true);
+      updateLastSyncOnUI();
     }
   }
 
   useFocusEffect(
     useCallback(() => {
-      // if (downloadInProgress) {
-      //   handleDownloadInProgress();
-      // } else {
-      // }
       handleLastSyncDate();
       handleAnalytics();
       return () => {
@@ -132,23 +109,32 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       }
 
       if (searchQuery.length === 0) {
-        const sites = await apiClient.sites.getSites(0, 20)
-        setSites(sites.results);
+        const sites = await apiClient.sites.getSites(sitesPage * 10, 10)
+        if ((sitesPage + 1) * 10 >= sites.total) setHasMoreSites(false);
+        else setHasMoreSites(true);
+
+        if(sites.offset === 0) setSites(sites.results);
+        else setSites(prev => [...prev, ...sites.results]);
       }
     }
 
     fetchData();
-  }, [searchQuery])
+  }, [searchQuery, sitesPage])
 
   useEffect(() => {
     if (searchQuery.length < 3) return;
     const searchSites = async () => {
-      let sites = await apiClient.sites.getSites(0, 20, [{ columnField: 'name_english', value: searchQuery, operatorValue: 'contains' }]);
-      setSites(sites.results);
+      let sites = await apiClient.sites.getSites(sitesPage * 10, 10, [{ columnField: 'name_english', value: searchQuery, operatorValue: 'contains' }]);
+
+      if ((sitesPage + 1) * 10 >= sites.total) setHasMoreSites(false);
+        else setHasMoreSites(true);
+
+        if(sites.offset === 0) setSites(sites.results);
+        else setSites(prev => [...prev, ...sites.results]);
     }
 
     searchSites();
-  }, [searchQuery])
+  }, [searchQuery, sitesPage])
 
   const handleSiteSelection = (site: Site | null) => {
     setSelectedSite(site);
@@ -243,22 +229,18 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
                 : option.name_english
             }}
             onSelect={handleSiteSelection}
-            onSearch={(text) => setSearchQuery(text)}
+            onSearch={(text) => {setSitesPage(0); setSearchQuery(text)}}
             variant='outlined'
             helpedText={Strings.messages.SelectTheSiteYouAreAt}
+            paginationOptions={{
+              page: sitesPage,
+              onPageChange: setSitesPage,
+              hasMore: hasMoreSites
+            }}
           />
         </View>}
         <View style={{ marginVertical: 30 }}></View>
       </ScrollView>
-
-      {loading && <View
-        style={{ position: 'absolute', bottom: 80, left: 20, right: 20 }}>
-        <Text style={{ textAlign: 'center', marginBottom: 5 }}>
-          Fetching Data from the Server!
-        </Text>
-        <ProgressBar visible={loading} progress={syncProgress} style={{ backgroundColor: '#bf8686' }} fillStyle={{ backgroundColor: '#02ab4e' }} />
-        <Text style={{ textAlign: 'center', marginTop: 2 }}>Completed: {getReadableProgress(syncProgress)}</Text>
-      </View>}
 
       <View style={{ position: 'absolute', bottom: 10, left: 20, right: 20 }}>
         <Text variant='bodySmall' style={{ color: 'black', alignSelf: 'center', marginBottom: 4 }}>
