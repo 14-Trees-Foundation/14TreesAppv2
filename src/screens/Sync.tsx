@@ -114,8 +114,8 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     useEffect(() => {
         const pending = remaining.trees.add + remaining.trees.edit + remaining.trees.delete
-                    + remaining.tree_images.add + remaining.tree_images.delete 
-                    + remaining.visit_images.delete + remaining.visit_images.delete 
+            + remaining.tree_images.add + remaining.tree_images.delete
+            + remaining.visit_images.delete + remaining.visit_images.delete
 
         if (pending === 0) setSyncDisabled(true);
         else setSyncDisabled(false);
@@ -124,16 +124,16 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
             const updateCurrentSyncInfo = async () => {
                 const syncInfo = await getSyncInfoByTime();
                 const completed = syncInfo.trees.add + syncInfo.trees.edit + syncInfo.trees.delete
-                            + syncInfo.tree_images.add + syncInfo.tree_images.delete 
-                            + syncInfo.visit_images.delete + syncInfo.visit_images.delete 
-    
-    
+                    + syncInfo.tree_images.add + syncInfo.tree_images.delete
+                    + syncInfo.visit_images.delete + syncInfo.visit_images.delete
+
+
                 if (pending + completed !== 0) {
                     const progress = completed / (pending + completed);
                     setSyncProgress((prev: any) => prev < progress ? progress : prev);
                 }
                 else setSyncProgress(0);
-    
+
                 setCurrentSyncDetails(syncInfo);
             }
             updateCurrentSyncInfo();
@@ -326,88 +326,88 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={{ height: '100%', width: '100%' }}>
             <InternetBanner />
             <View style={styles.screen}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Button
-                        mode='contained-tonal'
-                        icon={'download'}
-                        loading={downloadInProgress}
-                        buttonColor="#93faa9"
-                        labelStyle={{ color: 'black', fontWeight: 'bold' }}
-                        style={{ marginHorizontal: 4, flexGrow: 1, marginBottom: 10 }}
-                        disabled={downloadInProgress || uploadInProgress}
-                        onPress={fetchData}
-                    >{Strings.buttonLabels.DownloadSitesPlots}</Button>
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text variant='titleMedium' style={{ color: 'black', fontWeight: 'bold', paddingRight: 8 }}>{Strings.messages.LastSynced}</Text>
-                    <Chip icon='cloud-sync-outline' style={styles.chip} >
-                        {lastSyncDate === '' ? Strings.messages.Never : getTimeDiffString(lastSyncDate)}
-                    </Chip>
-                </View>
+                <ScrollView style={{ flex: 1, width: '100%' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Button
+                            mode='contained-tonal'
+                            icon={'download'}
+                            loading={downloadInProgress}
+                            buttonColor="#93faa9"
+                            labelStyle={{ color: 'black', fontWeight: 'bold' }}
+                            style={{ marginHorizontal: 4, flexGrow: 1, marginBottom: 10 }}
+                            disabled={downloadInProgress || uploadInProgress}
+                            onPress={fetchData}
+                        >{Strings.buttonLabels.DownloadSitesPlots}</Button>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Text variant='titleMedium' style={{ color: 'black', fontWeight: 'bold', paddingRight: 8 }}>{Strings.messages.LastSynced}</Text>
+                        <Chip icon='cloud-sync-outline' style={styles.chip} >
+                            {lastSyncDate === '' ? Strings.messages.Never : getTimeDiffString(lastSyncDate)}
+                        </Chip>
+                    </View>
 
-                <View style={{ marginTop: 20 }}>
-                    <Text variant='titleLarge' style={{ color: 'black', fontWeight: 'bold', paddingRight: 10 }}>{Strings.messages.LocalChanges}:</Text>
-                    <View style={{ justifyContent: 'center', marginVertical: 5 }}>
-                        <Text variant='titleMedium' style={{ color: 'black', paddingRight: 10 }}>{Strings.messages.Trees}:</Text>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
-                            <Chip icon={(props => getChipIcon(props, treeChanges?.add === undefined))} style={styles.chip} >{Strings.messages.New}: {treeChanges?.add || 0}</Chip>
-                            <Chip icon={(props => getChipIcon(props, treeChanges?.edit === undefined))} style={styles.chip} >{Strings.messages.Updated}: {treeChanges?.edit || 0}</Chip>
-                            <Chip icon={(props => getChipIcon(props, treeChanges?.delete === undefined))} style={styles.chip} >{Strings.messages.Deleted}: {treeChanges?.delete || 0}</Chip>
+                    <View style={{ marginTop: 20 }}>
+                        <Text variant='titleLarge' style={{ color: 'black', fontWeight: 'bold', paddingRight: 10 }}>{Strings.messages.LocalChanges}:</Text>
+                        <View style={{ justifyContent: 'center', marginVertical: 5 }}>
+                            <Text variant='titleMedium' style={{ color: 'black', paddingRight: 10 }}>{Strings.messages.Trees}:</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
+                                <Chip icon={(props => getChipIcon(props, treeChanges?.add === undefined))} style={styles.chip} >{Strings.messages.New}: {treeChanges?.add || 0}</Chip>
+                                <Chip icon={(props => getChipIcon(props, treeChanges?.edit === undefined))} style={styles.chip} >{Strings.messages.Updated}: {treeChanges?.edit || 0}</Chip>
+                                <Chip icon={(props => getChipIcon(props, treeChanges?.delete === undefined))} style={styles.chip} >{Strings.messages.Deleted}: {treeChanges?.delete || 0}</Chip>
+                            </View>
+                        </View>
+                        <View style={{ justifyContent: 'center', marginVertical: 5 }}>
+                            <Text variant='titleMedium' style={{ color: 'black', paddingRight: 10 }}>{Strings.messages.TreeImages}:</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
+                                <Chip icon={(props => getChipIcon(props, !(treeImagesCount?.add)))} style={styles.chip} >{Strings.messages.New}: {treeImagesCount?.add || 0}</Chip>
+                                <Chip icon={(props => getChipIcon(props, !(treeImagesCount?.delete)))} style={styles.chip} >{Strings.messages.Deleted}: {treeImagesCount?.delete || 0}</Chip>
+                            </View>
+                        </View>
+                        <View style={{ justifyContent: 'center', marginVertical: 5 }}>
+                            <Text variant='titleMedium' style={{ color: 'black', paddingRight: 10 }}>{Strings.messages.VisitImages}:</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
+                                <Chip icon={(props => getChipIcon(props, !(visitImagesCount?.add)))} style={styles.chip} >{Strings.messages.New}: {visitImagesCount?.add || 0}</Chip>
+                                <Chip icon={(props => getChipIcon(props, !(visitImagesCount?.delete)))} style={styles.chip} >{Strings.messages.Deleted}: {visitImagesCount?.delete || 0}</Chip>
+                            </View>
                         </View>
                     </View>
-                    <View style={{ justifyContent: 'center', marginVertical: 5 }}>
-                        <Text variant='titleMedium' style={{ color: 'black', paddingRight: 10 }}>{Strings.messages.TreeImages}:</Text>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
-                            <Chip icon={(props => getChipIcon(props, !(treeImagesCount?.add)))} style={styles.chip} >{Strings.messages.New}: {treeImagesCount?.add || 0}</Chip>
-                            <Chip icon={(props => getChipIcon(props, !(treeImagesCount?.delete)))} style={styles.chip} >{Strings.messages.Deleted}: {treeImagesCount?.delete || 0}</Chip>
-                        </View>
+
+                    <View style={{ marginTop: 20, justifyContent: 'center' }}>
+                        <Button
+                            icon={uploadInProgress ? 'stop-circle-outline' : 'upload'}
+                            mode='contained-tonal'
+                            buttonColor={uploadInProgress ? "#FF6666" : "#93faa9"}
+                            labelStyle={{ color: 'black', fontWeight: 'bold' }}
+                            style={{ marginHorizontal: 4, flexGrow: 1 }}
+                            onPress={handleUploadButtonPress}
+                            disabled={syncDisabled || downloadInProgress}
+                        >{uploadInProgress ? Strings.buttonLabels.StopUpload : Strings.buttonLabels.UploadData}</Button>
                     </View>
-                    <View style={{ justifyContent: 'center', marginVertical: 5 }}>
-                        <Text variant='titleMedium' style={{ color: 'black', paddingRight: 10 }}>{Strings.messages.VisitImages}:</Text>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
-                            <Chip icon={(props => getChipIcon(props, !(visitImagesCount?.add)))} style={styles.chip} >{Strings.messages.New}: {visitImagesCount?.add || 0}</Chip>
-                            <Chip icon={(props => getChipIcon(props, !(visitImagesCount?.delete)))} style={styles.chip} >{Strings.messages.Deleted}: {visitImagesCount?.delete || 0}</Chip>
-                        </View>
-                    </View>
-                </View>
 
-                <View style={{ marginTop: 20, justifyContent: 'center' }}>
-                    <Button
-                        icon={uploadInProgress ? 'stop-circle-outline' : 'upload'}
-                        mode='contained-tonal'
-                        buttonColor={uploadInProgress ? "#FF6666" : "#93faa9"}
-                        labelStyle={{ color: 'black', fontWeight: 'bold' }}
-                        style={{ marginHorizontal: 4, flexGrow: 1 }}
-                        onPress={handleUploadButtonPress}
-                        disabled={syncDisabled || downloadInProgress}
-                    >{uploadInProgress ? Strings.buttonLabels.StopUpload: Strings.buttonLabels.UploadData}</Button>
-                </View>
+                    {!(uploadInProgress || downloadInProgress) && syncInfoList.length !== 0 && <View style={{ flex: 1, width: '100%', marginTop: 20 }}>
+                        <Text variant='titleLarge' style={{ color: 'black', fontWeight: 'bold', paddingRight: 10 }}>{Strings.messages.SyncHistory}:</Text>
+                        <ScrollView style={{ flex: 1, width: '100%' }}>
+                            {
+                                syncInfoList.map(info => (
+                                    <View key={info.key} style={{ marginHorizontal: 5, marginVertical: 3 }}>
+                                        <SyncCard
+                                            syncedAt={info.synced_at === '' ? '' : getHumanReadableDateTime(info.synced_at)}
+                                            trees={info.trees}
+                                            treeImages={info.tree_images}
+                                            visitImages={info.visit_images}
+                                            uploadTime={info.upload_time}
+                                            fetchTime={info.fetch_time}
+                                            fetchError={info.fetch_error !== '' ? info.fetch_error : null}
+                                            uploadError={info.upload_error !== '' ? info.upload_error : null}
+                                        />
+                                    </View>
+                                ))
+                            }
+                        </ScrollView>
+                    </View>}
 
-                {!(uploadInProgress || downloadInProgress) && syncInfoList.length !== 0 && <View style={{ flex: 1, width: '100%', marginTop: 20 }}>
-                    <Text variant='titleLarge' style={{ color: 'black', fontWeight: 'bold', paddingRight: 10 }}>{Strings.messages.SyncHistory}:</Text>
-                    <ScrollView style={{ flex: 1, width: '100%' }}>
-                        {
-                            syncInfoList.map(info => (
-                                <View key={info.key} style={{ marginHorizontal: 5, marginVertical: 3 }}>
-                                    <SyncCard
-                                        syncedAt={info.synced_at === '' ? '' : getHumanReadableDateTime(info.synced_at)}
-                                        trees={info.trees}
-                                        treeImages={info.tree_images}
-                                        visitImages={info.visit_images}
-                                        uploadTime={info.upload_time}
-                                        fetchTime={info.fetch_time}
-                                        fetchError={info.fetch_error !== '' ? info.fetch_error : null}
-                                        uploadError={info.upload_error !== '' ? info.upload_error : null}
-                                    />
-                                </View>
-                            ))
-                        }
-                    </ScrollView>
-                </View>}
-
-                {uploadInProgress && <View style={{ flex: 1, width: '100%', marginTop: 20 }}>
-                    <Text variant='titleLarge' style={{ color: 'black', fontWeight: 'bold', paddingRight: 10 }}>{Strings.messages.CurrentSync}:</Text>
-                    <ScrollView style={{ flex: 1, width: '100%' }}>
+                    {uploadInProgress && <View style={{ flex: 1, width: '100%', marginTop: 20 }}>
+                        <Text variant='titleLarge' style={{ color: 'black', fontWeight: 'bold', paddingRight: 10 }}>{Strings.messages.CurrentSync}:</Text>
                         <View style={{ marginHorizontal: 5, marginVertical: 3 }}>
                             <SyncCard
                                 syncedAt={currentSyncDetails.synced_at === '' ? '' : getHumanReadableDateTime(currentSyncDetails.synced_at)}
@@ -420,8 +420,8 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                                 uploadError={currentSyncDetails.upload_error !== '' ? currentSyncDetails.upload_error : null}
                             />
                         </View>
-                    </ScrollView>
-                </View>}
+                    </View>}
+                </ScrollView>
 
                 {(uploadInProgress || downloadInProgress) && <View
                     style={{ position: 'absolute', bottom: 70, left: 20, right: 20 }}>
@@ -446,7 +446,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                     onSubmit={uploadData}
                 />
 
-                <MessageModal 
+                <MessageModal
                     visible={stoppingSync}
                     text={"Stopping the sync. Please wait..."}
                 />

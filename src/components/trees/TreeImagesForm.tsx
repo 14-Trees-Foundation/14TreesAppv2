@@ -105,7 +105,7 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, onCancel
     }
 
     return (
-        <View style={{ height: "97%", width: '100%', flexGrow: 1 }}>
+        <View style={{ flex: 1, height: "97%", width: '100%', flexGrow: 1 }}>
             <Text style={styles.saplingHeaderKey}>{Strings.messages.Sapling + ": "}<Text style={styles.saplingHeaderValue}>{sapling_id}</Text></Text>
             <ScrollView
                 keyboardShouldPersistTaps='handled'
