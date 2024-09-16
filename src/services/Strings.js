@@ -402,7 +402,7 @@ export class Strings {
             EmptyField : "Empty Field!",
             EmptySaplingField : "The sapling field is empty.",
 
-            SyncInProgress: "Sync already in progress. Stop the running or wait till it's finished."
+            SyncInProgress: "Sync already in progress. Stop the running sync or wait till it's finished."
 
         },
         "mr": {
@@ -500,7 +500,7 @@ export class Strings {
             EmptyField : "रिकामे फील्ड!",
             EmptySaplingField : "झाडाचे फील्ड रिकामे.",
 
-            SyncInProgress: "सिंक आधीच प्रगतीपथावर आहे. धावणे थांबवा किंवा ते पूर्ण होईपर्यंत प्रतीक्षा करा.",
+            SyncInProgress: "सिंक आधीच प्रगतीपथावर आहे. चालू असलेले सिंक थांबवा किंवा ते पूर्ण होईपर्यंत प्रतीक्षा करा.",
         }
     })
     static buttonLabels = new LocalizedStrings({
