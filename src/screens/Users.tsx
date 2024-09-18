@@ -1,4 +1,4 @@
-import { View, Button, BackHandler, ScrollView, SafeAreaView, StyleSheet, TextInput, Text } from "react-native";
+import { View, BackHandler, StyleSheet } from "react-native";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import GlobalContext from "../context/GlobalContext ";
 
@@ -12,6 +12,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { AddIconButton } from "../components/FABplusIcon";
 import SearchBar from "../components/Searchbar";
 import InternetBanner from "../components/InternetInfo";
+import CardList from "../components/CardList";
 
 interface UsersInputProps {
     navigation: any
@@ -30,9 +31,8 @@ const Users: React.FC<UsersInputProps> = ({ navigation }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [users, setUsers] = useState<User[]>([]);
-
-    let daoClient: DaoClient;
-    DaoClient.authenticate().then((client) => { daoClient = client; });
+    const [usersPage, setUsersPage] = useState(0);
+    const [hasMoreUsers, setHasMoreUsers] = useState(true);
 
     useFocusEffect(
         useCallback(() => {
@@ -55,24 +55,47 @@ const Users: React.FC<UsersInputProps> = ({ navigation }) => {
 
     useEffect(() => {
         if (searchQuery.length < 1) return;
-        setTimeout(async () => {
-            let users = await daoClient.users.searchUsers(searchQuery, 0, 100);
-            setUsers(users);
-        }, 1000)
-    }, [searchQuery, stateChange])
+        const getUsers = async () => {
+            const daoClient = await DaoClient.authenticate();
+            let resp = await daoClient.users.searchUsers(searchQuery, usersPage * 10, 10);
+            const newUsers = usersPage === 0 ? resp : [...users, ...resp];
+    
+            // Filter out duplicates based on user.id
+            const uniqueUsers = newUsers.filter((user, index, self) => 
+                index === self.findIndex((t) => t.id === user.id)
+            );
+    
+            setUsers(uniqueUsers);
+            setHasMoreUsers(resp.length === 10);
+        }
+        
+        getUsers();
+    }, [usersPage, searchQuery, stateChange])
 
     useEffect(() => {
         if (searchQuery.length > 0) return;
-        setTimeout(async () => {
-            let users = await daoClient.users.getUsers(0, 100);
-            setUsers(users);
-        }, 1000)
-    }, [searchQuery, stateChange])
+        const getUsers = async () => {
+            const daoClient = await DaoClient.authenticate();
+            let resp = await daoClient.users.getUsers(usersPage * 10, 10);
+            const newUsers = usersPage === 0 ? resp : [...users, ...resp];
+    
+            // Filter out duplicates based on user.id
+            const uniqueUsers = newUsers.filter((user, index, self) => 
+                index === self.findIndex((t) => t.id === user.id)
+            );
+    
+            setUsers(uniqueUsers);
+            setHasMoreUsers(resp.length === 10);
+        }
+
+        getUsers();
+    }, [usersPage, searchQuery, stateChange])
 
     const handleSave = (data: User | CreateUserRequest) => {
         setIsFormVisible(false);
-        setTimeout(async () => {
 
+        const saveUser = async () => {
+            const daoClient = await DaoClient.authenticate();
             if (changeMode === 'add') {
                 let request = JSON.parse(JSON.stringify(data)) as CreateUserRequest;
                 await daoClient.users.createUser(request)
@@ -80,46 +103,62 @@ const Users: React.FC<UsersInputProps> = ({ navigation }) => {
                 let request = JSON.parse(JSON.stringify(data)) as User;
                 await daoClient.users.updateUser(request)
             };
-
+    
             setStateChange(prev => prev + 1);
-        }, 1000)
+        }
+
+        saveUser();
     };
 
     const handleDelete = () => {
-        if (selectedUser) {
-            setTimeout(async () => {
+
+        const deleteUser = async () => {
+            if (selectedUser) {
+                const daoClient = await DaoClient.authenticate();
                 await daoClient.users.deleteUser(selectedUser.local_id);
                 setStateChange(prev => prev + 1);
-            }, 1000)
+            }
         }
+
+        deleteUser();
     }
+
+    const renderUserItem = (user: User, index: number) => {
+        return (
+            <View style={{ width: '100%', paddingHorizontal: 10 }}>
+                <TouchableOpacity 
+                    style={{ width: '100%' }} 
+                    activeOpacity={0.9} 
+                    onPress={() => {
+                        setSelectedUser(user);
+                        setInfoModalVisible(true);
+                    }}
+                >
+                    <UserCard user={user} />
+                </TouchableOpacity>
+            </View>
+        );
+    };
 
     return (
         <View style={{ flex: 1 }}>
             <InternetBanner />
             <View style={styles.safeArea}>
                 {!isFormVisible && <View style={styles.header}>
-                    <SearchBar query={searchQuery} onChange={setSearchQuery} />
+                    <SearchBar query={searchQuery} onChange={(text: string) => { setUsersPage(0); setSearchQuery(text) } } />
                 </View>}
-                {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{ alignItems: 'center' }}>
-                    {users.map((user, index) => (
-                        <View style={{ width: '95%' }} key={index}>
-                            <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.9} key={index} onPress={() => {
-                                setSelectedUser(user);
-                                setInfoModalVisible(true);
-                            }}>
-                                <UserCard
-                                    user={user}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    ))}
-                </ScrollView>}
-                {/* {!isFormVisible && <AddIconButton onClick={() => {
-                setIsFormVisible(true);
-                setSelectedUser(null);
-                setChangeModel('add');
-            }} />} */}
+                {!isFormVisible && <CardList 
+                    data={users}
+                    renderItem={renderUserItem}
+                    pagination
+                    onEndReached={() => setUsersPage(usersPage + 1)}
+                    hasMore={hasMoreUsers}
+                />}
+                {!isFormVisible && <AddIconButton onClick={() => {
+                    setIsFormVisible(true);
+                    setSelectedUser(null);
+                    setChangeModel('add');
+                }} />}
 
                 {isFormVisible && <UserForm
                     changeMode={changeMode}
@@ -144,7 +183,7 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         width: '100%',
-        alignItems: 'center'
+        alignItems: 'center',
     },
     header: {
         alignItems: 'center',

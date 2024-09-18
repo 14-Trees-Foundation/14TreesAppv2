@@ -57,6 +57,9 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
     const [plotSearchQuery, setPlotSearchQuery] = useState('');
     const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null);
     const [plots, setPlots] = useState<Plot[]>([]);
+    const [plotsPage, setPlotsPage] = useState(0);
+    const [hasMorePlots, setHasMorePlots] = useState(true);
+
     const [selectedSite, setSelectedSite] = useState<Site | null>(null);
     const [userDetails, setUserDetails] = useState<any>(null);
 
@@ -266,21 +269,43 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
 
     useEffect(() => {
         if (plotSearchQuery.length !== 0) return;
-        setTimeout(async () => {
+
+        const getPlots = async () => {
             const daoClient = await DaoClient.authenticate();
-            let resp = await daoClient.plots.getPlots(0, 50, undefined, false, selectedSite?.id);
-            setPlots(resp)
-        }, 10)
-    }, [plotSearchQuery, selectedSite])
+            let resp = await daoClient.plots.getPlots(plotsPage * 10, 10, undefined, false, selectedSite?.id);
+            const newPlots = plotsPage === 0 ? resp : [...plots, ...resp];
+    
+            // Filter out duplicates based on plot.id
+            const uniquePlots = newPlots.filter((plot, index, self) => 
+                index === self.findIndex((t) => t.id === plot.id)
+            );
+    
+            setPlots(uniquePlots);
+            setHasMorePlots(resp.length === 10);
+        }
+        
+        getPlots();
+    }, [plotsPage, plotSearchQuery, selectedSite])
 
     useEffect(() => {
         if (plotSearchQuery.length < 1) return;
-        setTimeout(async () => {
+
+        const searchPlots = async () => {
             const daoClient = await DaoClient.authenticate();
-            let plots = await daoClient.plots.searchPlots(plotSearchQuery, 0, 50, selectedSite?.id);
-            setPlots(plots);
-        }, 10)
-    }, [plotSearchQuery, selectedSite])
+            let resp = await daoClient.plots.searchPlots(plotSearchQuery, plotsPage * 10, 10, selectedSite?.id);
+            const newPlots = plotsPage === 0 ? resp : [...plots, ...resp];
+    
+            // Filter out duplicates based on plot.id
+            const uniquePlots = newPlots.filter((plot, index, self) => 
+                index === self.findIndex((t) => t.id === plot.id)
+            );
+    
+            setPlots(uniquePlots);
+            setHasMorePlots(resp.length === 10);
+        }
+        
+        searchPlots();
+    }, [plotsPage, plotSearchQuery, selectedSite])
 
     useEffect(() => {
         const getSelectedSite = async () => {
@@ -511,7 +536,12 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
                             valueGetter={(data) => data.name}
                             keyGetter={(data) => data.id}
                             variant='outlined'
-                            onSearch={setPlotSearchQuery}
+                            onSearch={(text: string) => { setPlotsPage(0); setPlotSearchQuery(text) }}
+                            paginationOptions={{
+                                hasMore: hasMorePlots,
+                                onPageChange: setPlotsPage,
+                                page: plotsPage
+                            }}
                         />
                         {validationErrors.plot && <HelperText visible={true} type='error'>Please select a plot</HelperText>}
                     </View>

@@ -1,4 +1,4 @@
-import { View, Button, BackHandler, ScrollView, SafeAreaView, StyleSheet, TextInput, Text } from "react-native";
+import { View, BackHandler, SafeAreaView, StyleSheet } from "react-native";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import GlobalContext from "../context/GlobalContext ";
 
@@ -11,6 +11,7 @@ import { TouchableOpacity } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import SearchBar from "../components/Searchbar";
 import InternetBanner from "../components/InternetInfo";
+import CardList from "../components/CardList";
 
 
 interface SitesInputProps {
@@ -32,8 +33,8 @@ const Sites: React.FC<SitesInputProps> = ({ navigation }) => {
     const [selectedSite, setSelectedSite] = useState<Site | null>(null);
     const [sites, setSites] = useState<Site[]>([]);
 
-    let daoClient: DaoClient;
-    DaoClient.authenticate().then((client) => { daoClient = client; });
+    const [sitesPage, setSitesPage] = useState(0);
+    const [hasMoreSites, setHasMoreSites] = useState(true);
 
     useFocusEffect(
         useCallback(() => {
@@ -56,22 +57,48 @@ const Sites: React.FC<SitesInputProps> = ({ navigation }) => {
 
     useEffect(() => {
         if (searchQuery.length < 1) return;
-        setTimeout(async () => {
-            let sites = await daoClient.sites.searchSites(searchQuery, 0, 100);
-            setSites(sites);
-        }, 1000)
-    }, [searchQuery, stateChange])
+
+        const getSites = async () => {
+            const daoClient = await DaoClient.authenticate();
+            let resp = await daoClient.sites.searchSites(searchQuery, 0, 10);
+            const newSites = sitesPage === 0 ? resp : [...sites, ...resp];
+    
+            // Filter out duplicates based on site.id
+            const uniqueSites = newSites.filter((site, index, self) => 
+                index === self.findIndex((t) => t.id === site.id)
+            );
+    
+            setSites(uniqueSites);
+            setHasMoreSites(resp.length === 10);
+        }
+
+        getSites();
+    }, [sitesPage, searchQuery, stateChange])
 
     useEffect(() => {
         if (searchQuery.length !== 0) return;
-        setTimeout(async () => {
-            let sites = await daoClient.sites.getSites(0, 100);
-            setSites(sites);
-        }, 1000)
-    }, [searchQuery, stateChange])
+
+        const getSites = async () => {
+            const daoClient = await DaoClient.authenticate();
+            let resp = await daoClient.sites.getSites(0, 10);
+            const newSites = sitesPage === 0 ? resp : [...sites, ...resp];
+    
+            // Filter out duplicates based on site.id
+            const uniqueSites = newSites.filter((site, index, self) => 
+                index === self.findIndex((t) => t.id === site.id)
+            );
+    
+            setSites(uniqueSites);
+            setHasMoreSites(resp.length === 10);
+        }
+
+        getSites();
+    }, [sitesPage, searchQuery, stateChange])
 
     const handleSave = (data: Site | CreateSiteRequest) => {
-        setTimeout(async () => {
+
+        const saveSite = async () => {
+            const daoClient = await DaoClient.authenticate();
             if (changeMode === 'add') {
                 let request = JSON.parse(JSON.stringify(data)) as CreateSiteRequest;
                 await daoClient.sites.createSite(request)
@@ -80,15 +107,38 @@ const Sites: React.FC<SitesInputProps> = ({ navigation }) => {
                 await daoClient.sites.updateSite(request)
             };
 
-        }, 1000)
+            setStateChange(prev => prev + 1);
+        }
+
+        saveSite();
     };
 
     const handleDelete = () => {
-        if (selectedSite) {
-            setTimeout(async () => {
+
+        const deleteSite = async () => {
+            if (selectedSite) {
+                const daoClient = await DaoClient.authenticate();
                 await daoClient.sites.deleteSite(selectedSite.local_id);
-            }, 1000)
+                setStateChange(prev => prev + 1);
+            }
         }
+
+        deleteSite();
+    }
+
+    const renderSiteItem = (site: Site, index: number) => {
+        return (
+            <View style={{ width: '100%', paddingHorizontal: 10 }} key={index}>
+                <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.9} key={index} onPress={() => {
+                    setSelectedSite(site);
+                    setInfoModalVisible(true);
+                }}>
+                    <SiteCard
+                        site={site}
+                    />
+                </TouchableOpacity>
+            </View>
+        )
     }
 
     return (
@@ -96,22 +146,15 @@ const Sites: React.FC<SitesInputProps> = ({ navigation }) => {
             <InternetBanner />
             <SafeAreaView style={styles.safeArea}>
                 {!isFormVisible && <View style={styles.header}>
-                    <SearchBar query={searchQuery} onChange={setSearchQuery} />
+                    <SearchBar query={searchQuery} onChange={(text: string) => { setSitesPage(0); setSearchQuery(text) }} />
                 </View>}
-                {!isFormVisible && <ScrollView style={styles.scrollView} contentContainerStyle={{ alignItems: 'center' }}>
-                    {sites.map((site, index) => (
-                        <View style={{ width: '95%' }} key={index}>
-                            <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.9} key={index} onPress={() => {
-                                setSelectedSite(site);
-                                setInfoModalVisible(true);
-                            }}>
-                                <SiteCard
-                                    site={site}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    ))}
-                </ScrollView>}
+                {!isFormVisible && <CardList 
+                    data={sites}
+                    renderItem={renderSiteItem}
+                    pagination
+                    onEndReached={() => setSitesPage(prev => prev + 1)}
+                    hasMore={hasMoreSites}
+                />}
                 {/* {!isFormVisible && <AddIconButton onClick={() => {
                 setIsFormVisible(true);
                 setSelectedVisit(null);

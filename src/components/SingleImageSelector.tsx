@@ -44,7 +44,7 @@ export const ImageSelector: React.FC<ImageSelectorInputProps> = ({ label, button
                     />
                     <TouchableOpacity onPress={handleImagePress} activeOpacity={0.9}>
                         <Card.Cover 
-                            onLoad={() => { onImageLoad && onImageLoad(); }} 
+                            onLoad={() => { imageUri && onImageLoad && onImageLoad(); }} 
                             source={{ uri: imageUri || defaultImageUri }} 
                             defaultSource={require('../../assets/placeholder.png')} 
                             resizeMode='contain'

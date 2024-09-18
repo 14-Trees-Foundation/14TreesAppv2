@@ -12,8 +12,8 @@ const SiteCard: React.FC<SiteCardInputProps> = ({ site }) => {
     <View style={styles.container}>
       <View style={styles.info}>
         <Text style={styles.title}>{site.name_english}</Text>
-        <Text style={styles.text}>{site.name_marathi}</Text>
-        <Text style={styles.text}>{site.district} {site.taluka} {site.village}</Text>
+        {site.name_marathi && <Text style={styles.text}>{site.name_marathi}</Text>}
+        {(site.district || site.taluka || site.village) && <Text style={styles.text}>{site.district} {site.taluka} {site.village}</Text>}
       </View>
     </View>
   );

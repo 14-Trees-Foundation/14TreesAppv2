@@ -425,6 +425,7 @@ export class TreesDao {
             LIMIT ? OFFSET ?;
         `
 
+        console.log(query)
         const [results] = await this.db.executeSql(query, [`%${searchStr}%`, limit, offset]);
         for (let index = 0; index < results.rows.length; index++) {
             trees.push(results.rows.item(index));

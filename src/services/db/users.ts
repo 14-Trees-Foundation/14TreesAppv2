@@ -263,6 +263,21 @@ export class UsersDao {
         return users;
     }
 
+    getUsersByEmail = async (email: string) => {
+        let users: User[] = [];
+        const query =  `
+            SELECT * FROM ${this.tableName} 
+            WHERE change_type != 'delete' AND email = ?
+            ORDER BY updated_at DESC
+            LIMIT 10 OFFSET 0;
+        `
+        const [results] = await this.db.executeSql(query, [email]);
+        for (let index = 0; index < results.rows.length; index++) {
+            users.push(results.rows.item(index));
+        }
+        return users;
+    }
+
     getUserByLiveId = async (id: number) => {
         const query =  `
             SELECT * FROM ${this.tableName} 

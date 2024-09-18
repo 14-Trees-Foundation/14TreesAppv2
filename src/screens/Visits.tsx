@@ -1,4 +1,4 @@
-import { View, BackHandler, ScrollView, StyleSheet, ToastAndroid } from "react-native";
+import { View, BackHandler, StyleSheet, ToastAndroid } from "react-native";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import GlobalContext from "../context/GlobalContext ";
 
@@ -16,6 +16,7 @@ import InternetBanner from "../components/InternetInfo";
 import { TreeForm } from "../components/trees/NewTreeForm";
 import { CreateTreeRequest, Tree } from "../model/tree";
 import { TreeImageType } from "../model/tree_image";
+import CardList from "../components/CardList";
 
 interface VisitsInputProps {
     navigation: any
@@ -35,9 +36,8 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
     const [visits, setVisits] = useState<Visit[]>([]);
-
-    let daoClient: DaoClient;
-    DaoClient.authenticate().then((client) => { daoClient = client; });
+    const [visitsPage, setVisitsPage] = useState(0);
+    const [hasMoreVisits, setHasMoreVisits] = useState(true);
 
     useFocusEffect(
         useCallback(() => {
@@ -61,24 +61,49 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
 
     useEffect(() => {
         if (searchQuery.length > 0) return;
-        setTimeout(async () => {
-            let visits = await daoClient.visits.getVisits(0, 100);
-            setVisits(visits);
-        }, 100)
-    }, [searchQuery, stateChange])
+
+        const getVisits = async () => {
+            const daoClient = await DaoClient.authenticate();
+            let resp = await daoClient.visits.getVisits(visitsPage * 10, 10);
+            const newVisits = visitsPage === 0 ? resp : [...visits, ...resp];
+    
+            // Filter out duplicates based on visit.id
+            const uniqueVisits = newVisits.filter((visit, index, self) => 
+                index === self.findIndex((t) => t.id === visit.id)
+            );
+    
+            setVisits(uniqueVisits);
+            setHasMoreVisits(resp.length === 10);
+        }
+
+        getVisits();
+    }, [visitsPage, searchQuery, stateChange])
 
     useEffect(() => {
         if (searchQuery.length < 1) return;
-        setTimeout(async () => {
-            let visits = await daoClient.visits.searchVisits(searchQuery, 0, 100);
-            setVisits(visits);
-        }, 100)
-    }, [searchQuery, stateChange])
+
+        const getVisits = async () => {
+            const daoClient = await DaoClient.authenticate();
+            let resp = await daoClient.visits.searchVisits(searchQuery, visitsPage * 10, 10);
+            const newVisits = visitsPage === 0 ? resp : [...visits, ...resp];
+    
+            // Filter out duplicates based on visit.id
+            const uniqueVisits = newVisits.filter((visit, index, self) => 
+                index === self.findIndex((t) => t.id === visit.id)
+            );
+    
+            setVisits(uniqueVisits);
+            setHasMoreVisits(resp.length === 10);
+        }
+
+        getVisits();
+    }, [visitsPage, searchQuery, stateChange])
 
     const handleSave = (data: Visit | CreateVisitRequest, images?: Image[]) => {
         setIsFormVisible(false);
-        setTimeout(async () => {
 
+        const saveVisit = async () => {
+            const daoClient = await DaoClient.authenticate();
             if (changeMode === 'add') {
                 let request = JSON.parse(JSON.stringify(data)) as CreateVisitRequest;
                 await daoClient.visits.createVisit(request)
@@ -94,16 +119,22 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
             };
 
             setStateChange(prev => prev + 1);
-        }, 1000)
+        }
+
+        saveVisit();
     };
 
     const handleDelete = () => {
-        if (selectedVisit) {
-            setTimeout(async () => {
+
+        const deleteVisit = async () => {
+            if (selectedVisit) {
+                const daoClient = await DaoClient.authenticate();
                 await daoClient.visits.deleteVisit(selectedVisit.local_id);
                 setStateChange(prev => prev + 1);
-            }, 1000)
+            }
         }
+
+        deleteVisit();
     }
 
     const handleTreeSave = (data: Tree | CreateTreeRequest, images?: any) => {
@@ -126,7 +157,7 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
                 console.log(err)
                 ToastAndroid.show("Failed to add tree locally!", ToastAndroid.SHORT)
             }
-    
+
             const upsertImage = async (type: TreeImageType) => {
                 if (images[type]) {
                     try {
@@ -143,7 +174,7 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
                     }
                 }
             }
-    
+
             if (!hasError) {
                 upsertImage('tree_image')
                 upsertImage('user_card_image')
@@ -151,34 +182,42 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
                 ToastAndroid.show("Updated Tree images locally!", ToastAndroid.SHORT)
             }
         }
-        
+
         saveTree();
 
     };
+
+    const renderVisitItem = (visit: Visit, index: number) => {
+        return (
+            <View style={{ width: '100%', paddingHorizontal: 10 }} key={index}>
+                <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.9} key={index} onPress={() => {
+                    setSelectedVisit(visit);
+                    setInfoModalVisible(true);
+                }}>
+                    <VisitCard
+                        visit={visit}
+                        onTreeAdd={() => { setSelectedVisit(visit); setTreeModal(true) }}
+                        onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
+                    />
+                </TouchableOpacity>
+            </View>
+        );
+    }
 
     return (
         <View style={{ flex: 1 }}>
             <InternetBanner />
             <View style={styles.safeArea}>
                 {!(isFormVisible || treeModal) && <View style={styles.header}>
-                    <SearchBar query={searchQuery} onChange={setSearchQuery} />
+                    <SearchBar query={searchQuery} onChange={(text: string) => { setVisitsPage(0); setSearchQuery(text) }} />
                 </View>}
-                {!(isFormVisible || treeModal) && <ScrollView style={styles.scrollView} contentContainerStyle={{ alignItems: 'center' }}>
-                    {visits.map((visit, index) => (
-                        <View style={{ width: '95%' }} key={index}>
-                            <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.9} key={index} onPress={() => {
-                                setSelectedVisit(visit);
-                                setInfoModalVisible(true);
-                            }}>
-                                <VisitCard
-                                    visit={visit}
-                                    onTreeAdd={() => {setSelectedVisit(visit); setTreeModal(true)}}
-                                    onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    ))}
-                </ScrollView>}
+                {!(isFormVisible || treeModal) && <CardList 
+                    data={visits}
+                    renderItem={renderVisitItem}
+                    pagination
+                    onEndReached={() => setVisitsPage(visitsPage + 1)}
+                    hasMore={hasMoreVisits}
+                />}
                 {/* {!(isFormVisible || treeModal) && <AddIconButton onClick={() => {
                 setIsFormVisible(true);
                 setSelectedVisit(null);
@@ -200,7 +239,7 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
                     visit={selectedVisit}
                 />}
 
-                {(!isFormVisible && treeModal) && <TreeForm 
+                {(!isFormVisible && treeModal) && <TreeForm
                     tree={null}
                     changeMode="add"
                     onCancel={() => setTreeModal(false)}

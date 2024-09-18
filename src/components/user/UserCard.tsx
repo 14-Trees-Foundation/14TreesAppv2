@@ -11,7 +11,7 @@ interface UserCardInputProps {
 const UserCard: React.FC<UserCardInputProps> = ({ user }) => {
   return (
     <View style={styles.container}>
-      <Avatar.Icon size={50} icon='account' style={{backgroundColor: '#e0e0e0'}}/>
+      <Avatar.Icon size={50} icon='account' style={{ backgroundColor: '#e0e0e0'}}/>
       <View style={styles.userInfo}>
         <Text style={styles.userName}>{user.name}</Text>
         <Text style={styles.userEmail}>{user.email}</Text>
@@ -38,6 +38,8 @@ const styles = StyleSheet.create({
   },
   userInfo: {
     marginLeft: 16,
+    flex: 1,
+    flexGrow: 1,
   },
   userName: {
     fontSize: 18,

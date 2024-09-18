@@ -36,15 +36,15 @@ export const SiteInfo: React.FC<SiteInfoInputProps> = ({ isVisible, site, onClos
                     </TouchableOpacity> */}
                 </View>
                 <Text style={styles.label}>Name (English):</Text>
-                <Text style={styles.value}>{site.name_english}</Text>
+                <Text style={styles.value}>{site.name_english || 'Not Available'}</Text>
                 <Text style={styles.label}>Name (Marathi):</Text>
-                <Text style={styles.value}>{site.name_marathi}</Text>
+                <Text style={styles.value}>{site.name_marathi || 'Not Available'}</Text>
                 <Text style={styles.label}>District:</Text>
-                <Text style={styles.value}>{site.district}</Text>
+                <Text style={styles.value}>{site.district || 'Not Available'}</Text>
                 <Text style={styles.label}>Taluka:</Text>
-                <Text style={styles.value}>{site.taluka}</Text>
+                <Text style={styles.value}>{site.taluka || 'Not Available'}</Text>
                 <Text style={styles.label}>Village:</Text>
-                <Text style={styles.value}>{site.village}</Text>
+                <Text style={styles.value}>{site.village || 'Not Available'}</Text>
                 
                 <Button style={styles.closeButton} onPress={onClose} >
                     Close

@@ -1,4 +1,3 @@
-// PlotsCard.js
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Plot } from '../../model/plot';
@@ -54,8 +53,7 @@ const PlotsCard: React.FC<PlotsCardInputProps> = ({ plot, onPlotChangePress, onA
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    backgroundColor: '#dff0d8', // Light green color
+    backgroundColor: '#dff0d8',
     width: '100%',
     padding: 5,
     margin: 5,
@@ -67,27 +65,26 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   info: {
+    width: '100%',
     marginHorizontal: 16,
-    flexGrow: 1,
-    alignSelf: 'flex-start'
   },
   actionContainer: {
-    flex: 1,
     flexDirection: 'row',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginHorizontal: 16,
   },
   action: {
+    marginHorizontal: 4,
     flex: 1,
-    flexGrow: 1,
   },
   actionLabel: {
     color: 'green',
-    flexWrap: 'wrap'
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: 'black'
+    color: 'black',
   },
   text: {
     fontSize: 14,
