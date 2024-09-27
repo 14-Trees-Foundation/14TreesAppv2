@@ -9,6 +9,31 @@ export class TreesDao {
         this.db = db;
     };
 
+    releaseChanges = async () => {
+        // adding new column to trees
+        try {
+            // Query to get the table schema
+            const query = `PRAGMA table_info(${this.tableName});`;
+            const results = await this.db.executeSql(query);
+
+            // Extract the column names from the results
+            const columns = results[0].rows.raw().map(row => row.name);
+
+            // Check if the column exists
+            if (!columns.includes('assigned_to_local')) {
+                // Add the column if it does not exist
+                const alterQuery = `ALTER TABLE ${this.tableName} ADD COLUMN assigned_to_local TEXT;`;
+                await this.db.executeSql(alterQuery);
+                console.log(`Column assigned_to_local added to ${this.tableName}.`);
+            } else {
+                console.log(`Column assigned_to_local already exists in ${this.tableName}.`);
+            }
+        } catch (error) {
+            console.error('Error adding column:', error);
+        }
+
+    };
+
     // Create necessary tables
     createTable = async () => {
         try {
@@ -31,6 +56,7 @@ export class TreesDao {
                 gifted_to INTEGER,
                 assigned_at TEXT,
                 assigned_to INTEGER,
+                assigned_to_local INTEGER,
                 user_tree_image TEXT,
                 user_card_image TEXT,
                 description TEXT,
@@ -46,6 +72,7 @@ export class TreesDao {
 
             await this.db.executeSql(query);
             console.log('Trees table created successfully!');
+            await this.releaseChanges();
         } catch (error) {
             console.log('error creating trees table:', error);
         }
@@ -120,15 +147,15 @@ export class TreesDao {
                 [row.change_type]: row.count,
             }
         }
-        // console.log(response)
+
         return response;
     }
 
     createTree = async (data: CreateTreeRequest) => {
         const query = `
             INSERT OR IGNORE INTO ${this.tableName}
-            (sapling_id, plant_type_id, plot_id, location, tree_status, planted_by, assigned_to, assigned_at, visit_id , change_type, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'add', ?, ?)
+            (sapling_id, plant_type_id, plot_id, location, tree_status, planted_by, assigned_to, assigned_to_local, assigned_at, visit_id , change_type, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'add', ?, ?)
         `
 
         const timeStamp = new Date().toISOString();
@@ -140,6 +167,7 @@ export class TreesDao {
             data.tree_status,
             data.planted_by,
             data.assigned_to,
+            data.assigned_to_local,
             data.assigned_at,
             data.visit_id,
             timeStamp,
@@ -176,6 +204,7 @@ export class TreesDao {
                     planted_by = ?,
                     assigned_at = ?,
                     assigned_to = ?,
+                    assigned_to_local = ?,
                     tree_status = ?,
                     visit_id = ?,
                     is_uploaded = 0,
@@ -184,7 +213,7 @@ export class TreesDao {
                 WHERE local_id = ?;`,
                 [
                     data.sapling_id, data.plant_type_id, data.plot_id, data.location, data.planted_by,
-                    data.assigned_at, data.assigned_to, data.tree_status, data.visit_id, changeType, now, data.local_id
+                    data.assigned_at, data.assigned_to, data.assigned_to_local, data.tree_status, data.visit_id, changeType, now, data.local_id
                 ]
             )
         } catch (err: any) {
@@ -284,6 +313,7 @@ export class TreesDao {
                     gifted_to = ?,
                     assigned_at = ?,
                     assigned_to = ?,
+                    assigned_to_local = NULL,
                     user_tree_image = ?,
                     user_card_image = ?,
                     description = ?,
@@ -314,7 +344,7 @@ export class TreesDao {
             let replacement: any[] = []
             let valuesStr = '';
             trees.forEach(data => {
-                valuesStr += `(${data.id}, ?, ${data.plant_type_id}, ${data.plot_id}, ?, ?, ?, ${data.mapped_to_user}, ${data.mapped_to_group}, ?, ${data.sponsored_by_user}, ${data.sponsored_by_group}, ${data.gifted_by}, ${data.gifted_to}, ?, ${data.assigned_to}, ${data.visit_id}, ?, ?, ?, 1, ?, ?),`
+                valuesStr += `(${data.id}, ?, ${data.plant_type_id}, ${data.plot_id}, ?, ?, ?, ${data.mapped_to_user}, ${data.mapped_to_group}, ?, ${data.sponsored_by_user}, ${data.sponsored_by_group}, ${data.gifted_by}, ${data.gifted_to}, ?, ${data.assigned_to}, NULL, ${data.visit_id}, ?, ?, ?, 1, ?, ?),`
                 replacement = [...replacement,
                 data.sapling_id, data.image, data.location, data.planted_by, data.mapped_at,
                 data.assigned_at, data.user_tree_image, data.user_card_image, data.tree_status, data.created_at, data.updated_at
@@ -341,6 +371,7 @@ export class TreesDao {
                     gifted_to,
                     assigned_at,
                     assigned_to,
+                    assigned_to_local,
                     visit_id,
                     user_tree_image,
                     user_card_image,

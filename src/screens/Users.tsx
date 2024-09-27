@@ -60,9 +60,9 @@ const Users: React.FC<UsersInputProps> = ({ navigation }) => {
             let resp = await daoClient.users.searchUsers(searchQuery, usersPage * 10, 10);
             const newUsers = usersPage === 0 ? resp : [...users, ...resp];
     
-            // Filter out duplicates based on user.id
+            // Filter out duplicates based on user.local_id
             const uniqueUsers = newUsers.filter((user, index, self) => 
-                index === self.findIndex((t) => t.id === user.id)
+                index === self.findIndex((t) => t.local_id === user.local_id)
             );
     
             setUsers(uniqueUsers);
@@ -79,9 +79,9 @@ const Users: React.FC<UsersInputProps> = ({ navigation }) => {
             let resp = await daoClient.users.getUsers(usersPage * 10, 10);
             const newUsers = usersPage === 0 ? resp : [...users, ...resp];
     
-            // Filter out duplicates based on user.id
+            // Filter out duplicates based on user.local_id
             const uniqueUsers = newUsers.filter((user, index, self) => 
-                index === self.findIndex((t) => t.id === user.id)
+                index === self.findIndex((t) => t.local_id === user.local_id)
             );
     
             setUsers(uniqueUsers);

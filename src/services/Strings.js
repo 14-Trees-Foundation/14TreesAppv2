@@ -114,6 +114,7 @@ export class Strings {
             Type: "Type",
             Plot: "Plot",
             Trees: 'Trees',
+            Users: 'Users',
             OldPlot: "Old Plot",
             NewPlot: "New Plot",
             Synced: "Synced",
@@ -206,6 +207,7 @@ export class Strings {
             failedToUpdate: "साठी प्लॉट अपडेट करू शकलो नाही",
             couldNotAdd: "साठी प्रतिमा जोडू शकलो नाही",
             Trees: "झाडे",
+            Users: "वापरकर्ते",
             trees: "झाडे",
             // add tree
             Location: "स्थान",

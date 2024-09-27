@@ -10,7 +10,7 @@ interface UserCardInputProps {
 
 const UserCard: React.FC<UserCardInputProps> = ({ user }) => {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: user.is_uploaded ? '#dff0d8' : '#ffe7b3' }]}>
       <Avatar.Icon size={50} icon='account' style={{ backgroundColor: '#e0e0e0'}}/>
       <View style={styles.userInfo}>
         <Text style={styles.userName}>{user.name}</Text>

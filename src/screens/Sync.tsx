@@ -21,6 +21,7 @@ const syncDetailsTemplate = {
     upload_error: '',
     fetch_error: '',
     trees: { add: 0, edit: 0, delete: 0 },
+    users: { add: 0, edit: 0, delete: 0 },
     tree_images: { add: 0, delete: 0 },
     visit_images: { add: 0, delete: 0 },
 }
@@ -44,6 +45,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [internetSpeedCheck, setInternetSpeedCheck] = useState(false);
     const [networkSpeed, setNetworkSpeed] = useState<string>('');
     const [lastSyncDate, setLastSyncDate] = useState('');
+    const [userChanges, setUserChanges] = useState<any>(null);
     const [treeChanges, setTreeChanges] = useState<any>(null);
     const [treeImagesCount, setTreeImagesCount] = useState<any>(null);
     const [visitImagesCount, setVisitImagesCount] = useState<any>(null);
@@ -112,6 +114,11 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                 edit: treeChanges?.edit || 0,
                 delete: treeChanges?.delete || 0,
             } : prev.trees,
+            users: userChanges ? {
+                add: userChanges?.add || 0,
+                edit: userChanges?.edit || 0,
+                delete: userChanges?.delete || 0,
+            } : prev.users,
             tree_images: treeImagesCount ? {
                 add: treeImagesCount?.add || 0,
                 delete: treeImagesCount?.delete || 0,
@@ -121,10 +128,11 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                 delete: visitImagesCount?.delete || 0,
             } : prev.visit_images,
         }));
-    }, [treeChanges, treeImagesCount, visitImagesCount]);
+    }, [userChanges, treeChanges, treeImagesCount, visitImagesCount]);
 
     useEffect(() => {
-        const pending = remaining.trees.add + remaining.trees.edit + remaining.trees.delete
+        const pending = remaining.users.add + remaining.users.edit + remaining.users.delete
+            + remaining.trees.add + remaining.trees.edit + remaining.trees.delete
             + remaining.tree_images.add + remaining.tree_images.delete
             + remaining.visit_images.delete + remaining.visit_images.delete
 
@@ -133,8 +141,11 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
 
         if (uploadInProgress && currentSyncTime) {
             const updateCurrentSyncInfo = async () => {
-                const syncInfo = await getSyncInfoByTime();
-                const completed = syncInfo.trees.add + syncInfo.trees.edit + syncInfo.trees.delete
+                let syncInfo: any = await Utils.getSyncInfoBySyncTime(currentSyncTime);
+                syncInfo = { ...syncInfo, key: syncInfo.local_id } 
+
+                const completed = syncInfo.users.add + syncInfo.users.edit + syncInfo.users.delete
+                    + syncInfo.trees.add + syncInfo.trees.edit + syncInfo.trees.delete
                     + syncInfo.tree_images.add + syncInfo.tree_images.delete
                     + syncInfo.visit_images.delete + syncInfo.visit_images.delete
 
@@ -151,20 +162,6 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         }
     }, [state, uploadInProgress, currentSyncTime, remaining])
 
-    const getSyncInfoByTime = async () => {
-        const daoClient = await DaoClient.authenticate();
-        const resp = await daoClient.syncInfo.getSyncInfoBySyncTime(currentSyncTime);
-        const syncInfo: any = {
-            ...resp,
-            key: resp.local_id,
-            trees: JSON.parse(resp.trees),
-            tree_images: JSON.parse(resp.tree_images),
-            visit_images: JSON.parse(resp.visit_images),
-
-        }
-        return syncInfo;
-    }
-
     const getSyncInfo = async () => {
         const daoClient = await DaoClient.authenticate();
         const syncInfoList = await daoClient.syncInfo.getSyncInfo();
@@ -174,6 +171,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
             data.trees = JSON.parse(item.trees)
             data.tree_images = JSON.parse(item.tree_images)
             data.visit_images = JSON.parse(item.visit_images)
+            data.users = item.users ? JSON.parse(item.users) : syncDetailsTemplate.users
 
             return data;
         })
@@ -191,6 +189,11 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
     const uploadData = async (netSpeedInKBps: number) => {
         setNetworkSpeed(netSpeedInKBps.toFixed(0))
         const localChangesCount = {
+            users: {
+                add: userChanges?.add || 0,
+                edit: userChanges?.edit || 0,
+                delete: userChanges?.delete || 0,
+            },
             trees: {
                 add: treeChanges?.add || 0,
                 edit: treeChanges?.edit || 0,
@@ -289,6 +292,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         data.trees = JSON.stringify(data.trees);
         data.tree_images = JSON.stringify(data.tree_images);
         data.visit_images = JSON.stringify(data.visit_images);
+        data.users = JSON.stringify(data.users);
         const daoClient = await DaoClient.authenticate();
         await daoClient.syncInfo.createSyncInfo(data);
     }
@@ -303,10 +307,15 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
 
         const treeImagesResp = await daoClient.treeSnapshots.countTreeSnapshotImages(false);
         setTreeImagesCount(treeImagesResp);
+
+        const usersResp = await daoClient.users.countUsersByChangeTye(false);
+        setUserChanges(usersResp);
     }
 
     const getRemainingUploadTime = () => {
         let items = 0;
+        if (userChanges?.add) items += userChanges?.add;
+        if (userChanges?.edit) items += userChanges?.edit;
         if (treeChanges?.add) items += treeChanges?.add;
         if (treeChanges?.edit) items += treeChanges?.edit;
         if (treeImagesCount?.add) items += treeImagesCount?.add;
@@ -364,6 +373,14 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                     <View style={{ marginTop: 20 }}>
                         <Text variant='titleLarge' style={{ color: 'black', fontWeight: 'bold', paddingRight: 10 }}>{Strings.messages.LocalChanges}:</Text>
                         <View style={{ justifyContent: 'center', marginVertical: 5 }}>
+                            <Text variant='titleMedium' style={{ color: 'black', paddingRight: 10 }}>{Strings.messages.Users}:</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
+                                <Chip icon={(props => getChipIcon(props, userChanges?.add === undefined))} style={styles.chip} >{Strings.messages.New}: {userChanges?.add || 0}</Chip>
+                                <Chip icon={(props => getChipIcon(props, userChanges?.edit === undefined))} style={styles.chip} >{Strings.messages.Updated}: {userChanges?.edit || 0}</Chip>
+                                <Chip icon={(props => getChipIcon(props, userChanges?.delete === undefined))} style={styles.chip} >{Strings.messages.Deleted}: {userChanges?.delete || 0}</Chip>
+                            </View>
+                        </View>
+                        <View style={{ justifyContent: 'center', marginVertical: 5 }}>
                             <Text variant='titleMedium' style={{ color: 'black', paddingRight: 10 }}>{Strings.messages.Trees}:</Text>
                             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
                                 <Chip icon={(props => getChipIcon(props, treeChanges?.add === undefined))} style={styles.chip} >{Strings.messages.New}: {treeChanges?.add || 0}</Chip>
@@ -408,6 +425,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                                         <SyncCard
                                             syncedAt={info.synced_at === '' ? '' : getHumanReadableDateTime(info.synced_at)}
                                             trees={info.trees}
+                                            users={info.users}
                                             treeImages={info.tree_images}
                                             visitImages={info.visit_images}
                                             uploadTime={info.upload_time}
@@ -427,6 +445,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                             <SyncCard
                                 syncedAt={currentSyncDetails.synced_at === '' ? '' : getHumanReadableDateTime(currentSyncDetails.synced_at)}
                                 trees={currentSyncDetails.trees}
+                                users={currentSyncDetails.users}
                                 treeImages={currentSyncDetails.tree_images}
                                 visitImages={currentSyncDetails.visit_images}
                                 uploadTime={currentSyncDetails.upload_time}
@@ -439,7 +458,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                 </ScrollView>
 
                 {(uploadInProgress || downloadInProgress) && <View
-                    style={{ position: 'absolute', bottom: 70, left: 20, right: 20 }}>
+                    style={{ marginHorizontal: 10, marginVertical: 10 }}>
                     <Text style={{ textAlign: 'center', marginBottom: 5 }}>
                         {uploadInProgress && networkSpeed !== ''
                             ? 'Remaining Time ' + getRemainingUploadTime() + ` (${getNetworkSpeed()})`

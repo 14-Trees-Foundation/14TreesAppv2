@@ -3,7 +3,7 @@ import { Constants, Utils } from "../Utils";
 import { fetchAndStoreTrees, uploadSingleTreeData, uploadTreesData } from "./tree"
 import { fetchAndStoreVisitImages, uploadVisitImagesData } from "./visit_images";
 import { fetchAndStoreTreeSnapshots, uploadSingleTreeSnapshotsData, uploadTreeSnapshotsData } from "./tree_snapshots";
-import { fetchAndStoreUsers } from "./users";
+import { fetchAndStoreUsers, uploadSingleUsersData, uploadUsersData } from "./users";
 import { fetchAndStoreSites } from "./sites";
 import { fetchAndStorePlots } from "./plots";
 import { fetchAndStoreVisits } from "./visits";
@@ -17,59 +17,17 @@ export const uploadLocalData = async (changesCount: any, syncTime: string) => {
     // remove force sync in order to allow the sync
     await AsyncStorage.removeItem(Constants.isForceSyncStop);
 
-    let count = 0;
-    try {
-        const response = await Utils.syncLogs();
-        if (response?.success) await Utils.deleteLogsFromLocalDB();
-
-    } catch (error: any) {
-        const stackTrace = error.stack;
-        const errorLog = {
-            msg: 'happened while trying to sync logs(inside sync display)',
-            error: JSON.stringify(error),
-            stackTrace: stackTrace,
-        };
-        await Utils.logException(JSON.stringify(errorLog));
-    }
+    let count = changesCount.users.add + changesCount.users.edit + changesCount.users.delete;
+    if (count !== 0) await uploadUsersData(syncTime);
 
     count = changesCount.trees.add + changesCount.trees.edit + changesCount.trees.delete;
-    try {
-        if (count !== 0) await uploadTreesData(syncTime);
-    } catch (error: any) {
-        const stackTrace = error.stack;
-        const errorLog = {
-            msg: 'Error uploading local trees data',
-            error: JSON.stringify(error),
-            stackTrace: stackTrace,
-        };
-        await Utils.logException(JSON.stringify(errorLog));
-    }
+    if (count !== 0) await uploadTreesData(syncTime);
 
     count = changesCount.tree_images.add + changesCount.tree_images.delete
-    try {
-        if (count !== 0) await uploadTreeSnapshotsData(syncTime);
-    } catch (error: any) {
-        const stackTrace = error.stack;
-        const errorLog = {
-            msg: 'happened while trying to sync tree images(inside sync display)',
-            error: JSON.stringify(error),
-            stackTrace: stackTrace,
-        };
-        await Utils.logException(JSON.stringify(errorLog));
-    }
+    if (count !== 0) await uploadTreeSnapshotsData(syncTime);
 
     count = changesCount.visit_images.add + changesCount.visit_images.delete
-    try {
-        if (count !== 0) await uploadVisitImagesData(syncTime);
-    } catch (error: any) {
-        const stackTrace = error.stack;
-        const errorLog = {
-            msg: 'Error uploading local visit images',
-            error: JSON.stringify(error),
-            stackTrace: stackTrace,
-        };
-        await Utils.logException(JSON.stringify(errorLog));
-    }
+    if (count !== 0) await uploadVisitImagesData(syncTime);
 
     try {
         await uploadSyncInfoData();
@@ -81,6 +39,13 @@ export const uploadLocalData = async (changesCount: any, syncTime: string) => {
             stackTrace: stackTrace,
         };
         await Utils.logException(JSON.stringify(errorLog));
+    }
+
+    try {
+        const response = await Utils.syncLogs();
+        if (response?.success) await Utils.deleteLogsFromLocalDB();
+    } catch (error: any) {
+        await Utils.saveErrorLog("uploadLocalData", error);
     }
 }
 
@@ -152,9 +117,11 @@ export const syncSingleTree = async (localId: number, saplingId: string, timeSta
             trees: { add: 0, edit: 0, delete: 0 },
             tree_images: { add: 0, delete: 0 },
             visit_images: { add: 0, delete: 0 },
+            users: { add: 0, edit: 0, delete: 0 },
         }
         await saveSyncInfo(daoClient, syncInfoRequest);
     } catch (error: any) {
+        console.log("Save:" ,error);
         const stackTrace = error.stack;
         const errorLog = {
             msg: 'Error in single tree sync feature (while initiating sync)',
@@ -163,29 +130,23 @@ export const syncSingleTree = async (localId: number, saplingId: string, timeSta
         };
         await Utils.logException(JSON.stringify(errorLog));
     }
-    
 
-    try {
-        await uploadSingleTreeData(localId, timeStamp)
-    } catch (error: any) {
-        const stackTrace = error.stack;
-        const errorLog = {
-            msg: 'Error in single tree sync feature (upload tree details)',
-            error: JSON.stringify(error),
-            stackTrace: stackTrace,
-        };
-        await Utils.logException(JSON.stringify(errorLog));
+    const daoClient = await DaoClient.authenticate();
+    const tree = await daoClient.trees.getTreeByLocalId(localId);
+    if (tree && tree.assigned_to_local) {
+        const user = await daoClient.users.getUserByLocalId(tree.assigned_to_local);
+        if (!user?.id) {
+            await uploadSingleUsersData(tree.assigned_to_local, timeStamp)
+        }
     }
 
+    await uploadSingleTreeData(localId, timeStamp)
+    await uploadSingleTreeSnapshotsData(saplingId, timeStamp)
+
     try {
-        await uploadSingleTreeSnapshotsData(saplingId, timeStamp)
+        const response = await Utils.syncLogs();
+        if (response?.success) await Utils.deleteLogsFromLocalDB();
     } catch (error: any) {
-        const stackTrace = error.stack;
-        const errorLog = {
-            msg: 'Error in single tree sync feature (upload tree audit)',
-            error: JSON.stringify(error),
-            stackTrace: stackTrace,
-        };
-        await Utils.logException(JSON.stringify(errorLog));
+        await Utils.saveErrorLog("uploadLocalData", error);
     }
 }

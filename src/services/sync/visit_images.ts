@@ -61,33 +61,39 @@ export const fetchAndStoreVisitImages = async (siteId?: number) => {
 }
 
 export const uploadVisitImagesData = async (syncTime: string) => {
+    try {
+        const daoClient = await DaoClient.authenticate();
+        const visitImages = await daoClient.visitImages.getVisitImages(false);
+        const deletedImages = visitImages.filter(image => image.is_deleted === 1)
+        const newImages = visitImages.filter(image => image.is_deleted === 0)
     
-    const daoClient = await DaoClient.authenticate();
-    const visitImages = await daoClient.visitImages.getVisitImages(false);
-    const deletedImages = visitImages.filter(image => image.is_deleted === 1)
-    const newImages = visitImages.filter(image => image.is_deleted === 0)
-
-    const resp = await daoClient.syncInfo.getSyncInfoBySyncTime(syncTime);
-    const syncInfo = { ...resp, trees: JSON.parse(resp.trees), tree_images: JSON.parse(resp.tree_images), visit_images: JSON.parse(resp.visit_images) }
-
-    await deleteImages(daoClient, deletedImages, syncInfo);
-    await uploadNewImages(daoClient, newImages, syncInfo);
-
-    await daoClient.visitImages.deleteUploadedImages();
+        const syncInfo = await Utils.getSyncInfoBySyncTime(syncTime);
+    
+        await deleteImages(daoClient, deletedImages, syncInfo);
+        await uploadNewImages(daoClient, newImages, syncInfo);
+    
+        await daoClient.visitImages.deleteUploadedImages();
+    } catch(error: any) {
+        Utils.saveErrorLog("UploadVisitImages::uploadVisitImagesData", error)
+    }
 }
 
 const deleteImages = async (daoClient: DaoClient, images: VisitImage[], syncInfo: any) => {
-    const apiClient = new ApiClient();
-    let imageIds: number[] = [] 
-    images.forEach(image => { if (image.id) imageIds.push(image.id) });
-
-    await apiClient.visitImages.deleteVisitImages(imageIds);
-
-    for (const image of images) {
-        await daoClient.visitImages.markImageUploaded(image.local_id);
-        syncInfo.visit_images.delete += 1;
-        syncInfo.upload_time = new Date().getTime() - new Date(syncInfo.synced_at).getTime();
-        await saveSyncInfo(daoClient, syncInfo);
+    try {
+        const apiClient = new ApiClient();
+        let imageIds: number[] = [] 
+        images.forEach(image => { if (image.id) imageIds.push(image.id) });
+    
+        await apiClient.visitImages.deleteVisitImages(imageIds);
+    
+        for (const image of images) {
+            await daoClient.visitImages.markImageUploaded(image.local_id);
+            syncInfo.visit_images.delete += 1;
+            syncInfo.upload_time = new Date().getTime() - new Date(syncInfo.synced_at).getTime();
+            await saveSyncInfo(daoClient, syncInfo);
+        }
+    } catch(error: any) {
+        Utils.saveErrorLog("UploadVisitImages::deleteImages", error)
     }
 }
 
@@ -106,17 +112,22 @@ const uploadNewImages = async (daoClient: DaoClient, visitImages: VisitImage[], 
     }
 
     for (const visitId of visitIds) {
-        const stopSync = await AsyncStorage.getItem(Constants.isForceSyncStop);
-        if (stopSync) break;
-        
-        const images = visitImagesMap[visitId];
-        await apiClient.visitImages.createVisitImages(visitId, images)
 
-        for (const image of images) {
-            await daoClient.visitImages.markImageUploaded(image.local_id);
-            syncInfo.visit_images.add += 1;
-            syncInfo.upload_time = new Date().getTime() - new Date(syncInfo.synced_at).getTime();
-            await saveSyncInfo(daoClient, syncInfo);
+        try {
+            const stopSync = await AsyncStorage.getItem(Constants.isForceSyncStop);
+            if (stopSync) break;
+            
+            const images = visitImagesMap[visitId];
+            await apiClient.visitImages.createVisitImages(visitId, images)
+    
+            for (const image of images) {
+                await daoClient.visitImages.markImageUploaded(image.local_id);
+                syncInfo.visit_images.add += 1;
+                syncInfo.upload_time = new Date().getTime() - new Date(syncInfo.synced_at).getTime();
+                await saveSyncInfo(daoClient, syncInfo);
+            }
+        } catch(error: any) {
+            Utils.saveErrorLog("UploadVisitImages::uploadNewImages", error)
         }
     }
 }

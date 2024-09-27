@@ -7,6 +7,7 @@ import { Strings } from '../services/Strings';
 type SyncCardProps = {
     syncedAt: string;
     trees: { add: number; edit: number; delete: number };
+    users: { add: number; edit: number; delete: number };
     treeImages: { add: number; delete: number };
     visitImages: { add: number; delete: number };
     uploadTime: number
@@ -15,7 +16,7 @@ type SyncCardProps = {
     uploadError: string | null
 };
 
-const SyncCard: React.FC<SyncCardProps> = ({ syncedAt, trees, treeImages, visitImages, uploadTime, fetchTime, uploadError, fetchError }) => {
+const SyncCard: React.FC<SyncCardProps> = ({ syncedAt, trees, users, treeImages, visitImages, uploadTime, fetchTime, uploadError, fetchError }) => {
 
     let treesData: string = ''
     if (trees.add !== 0) treesData = `${Strings.messages.New}: ${trees.add}`
@@ -28,6 +29,19 @@ const SyncCard: React.FC<SyncCardProps> = ({ syncedAt, trees, treeImages, visitI
         treesData.length === 0
         ? treesData = `${Strings.messages.Deleted}: ${trees.delete}`
         : treesData += `, ${Strings.messages.Deleted}: ${trees.delete}`
+    }
+
+    let usersData: string = ''
+    if (users.add !== 0) usersData = `${Strings.messages.New}: ${users.add}`
+    if (users.edit !== 0) {
+        usersData.length === 0
+        ? usersData = `${Strings.messages.Updated}: ${users.edit}`
+        : usersData += `, ${Strings.messages.Updated}: ${users.edit}`
+    }
+    if (users.delete !== 0) {
+        usersData.length === 0
+        ? usersData = `${Strings.messages.Deleted}: ${users.delete}`
+        : usersData += `, ${Strings.messages.Deleted}: ${users.delete}`
     }
 
     let treeImagesData = ''
@@ -49,6 +63,11 @@ const SyncCard: React.FC<SyncCardProps> = ({ syncedAt, trees, treeImages, visitI
     return (
         <View style={styles.card}>
             {syncedAt !== '' && <Text style={styles.syncedAtTitle}>{Strings.messages.StartTime}: <Text style={styles.syncedAt}>{syncedAt}</Text></Text>}
+
+            {usersData.length !== 0 && <View style={styles.sectionContainer}>
+                <Text style={styles.sectionTitle}>{Strings.messages.Users}: </Text>
+                <Text style={styles.detail}>[ {usersData} ]</Text>
+            </View>}
 
             {treesData.length !== 0 && <View style={styles.sectionContainer}>
                 <Text style={styles.sectionTitle}>{Strings.messages.Trees}: </Text>

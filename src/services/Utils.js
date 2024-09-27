@@ -38,6 +38,16 @@ export class Utils {
         return;
     }
 
+    static async saveErrorLog(message, error) {
+        const stackTrace = error.stack;
+        const errorLog = {
+            msg: message,
+            error: JSON.stringify(error),
+            stackTrace: stackTrace,
+        };
+        await Utils.logException(JSON.stringify(errorLog));
+    }
+
     static async getLogsFromLocalDB() {
         return await this.localdb.getAllLogs();
     }
@@ -1511,6 +1521,19 @@ export class Utils {
         return null; // Return null if file size is already within limit
     }
 
+    // # NEW v3
+
+    static async getSyncInfoBySyncTime(syncTime) {
+        const daoClient = await DaoClient.authenticate();
+        const resp = await daoClient.syncInfo.getSyncInfoBySyncTime(syncTime);
+        return { 
+            ...resp, 
+            trees: JSON.parse(resp.trees), 
+            tree_images: JSON.parse(resp.tree_images), 
+            visit_images: JSON.parse(resp.visit_images),
+            users: resp.users ? JSON.parse(resp.users) : { add: 0, edit: 0, delete: 0 },
+        }
+    }
 
 }
 

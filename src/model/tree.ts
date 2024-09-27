@@ -18,6 +18,7 @@ export type Tree = {
     gifted_to: number | null;
     assigned_at: string | null;
     assigned_to: number | null;
+    assigned_to_local: number | null;
     user_tree_image: string | null;
     user_card_image: string | null;
     description: string | null;
@@ -40,6 +41,7 @@ export type CreateTreeRequest = {
     tree_status: 'healthy' | 'diseased' | 'dead';
     assigned_at: string | null;
     assigned_to: number | null;
+    assigned_to_local: number | null;
     visit_id: number | null;
 }
 

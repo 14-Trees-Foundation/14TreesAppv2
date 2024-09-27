@@ -11,59 +11,35 @@ export class UserService {
     }
 
     async getUsers(offset: number, limit: number, filters?: FilterItem[]): Promise<PaginatedResponse<User>> {
-        const url = `/get?offset=${offset}&limit=${limit}`;
-        try {
-            const response = await this.api.post<PaginatedResponse<User>>(url, { filters: filters });
-            return response.data;
-        } catch (error: any) {
-            return handleApiError("UserClient::getUsers:", error)
-        }
+        const url = `/api/users/get?offset=${offset}&limit=${limit}`;
+        const response = await this.api.post<PaginatedResponse<User>>(url, { filters: filters });
+        return response.data;
     }
 
     async searchUsers(searchStr: string): Promise<User[]> {
-        try {
-            const response = await this.api.get<User[]>(`/${searchStr}`);
-            return response.data;
-        } catch (error: any) {
-            return handleApiError("UserClient::searchUsers:", error)
-        }
+        const response = await this.api.get<User[]>(`/api/users/${searchStr}`);
+        return response.data;
     }
 
     async createUser(data: User): Promise<User> {
-        try {
-            const response = await this.api.post<User>(`/`, data);
-            return response.data;
-        } catch (error: any) {
-            return handleApiError("UserClient::createUser:", error)
-        }
+        const response = await this.api.post<User>(`/api/users/`, data);
+        return response.data;
     }
 
     async updateUser(data: User): Promise<User> {
-        try {
-            const response = await this.api.put<User>(`/${data.id}`, data);
-            return response.data;
-        } catch (error: any) {
-            return handleApiError("UserClient::updateUser:", error)
-        }
+        const response = await this.api.put<User>(`/api/users//${data.id}`, data);
+        return response.data;
     }
 
     async deleteUser(data: User): Promise<number> {
         if (!data.id) throw new Error('User id required to delete user!')
-        try {
-            await this.api.delete<any>(`/${data.id}`);
-            return data.id;
-        } catch (error: any) {
-            return handleApiError("UserClient::deleteUser:", error)
-        }
+        await this.api.delete<any>(`/api/users//${data.id}`);
+        return data.id;
     }
 
     async fetchChanges(timestamp: string, user_ids: number[], offset: number): Promise<UserHelperDataResponse> {
         const url = `/api/appv2/fetchHelperData/users`;
-        try {
-            const response = await this.api.post<UserHelperDataResponse>(url, { timestamp, user_ids, offset });
-            return response.data;
-        } catch (error: any) {
-            return handleApiError("UserService::fetchChanges:", error)
-        }
+        const response = await this.api.post<UserHelperDataResponse>(url, { timestamp, user_ids, offset });
+        return response.data;
     }
 }

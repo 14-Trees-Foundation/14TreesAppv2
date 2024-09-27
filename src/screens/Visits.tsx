@@ -67,9 +67,9 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
             let resp = await daoClient.visits.getVisits(visitsPage * 10, 10);
             const newVisits = visitsPage === 0 ? resp : [...visits, ...resp];
     
-            // Filter out duplicates based on visit.id
+            // Filter out duplicates based on visit.local_id
             const uniqueVisits = newVisits.filter((visit, index, self) => 
-                index === self.findIndex((t) => t.id === visit.id)
+                index === self.findIndex((t) => t.local_id === visit.local_id)
             );
     
             setVisits(uniqueVisits);
@@ -87,9 +87,9 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
             let resp = await daoClient.visits.searchVisits(searchQuery, visitsPage * 10, 10);
             const newVisits = visitsPage === 0 ? resp : [...visits, ...resp];
     
-            // Filter out duplicates based on visit.id
+            // Filter out duplicates based on visit.local_id
             const uniqueVisits = newVisits.filter((visit, index, self) => 
-                index === self.findIndex((t) => t.id === visit.id)
+                index === self.findIndex((t) => t.local_id === visit.local_id)
             );
     
             setVisits(uniqueVisits);

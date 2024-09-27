@@ -116,7 +116,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     
             // Filter out duplicates based on tree.id
             const uniqueTrees = newTrees.filter((tree, index, self) => 
-                index === self.findIndex((t) => t.id === tree.id)
+                index === self.findIndex((t) => t.local_id === tree.local_id)
             );
     
             setTrees(uniqueTrees);
@@ -137,13 +137,11 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                 if (count > 0) resp[i].is_uploaded = 0;
             }
 
-            console.log(treesPage)
-            console.log(resp.map((tree) => tree.sapling_id));
             const newTrees = treesPage === 0 ? resp : [...trees, ...resp];
     
             // Filter out duplicates based on tree.id
             const uniqueTrees = newTrees.filter((tree, index, self) => 
-                index === self.findIndex((t) => t.id === tree.id)
+                index === self.findIndex((t) => t.local_id === tree.local_id)
             );
     
             setTrees(uniqueTrees);

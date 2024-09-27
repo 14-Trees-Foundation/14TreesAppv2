@@ -69,9 +69,9 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
             let resp = await daoClient.plots.getPlots(plotsPage * 10, 10, undefined, false, selectedSite?.id);
             const newPlots = plotsPage === 0 ? resp : [...plots, ...resp];
     
-            // Filter out duplicates based on plot.id
+            // Filter out duplicates based on plot.local_id
             const uniquePlots = newPlots.filter((plot, index, self) => 
-                index === self.findIndex((t) => t.id === plot.id)
+                index === self.findIndex((t) => t.local_id === plot.local_id)
             );
     
             setPlots(uniquePlots);
@@ -86,12 +86,12 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
 
         const fetchPlots = async () => {
             const daoClient = await DaoClient.authenticate();
-            let resp = await daoClient.plots.searchPlots(searchQuery, plotsPage * 10, 10, selectedSite?.id);
+            let resp = await daoClient.plots.searchPlots(searchQuery, plotsPage * 10, 10, selectedSite?.local_id);
             const newPlots = plotsPage === 0 ? resp : [...plots, ...resp];
     
-            // Filter out duplicates based on plot.id
+            // Filter out duplicates based on plot.local_id
             const uniquePlots = newPlots.filter((plot, index, self) => 
-                index === self.findIndex((t) => t.id === plot.id)
+                index === self.findIndex((t) => t.local_id === plot.local_id)
             );
     
             setPlots(uniquePlots);

@@ -9,6 +9,31 @@ export class SyncInfoDao {
         this.db = db;
     };
 
+    releaseChanges = async () => {
+        // adding new column to sync info
+        try {
+            // Query to get the table schema
+            const query = `PRAGMA table_info(${this.tableName});`;
+            const results = await this.db.executeSql(query);
+
+            // Extract the column names from the results
+            const columns = results[0].rows.raw().map(row => row.name);
+
+            // Check if the column exists
+            if (!columns.includes('users')) {
+                // Add the column if it does not exist
+                const alterQuery = `ALTER TABLE ${this.tableName} ADD COLUMN users TEXT;`;
+                await this.db.executeSql(alterQuery);
+                console.log(`Column users added to ${this.tableName}.`);
+            } else {
+                console.log(`Column users already exists in ${this.tableName}.`);
+            }
+        } catch (error) {
+            console.error('Error adding column:', error);
+        }
+
+    };
+
     // Create necessary tables
     createTable = async () => {
         try {
@@ -18,6 +43,7 @@ export class SyncInfoDao {
                 trees TEXT NOT NULL,
                 tree_images TEXT NULL,
                 visit_images TEXT NULL,
+                users TEXT NULL,
                 synced_at TEXT UNIQUE,
                 upload_time INTEGER NULL,
                 fetch_time INTEGER NULL,
@@ -31,6 +57,7 @@ export class SyncInfoDao {
 
             await this.db.executeSql(query);
             console.log('SyncInfo table created successfully!');
+            await this.releaseChanges();
         } catch (error) {
             console.log('error creating sync_info table:', error);
         }
@@ -75,8 +102,8 @@ export class SyncInfoDao {
     createSyncInfo = async (data: CreateSyncInfoRequest) => {
         const query = `
             INSERT OR REPLACE INTO ${this.tableName}
-            (trees, tree_images, visit_images, synced_at, upload_time, fetch_time, upload_error, fetch_error, is_uploaded, change_type, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'add', ?, ?)
+            (trees, tree_images, visit_images, users, synced_at, upload_time, fetch_time, upload_error, fetch_error, is_uploaded, change_type, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'add', ?, ?)
         `
 
         const timeStamp = new Date().toISOString();
@@ -84,6 +111,7 @@ export class SyncInfoDao {
             data.trees, 
             data.tree_images,
             data.visit_images,
+            data.users,
             data.synced_at,
             data.upload_time,
             data.fetch_time,
@@ -117,6 +145,7 @@ export class SyncInfoDao {
                     trees = ?,
                     tree_images = ?,
                     visit_images = ?,
+                    users = ?,
                     synced_at = ?,
                     upload_time = ?,
                     fetch_time = ?,
@@ -125,7 +154,7 @@ export class SyncInfoDao {
                     updated_at = ?
                 WHERE local_id = ?;`,
                 [
-                    data.trees, data.tree_images, data.visit_images, data.synced_at, data.upload_time, data.fetch_time, changeType, now, data.local_id
+                    data.trees, data.tree_images, data.visit_images, data.users, data.synced_at, data.upload_time, data.fetch_time, changeType, now, data.local_id
                 ]
             )
         } catch(err: any) {
@@ -136,8 +165,8 @@ export class SyncInfoDao {
     upsertLiveSyncInfo = async (data: SyncInfo) => {
         const query = `
             INSERT OR REPLACE INTO ${this.tableName}
-            (id, trees, tree_images, visit_images, synced_at, upload_time, upload_error, fetch_time, fetch_error, is_uploaded, change_type, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, 0, '', 1, 'none', ?, ?)
+            (id, trees, tree_images, visit_images, users, synced_at, upload_time, upload_error, fetch_time, fetch_error, is_uploaded, change_type, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, '', 1, 'none', ?, ?)
         `
 
         await this.db.executeSql(query, [
@@ -145,6 +174,7 @@ export class SyncInfoDao {
             data.trees, 
             data.tree_images,
             data.visit_images,
+            data.users,
             data.synced_at,
             data.upload_time,
             data.upload_error,

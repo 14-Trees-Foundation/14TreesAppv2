@@ -61,50 +61,62 @@ export const fetchAndStoreTreeSnapshots = async (siteId?: number) => {
 }
 
 export const uploadTreeSnapshotsData = async (syncTime: string) => {
-    const daoClient = await DaoClient.authenticate();
-    const treeSnapshots = await daoClient.treeSnapshots.getTreeSnapshots(false);
-    const deletedImages = treeSnapshots.filter(image => image.is_deleted === 1)
-    const newImages = treeSnapshots.filter(image => image.is_deleted === 0)
-
-    const resp = await daoClient.syncInfo.getSyncInfoBySyncTime(syncTime);
-    const syncInfo = { ...resp, trees: JSON.parse(resp.trees), tree_images: JSON.parse(resp.tree_images), visit_images: JSON.parse(resp.visit_images) }
-
-    await deleteTreeSnapshots(daoClient, deletedImages, syncInfo);
-    await uploadNewTreeSnapshots(daoClient, newImages, syncInfo);
-
-    await daoClient.treeSnapshots.deleteUploadedImages();
+    try {
+        const daoClient = await DaoClient.authenticate();
+        const treeSnapshots = await daoClient.treeSnapshots.getTreeSnapshots(false);
+        const deletedImages = treeSnapshots.filter(image => image.is_deleted === 1)
+        const newImages = treeSnapshots.filter(image => image.is_deleted === 0)
+    
+        const resp = await daoClient.syncInfo.getSyncInfoBySyncTime(syncTime);
+        const syncInfo = { ...resp, trees: JSON.parse(resp.trees), tree_images: JSON.parse(resp.tree_images), visit_images: JSON.parse(resp.visit_images) }
+    
+        await deleteTreeSnapshots(daoClient, deletedImages, syncInfo);
+        await uploadNewTreeSnapshots(daoClient, newImages, syncInfo);
+    
+        await daoClient.treeSnapshots.deleteUploadedImages();
+    } catch (error: any) {
+        Utils.saveErrorLog("UploadTreeSnapshots::uploadTreeSnapshotsData", error);
+    }
 }
 
 export const uploadSingleTreeSnapshotsData = async (saplingId: string, syncTime: string) => {
-    const daoClient = await DaoClient.authenticate();
-
-    const treeSnapshots = await daoClient.treeSnapshots.getTreeSnapshotsBySaplingId(saplingId, false);
-    const deletedImages = treeSnapshots.filter(image => image.is_deleted === 1)
-    const newImages = treeSnapshots.filter(image => image.is_deleted === 0)
-
-    const resp = await daoClient.syncInfo.getSyncInfoBySyncTime(syncTime);
-    const syncInfo = { ...resp, trees: JSON.parse(resp.trees), tree_images: JSON.parse(resp.tree_images), visit_images: JSON.parse(resp.visit_images) }
-
-    await deleteTreeSnapshots(daoClient, deletedImages, syncInfo);
-    await uploadNewTreeSnapshots(daoClient, newImages, syncInfo);
-
-    await daoClient.treeSnapshots.deleteUploadedImages();
+    try {
+        const daoClient = await DaoClient.authenticate();
+    
+        const treeSnapshots = await daoClient.treeSnapshots.getTreeSnapshotsBySaplingId(saplingId, false);
+        const deletedImages = treeSnapshots.filter(image => image.is_deleted === 1)
+        const newImages = treeSnapshots.filter(image => image.is_deleted === 0)
+    
+        const resp = await daoClient.syncInfo.getSyncInfoBySyncTime(syncTime);
+        const syncInfo = { ...resp, trees: JSON.parse(resp.trees), tree_images: JSON.parse(resp.tree_images), visit_images: JSON.parse(resp.visit_images) }
+    
+        await deleteTreeSnapshots(daoClient, deletedImages, syncInfo);
+        await uploadNewTreeSnapshots(daoClient, newImages, syncInfo);
+    
+        await daoClient.treeSnapshots.deleteUploadedImages();
+    } catch (error: any) {
+        Utils.saveErrorLog("UploadTreeSnapshots::uploadSingleTreeSnapshotsData", error);
+    }
 }
 
 const deleteTreeSnapshots = async (daoClient: DaoClient, images: TreeSnapshot[], syncInfo: any) => {
-    const apiClient = new ApiClient();
-    let imageIds: number[] = []
-    images.forEach(image => { if (image.id) imageIds.push(image.id) });
-
-    if (imageIds.length > 0) {
-        await apiClient.treeSnapshots.deleteTreeSnapshots(imageIds);
-    }
-
-    for (const image of images) {
-        await daoClient.treeSnapshots.markImageUploaded(image.local_id);
-        syncInfo.tree_images.delete += 1;
-        syncInfo.upload_time = new Date().getTime() - new Date(syncInfo.synced_at).getTime();
-        await saveSyncInfo(daoClient, syncInfo);
+    try {
+        const apiClient = new ApiClient();
+        let imageIds: number[] = []
+        images.forEach(image => { if (image.id) imageIds.push(image.id) });
+    
+        if (imageIds.length > 0) {
+            await apiClient.treeSnapshots.deleteTreeSnapshots(imageIds);
+        }
+    
+        for (const image of images) {
+            await daoClient.treeSnapshots.markImageUploaded(image.local_id);
+            syncInfo.tree_images.delete += 1;
+            syncInfo.upload_time = new Date().getTime() - new Date(syncInfo.synced_at).getTime();
+            await saveSyncInfo(daoClient, syncInfo);
+        }
+    } catch (error: any) {
+        Utils.saveErrorLog("UploadTreeSnapshots::deleteTreeSnapshots", error);
     }
 }
 
@@ -127,21 +139,25 @@ const uploadNewTreeSnapshots = async (daoClient: DaoClient, treeSnapshots: TreeS
     if (userId === 0) return;
 
     for (const saplingId of saplingIds) {
-        const stopSync = await AsyncStorage.getItem(Constants.isForceSyncStop);
-        if (stopSync) break;
-        
-        const images = treeSnapshotsMap[saplingId];
-        const treeSnapshots = await apiClient.treeSnapshots.createTreeSnapshots(saplingId, userId, images)
-
-        for (const image of images) {
-            await daoClient.treeSnapshots.markImageUploaded(image.local_id);
-            syncInfo.tree_images.add += 1;
-            syncInfo.upload_time = new Date().getTime() - new Date(syncInfo.synced_at).getTime();
-            await saveSyncInfo(daoClient, syncInfo);
-        }
-
-        for (const treeSnapshot of treeSnapshots) {
-            await daoClient.treeSnapshots.upsertLiveTreeSnapshotIntoLocalDb(treeSnapshot);
+        try {
+            const stopSync = await AsyncStorage.getItem(Constants.isForceSyncStop);
+            if (stopSync) break;
+            
+            const images = treeSnapshotsMap[saplingId];
+            const treeSnapshots = await apiClient.treeSnapshots.createTreeSnapshots(saplingId, userId, images)
+    
+            for (const image of images) {
+                await daoClient.treeSnapshots.markImageUploaded(image.local_id);
+                syncInfo.tree_images.add += 1;
+                syncInfo.upload_time = new Date().getTime() - new Date(syncInfo.synced_at).getTime();
+                await saveSyncInfo(daoClient, syncInfo);
+            }
+    
+            for (const treeSnapshot of treeSnapshots) {
+                await daoClient.treeSnapshots.upsertLiveTreeSnapshotIntoLocalDb(treeSnapshot);
+            }
+        } catch (error: any) {
+            Utils.saveErrorLog("UploadTreeSnapshots::uploadNewTreeSnapshots", error);
         }
     }
 }

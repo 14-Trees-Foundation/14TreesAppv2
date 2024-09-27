@@ -1,20 +1,22 @@
 import { useContext, useEffect, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Strings } from "../../services/Strings";
 import { CustomButtonStyles, treeFormStyles } from "../../services/Styles";
 import GlobalContext from '../../context/GlobalContext ';
 import { Button, HelperText, TextInput } from 'react-native-paper';
 import { User, CreateUserRequest } from '../../model/user';
 import { DaoClient } from '../../services/db/dao';
+import UserCard from './UserCard';
 
 interface UserFormInputProps {
     user: User | null,
     changeMode: 'add' | 'edit',
     onSubmit: (data: User | CreateUserRequest) => void,
     onCancel: () => void,
+    select?: boolean
 }
 
-const UserForm: React.FC<UserFormInputProps> = ({ user, changeMode, onCancel, onSubmit }) => {
+const UserForm: React.FC<UserFormInputProps> = ({ user, changeMode, onCancel, onSubmit, select }) => {
 
     const { lightTheme } = useContext(GlobalContext);
     const [name, setName] = useState('');
@@ -26,6 +28,7 @@ const UserForm: React.FC<UserFormInputProps> = ({ user, changeMode, onCancel, on
         phoneError: '',
     })
     const [birthDate, setBirthDate] = useState<string | null>(null);
+    const [users, setUsers] = useState<User[]>([]);
 
     useEffect(() => {
         if (user) {
@@ -35,6 +38,20 @@ const UserForm: React.FC<UserFormInputProps> = ({ user, changeMode, onCancel, on
             setBirthDate(user.birth_date);
         }
     }, [user])
+
+
+    useEffect(() => {
+        if (!select) return
+
+        const searchUsers = async (str: string) => {
+            const daoClient = await DaoClient.authenticate();
+            const users = await daoClient.users.searchUsers(str, 0, 2);
+            setUsers(users);
+        }
+
+        if (name.trim() !== '') searchUsers(name);
+        else if (email.trim() !== '') searchUsers(email);
+    }, [name, email, select])
 
     const handleNameChange = (name: string) => {
         if (name.trim() === '') {
@@ -119,7 +136,8 @@ const UserForm: React.FC<UserFormInputProps> = ({ user, changeMode, onCancel, on
 
     return (
         <View style={{ height: "97%", width: '100%', flexGrow: 1 }}>
-            <Text style={treeFormStyles.plotSapling}> {changeMode === 'add' ? 'Add User' : 'Edit User'} </Text>
+            {!select && <Text style={treeFormStyles.plotSapling}> {changeMode === 'add' ? 'Add User' : 'Edit User'} </Text>}
+            {select && <Text style={treeFormStyles.plotSapling}>Enter User Details</Text>}
             <ScrollView
                 keyboardShouldPersistTaps='handled'
                 scrollEnabled={true}
@@ -127,7 +145,7 @@ const UserForm: React.FC<UserFormInputProps> = ({ user, changeMode, onCancel, on
                 <View style={{ margin: 4, borderRadius: 10 }}>
                     <View style={{ marginTop: 15, flexGrow: 1 }}>
                         <TextInput
-                            defaultValue={name}
+                            value={name}
                             mode='outlined'
                             label={Strings.labels.Username}
                             onChangeText={handleNameChange}
@@ -136,7 +154,7 @@ const UserForm: React.FC<UserFormInputProps> = ({ user, changeMode, onCancel, on
                     </View>
                     <View style={{ marginTop: 15, flexGrow: 1 }}>
                         <TextInput
-                            defaultValue={email}
+                            value={email}
                             mode='outlined'
                             label={Strings.labels.Email}
                             onChangeText={handleEmailChange}
@@ -145,7 +163,7 @@ const UserForm: React.FC<UserFormInputProps> = ({ user, changeMode, onCancel, on
                     </View>
                     <View style={{ marginTop: 15, flexGrow: 1 }}>
                         <TextInput
-                            defaultValue={phone}
+                            value={phone}
                             mode='outlined'
                             label={Strings.labels.Phone}
                             keyboardType='numeric'
@@ -153,6 +171,23 @@ const UserForm: React.FC<UserFormInputProps> = ({ user, changeMode, onCancel, on
                         />
                         {formError.phoneError && <HelperText visible type='error'>{formError.phoneError}</HelperText>}
                     </View>
+
+
+                    {(select && users.length !== 0) && <View style={{ marginTop: 15, flexGrow: 1 }}>
+                        {users.map((user, index) => (
+                            <View key={index} style={{ width: '100%', paddingHorizontal: 10 }}>
+                                <TouchableOpacity
+                                    style={{ width: '100%' }}
+                                    activeOpacity={0.9}
+                                    onPress={() => {
+                                        onSubmit(user);
+                                    }}
+                                >
+                                    <UserCard user={user} />
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                    </View>}
 
 
                     <View style={CustomButtonStyles.container}>

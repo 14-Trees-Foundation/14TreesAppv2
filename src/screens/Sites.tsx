@@ -63,9 +63,9 @@ const Sites: React.FC<SitesInputProps> = ({ navigation }) => {
             let resp = await daoClient.sites.searchSites(searchQuery, 0, 10);
             const newSites = sitesPage === 0 ? resp : [...sites, ...resp];
     
-            // Filter out duplicates based on site.id
+            // Filter out duplicates based on site.local_id
             const uniqueSites = newSites.filter((site, index, self) => 
-                index === self.findIndex((t) => t.id === site.id)
+                index === self.findIndex((t) => t.local_id === site.local_id)
             );
     
             setSites(uniqueSites);
@@ -83,9 +83,9 @@ const Sites: React.FC<SitesInputProps> = ({ navigation }) => {
             let resp = await daoClient.sites.getSites(0, 10);
             const newSites = sitesPage === 0 ? resp : [...sites, ...resp];
     
-            // Filter out duplicates based on site.id
+            // Filter out duplicates based on site.local_id
             const uniqueSites = newSites.filter((site, index, self) => 
-                index === self.findIndex((t) => t.id === site.id)
+                index === self.findIndex((t) => t.local_id === site.local_id)
             );
     
             setSites(uniqueSites);

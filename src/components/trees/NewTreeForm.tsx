@@ -17,6 +17,7 @@ import { Plot } from '../../model/plot';
 import { Site } from '../../model/sites';
 import SelectMenu from '../SelectMenu';
 import { useFocusEffect } from '@react-navigation/native';
+import UserUpsertForm from './UpsertUserForm';
 
 interface TreeFormInputProps {
     tree: Tree | null,
@@ -48,7 +49,6 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
     const [recentPlantTypes, setRecentPlantTypes] = useState<any[]>([]);
     const recentPlantTypesRef = useRef(recentPlantTypes);
 
-    const [users, setUsers] = useState<User[]>([]);
     const [visits, setVisits] = useState<Visit[]>([]);
     const [assignedTo, setAssignedTo] = useState<User | null>(null);
     const [selectedVisit, setSelectedVisit] = useState<Visit | null>(visit ? visit : null);
@@ -211,7 +211,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
                 setVisitEnabled(true);
             }
         }, 100)
-    }, [tree, users])
+    }, [tree])
 
     useEffect(() => {
         if (selectedVisit) return;
@@ -277,7 +277,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
     
             // Filter out duplicates based on plot.id
             const uniquePlots = newPlots.filter((plot, index, self) => 
-                index === self.findIndex((t) => t.id === plot.id)
+                index === self.findIndex((t) => t.local_id === plot.local_id)
             );
     
             setPlots(uniquePlots);
@@ -297,7 +297,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
     
             // Filter out duplicates based on plot.id
             const uniquePlots = newPlots.filter((plot, index, self) => 
-                index === self.findIndex((t) => t.id === plot.id)
+                index === self.findIndex((t) => t.local_id === plot.local_id)
             );
     
             setPlots(uniquePlots);
@@ -319,16 +319,6 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
         getSelectedSite();
     }, [])
 
-    const handleUserSearch = (txt: string) => {
-        if (txt.length > 0) {
-            setTimeout(async () => {
-                const daoClient = await DaoClient.authenticate();
-                const users = await daoClient.users.searchUsers(txt, 0, 20)
-                setUsers(users)
-            }, 100)
-        }
-    }
-
     const handleVisitSearch = (txt: string) => {
         if (txt.length > 0) {
             setTimeout(async () => {
@@ -340,7 +330,6 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
     }
 
     useEffect(() => {
-        handleUserSearch(' ');
         handleVisitSearch(' ');
     }, [])
 
@@ -366,7 +355,8 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
             plot_id: selectedPlot.id,
             planted_by: userDetails?.name,
             tree_status: treeStatus.value,
-            assigned_to: (visitEnabled && assignedTo) ? assignedTo.id : null,
+            assigned_to: (visitEnabled && assignedTo?.id) ? assignedTo.id : null,
+            assigned_to_local: (visitEnabled && assignedTo) ? assignedTo.local_id : null,
             assigned_at: (visitEnabled && assignedTo) ? new Date().toISOString() : null,
             visit_id: (visitEnabled && selectedVisit) ? selectedVisit.id : null,
         }
@@ -455,15 +445,9 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
                 </View>
 
                 <View style={{ marginTop: 10 }}>
-                    <Autocomplete
+                    <UserUpsertForm
                         value={assignedTo}
-                        options={users}
-                        label={Strings.labels.SelectUser}
-                        onSelect={(data) => { setAssignedTo(data); }}
-                        valueGetter={(data) => `${data?.name} (${data?.email})`}
-                        keyGetter={(data) => `${data?.local_id}`}
-                        onSearch={handleUserSearch}
-                        variant='outlined'
+                        onSelect={setAssignedTo}
                     />
                 </View>
 
