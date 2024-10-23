@@ -40,7 +40,8 @@ export const ImageSelector: React.FC<ImageSelectorInputProps> = ({ label, button
                 <Card>
                     <Card.Title
                         title={label}
-                        right={(props) => <IconButton icon='close' size={props.size} onPress={handleRemoveImage} />}
+                        subtitle={(!imageUri && defaultImageUri) ? 'Click below image to take a picture' : undefined}
+                        right={imageUri ? (props) => <IconButton icon='close' size={props.size} onPress={handleRemoveImage} /> : undefined}
                     />
                     <TouchableOpacity onPress={handleImagePress} activeOpacity={0.9}>
                         <Card.Cover 

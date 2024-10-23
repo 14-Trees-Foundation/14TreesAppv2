@@ -431,7 +431,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
     const renderVisitDetails = () => {
         return (
             <View>
-                <View style={{ marginTop: 10 }}>
+                {!visit &&<View style={{ marginTop: 10 }}>
                     <Autocomplete
                         value={selectedVisit}
                         options={visits}
@@ -442,7 +442,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
                         onSearch={handleVisitSearch}
                         variant='outlined'
                     />
-                </View>
+                </View>}
 
                 <View style={{ marginTop: 10 }}>
                     <UserUpsertForm
@@ -476,7 +476,8 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
 
     return (
         <View style={{ height: "98%", width: "95%" }}>
-            <Text style={treeFormStyles.plotSapling}> {changeMode === 'add' ? Strings.messages.AddTree : Strings.messages.EditTree + ': ' + saplingId} </Text>
+            {!visit && <Text style={treeFormStyles.plotSapling}> {changeMode === 'add' ? Strings.messages.AddTree : Strings.messages.EditTree + ': ' + saplingId} </Text>}
+            {visit && <Text style={treeFormStyles.plotSapling}> {visit.visit_name} </Text>}
             <ScrollView
                 ref={scrollViewRef}
                 keyboardShouldPersistTaps='handled'

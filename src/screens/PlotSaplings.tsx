@@ -95,7 +95,7 @@ const PlotSaplings: FC<PlotSaplingsProps> = ({ navigation, route }) => {
         let newSaplings = [...saplings];
         const idx = newSaplings.findIndex(item => item.sapling === value);
         if (idx >= 0) {
-            newSaplings[idx].selected = true;
+            newSaplings[idx].selected = newSaplings[idx].selected ? false : true;
         }
         setSaplings(newSaplings);
 

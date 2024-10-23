@@ -77,7 +77,8 @@ const UserForm: React.FC<UserFormInputProps> = ({ user, changeMode, onCancel, on
     const handlePhoneChange = (phone: string) => {
         phone = phone.trim();
         if (phone.trim() === '') {
-            setFormError(prev => ({ ...prev, phoneError: 'Contact number is required!' }))
+            // allow empty phone number
+            setFormError(prev => ({ ...prev, phoneError: '' }))
         } else if (!phone.match(/^[0-9]{10}$/)) {
             setFormError(prev => ({ ...prev, phoneError: 'Invalid contact number!' }))
         } else {

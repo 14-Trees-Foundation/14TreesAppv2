@@ -17,6 +17,7 @@ import { TreeForm } from "../components/trees/NewTreeForm";
 import { CreateTreeRequest, Tree } from "../model/tree";
 import { TreeImageType } from "../model/tree_image";
 import CardList from "../components/CardList";
+import { Modal } from "react-native";
 
 interface VisitsInputProps {
     navigation: any
@@ -66,12 +67,12 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
             const daoClient = await DaoClient.authenticate();
             let resp = await daoClient.visits.getVisits(visitsPage * 10, 10);
             const newVisits = visitsPage === 0 ? resp : [...visits, ...resp];
-    
+
             // Filter out duplicates based on visit.local_id
-            const uniqueVisits = newVisits.filter((visit, index, self) => 
+            const uniqueVisits = newVisits.filter((visit, index, self) =>
                 index === self.findIndex((t) => t.local_id === visit.local_id)
             );
-    
+
             setVisits(uniqueVisits);
             setHasMoreVisits(resp.length === 10);
         }
@@ -86,12 +87,12 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
             const daoClient = await DaoClient.authenticate();
             let resp = await daoClient.visits.searchVisits(searchQuery, visitsPage * 10, 10);
             const newVisits = visitsPage === 0 ? resp : [...visits, ...resp];
-    
+
             // Filter out duplicates based on visit.local_id
-            const uniqueVisits = newVisits.filter((visit, index, self) => 
+            const uniqueVisits = newVisits.filter((visit, index, self) =>
                 index === self.findIndex((t) => t.local_id === visit.local_id)
             );
-    
+
             setVisits(uniqueVisits);
             setHasMoreVisits(resp.length === 10);
         }
@@ -211,7 +212,7 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
                 {!(isFormVisible || treeModal) && <View style={styles.header}>
                     <SearchBar query={searchQuery} onChange={(text: string) => { setVisitsPage(0); setSearchQuery(text) }} />
                 </View>}
-                {!(isFormVisible || treeModal) && <CardList 
+                {!(isFormVisible || treeModal) && <CardList
                     data={visits}
                     renderItem={renderVisitItem}
                     pagination

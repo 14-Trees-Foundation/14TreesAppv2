@@ -8,7 +8,7 @@ export type PaginatedResponse<T> = {
 export type FilterItem = {
     columnField: string,
     value: any,
-    operatorValue: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'isEmpty' | 'isNotEmpty'
+    operatorValue: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'isEmpty' | 'isNotEmpty' | 'between'
 }
 
 export type Image = {

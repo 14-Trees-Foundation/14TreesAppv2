@@ -1,7 +1,8 @@
 import { AxiosInstance } from "axios";
-import { Tree, TreeAnalytics, TreeHelperDataResponse } from "../../model/tree"
+import { Tree, TreeAnalytics, TreeHelperDataResponse, TreePlantationInfo } from "../../model/tree"
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Constants } from "../Utils";
+import { FilterItem, PaginatedResponse } from "../../model/common";
 
 export class TreeService {
     private api: AxiosInstance;
@@ -40,6 +41,12 @@ export class TreeService {
     async analyticsCount(userName: string): Promise<TreeAnalytics> {
         const url = `/api/appv2/trees-count?name=${userName}`;
         const response =  await this.api.get<TreeAnalytics>(url);
+        return response.data;
+    }
+
+    async getTreesPlantationInfo(offset: number, limit: number, filters?: FilterItem[]): Promise<PaginatedResponse<TreePlantationInfo>> {
+        const url = `/api/trees/get-trees-plantation-info?offset=${offset}&limit=${limit}`;
+        const response = await this.api.post<PaginatedResponse<TreePlantationInfo>>(url, { filters: filters });
         return response.data;
     }
 

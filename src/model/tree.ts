@@ -57,3 +57,9 @@ export type TreeAnalytics = {
     trees_planted_this_month: number,
     trees_planted_by_you: number,
 }
+
+export type TreePlantationInfo = {
+    user_name: string,
+    plot_name: string,
+    trees_planted: number,
+}

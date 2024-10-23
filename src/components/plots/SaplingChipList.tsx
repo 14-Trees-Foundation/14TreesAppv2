@@ -4,6 +4,7 @@ import { Badge, Chip } from 'react-native-paper';
 
 export type SaplingChipItem = {
   sapling: string,
+  plantType?: string,
   badge?: number,
   selected?: boolean,
   local?: boolean,

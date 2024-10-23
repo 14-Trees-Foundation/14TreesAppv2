@@ -162,6 +162,15 @@ export const DrawerContent = (props) => {
               labelStyle={{ marginLeft: -40 }} 
               onPress={() => props.navigation.navigate(Strings.screenNames.getString('Dev', Strings.english))}
             />}
+            {isAdmin && <DrawerItem 
+              icon={({size, color}) => (
+                <Button icon='chart-pie' size={size + 20} color={color}/>
+              )}
+              label={Strings.screenNames.Reports} 
+              style={{marginVertical: -5}}
+              labelStyle={{ marginLeft: -40 }} 
+              onPress={() => props.navigation.navigate(Strings.screenNames.getString('Reports', Strings.english))}
+            />}
             <DrawerItem 
               icon={({size, color}) => (
                 <Button icon='information-outline' size={size + 20} color={color}/>

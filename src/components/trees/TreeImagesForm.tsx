@@ -22,12 +22,13 @@ const getImageDescription = (imageDate: string, treeStatus: string) => {
 }
 
 interface TreeImageFormInputProps {
-    sapling_id: string,
+    saplingId: string,
+    plantType: string,
     onSubmit: (images: CreateTreeSnapshotRequest[], deleted: number[], treeStatus: string) => void,
     onCancel: () => void,
 }
 
-const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, onCancel, onSubmit }) => {
+const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ saplingId, plantType,onCancel, onSubmit }) => {
 
     const [images, setImages] = useState<(ImageSource | CreateTreeSnapshotRequest)[]>([]);
     const [deletedImages, setDeletedImages] = useState<number[]>([]);
@@ -36,11 +37,11 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, onCancel
     const [dateEnabled, setDateEnabled] = useState(false);
 
     useEffect(() => {
-        if (sapling_id !== '') {
+        if (saplingId !== '') {
             setTimeout(async () => {
                 
                 const daoClient = await DaoClient.authenticate();
-                const treeSnapshots = await  daoClient.treeSnapshots.getTreeSnapshotsBySaplingId(sapling_id);
+                const treeSnapshots = await  daoClient.treeSnapshots.getTreeSnapshotsBySaplingId(saplingId);
 
                 const uris = treeSnapshots.map(treeImage => {
                     const description = getImageDescription(treeImage.created_at, treeImage.tree_status);
@@ -59,7 +60,7 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, onCancel
                 setImages(prev => [...prev, ...uris])
             }, 10)
         }
-    }, [sapling_id])
+    }, [saplingId])
 
     const handleSubmit = () => {
         const newImages: CreateTreeSnapshotRequest[] = [];
@@ -106,7 +107,7 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ sapling_id, onCancel
 
     return (
         <View style={{ flex: 1, height: "97%", width: '100%', flexGrow: 1 }}>
-            <Text style={styles.saplingHeaderKey}>{Strings.messages.Sapling + ": "}<Text style={styles.saplingHeaderValue}>{sapling_id}</Text></Text>
+            <Text style={styles.saplingHeaderKey}>{Strings.messages.Sapling + ": "}<Text style={styles.saplingHeaderValue}>{saplingId} ({plantType})</Text></Text>
             <ScrollView
                 keyboardShouldPersistTaps='handled'
                 scrollEnabled={true}

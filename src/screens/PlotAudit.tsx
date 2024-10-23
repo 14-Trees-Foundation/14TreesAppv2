@@ -1,5 +1,5 @@
 import React, { FC, useContext, useEffect, useState } from 'react';
-import { BackHandler, SafeAreaView, ToastAndroid, View } from 'react-native';
+import { BackHandler, Modal, SafeAreaView, StyleSheet, ToastAndroid, View } from 'react-native';
 import SaplingChipList, { SaplingChipItem } from '../components/plots/SaplingChipList';
 import { Button, Divider, Icon, Text } from 'react-native-paper';
 import { DaoClient } from '../services/db/dao';
@@ -63,12 +63,13 @@ const PlotAudit: FC<PlotSaplingsProps> = ({ navigation, route }) => {
     }, [date])
 
     const getSaplings = async (daoClient: DaoClient, date: Date) => {
+        const plantTypes = await daoClient.plantTypes.getPlantTypes(0, -1);
         const trees = await daoClient.trees.getTrees(0, -1, undefined, false, plot.id)
         const saplings: SaplingChipItem[] = [];
         for (const tree of trees) {
             const count = await getImagesCountForSapling(tree.sapling_id, date);
             const isAudited = (count.pending + count.synced) > 0
-            saplings.push({ sapling: tree.sapling_id, badge: count.pending, selected: isAudited });
+            saplings.push({ sapling: tree.sapling_id, badge: count.pending, selected: isAudited, plantType: plantTypes.find(pt => pt.id === tree.plant_type_id)?.name });
         }
         setSaplings(saplings);
     }
@@ -78,21 +79,22 @@ const PlotAudit: FC<PlotSaplingsProps> = ({ navigation, route }) => {
         const dateStr = date.toISOString().slice(0, 10)
         const synced = await daoClient.treeSnapshots.countTreeSnapshotImagesForSaplingId(saplingId, true, dateStr);
         const notSynced = await daoClient.treeSnapshots.countTreeSnapshotImagesForSaplingId(saplingId, false, dateStr);
-        return {synced: synced.add, pending: notSynced.add};
+        return { synced: synced.add, pending: notSynced.add };
     }
 
     const handleSaplingSubmit = (images: CreateTreeSnapshotRequest[], deleted: number[], treeStatus: string) => {
         setIsFormVisible(false);
-        setTimeout(async () => {
+
+        const saveImage = async () => {
             if (selectedSapling) {
                 const daoClient = await DaoClient.authenticate();
                 for (const imageId of deleted) {
                     await daoClient.treeSnapshots.deleteTreeSnapshot(imageId);
                 }
-                if (images.length > 0 ) await daoClient.treeSnapshots.insertTreeSnapshots(selectedSapling, userDetails.id, images);
+                if (images.length > 0) await daoClient.treeSnapshots.insertTreeSnapshots(selectedSapling, userDetails.id, images);
                 else if (deleted.length === 0) await daoClient.treeSnapshots.insertTreeAdit(selectedSapling, userDetails.id, treeStatus);
                 const resp = await getImagesCountForSapling(selectedSapling, date)
-                
+
                 const idx = saplings.findIndex(item => item.sapling === selectedSapling);
                 if (idx >= 0) {
                     const updatedSaplings = [...saplings];
@@ -105,7 +107,9 @@ const PlotAudit: FC<PlotSaplingsProps> = ({ navigation, route }) => {
                 setSelectedSapling(null);
                 ToastAndroid.show("Saved Changes locally!", ToastAndroid.LONG)
             }
-        }, 10)
+        }
+
+        saveImage();
     }
 
     const handleChipPress = (item: string) => {
@@ -129,7 +133,7 @@ const PlotAudit: FC<PlotSaplingsProps> = ({ navigation, route }) => {
                         onChange={setDate}
                     />
                 </View>
-                {!isFormVisible && <View style={{ flex: 1, flexGrow: 1 }}>
+                <View style={{ flex: 1, flexGrow: 1 }}>
                     <Divider />
                     {loading && <View style={{ alignItems: 'center', justifyContent: 'center', alignContent: 'center', flexGrow: 1 }}>
                         <CircleSnail size={100} color={'#059636'}
@@ -160,16 +164,44 @@ const PlotAudit: FC<PlotSaplingsProps> = ({ navigation, route }) => {
                             </View>
                         </View>
                     </View>
-                </View>}
+                </View>
 
-                {isFormVisible && selectedSapling && <TreeImageForm
-                    sapling_id={selectedSapling}
-                    onSubmit={handleSaplingSubmit}
-                    onCancel={() => setIsFormVisible(false)}
-                />}
+                <Modal
+                    visible={isFormVisible && selectedSapling !== null}
+                    onRequestClose={() => setIsFormVisible(false)}
+                    transparent={true}
+                    animationType="fade"
+                >
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            <TreeImageForm
+                                saplingId={selectedSapling ? selectedSapling : ''}
+                                plantType={saplings.find(item => item.sapling === selectedSapling)?.plantType ?? 'Unknown'}
+                                onSubmit={handleSaplingSubmit}
+                                onCancel={() => setIsFormVisible(false)}
+                            />
+                        </View>
+                    </View>
+                </Modal>
             </View>
         </SafeAreaView>
     );
 };
+
+const styles = StyleSheet.create({
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        width: '100%',
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        height: '100%',
+    },
+});
 
 export default PlotAudit;

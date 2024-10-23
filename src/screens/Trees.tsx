@@ -421,7 +421,8 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                 {isImageFormVisible && selectedTree && <TreeImageForm
                     onCancel={() => setIsImageFormVisible(false)}
                     onSubmit={handleImagesSave}
-                    sapling_id={selectedTree?.sapling_id}
+                    saplingId={selectedTree.sapling_id}
+                    plantType={plantTypes.find(plantType => plantType.id === selectedTree.plant_type_id)?.name || ''}
                 />}
 
                 {selectedTree && <TreeInfo
