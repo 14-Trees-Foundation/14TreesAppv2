@@ -47,7 +47,7 @@ export class PlotsDao {
                 local_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 id INTEGER,
                 name TEXT NOT NULL,
-                plot_id TEXT NOT NULL,
+                plot_id TEXT NULL,
                 category TEXT CHECK(category IN ('Public', 'Foundation')) DEFAULT NULL,
                 tags TEXT DEFAULT NULL,
                 gat TEXT DEFAULT NULL,

@@ -129,28 +129,31 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
 
     useEffect(() => {
         if (searchQuery.length < 1) return;
-        const searchTrees = async () => {
-            const localClient = await DaoClient.authenticate();
-            let resp = await localClient.trees.searchTrees(searchQuery, treesPage * 10, 10, selectedPlot?.id);
-            for (let i = 0; i < resp.length; i++) {
-                const count = await getPendingImagesCountForSapling(resp[i].sapling_id);
-                if (count > 0) resp[i].is_uploaded = 0;
+    
+        const timeoutId = setTimeout(() => {
+            const searchTrees = async () => {
+                const localClient = await DaoClient.authenticate();
+                let resp = await localClient.trees.searchTrees(searchQuery, treesPage * 10, 10, selectedPlot?.id);
+                for (let i = 0; i < resp.length; i++) {
+                    const count = await getPendingImagesCountForSapling(resp[i].sapling_id);
+                    if (count > 0) resp[i].is_uploaded = 0;
+                }
+    
+                const newTrees = treesPage === 0 ? resp : [...trees, ...resp];
+                const uniqueTrees = newTrees.filter((tree, index, self) => 
+                    index === self.findIndex((t) => t.local_id === tree.local_id)
+                );
+    
+                setTrees(uniqueTrees);
+                setHasMoreTrees(resp.length === 10);
+                setLoading(false);
             }
-
-            const newTrees = treesPage === 0 ? resp : [...trees, ...resp];
     
-            // Filter out duplicates based on tree.id
-            const uniqueTrees = newTrees.filter((tree, index, self) => 
-                index === self.findIndex((t) => t.local_id === tree.local_id)
-            );
+            searchTrees();
+        }, 500); // Adjust debounce duration
     
-            setTrees(uniqueTrees);
-            setHasMoreTrees(resp.length === 10);
-            setLoading(false);
-        }
-
-        searchTrees();
-    }, [treesPage, searchQuery, stateChange, selectedPlot])
+        return () => clearTimeout(timeoutId);
+    }, [treesPage, searchQuery, stateChange, selectedPlot]);
 
     useEffect(() => {
         if (plotSearchQuery.length !== 0) return;
@@ -422,7 +425,7 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                     onCancel={() => setIsImageFormVisible(false)}
                     onSubmit={handleImagesSave}
                     saplingId={selectedTree.sapling_id}
-                    plantType={plantTypes.find(plantType => plantType.id === selectedTree.plant_type_id)?.name || ''}
+                    plantTypes={plantTypes}
                 />}
 
                 {selectedTree && <TreeInfo

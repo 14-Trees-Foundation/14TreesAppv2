@@ -195,7 +195,7 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
         if (tree) {
             getPlotForPlotId(tree.plot_id);
         }
-    }, [tree, plots])
+    }, [tree])
 
     useEffect(() => {
         changeMode === 'add' && defaultPlot && setSelectedPlot(defaultPlot);

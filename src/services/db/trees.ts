@@ -9,6 +9,104 @@ export class TreesDao {
         this.db = db;
     };
 
+    releaseChangesV_3_0_10 = async () => {
+        try {
+
+            const query2 = `drop table IF EXISTS ${this.tableName}_new;`;
+            await this.db.executeSql(query2);
+    
+            // Check if 'lost' is already in the CHECK constraint
+            const schemaResult = await this.db.executeSql(
+                "SELECT sql FROM sqlite_master WHERE type='table' AND name='trees'"
+            );
+    
+            const schema = schemaResult[0].rows.item(0).sql;
+    
+            // If 'lost' is already in the CHECK constraint, no need to recreate the table
+            if (schema.includes("tree_status IN ('healthy', 'dead', 'diseased', 'lost')")) {
+                console.log("'lost' is already present in the tree_status constraint.");
+                return;
+            }
+    
+            console.log("Updating tree_status constraint to include 'lost'.");
+
+            await this.db.executeSql(`
+                CREATE TABLE IF NOT EXISTS trees_new (
+                    local_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id INTEGER NULL,
+                    sapling_id TEXT UNIQUE NOT NULL,
+                    plant_type_id INTEGER NOT NULL,
+                    plot_id INTEGER,
+                    image TEXT,
+                    tags TEXT,
+                    location TEXT,
+                    planted_by TEXT,
+                    mapped_to_user INTEGER,
+                    mapped_to_group INTEGER,
+                    mapped_at TEXT,
+                    sponsored_by_user INTEGER,
+                    sponsored_by_group INTEGER,
+                    gifted_by INTEGER,
+                    gifted_to INTEGER,
+                    assigned_at TEXT,
+                    assigned_to INTEGER,
+                    assigned_to_local INTEGER,
+                    user_tree_image TEXT,
+                    user_card_image TEXT,
+                    description TEXT,
+                    event_id INTEGER,
+                    visit_id INTEGER,
+                    memory_images TEXT,
+                    tree_status TEXT DEFAULT 'healthy' CHECK (tree_status IN ('healthy', 'dead', 'diseased', 'lost')),
+                    is_uploaded INTEGER DEFAULT 0 CHECK (is_uploaded IN (0, 1)),
+                    change_type TEXT DEFAULT 'none' CHECK (change_type IN ('none', 'add', 'edit', 'delete')),
+                    created_at TEXT,
+                    updated_at TEXT
+                ); 
+            `);
+
+            const limit = 100; // Define batch size
+            let offset = 0;
+            let rowsCopied;
+
+            do {
+                const [result] = await this.db.executeSql(
+                    `INSERT INTO trees_new (
+                        local_id, id, sapling_id, plant_type_id, plot_id, image, tags, location, 
+                        planted_by, mapped_to_user, mapped_to_group, mapped_at, sponsored_by_user, 
+                        sponsored_by_group, gifted_by, gifted_to, assigned_at, assigned_to, 
+                        assigned_to_local, user_tree_image, user_card_image, description, event_id, 
+                        visit_id, memory_images, tree_status, is_uploaded, change_type, created_at, 
+                        updated_at
+                    )
+                    SELECT 
+                        local_id, id, sapling_id, plant_type_id, plot_id, image, tags, location, 
+                        planted_by, mapped_to_user, mapped_to_group, mapped_at, sponsored_by_user, 
+                        sponsored_by_group, gifted_by, gifted_to, assigned_at, assigned_to, 
+                        assigned_to_local, user_tree_image, user_card_image, description, event_id, 
+                        visit_id, memory_images, tree_status, is_uploaded, change_type, created_at, 
+                        updated_at
+                    FROM trees
+                    LIMIT ? OFFSET ?`,
+                    [limit, offset]
+                );
+
+                rowsCopied = result.rowsAffected;
+                offset += limit;
+
+                console.log(`Copied ${rowsCopied} rows in batch starting from offset ${offset}`);
+            } while (rowsCopied > 0); // Continue while rows are being copied
+
+            await this.db.executeSql("DROP TABLE trees");
+
+            await this.db.executeSql("ALTER TABLE trees_new RENAME TO trees");
+    
+            console.log("Success!");
+        } catch (error) {
+            console.error("Error updating the table:", error);
+        }
+    };
+
     releaseChanges = async () => {
         // adding new column to trees
         try {
@@ -63,7 +161,7 @@ export class TreesDao {
                 event_id INTEGER,
                 visit_id INTEGER,
                 memory_images TEXT,
-                tree_status TEXT DEFAULT 'healthy' CHECK (tree_status IN ('healthy', 'dead', 'diseased')),
+                tree_status TEXT DEFAULT 'healthy' CHECK (tree_status IN ('healthy', 'dead', 'diseased', 'lost')),
                 is_uploaded INTEGER DEFAULT 0 CHECK (is_uploaded IN (0, 1)),
                 change_type TEXT DEFAULT 'none' CHECK (change_type IN ('none', 'add', 'edit', 'delete')),
                 created_at TEXT,
@@ -73,13 +171,15 @@ export class TreesDao {
             await this.db.executeSql(query);
             console.log('Trees table created successfully!');
             await this.releaseChanges();
+            await this.releaseChangesV_3_0_10();
+
         } catch (error) {
             console.log('error creating trees table:', error);
         }
     };
 
     deleteTable = async () => {
-        const query = `drop table ${this.tableName};`;
+        const query = `drop table IF EXISTS ${this.tableName};`;
         await this.db.executeSql(query);
         console.log("Trees table deleted")
     }
@@ -456,8 +556,7 @@ export class TreesDao {
             LIMIT ? OFFSET ?;
         `
 
-        console.log(query)
-        const [results] = await this.db.executeSql(query, [`%${searchStr}%`, limit, offset]);
+        const [results] = await this.db.executeSql(query, [`${searchStr}%`, limit, offset]);
         for (let index = 0; index < results.rows.length; index++) {
             trees.push(results.rows.item(index));
         }

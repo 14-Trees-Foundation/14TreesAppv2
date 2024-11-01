@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, ToastAndroid, View } from 'react-native';
 import { Strings } from "../../services/Strings";
 import { CustomButtonStyles, treeFormStyles } from "../../services/Styles";
@@ -8,8 +8,15 @@ import ImageOptions from '../ImageOptionsModal';
 import { Image, ImageSource } from '../../model/common';
 import { DaoClient } from '../../services/db/dao';
 import { DatePicker } from '../DatePicker';
-import { getHumanReadableDate } from '../../services/Utils';
+import { Constants, getHumanReadableDate } from '../../services/Utils';
 import { CreateTreeSnapshotRequest } from '../../model/tree_snapshot';
+import { Tree } from '../../model/tree';
+import SelectMenu from '../SelectMenu';
+import Autocomplete from '../AutocompleteModal';
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Plot } from '../../model/plot';
+import { Site } from '../../model/sites';
 
 const getImageDescription = (imageDate: string, treeStatus: string) => {
     const treeStatusMap: any = {
@@ -23,46 +30,191 @@ const getImageDescription = (imageDate: string, treeStatus: string) => {
 
 interface TreeImageFormInputProps {
     saplingId: string,
-    plantType: string,
+    plantTypes: any[],
     onSubmit: (images: CreateTreeSnapshotRequest[], deleted: number[], treeStatus: string) => void,
     onCancel: () => void,
 }
 
-const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ saplingId, plantType,onCancel, onSubmit }) => {
+const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ saplingId, plantTypes, onCancel, onSubmit }) => {
 
     const [images, setImages] = useState<(ImageSource | CreateTreeSnapshotRequest)[]>([]);
     const [deletedImages, setDeletedImages] = useState<number[]>([]);
     const [date, setDate] = useState(new Date());
     const [treeStatus, setTreeStatus] = useState('healthy');
     const [dateEnabled, setDateEnabled] = useState(false);
+    const [tree, setTree] = useState<Tree | null>(null)
+
+    const [selectedPlantType, setSelectedPlantType] = useState<any>(null);
+    const [recentPlantTypes, setRecentPlantTypes] = useState<any[]>([]);
+    const recentPlantTypesRef = useRef(recentPlantTypes);
+
+    const [plotSearchQuery, setPlotSearchQuery] = useState('');
+    const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null);
+    const [plots, setPlots] = useState<Plot[]>([]);
+    const [plotsPage, setPlotsPage] = useState(0);
+    const [hasMorePlots, setHasMorePlots] = useState(true);
+    const [selectedSite, setSelectedSite] = useState<Site | null>(null);
+
+    // Update the ref whenever recentPlantTypes changes
+    useEffect(() => {
+        recentPlantTypesRef.current = recentPlantTypes;
+    }, [recentPlantTypes]);
+
+    useFocusEffect(
+        useCallback(() => {
+            const getRecentPTs = async () => {
+                try {
+                    const recentPTs = await AsyncStorage.getItem(Constants.recentPlantTypes);
+                    if (recentPTs) {
+                        setRecentPlantTypes(JSON.parse(recentPTs));
+                    }
+                } catch (error) {
+                    console.error("Error fetching recent plant types:", error);
+                }
+            };
+
+            getRecentPTs();
+
+            // Cleanup function to save recentPlantTypes if it has changed
+            return () => {
+                const saveRecentPTs = async () => {
+                    try {
+                        await AsyncStorage.setItem(
+                            Constants.recentPlantTypes,
+                            JSON.stringify(recentPlantTypesRef.current)
+                        );
+                    } catch (error) {
+                        console.error("Error saving recent plant types:", error);
+                    }
+                };
+                saveRecentPTs();
+            };
+        }, [])
+    );
 
     useEffect(() => {
-        if (saplingId !== '') {
-            setTimeout(async () => {
-                
-                const daoClient = await DaoClient.authenticate();
-                const treeSnapshots = await  daoClient.treeSnapshots.getTreeSnapshotsBySaplingId(saplingId);
+        const setTreeSnapshots = async () => { 
+            const daoClient = await DaoClient.authenticate();
+            const treeSnapshots = await  daoClient.treeSnapshots.getTreeSnapshotsBySaplingId(saplingId);
 
-                const uris = treeSnapshots.map(treeImage => {
-                    const description = getImageDescription(treeImage.created_at, treeImage.tree_status);
-                    let imageUri = treeImage.data ? `data:image/jpg;base64,${treeImage.data}`: undefined;
-                    if (treeImage.image) imageUri = treeImage.image;
+            const uris = treeSnapshots.map(treeImage => {
+                const description = getImageDescription(treeImage.created_at, treeImage.tree_status);
+                let imageUri = treeImage.data ? `data:image/jpg;base64,${treeImage.data}`: undefined;
+                if (treeImage.image) imageUri = treeImage.image;
 
-                    return {
-                        uri: imageUri, 
-                        description: description,
-                        id: treeImage.local_id,
-                        tree_status: treeImage.tree_status,
-                        image_date: treeImage.image_date
-                    };
-                })
+                return {
+                    uri: imageUri, 
+                    description: description,
+                    id: treeImage.local_id,
+                    tree_status: treeImage.tree_status,
+                    image_date: treeImage.image_date
+                };
+            })
 
-                setImages(prev => [...prev, ...uris])
-            }, 10)
+            setImages(prev => [...prev, ...uris])
         }
+
+        const setTreeForSapling = async () => {
+            const daoClient = await DaoClient.authenticate();
+            const trees = await daoClient.trees.getTreesBySaplings([saplingId]);
+            if (trees.length === 1) {
+                setTree(trees[0])
+            }
+        }
+        
+        if (saplingId !== '') {
+            setTreeSnapshots();
+            setTreeForSapling();
+        }
+
     }, [saplingId])
 
+    useEffect(() => {
+        const getPlotForPlotId = async (plotId: number) => {
+            const daoClient = await DaoClient.authenticate();
+            const plot = await daoClient.plots.getPlotByLiveId(plotId);
+            setSelectedPlot(plot);
+        }
+        if (tree) {
+            getPlotForPlotId(tree.plot_id);
+        }
+    }, [tree])
+
+    useEffect(() => {
+        if (tree) {
+            const pt = plantTypes.find(item => item.id === tree.plant_type_id);
+            if (pt) setSelectedPlantType(pt);
+        }
+    }, [tree, plantTypes])
+
+    useEffect(() => {
+        const getSelectedSite = async () => {
+            const data = await AsyncStorage.getItem(Constants.selectedSite);
+            if (data) {
+                const site = JSON.parse(data);
+                setSelectedSite(site);
+            } else {
+                setSelectedSite(null);
+            }
+        }
+
+        getSelectedSite();
+    }, [])
+
+    useEffect(() => {
+        if (plotSearchQuery.length !== 0) return;
+        const getPlots = async () => {
+            const daoClient = await DaoClient.authenticate();
+            let resp = await daoClient.plots.getPlots(plotsPage * 10, 10, undefined, false, selectedSite?.id);
+            if (resp.length < 10) setHasMorePlots(false);
+            else setHasMorePlots(true);
+
+            if (plotsPage === 0) setPlots(resp);
+            else setPlots([...plots, ...resp]);
+        }
+
+        getPlots();
+    }, [plotsPage, plotSearchQuery, selectedSite])
+
+    useEffect(() => {
+        if (plotSearchQuery.length < 1) return;
+
+        const getPlots = async () => {
+            const daoClient = await DaoClient.authenticate();
+            let resp = await daoClient.plots.searchPlots(plotSearchQuery, plotsPage * 10, 10, selectedSite?.id);
+            if (resp.length < 10) setHasMorePlots(false);
+            else setHasMorePlots(true);
+
+            if (plotsPage === 0) setPlots(resp);
+            else setPlots([...plots, ...resp]);
+        }
+
+        getPlots();
+
+    }, [plotsPage, plotSearchQuery, selectedSite])
+
     const handleSubmit = () => {
+        const updateTree = async (data: Tree) => {
+            const daoClient = await DaoClient.authenticate();
+            await daoClient.trees.updateTree(data)
+            ToastAndroid.show('Tree details updated!', ToastAndroid.LONG);
+        }
+
+        if (tree) {
+            let isChanged = false;
+            if ( selectedPlot?.id && selectedPlot.id !== tree.plot_id) {
+                isChanged = true;
+                tree.plot_id = selectedPlot.id
+            }
+
+            if (selectedPlantType?.id && selectedPlantType.id !== tree.plant_type_id) {
+                isChanged = true;
+                tree.plant_type_id = selectedPlantType.id
+            }
+
+            if (isChanged) updateTree(tree);
+        }
+
         const newImages: CreateTreeSnapshotRequest[] = [];
         images.forEach(image => {
             let imageObj: any = { ...image }
@@ -105,16 +257,58 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ saplingId, plantType
         setImages([...images.slice(0, index), ...images.slice(index + 1)])
     }
 
+    const handlePlantTypeSelect = (pt: any) => {
+        setSelectedPlantType(pt);
+        if (pt) {
+            setRecentPlantTypes(prev => {
+                const updated = prev.filter(item => item.id !== pt.id);  // Remove if already exists
+                updated.unshift(pt); // Add to the top
+                return updated.slice(0, 20); // Limit recent selections to 20 items
+            });
+        }
+    }
+
     return (
         <View style={{ flex: 1, height: "97%", width: '100%', flexGrow: 1 }}>
-            <Text style={styles.saplingHeaderKey}>{Strings.messages.Sapling + ": "}<Text style={styles.saplingHeaderValue}>{saplingId} ({plantType})</Text></Text>
+            <Text style={styles.saplingHeaderKey}>{Strings.messages.Sapling + ": "}<Text style={styles.saplingHeaderValue}>{saplingId}</Text></Text>
             <ScrollView
                 keyboardShouldPersistTaps='handled'
                 scrollEnabled={true}
                 style={{ ...treeFormStyles.detailsContainerOuter, marginHorizontal: 10, }} >
                 <View style={{ margin: 4, borderRadius: 10 }}>
 
-                    <View style={{ marginTop: 15, flexGrow: 1 }}>
+                    <View style={{ marginTop: 10, flexGrow: 1 }}>
+                        <SelectMenu
+                            value={selectedPlantType}
+                            options={plantTypes}
+                            recentOptions={recentPlantTypes}
+                            label={Strings.labels.SelectTreeType}
+                            onSelect={handlePlantTypeSelect}
+                            valueGetter={(data) => data.name}
+                            keyGetter={(data) => data.value}
+                            variant='outlined'
+                        />
+                    </View>
+
+                    <View style={{ marginTop: 10, flexGrow: 1 }}>
+                        <Autocomplete
+                            value={selectedPlot}
+                            options={plots}
+                            label={selectedPlot ? Strings.labels.SelectedPlot : Strings.labels.SelectPlot}
+                            onSelect={(data) => { setSelectedPlot(data); }}
+                            valueGetter={(data) => data.name}
+                            keyGetter={(data) => data.id}
+                            variant='outlined'
+                            onSearch={(text: string) => { setPlotsPage(0); setPlotSearchQuery(text) }}
+                            paginationOptions={{
+                                hasMore: hasMorePlots,
+                                onPageChange: setPlotsPage,
+                                page: plotsPage
+                            }}
+                        />
+                    </View>
+
+                    <View style={{ marginTop: 10, flexGrow: 1 }}>
                         <ImagesView
                             title={images.length > 0 ? Strings.messages.TreeImages : Strings.messages.NoImages}
                             images={ images.map(item => item).reverse() }

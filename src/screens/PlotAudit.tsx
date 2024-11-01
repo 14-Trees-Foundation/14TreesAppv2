@@ -1,7 +1,7 @@
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { BackHandler, Modal, SafeAreaView, StyleSheet, ToastAndroid, View } from 'react-native';
 import SaplingChipList, { SaplingChipItem } from '../components/plots/SaplingChipList';
-import { Button, Divider, Icon, Text } from 'react-native-paper';
+import { Divider, Icon, Text } from 'react-native-paper';
 import { DaoClient } from '../services/db/dao';
 import GlobalContext from '../context/GlobalContext ';
 import { CircleSnail } from 'react-native-progress';
@@ -30,6 +30,7 @@ const PlotAudit: FC<PlotSaplingsProps> = ({ navigation, route }) => {
     const [saplings, setSaplings] = useState<SaplingChipItem[]>([])
     const [userDetails, setUserDetails] = useState<any>(null);
     const [date, setDate] = useState<Date>(new Date());
+    const [plantTypes, setPlantTypes] = useState<any[]>([]);
 
     useEffect(() => {
         const backAction = () => {
@@ -46,6 +47,10 @@ const PlotAudit: FC<PlotSaplingsProps> = ({ navigation, route }) => {
         const getUserDetails = async () => {
             const userData = await AsyncStorage.getItem(Constants.userDetailsKey)
             if (userData) setUserDetails(JSON.parse(userData));
+
+            const daoClient = await DaoClient.authenticate();
+            let plantTypes = await daoClient.plantTypes.getPlantTypes(0, -1);
+            setPlantTypes(plantTypes);
         }
 
         getUserDetails();
@@ -63,13 +68,12 @@ const PlotAudit: FC<PlotSaplingsProps> = ({ navigation, route }) => {
     }, [date])
 
     const getSaplings = async (daoClient: DaoClient, date: Date) => {
-        const plantTypes = await daoClient.plantTypes.getPlantTypes(0, -1);
         const trees = await daoClient.trees.getTrees(0, -1, undefined, false, plot.id)
         const saplings: SaplingChipItem[] = [];
         for (const tree of trees) {
             const count = await getImagesCountForSapling(tree.sapling_id, date);
             const isAudited = (count.pending + count.synced) > 0
-            saplings.push({ sapling: tree.sapling_id, badge: count.pending, selected: isAudited, plantType: plantTypes.find(pt => pt.id === tree.plant_type_id)?.name });
+            saplings.push({ sapling: tree.sapling_id, badge: count.pending, selected: isAudited });
         }
         setSaplings(saplings);
     }
@@ -176,7 +180,7 @@ const PlotAudit: FC<PlotSaplingsProps> = ({ navigation, route }) => {
                         <View style={styles.modalContent}>
                             <TreeImageForm
                                 saplingId={selectedSapling ? selectedSapling : ''}
-                                plantType={saplings.find(item => item.sapling === selectedSapling)?.plantType ?? 'Unknown'}
+                                plantTypes={plantTypes}
                                 onSubmit={handleSaplingSubmit}
                                 onCancel={() => setIsFormVisible(false)}
                             />
