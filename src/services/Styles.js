@@ -119,7 +119,6 @@ export const commonStyles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     color: 'black',
     textAlign: 'center',
-    fontWeight: 'bold',
     fontSize: 20,
   },
   defaultButtonTextStyle: {
@@ -128,10 +127,10 @@ export const commonStyles = StyleSheet.create({
     textAlign: 'center',
   },
   drawerHeaderLight: {
-    backgroundColor: '#F1FAEE',
+    backgroundColor: '#83cde6',
   },
   drawerHeaderDark: {
-    backgroundColor: '#FFD700'
+    backgroundColor: 'lightgreen'
   },
   headerTitleStyleDark: {
     fontFamily: 'Inter-Regular',
@@ -281,12 +280,11 @@ export const commonStyles = StyleSheet.create({
   txtInput: {
     height: 50,
     fontFamily: 'Inter-Regular',
-    width: '93%',
+    width: '100%',
     borderWidth: 2,
     borderColor: '#ccc',
     borderRadius: 5,
     backgroundColor: 'white',
-    marginTop: 10,
     marginBottom: 10,
     padding: 10,
     color: '#333', // Change font color here
@@ -407,10 +405,7 @@ export const CustomButtonStyles = StyleSheet.create({
   button: {
     height: 50,
     justifyContent: 'center',
-    borderRadius: 10,
-    borderColor: 'white',
-    //borderColor: 'white',
-    //borderWidth: 1,
+    borderRadius: 6,
     shadowColor: '#1A894E',
     elevation: 4,
     shadowOffset: {
@@ -420,6 +415,19 @@ export const CustomButtonStyles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 10,
   },
+  errorButton: {
+    height: 50,
+    justifyContent: 'center',
+    borderRadius: 6,
+    shadowColor: '#1A894E',
+    elevation: 4,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+  }
 })
 
 export const coordinateSetterStyles = StyleSheet.create({
@@ -441,9 +449,10 @@ export const customDropdownStyles = StyleSheet.create({
   }),
   clearButton: {
     position: 'absolute',
-    top: 22,
+    top: 14,
     right: 29,
     zIndex: 1,
+    opacity: 0.7,
   },
 });
 
@@ -606,7 +615,7 @@ export const languageModalStyles = StyleSheet.create({
 });
 
 export const ScreenHeaderContentStyles = StyleSheet.create({
-  container: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
+  container: { flexDirection: 'row', justifyContent: 'space-between' },
   modeIcon: { width: 35, height: 35, borderRadius: 37.5 }
 })
 
@@ -688,21 +697,25 @@ export const treeFormStyles = StyleSheet.create({
     marginTop: 25,
     fontWeight: '300',
   },
-  textInput: (lightTheme, saplingid) => ({
+  textInput: (lightTheme) => ({
     ...commonStyles.txtInput,
     color: lightTheme ? '#333' : 'black',
     fontSize: 15,
     borderRadius: 13,
-    fontWeight: saplingid ? '800' : 'normal',
+    fontWeight: 'normal',
   }),
+  inputLabel: {
+    ...commonStyles.text4,
+    fontSize: 14,
+    paddingLeft: 15,
+  },
   imageContainer: {
     flexDirection: 'column',
-    marginHorizontal: 20,
-    marginTop: 10,
+    marginHorizontal: 12,
     marginBottom: 15,
     alignItems: 'center',
     justifyContent: 'space-around',
-    // width: "98%"
+    width: "93%"
   },
   imagePicker: {
     flex: 1,
@@ -883,13 +896,18 @@ export const homeStyles = StyleSheet.create({
 });
 
 export const loginStyles = StyleSheet.create({
-  outerContainer: { backgroundColor: 'white', height: '100%', marginTop: 40 },
+  outerContainer: { 
+    backgroundColor: 'white', 
+    height: '100%', 
+  },
   inputContainer: {
-    padding: 2,
-    margin: 4,
+    marginTop: 48,
+    marginBottom: 8,
+    marginHorizontal: 10,
     borderRadius: 10,
     borderColor: '#ccc',
     borderWidth: 3,
+    borderRadius: 5,
   },
   textInput: (lightTheme, phoneNumber) => ({
     ...commonStyles.txtInput,

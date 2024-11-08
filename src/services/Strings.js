@@ -8,6 +8,10 @@ export class Strings {
     static screenNames = new LocalizedStrings({
         "en": {
             HomePage: "Home",
+            TreesPage: "Trees",
+            PlotsPage: "Plots",
+            SitesPage: "Sites",
+            VisitsPage: "Visits",
             AddTreeShift: "Add Tree",
             LocalDataView: "Local Data",
             LocalDataNavigator: "LocalDataNavigator",
@@ -22,14 +26,23 @@ export class Strings {
             AddImageShift: "Add Tree Image",
             UpdatePlotShift: "Update Tree Plot",
             AppInfo: "App Info",
+            Dev: "Dev",
+            Map: "Map",
+            ChangePlot: "Change Plot",
+            PlotAudit: "Plot Audit",
             TreesInShift: "Trees In Shift", //manjur
             PlotSelect: "Select Plot",
             SyncDisplay: "Sync Data", //manjur
             LoadingScreen: 'Load',
             UpdateSaplingsPlot: "UpdateSaplingsPlot",
+            UsersPage: "Users",
         },
         "mr": {
             HomePage: "मुख्य पृष्ठ",
+            TreesPage: "झाडे",
+            PlotsPage: "भूखंड",
+            SitesPage: "साइट्स",
+            VisitsPage: "भेटी",
             AddTreeShift: "नवीन झाड जोडा",
             LocalDataView: "लोकल डेटा",
             LocalDataNavigator: "LocalDataNavigator",
@@ -45,11 +58,16 @@ export class Strings {
             AddImageShift: "अ‍ॅड सॅपलिंग इमेज",
             UpdatePlotShift: "सॅपलिंग प्लॉट अपडेट",
             AppInfo: "अ‍ॅपची माहिती",
+            Dev: "देव",
+            Map: "नकाशा",
+            ChangePlot: "प्लॉट बदला",
+            PlotAudit: 'प्लॉट ऑडिट',
             TreesInShift: "शिफ्ट मधील झाडे", //manjur
             PlotSelect: "प्लॉट निवडा", //manjur
             SyncDisplay: "सिंक डेटा",
             LoadingScreen: 'लोड',
-            UpdateSaplingsPlot: "झाडाचा प्लॉट अपडेट करा"
+            UpdateSaplingsPlot: "झाडाचा प्लॉट अपडेट करा",
+            UsersPage: "वापरकर्ते",
         }
     })
 
@@ -116,6 +134,57 @@ export class Strings {
             ShiftType: "Shift type",
             StartThisShift: "Start this Shift",
 
+            // users
+            NewUsers: "New Users",
+
+            // Analytics
+            TotalTrees: 'Total Trees Planted Till Date',
+            YearTrees: 'Trees Planted This Year',
+            MonthTrees: 'Trees Planted This Month',
+            PersonTrees: 'Trees Planted By You!',
+
+            // Sync
+            LocalChanges: 'Local Changes',
+            New: 'New',
+            Updated: 'Updated',
+            Deleted: 'Deleted',
+            VisitImages: 'Visit Images',
+            TreeImages: 'Tree Images',
+            Completed: 'Completed',
+
+            NoImages: 'No Images',
+
+            UploadingLocal: 'Uploading Local Changes!',
+            FetchingChanges: 'Fetching New Changes from Server!',
+
+            SyncHistory: 'Sync History',
+            CurrentSync: 'Current Sync',
+            StartTime: 'Start Time',
+            UploadTime: 'Upload Time',
+            UploadError: 'Upload Error',
+            FetchTime: 'Fetch Time',
+            FetchError: 'Fetch Error',
+            NoDataUploaded: 'No data was uploaded in this sync.',
+            UploadingChanges: 'Uploading changes...',
+
+            NetworkSpeed: 'Network Speed',
+            EstimatedTimeToSync: 'Estimated Time to Sync',
+            WishToContinue: 'Do you wish to sync the data?',
+            SelectTheSiteYouAreAt: 'Select the site you are at',
+            SelectNewPlot: 'Select a new plot name',
+
+            // Visits
+            AddVisit: 'Add Visit',
+            EditVisit: 'Edit Visit',
+
+            // Trees
+            AddVisitorDetails: 'Add Visitor Details?',
+            AddTree: 'Add Tree',
+            EditTree: 'Edit Tree',
+            AddTreeImages: 'Add Tree Images For Sapling',
+            TreeImages: 'Tree Images',
+            ImageDate: "Image date different than today's date?",
+            WhatIsTreeStatus: "What is the health status of the tree?",
         },
         "mr": {
             SignIn: "साइन इन करा",
@@ -176,6 +245,58 @@ export class Strings {
             ClickToDelete: "एंट्री हटवण्यासाठी रोपावर क्लिक करा", //manjur
             ShiftType: "शिफ्ट प्रकार",
             StartThisShift: "ही शिफ्ट सुरू करा",
+
+            // users
+            NewUsers: "नवीन वापरकर्ते",
+
+            // Analytics
+            TotalTrees: 'आजपर्यंत लावलेली एकूण झाडे',
+            YearTrees: 'यावर्षी लावलेली झाडे',
+            MonthTrees: 'या महिन्यात लावलेली झाडे',
+            PersonTrees: 'तुम्ही लावलेली झाडे!',
+
+            // Sync
+            LocalChanges: 'स्थानिक बदल',
+            New: 'नवीन',
+            Updated: 'अपडेट केले',
+            Deleted: 'हटवले',
+            VisitImages: 'प्रतिमांना भेट द्या',
+            TreeImages: 'वृक्ष प्रतिमा',
+            Completed: 'पूर्ण झाले',
+
+            NoImages: 'प्रतिमा नाहीत',
+
+            UploadingLocal: 'स्थानिक बदल अपलोड करत आहे!',
+            FetchingChanges: 'सर्व्हरवरून नवीन बदल आणत आहे!',
+
+            SyncHistory: 'सिंक इतिहास',
+            CurrentSync: 'वर्तमान समक्रमण',
+            StartTime: 'प्रारंभ वेळ',
+            UploadTime: 'अपलोड वेळ',
+            UploadError: 'अपलोड त्रुटी',
+            FetchTime: 'वेळ आणा',
+            FetchError: 'आणणे त्रुटी',
+            NoDataUploaded: 'या सिंकमध्ये कोणताही डेटा अपलोड केला गेला नाही.',
+            UploadingChanges: 'बदल अपलोड करत आहे...',
+
+            NetworkSpeed: 'नेटवर्क गती',
+            EstimatedTimeToSync: 'सिंक करण्यासाठी अंदाजे वेळ',
+            WishToContinue: 'तुम्ही डेटा समक्रमित करू इच्छिता?',
+            SelectTheSiteYouAreAt: 'तुम्ही ज्या साइटवर आहात ते निवडा',
+            SelectNewPlot: 'नवीन प्लॉटचे नाव निवडा',
+
+            // Visits
+            AddVisit: 'भेट जोडा',
+            EditVisit: 'भेट संपादित करा',
+
+            // Trees
+            AddVisitorDetails: 'अभ्यागत तपशील जोडायचे?',
+            AddTree: 'झाड जोडा',
+            EditTree: 'झाड संपादित करा',
+            AddTreeImages: 'रोपट्यासाठी वृक्ष प्रतिमा जोडा',
+            TreeImages: 'वृक्ष प्रतिमा',
+            ImageDate: "चित्राची तारीख आजच्या तारखेपेक्षा वेगळी आहे का?",
+            WhatIsTreeStatus: "झाडाच्या आरोग्याची स्थिती काय आहे?",
         },
     });
     static alertMessages = new LocalizedStrings({
@@ -416,7 +537,29 @@ export class Strings {
             logOut: 'Log out',
             login: "Log in",
             Done: "End Shift", //manjur
-            Continue: "Continue" //manjur
+            Continue: "Continue", //manjur
+            Settings: "Settings",
+            ChangeLanguage: "Change Language",
+            ChangeTheme: "Change Theme",
+
+            // Users
+            AddUser: "Add User",
+
+            // Visits
+            AddVisitImages: 'Add Visit Images',
+
+            // Trees
+            AddNewImage: 'Add New Image',
+            AddTreeImage: 'Add Tree Image',
+            AddUserTreeImage: 'Add User Tree Image',
+            AddUserCardImage: 'Add User Card Image',
+
+            DownloadData: 'Download Data',
+            UploadData: 'Upload Data',
+            UploadInProgress: 'Upload in progress',
+            DownloadSitesPlots: 'Download Sites & Plots Data',
+
+            ChangePlot: 'Change Plot',
         },
         "mr": {
             // home
@@ -463,7 +606,29 @@ export class Strings {
             logOut: 'बाहेर पडणे',
             login: "लॉगिन",
             Done: "शिफ्ट संपली", //manjur
-            Continue: 'सुरू'//manjur
+            Continue: 'सुरू', //manjur
+            Settings: "सेटिंग्ज",
+            ChangeLanguage: "भाषा बदला",
+            ChangeTheme: "थीम बदला",
+
+            // Users
+            AddUser: "वापरकर्ता जोडा",
+
+            // Visits
+            AddVisitImages: 'भेट प्रतिमा जोडा',
+
+            // Trees
+            AddNewImage: 'नवीन प्रतिमा जोडा',
+            AddTreeImage: 'झाडाची प्रतिमा जोडा',
+            AddUserTreeImage: 'वापरकर्ता वृक्ष प्रतिमा जोडा',
+            AddUserCardImage: 'वापरकर्ता कार्ड प्रतिमा जोडा',
+
+            DownloadData: 'डेटा डाउनलोड करा',
+            UploadData: 'डेटा अपलोड करा',
+            UploadInProgress: 'अपलोड प्रगतीपथावर आहे',
+            DownloadSitesPlots: 'साइट्स आणि प्लॉट डेटा डाउनलोड करा',
+
+            ChangePlot: 'प्लॉट बदला',
         }
     })
     static labels = new LocalizedStrings({
@@ -471,8 +636,16 @@ export class Strings {
 
             //add tree
             SaplingId: "Sapling ID",
-            SelectTreeType: "Select Tree Type",
-            SelectPlot: "Select Plot",
+            SelectTreeType: "Select Plant Type",
+            SelectPlot: "Select a Plot",
+            SelectedPlot: "Selected Plot",
+            SelectTreeStatus: "Select Tree Status",
+            SelectUser: "Select User",
+            SelectVisit: "Select Visit",
+            SelectSite: "Select a Site",
+            SelectedSite: "Selected Site",
+            ClickSiteFromDropdown: "Click the site name from dropdown",
+
             //local data view
             UploadStatus: "Upload Status",
             TreeType: "Tree Type",
@@ -487,12 +660,55 @@ export class Strings {
             TimeTaken: 'Timer',
             AddAShift : 'Add a tree to this shift',
             Time: 'Time',
+
+            // User
+            Username: 'Username',
+            Email: 'Email',
+            Phone: 'Contact No.',
+            DOB: 'Date of Birth',
+
+            // Plot
+            PlotName: 'Plot name',
+            PlotId: 'Plot ID',
+            Tags: 'Tags',
+            PlotCategory: 'Plot category',
+            Gat: 'Gat',
+
+            // site
+            SiteName: 'Site Name',
+
+            // Visits
+            VisitName: 'Visit Name',
+            VisitType: 'Visit Type',
+            VisitDate: 'Visit Date',
+
+            // Trees
+            ImageDate: 'Image Date',
+            TreeImage: 'Tree Image',
+            UserTreeImage: 'User Tree Image',
+            UserCardImage: 'User Card Image',
+
+            Selected: 'Selected',
+            NotSelected: 'Not Selected',
+            Audited: 'Audited',
+            NotAudited: 'Not Audited',
+            Total: 'Total',
+            ChangeSaplingsFromPlot: 'Change saplings from plot',
+            To: 'To',
         },
         "mr": {
             //add tree
             SaplingId: "रोपाची संख्या",
             SelectTreeType: "झाडाचा प्रकार निवडा",
             SelectPlot: "प्लॉट निवडा",
+            SelectedPlot: "निवडलेला प्लॉट",
+            SelectTreeStatus: "झाडाची स्थिती निवडा",
+            SelectUser: "वापरकर्ता निवडा",
+            SelectVisit: "भेट द्या निवडा",
+            SelectSite: "एक साइट निवडा",
+            SelectedSite: "निवडलेली साइट",
+            ClickSiteFromDropdown: "ड्रॉपडाउनमधून साइटच्या नावावर क्लिक करा",
+
             //local data view
             UploadStatus: "अपलोड स्थिती",
             TreeType: "झाडाचा प्रकार",
@@ -506,7 +722,43 @@ export class Strings {
             EndTime: 'समाप्ती वेळ',
             TimeTaken: 'वेळ',
             Time: 'वेळ',
-            AddAShift: 'या शिफ्टमध्ये एक झाड जोडा'
+            AddAShift: 'या शिफ्टमध्ये एक झाड जोडा',
+
+            // User
+            Username: 'वापरकर्ता नाव',
+            Email: 'ईमेल',
+            Phone: 'संपर्क क्र.',
+            DOB: 'जन्मतारीख',
+
+            // site
+            SiteName: 'साइटचे नाव',
+
+            // Plot
+            PlotName: 'प्लॉटचे नाव',
+            PlotId: 'प्लॉट आयडी',
+            Tags: 'टॅग्ज',
+            PlotCategory: 'प्लॉट श्रेणी',
+            Gat: 'गॅट',
+            AddAShift: 'या शिफ्टमध्ये एक झाड जोडा',
+
+            // Visits
+            VisitName: 'भेटीचे नाव',
+            VisitType: 'भेट प्रकार',
+            VisitDate: 'भेट तारीख',
+
+            // Trees
+            ImageDate: 'प्रतिमा/चित्र तारीख',
+            TreeImage: 'झाडाची प्रतिमा',
+            UserTreeImage: 'वापरकर्ता वृक्ष प्रतिमा',
+            UserCardImage: 'वापरकर्ता कार्ड प्रतिमा',
+
+            Selected: 'निवडलेले',
+            NotSelected: 'निवडलेले नाही',
+            Audited: 'ऑडिट केले',
+            NotAudited: 'ऑडिट केलेले नाही',
+            Total: 'एकूण',
+            ChangeSaplingsFromPlot: 'प्लॉटमधून रोपे बदला',
+            To: 'ला',
         }
     })
     static english = 'en';

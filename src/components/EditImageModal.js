@@ -98,9 +98,9 @@ function EditImageModal({ modalVisible, setModalVisible, saplingID, onFetchData 
     const pickImage = async (selectionId) => {
         setGalleryModalVisible(false);
         Utils.startTask();
-        let newImage = await Utils.getImage(true, selectionId);
-        if (newImage === undefined) return;
-        newImage = await Utils.formatImageForSapling(newImage, saplingid);
+        let newImages = await Utils.getImage(true, selectionId);
+        if (!newImages || newImages.length === 0) return;
+        const newImage = await Utils.formatImageForSapling(newImages[0], saplingid);
         setImage(newImage);
         setClickedNewImage(true);
         setShowImage(true);
@@ -358,12 +358,14 @@ function EditImageModal({ modalVisible, setModalVisible, saplingID, onFetchData 
                                 </View>
                             </Modal>
 
-                            <CoordinateSetter
-                                inLat={lat}
-                                inLng={lng}
-                                onSetLat={item => setlat(item)}
-                                onSetLng={item => setlng(item)}
-                            />
+                            <View style={{marginTop: 15}}>
+                                <CoordinateSetter
+                                    inLat={lat}
+                                    inLng={lng}
+                                    onSetLat={item => setlat(item)}
+                                    onSetLng={item => setlng(item)}
+                                />
+                            </View>
 
                             <View style={CustomButtonStyles.container}>
                                 <View style={CustomButtonStyles.buttonRow}>
@@ -385,6 +387,7 @@ function EditImageModal({ modalVisible, setModalVisible, saplingID, onFetchData 
                                     <View style={CustomButtonStyles.buttonContainer}>
                                         <Button
                                             onPress={onSave}
+                                            disabled={saplingid === '' || !lat || image === null}
                                             mode="contained"
                                             buttonColor='#1D4ED8'
                                             labelStyle={CustomButtonStyles.buttonLabel}

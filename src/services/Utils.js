@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { Alert, ToastAndroid, Modal } from "react-native";
+import { openCamera, openPicker } from "react-native-image-crop-picker";
+import { Alert, ToastAndroid } from "react-native";
 import { DataService } from "./DataService";
 import { LocalDatabase } from "./tree_db";
 import RNRestart from 'react-native-restart';
@@ -9,6 +9,8 @@ import ImageResizer from "react-native-image-resizer";
 import RNFS from 'react-native-fs';
 import ReactNativeForegroundService from '@supersami/rn-foreground-service';
 import { shiftTypes } from "../screens/Shifts";
+import { DaoClient } from "./db/dao";
+import moment from "moment";
 const MIN_BATCH_SIZE = 5
 
 const shiftTypesObject = {
@@ -146,9 +148,9 @@ export class Utils {
         for (let index = 0; index < images.length; index++) {
             //console.log("image while adding tree: ", images[index].data)
             const element = {
-                saplingid: tree.saplingid,
+                sapling_id: tree.sapling_id,
                 image: images[index].data,
-                imageid: images[index].name,
+                image_id: images[index].name,
                 remark: images[index].meta.remark,
                 timestamp: images[index].meta.capturetimestamp,
             };
@@ -205,7 +207,7 @@ export class Utils {
                 lng: res[index].lng,
                 inActive: res[index].inActive,
                 image: {
-                    name: res[index]?.imageid,
+                    name: res[index]?.image_id,
                     data: res[index]?.image,
                     meta: {
                         remark: res[index]?.remark?.replace("''", "'"),
@@ -278,6 +280,27 @@ export class Utils {
     }
 
     static async createLocalTablesIfNeeded() {
+        // await this.localdb.deleteTables();
+        // await AsyncStorage.multiRemove([
+        //     // Constants.lastHashKey,
+        //     // Constants.lastHashForShifts,
+        //     // Constants.adminIdKey,
+        //     // Constants.appRootTagKey,
+        //     // Constants.syncDateKey,
+        //     // Constants.lastVisitImagesFetchedAt
+        //     // Constants.lastTreeSnapshotsFetchedAt
+        // ])
+        const daoClient = await DaoClient.authenticate();
+        await daoClient.trees.createTable();
+        await daoClient.users.createTable();
+        await daoClient.treeImages.createTable();
+        await daoClient.treeSnapshots.createTable();
+        await daoClient.plots.createTable();
+        await daoClient.sites.createTable();
+        await daoClient.visits.createTable();
+        await daoClient.visitImages.createTable();
+        await daoClient.syncInfo.createTable();
+        await daoClient.siteSync.createTable();
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
         await this.localdb.createSaplingTbl();
@@ -322,10 +345,10 @@ export class Utils {
         if (data) {
             console.log("---------------------------New Data-------------")
 
-            await Utils.storeTreeTypes(data['treeTypes']);
+            await Utils.storeTreeTypes(data['plant_types']);
             await Utils.storePlots(data['plots']);
-            console.log("data['saplings'] :", data['saplings'].length)
-            await Utils.storeTrees(data['saplings'])
+            console.log("data['sapling_ids'] :", data['sapling_ids'].length)
+            await Utils.storeTrees(data['sapling_ids'])
             await AsyncStorage.setItem(Constants.lastHashKey, newHash);
             // ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG)
             // setstatus(data updated)
@@ -338,6 +361,7 @@ export class Utils {
         let lastHashForShifts = await AsyncStorage.getItem(Constants.lastHashForShifts);
         lastHash = String(lastHashForShifts);
         let userId = await Utils.getUserId();
+        userId = parseInt(userId);
         const shiftData = await DataService.fetchShifts(userId, lastHash);
 
         console.log("lastHash shift---", lastHash)
@@ -418,13 +442,13 @@ export class Utils {
                     const shiftData = {
                         id: shift.id,
                         user_id: shift.user_id,
-                        plotselected: shift.plotselected,
-                        starttime: shift.starttime,
-                        endtime: shift.endtime,
-                        shiftended: 1, //made it 1
-                        shiftuploadcomplete: uploadedShift ? 1 : 0,
-                        timetaken: shift.timetaken,
-                        treesplanted: shift.treesplanted,
+                        plot_selected: shift.plotselected,
+                        start_time: shift.starttime,
+                        end_time: shift.endtime,
+                        shift_ended: 1, //made it 1
+                        shift_upload_complete: uploadedShift ? 1 : 0,
+                        time_taken: shift.timetaken,
+                        trees_planted: shift.treesplanted,
                         saplings: saplings
                     }
 
@@ -457,15 +481,16 @@ export class Utils {
     }
 
 
-    static async storeTreeTypes(treeTypes) {
+    static async storeTreeTypes(plantTypes) {
         // console.log(treeTypes[0])
-        const treeTypesInLocalDBFormat = treeTypes.map((treeType) => {
-            if (treeType.name) {
-                treeType.name = treeType.name.replace("'", "''");
+        const treeTypesInLocalDBFormat = plantTypes.map((plantType) => {
+            if (plantType.name) {
+                plantType.name = plantType.name.replace("'", "''");
             }
             return {
-                name: treeType.name,
-                tree_id: treeType.tree_id
+                name: plantType.name,
+                plant_type_id: plantType.plant_type_id,
+                id: plantType.id,
             }
         })
         let failure = false;
@@ -500,6 +525,7 @@ export class Utils {
                 plot.name = plot.name.replace("'", "''");
             }
             return {
+                id: plot.id,
                 name: plot.name,
                 plot_id: plot.plot_id
             }
@@ -580,15 +606,15 @@ export class Utils {
                 plot_selected: shift.plot_selected,
                 end_time: shift.end_time,
                 saplings: shift.saplings,
-                shift_id: shift._id,
+                shift_id: shift.id,
                 shift_type: shift.shift_type,
                 start_time: shift.start_time,
                 timestamp: shift.timestamp,
                 time_taken: shift.time_taken,
                 trees_planted: shift.trees_planted,
                 user_id: shift.user_id,
-                shiftended: 1,
-                shiftuploadcomplete: 1,
+                shift_ended: 1,
+                shift_upload_complete: 1,
             }
         })
 
@@ -697,7 +723,7 @@ export class Utils {
         let shifts = await Utils.getShiftsIDLocalDB(0); //not uploaded.
 
         for (const shift of shifts) {
-            const shiftType = shiftTypesObject[shift.shifttype];
+            const shiftType = shiftTypesObject[shift.shift_type];
             let saplingsInShift = shift.saplings;
             let saplingsFromLocalTable;
 
@@ -924,6 +950,14 @@ export class Utils {
     static async getLastSyncDate() {
         return await AsyncStorage.getItem(Constants.syncDateKey);
     }
+    
+    static async getNetworkSpeed() {
+        return await AsyncStorage.getItem(Constants.networkSpeed);
+    }
+
+    static async removeNetworkSpeed() {
+        await AsyncStorage.removeItem(Constants.networkSpeed);
+    }
 
     static async upload(onProgress = undefined) {
         const final = await Utils.fetchTreesFromLocalDB(0);//not uploaded.
@@ -1093,6 +1127,7 @@ export class Utils {
         var final = [];
         for (let index = 0; index < res.length; index++) {
             let tree = await Utils.formatLocalTreeToJSON(res[index]);
+            console.log(tree);
             final.push(tree);
         }
         return final;
@@ -1107,17 +1142,21 @@ export class Utils {
             element.lng = 0;
         }
         //console.log(element.lat, element.lng);
+        const userDetailsStr = await AsyncStorage.getItem(Constants.userDetailsKey)
+        const userDetails = JSON.parse(userDetailsStr);
         let images = await this.localdb.getTreeImages(element.sapling_id);
 
         const tree = {
             sapling_id: element.sapling_id,
-            type_id: element.type_id,
+            plant_type_id: element.plant_type_id,
             plot_id: element.plot_id,
             coordinates: [element.lat, element.lng],
+            planted_by: userDetails.name,
             images: images,
             // shiftID: element.shiftID,
             uploaded: (element.uploaded === 1),
             //sequenceNo: element.sequenceNo,
+            tree_status: element.tree_status,
             timestamp: element.timestamp
         };
         if (element.uploaded !== undefined) {
@@ -1137,13 +1176,13 @@ export class Utils {
     static async treeTypeFromID(treeTypeID) {
         //both ids are numbers of type string.
         const treeNames = await this.localdb.getTreeTypes();
-        const requiredTreeType = treeNames.find((tree) => (tree.value === treeTypeID));
+        const requiredTreeType = treeNames.find((tree) => (tree.id === treeTypeID));
         return requiredTreeType;
     }
     static async plotFromPlotID(plotID) {
         //both ids are numbers of type string.
         const plots = await this.localdb.getAllPlots();
-        const requiredPlot = plots.find((plot) => (plot.value === plotID));
+        const requiredPlot = plots.find((plot) => (plot.id === plotID));
         console.log(requiredPlot)
         return requiredPlot;
     }
@@ -1164,7 +1203,8 @@ export class Utils {
 
 
     static async getUserId() {
-        return await AsyncStorage.getItem(Constants.userIdKey);
+        let userId = await AsyncStorage.getItem(Constants.userIdKey)
+        return parseInt(userId);
     }
 
     static async getAdminId() {
@@ -1244,43 +1284,41 @@ export class Utils {
         ReactNativeForegroundService.stopAll();
     };
 
-    static async getImage(compressionRequired = false, selectionId) {
+    static async getImage(compressionRequired = false, selectionId, multiple = false) {
 
         const options = {
             mediaType: 'photo',
             includeBase64: true,
             maxHeight: 960,
             maxWidth: 720,
+            multiple: multiple
         };
 
         try {
             let response = {}
-            if (selectionId === 0) {
-                response = await launchCamera(options);
-            } else {
-                response = await launchImageLibrary(options)
+            try {
+                if (selectionId === 0) {
+                    response = await openCamera(options);
+                } else {
+                    response = await openPicker(options)
+                }
+            } catch (err) {
+                if (err.code = 'E_PICKER_CANCELLED') return null;
+                throw new Error(err.message)
             }
 
+            let images = response[0] ? response : [response];
 
-            if (response.didCancel) {
-                console.log('User cancelled image picker');
-            } else if (response.error) {
-                console.log('ImagePicker Error: ', response.error);
-            } else {
-
+            let result = []
+            for (const image of images) {
                 const timestamp = new Date().toISOString(); // only show time and not date
-                let filesz = response.assets[0].fileSize;
-                let base64Data = response.assets[0].base64;
+                let fileSize = image.size;
+                let base64Data = image.data;
 
-
-
-                let imagePath = response.assets[0].uri;
-
-                console.log("response.assets[0]----", filesz);
+                let imagePath = image.path;
 
                 if (compressionRequired) {
-                    const compressedData = await Utils.compressImageAt(filesz, imagePath);
-                    //console.log("compressedData: ", compressedData.size);
+                    const compressedData = await Utils.compressImageAt(fileSize, imagePath);
                     if (compressedData) {
                         base64Data = compressedData;
                     } else {
@@ -1292,12 +1330,13 @@ export class Utils {
                     meta: {
                         capturetimestamp: timestamp,
                         remark: Strings.messages.defaultRemark,
-
                     },
                 };
-
-                return newImage;
+                result.push(newImage);
             }
+
+            return result;
+            
         } catch (error) {
             console.log('An error occurred while accessing the camera:', error);
             const stackTrace = error.stack;
@@ -1354,10 +1393,6 @@ export class Utils {
                 );
 
                 const resizedImageSize = resizedImage.size;
-                console.log("resizedImage----:", resizedImageSize);
-
-
-
                 if (resizedImageSize > maxsz) {
                     // Image size is still too large, reduce quality
                     maxQuality = compressedQuality;
@@ -1408,6 +1443,8 @@ export class Utils {
 
 export class Constants {
     static userIdKey = 'userid';
+    static userRole = 'user_role';
+    static authToken = 'token';
     static userDetailsKey = 'userobj';
     static adminIdKey = 'adminid';
     static phoneNumber = 'phoneNo';
@@ -1416,15 +1453,37 @@ export class Constants {
     static hashForPlotSaplingsKey = 'hashForPlotSaplings';
     static appRootTagKey = 'rootTag';
     static syncDateKey = 'date';
-    static treeFormTemplateData = { inSaplingId: null, inLat: 0, inLng: 0, inImages: [], inPlot: null, inTreeType: null, inUserId: '' }
+    static treeFormTemplateData = { inSaplingId: null, inLat: 0, inLng: 0, inImage: null, inPlot: null, inTreeType: null, inUserId: 0, inTreeStatus: 'alive' }
     static selectedLangKey = 'LANG';
     static selectedTheme = 'DARK';
+    static authToken = 'token'
+    static userRole = 'user_role'
     static logoImage() {
         return require('../../assets/14-trees-logo.png');
     }
     static placeholderImage() {
         return require('../../assets/icon-profile.png');
     }
+
+    // helpers data
+    static lastTreesFetchedAt = 'last_trees_fetched_at'
+    static lastUsersFetchedAt = 'last_users_fetched_at'
+    static lastPlotsFetchedAt = 'last_plots_fetched_at'
+    static lastSitesFetchedAt = 'last_sites_fetched_at'
+    static lastVisitsFetchedAt = 'last_visits_fetched_at'
+    static lastVisitImagesFetchedAt = 'last_visit_images_fetched_at'
+    static lastTreeSnapshotsFetchedAt = 'last_tree_snapshots_fetched_at'
+    static lastSyncInfoFetchedAt = 'last_sync_info_fetched_at'
+
+    // tree analytics for home screen
+    static treeAnalyticsDataKey = 'tree_analytics'
+
+    // for sync screen
+    static lastSyncInfo = 'last_sync_info'
+    static networkSpeed = 'network_speed'
+
+    // selected Site to work with
+    static selectedSiteId = 'selected_site_id'
 }
 
 export const getImageSourceObject = (src) => {
@@ -1436,4 +1495,88 @@ export const getImageSourceObject = (src) => {
     }
     console.log('image src was unexpected.')
     return Constants.placeholderImage()
+}
+
+export const getTimeDiffString = (time) => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - new Date(time)) / 1000);
+    
+    const minute = 60;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+    const week = 7 * day;
+    const month = 30 * day;
+    const year = 365 * day;
+    
+    if (diffInSeconds < minute) {
+        return 'few seconds ago';
+    } else if (diffInSeconds < hour) {
+        const minutes = Math.floor(diffInSeconds / minute);
+        return minutes === 1 ? "1 min ago" : `${minutes} min ago`;
+    } else if (diffInSeconds < day) {
+        const hours = Math.floor(diffInSeconds / hour);
+        const minutes = Math.floor((diffInSeconds % hour) / minute);
+        return minutes === 0 
+        ? `${hours} hour${hours === 1 ? '' : 's'} ago` 
+        : `${hours} hour${hours === 1 ? '' : 's'} and ${minutes} min${minutes === 1 ? '' : 's'} ago`;
+    } else if (diffInSeconds < week) {
+        const days = Math.floor(diffInSeconds / day);
+        return days === 1 ? "1 day ago" : `${days} days ago`;
+    } else if (diffInSeconds < month) {
+        const weeks = Math.floor(diffInSeconds / week);
+        return weeks === 1 ? "1 week ago" : `${weeks} weeks ago`;
+    } else if (diffInSeconds < year) {
+        const months = Math.floor(diffInSeconds / month);
+        return months === 1 ? "1 month ago" : `${months} months ago`;
+    } else {
+        const years = Math.floor(diffInSeconds / year);
+        return years === 1 ? "1 year ago" : `${years} years ago`;
+    }
+}
+
+export function formatDuration(milliseconds) {
+    const seconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+
+    const remainingSeconds = seconds % 60;
+    const remainingMinutes = minutes % 60;
+
+    let result = '';
+
+    if (hours > 0) {
+        result += `${hours} hour${hours > 1 ? 's' : ''}`;
+        if (remainingMinutes > 0 || remainingSeconds > 0) {
+            result += `, `;
+        }
+    }
+
+    if (remainingMinutes > 0) {
+        result += `${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''}`;
+        if (remainingSeconds > 0) {
+            result += `, `;
+        }
+    }
+
+    if (remainingSeconds > 0 || result === '') {
+        result += `${remainingSeconds} second${remainingSeconds > 1 ? 's' : ''}`;
+    }
+
+    return result;
+}
+
+export const getHumanReadableDate = (dateStr) => {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    return moment(dateStr).format('MMMM D, YYYY');
+}
+
+export const getHumanReadableDateTime = (dateStr) => {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    return moment(dateStr).format('MMMM D, YYYY HH:mm');
+}
+
+export const getReadableProgress = (progress) => {
+    return Math.round(progress * 100).toString() + '%';
 }

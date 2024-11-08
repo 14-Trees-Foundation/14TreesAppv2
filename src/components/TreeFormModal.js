@@ -12,12 +12,12 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
 
-    const { inSaplingId, inLng, inLat, inImages, inTreeType, inPlot, inUserId } = treeData;
+    const { inSaplingId, inLng, inLat, inImage, inTreeType, inPlot, inUserId, inTreeStatus } = treeData;
     const [saplingid, setSaplingId] = useState(inSaplingId);
     const [lat, setlat] = useState(inLat);
     const [lng, setlng] = useState(inLng);
     // array of images
-    const [images, setImages] = useState(inImages);
+    const [images, setImages] = useState([inImage]);
     const [showImage, setShowImage] = useState(false);
 
     const [treeItems, setTreeItems] = useState([]);
@@ -28,6 +28,13 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
     const [existsInLiveDB, setExistsInLiveDB] = useState(false);
     const [galleryModalVisible, setGalleryModalVisible] = useState(false);
 
+    const treeStatusList = [
+        { value: 'alive', name: 'Alive' },
+        { value: 'dead', name: 'Dead' },
+        { value: 'lost', name: 'Lost' },
+    ];
+    const [treeStatus, setTreeStatus] = useState( treeStatusList.find((item) => item.value === inTreeStatus) || treeStatusList[0]);
+
     const { lightTheme } = useContext(GlobalContext);
 
     useEffect(() => {
@@ -36,7 +43,7 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
 
     useEffect(() => {
         if (mode === treeFormModes.localEdit) {
-            if (treeData.inImages.length > 0) {
+            if (treeData.inImage) {
                 setShowImage(true);
             }
         }
@@ -80,9 +87,9 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
     const pickImage = async (selectionId) => {
         setGalleryModalVisible(false);
         Utils.startTask();
-        let newImage = await Utils.getImage(true, selectionId);
-        if (newImage === undefined) return;
-        newImage = await Utils.formatImageForSapling(newImage, saplingid);
+        let newImages = await Utils.getImage(true, selectionId);
+        if (!newImages || newImages.length === 0) return;
+        const newImage = await Utils.formatImageForSapling(newImages[0], saplingid);
         setImages([newImage]);
         setShowImage(true);
         Utils.stopTask();
@@ -156,12 +163,13 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
         try {
 
             const tree = {
-                treeid: selectedTreeType.value,
-                saplingid: saplingid,
+                plant_type_id: selectedTreeType.id,
+                sapling_id: saplingid,
                 lat: lat,
                 lng: lng,
-                plotid: selectedPlot.value,
+                plot_id: selectedPlot.id,
                 user_id: userId,
+                tree_status: treeStatus.value,
                 timestamp: new Date().toISOString()
             };
             console.log("final tree data----", tree);
@@ -232,6 +240,12 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                 label={Strings.labels.SelectTreeType}
                 onSelectItem={setSelectedTreeType}
             />
+            {mode !== treeFormModes.addTree && <CustomDropdown
+                initItem={treeStatus}
+                items={treeStatusList}
+                label={Strings.labels.SelectTreeStatus}
+                onSelectItem={setTreeStatus}
+            />}
 
 
             <View style={{ ...treeFormModalStyles.imageContainer, marginTop: 9 }}>
@@ -323,12 +337,14 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                 </View>
             </Modal>
 
-            <CoordinateSetter
-                inLat={lat}
-                inLng={lng}
-                onSetLat={item => setlat(item)}
-                onSetLng={item => setlng(item)}
-            />
+            <View style={{ marginTop: 15 }}>
+                <CoordinateSetter
+                    inLat={lat}
+                    inLng={lng}
+                    onSetLat={item => setlat(item)}
+                    onSetLng={item => setlng(item)}
+                />
+            </View>
 
             <View style={CustomButtonStyles.container}>
                 <View style={CustomButtonStyles.buttonRow}>
@@ -349,7 +365,8 @@ export const TreeFormModal = ({ treeData, onVerifiedSave, mode, onCancel }) => {
                     <View style={CustomButtonStyles.buttonContainer}>
                         <Button
                             onPress={onSave}
-                            //mode="contained"
+                            disabled={!selectedPlot || !lat || !selectedTreeType || saplingid === '' || !showImage}
+                            mode="contained"
                             buttonColor='#1D4ED8'
                             labelStyle={CustomButtonStyles.buttonLabel}
                             style={CustomButtonStyles.button}

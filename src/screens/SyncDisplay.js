@@ -1,15 +1,19 @@
-import React, { useEffect, useState, useCallback, useContext, useRef } from 'react';
-import { Text, View, FlatList, BackHandler, ToastAndroid, StyleSheet } from 'react-native';
-import { Constants, Utils } from '../services/Utils';
+import React, { useEffect, useState, useCallback, useContext } from 'react';
+import { Text, View, FlatList, BackHandler, ToastAndroid } from 'react-native';
+import { Utils } from '../services/Utils';
 import { Strings } from '../services/Strings';
 import * as Progress from 'react-native-progress';
 import { useFocusEffect } from '@react-navigation/native';
-import { CustomButtonStyles, commonStyles, syncButtonStyles, syncDisplayStyles } from "../services/Styles";
+import { CustomButtonStyles, commonStyles, syncDisplayStyles } from "../services/Styles";
 import GlobalContext from '../context/GlobalContext ';
 import { Button } from 'react-native-paper';
 import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { DaoClient } from '../services/db/dao';
+import { uploadTreesData } from '../services/sync/tree';
+import { uploadVisitImagesData } from '../services/sync/visit_images';
+import { uploadTreeSnapshotsData } from '../services/sync/tree_snapshots';
 
-const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount) => {
+const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setVisitImagesCount, setTreeSnapshotsCount) => {
   const lsdate = await Utils.getLastSyncDate();
   if (lsdate) {
     setSyncDate(Utils.getReadableDate(lsdate));
@@ -23,6 +27,16 @@ const updateSyncStatus = async (setSyncDate, setTreeCounts, setShiftsCount) => {
   const shiftsCount = await Utils.getShiftsCounts();
   setShiftsCount(shiftsCount);
   console.log('setting counts: ', counts, "setting shifts count: ", shiftsCount);
+
+  const daoClient = await DaoClient.authenticate();
+  const treesResp = await daoClient.trees.countTreesByChangeTye();
+  setTreesCount(treesResp)
+
+  const visitImagesResp = await daoClient.visitImages.countVisitImages(false);
+  setVisitImagesCount(visitImagesResp);
+
+  const treeImagesResp = await daoClient.treeSnapshots.countTreeSnapshotImages(false);
+  setTreeSnapshotsCount(treeImagesResp);
 }
 
 const getReadableProgress = (progress) => {
@@ -39,6 +53,9 @@ const SyncDisplay = ({ navigation }) => {
   const [failedImagesTrees, setFailedImagesTrees] = useState([]);
   const [failedPlotTrees, setFailedPlotTrees] = useState([]);
   const [shiftsCount, setShiftsCount] = useState(null);
+  const [treesCount, setTreesCount] = useState(null);
+  const [visitImagesCount, setVisitImagesCount] = useState(0);
+  const [treeSnapshotsCount, setTreeSnapshotsCount] = useState(0);
   const { lightTheme, shiftID, shiftDone } = useContext(GlobalContext);
 
   useEffect(() => {
@@ -54,7 +71,7 @@ const SyncDisplay = ({ navigation }) => {
 
 
   useFocusEffect(useCallback(() => {
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setVisitImagesCount, setTreeSnapshotsCount);
     console.log('sync date updated', shiftID)
   }, []))
 
@@ -99,7 +116,7 @@ const SyncDisplay = ({ navigation }) => {
     setFailedShifts(responseFromSyncShifts.failures);
 
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setVisitImagesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -128,7 +145,7 @@ const SyncDisplay = ({ navigation }) => {
 
     setFailedTrees(failures)
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setVisitImagesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -147,7 +164,7 @@ const SyncDisplay = ({ navigation }) => {
     //console.log("----------------treesinNewImageTable-----------", treesinNewImageTable[0].uploaded)
     setFailedImagesTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setVisitImagesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -168,7 +185,7 @@ const SyncDisplay = ({ navigation }) => {
     console.log("---------failedPlotTreesMessages------", failures)
     setFailedPlotTrees(failures);
     setProgress(1);
-    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount);
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setVisitImagesCount);
     setTimeout(() => {
       setShowProgress(false);
     }, 2000);
@@ -181,11 +198,14 @@ const SyncDisplay = ({ navigation }) => {
     if (
       treeCounts &&
       treeCounts.pending.treesUpload === 0 && treeCounts.pending.plotUpload === 0 && treeCounts.pending.imagesUpload === 0 &&
-      shiftsCount && shiftsCount.pending === 0) {
+      shiftsCount && shiftsCount.pending === 0 
+      && treesCount && (!treesCount.add && !treesCount.edit && !treesCount.delete)
+      && visitImagesCount === 0
+    ) {
       ToastAndroid.show(Strings.alertMessages.NothingToSync, ToastAndroid.LONG);
       return;
     }
-
+    setProgress(0);
     setShowProgress(true);
 
     try {
@@ -203,10 +223,74 @@ const SyncDisplay = ({ navigation }) => {
       await Utils.logException(JSON.stringify(errorLog));
     }
 
-    let uploadedSaplings;
+    // let uploadedSaplings;
+
+    // try {
+    //   uploadedSaplings = await uploadTrees();
+    // } catch (error) {
+    //   console.log('unable to sync trees---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync trees(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+
+
+    // let uploadedImageSaplings;
+    // try {
+    //   uploadedImageSaplings = await uploadImages();
+    // } catch (error) {
+    //   console.log('unable to sync new images---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync new images(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+
+    // let uploadedTreesPlotsSaplings;
+
+    // try {
+    //   uploadedTreesPlotsSaplings = await uploadTreesPlots();
+    //   //console.log("uploadedTreesPlotsSaplings---", uploadedTreesPlotsSaplings);
+    // } catch (error) {
+    //   console.log('unable to sync trees---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync trees(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+    // try {
+
+    //   await uploadShift();
+    // } catch (error) {
+    //   console.log('unable to sync shifts---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync shifts(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+    setProgress( prev => prev + 0.2);
 
     try {
-      uploadedSaplings = await uploadTrees();
+      console.log(treesCount)
+      if (treesCount && (treesCount.add || treesCount.edit || treesCount.delete)) {
+        await uploadTreesData();
+      }
     } catch (error) {
       console.log('unable to sync trees---', error);
       const stackTrace = error.stack;
@@ -218,52 +302,93 @@ const SyncDisplay = ({ navigation }) => {
       await Utils.logException(JSON.stringify(errorLog));
     }
 
+    setProgress( prev => prev + 0.2);
 
+    // try {
+    //   await uploadUsersData();
+    // } catch (error) {
+    //   console.log('unable to sync users---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync users(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
 
-    let uploadedImageSaplings;
+    // try {
+    //   await uploadPlotsData();
+    // } catch (error) {
+    //   console.log('unable to sync plots---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync plots(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+    // try {
+    //   await uploadSitesData();
+    // } catch (error) {
+    //   console.log('unable to sync sites---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync sites(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
+    // try {
+    //   await uploadVisitData();
+    // } catch (error) {
+    //   console.log('unable to sync visits---', error);
+    //   const stackTrace = error.stack;
+    //   const errorLog = {
+    //     msg: 'happened while trying to sync visits(inside sync display)',
+    //     error: JSON.stringify(error),
+    //     stackTrace: stackTrace,
+    //   };
+    //   await Utils.logException(JSON.stringify(errorLog));
+    // }
+
     try {
-      uploadedImageSaplings = await uploadImages();
+      if (treeSnapshotsCount && treeSnapshotsCount !== 0) await uploadTreeSnapshotsData();
     } catch (error) {
-      console.log('unable to sync new images---', error);
+      console.log('unable to sync tree images---', error);
       const stackTrace = error.stack;
       const errorLog = {
-        msg: 'happened while trying to sync new images(inside sync display)',
+        msg: 'happened while trying to sync tree images(inside sync display)',
         error: JSON.stringify(error),
         stackTrace: stackTrace,
       };
       await Utils.logException(JSON.stringify(errorLog));
     }
 
-
-    let uploadedTreesPlotsSaplings;
-
+    setProgress( prev => prev + 0.2);
+    
     try {
-      uploadedTreesPlotsSaplings = await uploadTreesPlots();
-      //console.log("uploadedTreesPlotsSaplings---", uploadedTreesPlotsSaplings);
+      if (visitImagesCount && visitImagesCount !== 0) await uploadVisitImagesData();
     } catch (error) {
-      console.log('unable to sync trees---', error);
+      console.log('unable to sync visit images---', error);
       const stackTrace = error.stack;
       const errorLog = {
-        msg: 'happened while trying to sync trees(inside sync display)',
+        msg: 'happened while trying to sync visit images(inside sync display)',
         error: JSON.stringify(error),
         stackTrace: stackTrace,
       };
       await Utils.logException(JSON.stringify(errorLog));
     }
 
-    try {
+    setProgress(1);
 
-      await uploadShift();
-    } catch (error) {
-      console.log('unable to sync shifts---', error);
-      const stackTrace = error.stack;
-      const errorLog = {
-        msg: 'happened while trying to sync shifts(inside sync display)',
-        error: JSON.stringify(error),
-        stackTrace: stackTrace,
-      };
-      await Utils.logException(JSON.stringify(errorLog));
-    }
+    updateSyncStatus(setSyncDate, setTreeCounts, setShiftsCount, setTreesCount, setVisitImagesCount, setTreeSnapshotsCount);
+    setShowProgress(false);
+    await Utils.setLastSyncDateNow();
 
   };
 
@@ -305,6 +430,42 @@ const SyncDisplay = ({ navigation }) => {
               </Text>
               <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
                 {Strings.screenNames.Shifts}: {shiftsCount?.pending}
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "bold", paddingBottom: 4 }}>
+                {Strings.screenNames.TreesPage}: 
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                [ added: {treesCount?.add || 0}, edited: {treesCount?.edit || 0}, deleted: {treesCount?.delete || 0}]
+              </Text>
+              {/* <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "bold", paddingBottom: 4 }}>
+                {Strings.screenNames.UsersPage}: 
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                [ added: {usersCount?.add || 0}, edited: {usersCount?.edit || 0}, deleted: {usersCount?.delete || 0}]
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "bold", paddingBottom: 4 }}>
+                {Strings.screenNames.PlotsPage}: 
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                [ added: {plotsCount?.add || 0}, edited: {plotsCount?.edit || 0}, deleted: {plotsCount?.delete || 0}]
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "bold", paddingBottom: 4 }}>
+                {Strings.screenNames.SitesPage}: 
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                [ added: {sitesCount?.add || 0}, edited: {sitesCount?.edit || 0}, deleted: {sitesCount?.delete || 0}]
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "bold", paddingBottom: 4 }}>
+                {Strings.screenNames.VisitsPage}: 
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                [ added: {visitsCount?.add || 0}, edited: {visitsCount?.edit || 0}, deleted: {visitsCount?.delete || 0}]
+              </Text> */}
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                Tree Images: {treeSnapshotsCount}
+              </Text>
+              <Text style={{ ...syncDisplayStyles.syncText(lightTheme), fontWeight: "medium", paddingBottom: 4 }}>
+                Visit Images: {visitImagesCount}
               </Text>
             </View>
           </View>

@@ -2,7 +2,9 @@ import axios from 'axios';
 import { Buffer } from "buffer";
 import { ToastAndroid } from 'react-native';
 import { Strings } from './Strings';
-import { Utils } from './Utils';
+import { Constants, Utils } from './Utils';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_HOST } from '../constants/constants';
 
 axios.interceptors.response.use(function (response) {
   return response;
@@ -36,10 +38,10 @@ axios.interceptors.response.use(function (response) {
   else {
     errorMsg = error.message;
   }
-  ToastAndroid.show(errorMsg, ToastAndroid.LONG);
-  if (requestDescriptor) {
-    requestDescriptor = ` (${requestDescriptor})`;
-    ToastAndroid.show(requestDescriptor, ToastAndroid.LONG);
+  if (error.message && error.message.includes('Network Error')) {
+    ToastAndroid.show('No internet connection. Please try later!', ToastAndroid.LONG);
+  } else {
+    ToastAndroid.show('Something went wrong. Please contact the IT Team!', ToastAndroid.LONG);
   }
   console.log(error);
   return null;
@@ -48,44 +50,59 @@ axios.interceptors.response.use(function (response) {
 export class DataService {
 
   static productionHostName = 'https://api.14trees.org';
+  static devHostName = 'https://dev-api.14trees.org';
   static hostName = 'http://10.0.2.2:8088';
-  static phoneHostName = "http://192.168.1.14:8008";
-  static serverBase = `${this.productionHostName}/api/appv2`;
+  static phoneHostName = "http://192.168.1.5:8088";
+  static serverBase = `${API_HOST}/api/appv2`;
 
   static async loginUser(userDataPayload) {
     const url = `${DataService.serverBase}/login`;
     console.log("url: ", url);
     console.log("userdata payload: ", userDataPayload);
     let result = await axios.post(url, userDataPayload);
-    // result = JSON.parse(result);
-    //console.log("result: ", result);
     return result;
   }
 
-  static async fetchHelperData(user_id, lasthash, onDownloadProgress = undefined) {
+  static async fetchHelperData(userId, lastHash, onDownloadProgress = undefined) {
+    const token = await AsyncStorage.getItem(Constants.authToken);
     const url = `${DataService.serverBase}/fetchHelperData`;
     return await axios.post(url, {
-      userId: user_id,
-      lastHash: lasthash
+      user_id: userId,
+      last_ash: lastHash
     }, {
+      headers: {
+        'x-access-token': token
+      },
       onDownloadProgress,
     });
 
   }
 
-  static async fetchShifts(user_id) {
+  static async fetchShifts(userId, lastHash) {
+    const token = await AsyncStorage.getItem(Constants.authToken);
     const url = `${DataService.serverBase}/fetchShifts`;
     return await axios.post(url, {
-      userId: user_id,
+      user_id: userId,
+      last_hash: lastHash,
+    },
+    {
+      headers: {
+        'x-access-token': token
+      },
     });
 
   }
 
   static async fetchPlotSaplings(user_id, lasthash) {
+    const token = await AsyncStorage.getItem(Constants.authToken);
     const url = `${DataService.serverBase}/fetchPlotSaplings`;
     return await axios.post(url, {
       userId: user_id,
       lastHash: lasthash
+    },{
+      headers: {
+        'x-access-token': token
+      },
     });
   }
 
@@ -108,9 +125,10 @@ export class DataService {
     });
   }
 
-  static async updateSapling(adminID, sapling) {
+  static async updateSapling(sapling) {
+    const token =  await AsyncStorage.getItem(Constants.authToken);
     const url = `${DataService.serverBase}/updateSapling`;
-    return await axios.post(url, { adminID: adminID, sapling: sapling });
+    return await axios.post(url, sapling, { headers: { 'x-access-token': token } });
   }
   static async uploadLogs(logs) {
     const url = `${DataService.serverBase}/uploadLogs`;
@@ -159,11 +177,16 @@ export class DataService {
     return;
   }
 
-  static async fetchTreeDetails(saplingID, adminID) {
+  static async fetchTreeDetails(saplingId) {
+    const token = await AsyncStorage.getItem(Constants.authToken);
     const url = `${DataService.serverBase}/getSapling`
     const response = await axios.post(url, {
-      adminID: adminID,
-      saplingID: saplingID
+      sapling_id: saplingId
+    },
+    {
+      headers: {
+        'x-access-token': token
+      }
     })
     //console.log("response from fetchTreeDetails:- ", response);
     if (response) {

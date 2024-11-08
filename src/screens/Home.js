@@ -1,14 +1,27 @@
 import React, { useEffect, useContext, useCallback, useState } from 'react';
-import { View, BackHandler, ToastAndroid, TouchableOpacity, Image, Text, ScrollView } from 'react-native';
+import { View, BackHandler, ToastAndroid, TouchableOpacity, Image, Text, ScrollView, Modal } from 'react-native';
 import { Strings } from '../services/Strings';
-import { Utils } from '../services/Utils';
+import { Utils, getTimeDiffString } from '../services/Utils';
 import GlobalContext from '../context/GlobalContext ';
 import { useFocusEffect } from '@react-navigation/native';
 import { homeStyles } from '../services/Styles';
+import { fetchAndStoreTrees } from '../services/sync/tree';
+import { fetchAndStoreUsers } from '../services/sync/users';
+import { fetchAndStorePlots } from '../services/sync/plots';
+import { fetchAndStoreSites } from '../services/sync/sites';
+import { fetchAndStoreVisitImages } from '../services/sync/visit_images';
+
+import { fetchAndStoreVisits } from '../services/sync/visits';
+import { fetchAndStoreTreeSnapshots } from '../services/sync/tree_snapshots';
+import { ActivityIndicator } from 'react-native-paper';
+import { Loading } from '../components/Loading';
+
 
 const HomeScreen = ({ navigation }) => {
   const { langChanged, lightTheme } = useContext(GlobalContext);
   const [dataUptoDate, setDataUptoDate] = useState(false);
+  const [syncDate, setSyncDate] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const fetchHelperDataAndShifts = async () => {
     if (!dataUptoDate) {
@@ -18,11 +31,22 @@ const HomeScreen = ({ navigation }) => {
       );
     }
 
+    setLoading(true);
     const helperDataStatus = await Utils.fetchAndStoreHelperData();
+
+    await fetchAndStoreUsers();
+    await fetchAndStoreTrees();
+    await fetchAndStorePlots();
+    await fetchAndStoreSites();
+    await fetchAndStoreVisits();
+    await fetchAndStoreVisitImages();
+    await fetchAndStoreTreeSnapshots();
+
+    setLoading(false);
 
     if (helperDataStatus.helperDataUptoDate) {
       setDataUptoDate(true);
-      ToastAndroid.show(Strings.alertMessages.DataUptodate, ToastAndroid.LONG);
+      ToastAndroid.show('All data is upto Date!', ToastAndroid.LONG);
     } else {
       ToastAndroid.show(
         Strings.alertMessages.DataGettingFetched,
@@ -35,6 +59,8 @@ const HomeScreen = ({ navigation }) => {
     await fetchHelperDataAndShifts();
     await Utils.fetchAndStoreShifts();
     await Utils.checkShiftsComplete();
+    const lsDate = await Utils.getLastSyncDate();
+    if (lsDate) setSyncDate(lsDate);
   };
 
   useEffect(() => {
@@ -129,7 +155,13 @@ const HomeScreen = ({ navigation }) => {
             </Text>
           </View>
         </TouchableOpacity>
+
+        <View>
+          <Text>{Strings.messages.LastSynced} {syncDate === '' ? 'Never' : getTimeDiffString(syncDate)}</Text>
+        </View>
       </View>
+
+      <Loading loading={loading}/>
     </ScrollView>
   );
 };

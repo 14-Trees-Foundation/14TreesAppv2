@@ -111,9 +111,9 @@ function EditLocalAddImage({ navigation, route }) {
     const pickImage = async (selectionId) => {
         setGalleryModalVisible(false);
         Utils.startTask();
-        let newImage = await Utils.getImage(true, selectionId);
-        if (newImage === undefined) return;
-        newImage = await Utils.formatImageForSapling(newImage, saplingid);
+        let newImages = await Utils.getImage(true, selectionId);
+        if (!newImages || newImages.length === 0) return;
+        const newImage = await Utils.formatImageForSapling(newImages[0], saplingid);
         setImage(newImage);
         setClickedNewImage(true);
         setShowImage(true);

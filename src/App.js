@@ -1,17 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import React, { useContext, useEffect, useState } from 'react';
-import { Alert, Platform, RootTagContext, TouchableOpacity } from 'react-native';
-import { PERMISSIONS, request } from 'react-native-permissions';
+import React, { useCallback, useContext, useEffect } from 'react';
+import { Alert, Platform, RootTagContext, TouchableOpacity, SafeAreaView } from 'react-native';
+import { PERMISSIONS } from 'react-native-permissions';
 import { DrawerNavigator } from './components/DrawerNavigator';
 import LoadingScreen from './screens/LoadingScreen';
 import LoginScreen from './screens/Login';
 import { Strings } from './services/Strings';
 import { Constants, Utils } from './services/Utils';
 import { checkMultiplePermissions } from './services/check_permissions';
-import DeviceInfo from 'react-native-device-info';
-import { DataService } from './services/DataService';
 import { commonStyles } from './services/Styles';
 import GlobalContext from './context/GlobalContext ';
 import AddTreeShift from './screens/AddTreeShift';
@@ -19,7 +17,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { Text, View } from 'react-native';
 import { EditLocalTree } from './screens/EditLocalTree';
 import TreesInShift from './screens/TreesInShift';
-import SyncDisplay from './screens/SyncDisplay';
 import SplashScreen from './screens/SplashScreen';
 import ScreenHeaderContent from './components/ScreenHeaderContent';
 import { setJSExceptionHandler } from 'react-native-exception-handler';
@@ -27,6 +24,11 @@ import RNRestart from 'react-native-restart';
 import AddImageShift from './screens/AddImageShift';
 import UpdatePlotShift from './screens/UpdatePlotShift';
 import EditLocalAddImage from './screens/EditLocalAddImage';
+import { APP_VERSION } from './constants/constants';
+import Sync from './screens/Sync';
+import Sound from 'react-native-sound';
+import PlotSaplings from './screens/PlotSaplings';
+import PlotAudit from './screens/PlotAudit';
 
 
 const errorHandler = async (e, isFatal) => {
@@ -75,7 +77,7 @@ async function requestPermissions() {
     PERMISSIONS.ANDROID.CAMERA,
     PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
     PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-    PERMISSIONS.ANDROID.ACCESS_BACKGROUND_LOCATION,
+    // PERMISSIONS.ANDROID.ACCESS_BACKGROUND_LOCATION,
     PERMISSIONS.ANDROID.READ_PHONE_NUMBERS
   ];
   if (androidVersion < versionOfPermissionChange) {
@@ -95,6 +97,7 @@ async function requestPermissions() {
   let ungrantedPermissions = await checkMultiplePermissions(permissions);
   console.log("ungrantedPermissions: ", ungrantedPermissions);
 
+  console.log(ungrantedPermissions)
   if (ungrantedPermissions.length > 0) {
     Alert.alert(Strings.alertMessages.PermissionsRequired, Strings.alertMessages.Settings);
   }
@@ -110,102 +113,44 @@ const App = () => {
   const rootTag = useContext(RootTagContext);
   //console.log('app roottag app.js: ')
 
-  const { userName, setUserName, lightTheme } = useContext(GlobalContext);
+  const { userName, lightTheme, playSound, setPlaySound, setUploadInProgress, setDownloadInProgress, setCurrentSyncTime } = useContext(GlobalContext);
+  const playBackgroundSound = useCallback(() => {
+    var sound = new Sound('livechat.mp3', Sound.MAIN_BUNDLE, (error) => {
+      if (error) {
+        console.log('failed to load the sound', error);
+        return;
+      }
+
+      // Play the sound with an onEnd callback
+      sound.play((success) => {
+        if (success) {
+          console.log('successfully finished playing');
+        } else {
+          console.log('playback failed due to audio decoding errors');
+        }
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    if (playSound) {
+      playBackgroundSound();
+      setPlaySound(false);
+    }
+  }, [playSound])
 
   AsyncStorage.setItem(Constants.appRootTagKey, rootTag.toString());
 
   const checkSignInStatus = async () => {
     console.log('app roottag app.js1: ')
     try {
-
-      let phoneNumber;
-
-      try {
-        phoneNumber = await DeviceInfo.getPhoneNumber();
-      } catch (error) {
-        const stackTrace = error.stack;
-
-        const errorLog = {
-          msg: "happened while trying to auto login when user starts the app inside app.js",
-          error: JSON.stringify(error),
-          stackTrace: stackTrace
-        }
-
-        await Utils.logException(JSON.stringify(errorLog));
-      }
-
-
-      const userDataPayload = {
-        phone: phoneNumber,
-      }
-
-      if (!phoneNumber) {
-        // User is not signed in, navigate to LoginScreen
-        stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
-        return false;
-      }
-
-      const isSignedIn = await DataService.loginUser(userDataPayload);
-
-      if (!isSignedIn) {
-        stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
-        return false;
-      }
-
-      const response = isSignedIn.data;
-      console.log("response data inside app.js: ", response);
-
-      if (response.success === false) {  // User is not signed in, navigate to LoginScreen
-        stackNavRef.current?.navigate(Strings.screenNames.getString('LogIn', Strings.english));
-        return false;
-      }
-
-      if (response.user.adminID) {
-        await AsyncStorage.setItem(Constants.adminIdKey, response.user.adminID);
-        const admin_id = await AsyncStorage.getItem(Constants.adminIdKey);
-        console.log('adminId stored from async: ', admin_id);
-        console.log('adminId : ', response.user.adminID);
-      } else {
-        console.log('adminId not stored');
-      }
-
-      try {
-
-        await AsyncStorage.setItem(Constants.userIdKey, response.user._id);
-        console.log('userId stored: ', response.user._id);
-        response.data = { ...response.user, image: '' };
-        //console.log("response data modified: ", response.data);
-        await AsyncStorage.setItem(Constants.userDetailsKey, JSON.stringify(response.data));
-        console.log('userDetails stored');
-
-        let userKeyDetails = await AsyncStorage.getItem(Constants.userDetailsKey);
-        if (userKeyDetails) {
-          userKeyDetails = JSON.parse(userKeyDetails);
-          let name = userKeyDetails.name;
-          if (name) {
-            const firstName = name.split(' ')[0];
-            console.log("user name in app.js and header---- ", firstName);
-            setUserName(firstName);
-          }
-        }
-      } catch (error) {
-        console.log('Error storing userId', error);
-        const stackTrace = error.stack;
-        const errorLog = {
-          msg: "happened while trying to store userId during auto login inside app.js",
-          error: JSON.stringify(error),
-          stackTrace: stackTrace
-        }
-        await Utils.logException(JSON.stringify(errorLog));
-      }
-
-      return true;
-
+      const token = await AsyncStorage.getItem(Constants.authToken)
+      return token && token !== ''
     } catch (error) {
       console.error('Error checking sign-in status:', error);
       const stackTrace = error.stack;
       const errorLog = {
-        msg: "happened while trying to auto login inside app.js",
+        msg: "happened while login status in side app.js",
         error: JSON.stringify(error),
         stackTrace: stackTrace
       }
@@ -245,6 +190,9 @@ const App = () => {
 
   const initializeApp = async () => {
     await requestPermissions();
+    setUploadInProgress(false);
+    setDownloadInProgress(false);
+    setCurrentSyncTime(null);
     await initTasks();
   };
 
@@ -277,7 +225,7 @@ const App = () => {
                 marginRight: 30, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 7, marginTop: 5, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -305,7 +253,7 @@ const App = () => {
                 marginRight: 30, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -334,7 +282,7 @@ const App = () => {
                 marginRight: 30, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 6, marginTop: 10, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -355,7 +303,7 @@ const App = () => {
           }} />
         <Stack.Screen
           name={Strings.screenNames.getString('SyncDisplay', Strings.english)}
-          component={SyncDisplay}
+          component={Sync}
           options={{
             headerLeft: () => (
               <View style={{ marginLeft: 10 }}>
@@ -367,14 +315,56 @@ const App = () => {
               </View>
             ),
             headerRight: () => (
-              <View style={{ height: 35, marginRight: 13, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
-              </View>
+              <ScreenHeaderContent />
             ),
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
             headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
             headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
             title: Strings.screenNames.SyncDisplay,
+          }}
+        />
+        <Stack.Screen
+          name={Strings.screenNames.getString('ChangePlot', Strings.english)}
+          component={PlotSaplings}
+          options={{
+            headerLeft: () => (
+              <View style={{ marginLeft: 10 }}>
+                <TouchableOpacity onPress={() => {
+                  stackNavRef.current.goBack() // Go back when the button is pressed
+                }}>
+                  <Icon name="arrow-back" size={24} color="black" />
+                </TouchableOpacity>
+              </View>
+            ),
+            headerRight: () => (
+              <ScreenHeaderContent />
+            ),
+            headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+            headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+            headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+            title: Strings.screenNames.ChangePlot,
+          }}
+        />
+        <Stack.Screen
+          name={Strings.screenNames.getString('PlotAudit', Strings.english)}
+          component={PlotAudit}
+          options={{
+            headerLeft: () => (
+              <View style={{ marginLeft: 10 }}>
+                <TouchableOpacity onPress={() => {
+                  stackNavRef.current.goBack() // Go back when the button is pressed
+                }}>
+                  <Icon name="arrow-back" size={24} color="black" />
+                </TouchableOpacity>
+              </View>
+            ),
+            headerRight: () => (
+              <ScreenHeaderContent />
+            ),
+            headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+            headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+            headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+            title: Strings.screenNames.PlotAudit,
           }}
         />
         <Stack.Screen
@@ -386,7 +376,7 @@ const App = () => {
                 marginRight: 35, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 {/* <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -415,7 +405,6 @@ const App = () => {
             headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
             headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
             headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
-            title: Strings.screenNames.LogIn
           }} />
         <Stack.Screen
           name={Strings.screenNames.getString('DrawerScreen', Strings.english)}
@@ -440,7 +429,7 @@ const App = () => {
                 marginRight: 35, flexDirection: "row"
               }}>
                 <View style={{ height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 {/* <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -477,7 +466,7 @@ const App = () => {
               }}>
                 <View
                   style={{ height: 35, marginRight: 4, marginTop: 3, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
+                  <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>{APP_VERSION}</Text>
                 </View>
                 {/* <Text style={{
                   fontFamily: 'Inter-Regular',
@@ -497,7 +486,6 @@ const App = () => {
           }} />
       </Stack.Navigator>
     </NavigationContainer>
-
   )
 };
 

@@ -9,13 +9,25 @@ import { useState, useEffect, useCallback, useContext } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { View, Image, Text, BackHandler, TouchableOpacity } from "react-native";
 import { Constants, Utils, getImageSourceObject, logoSrc } from "../services/Utils";
-import { DrawerContentScrollView, DrawerItemList, createDrawerNavigator, } from '@react-navigation/drawer';
+import { DrawerContentScrollView, DrawerItem, DrawerItemList, createDrawerNavigator, } from '@react-navigation/drawer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import About from '../screens/About';
 import Shifts from "../screens/Shifts";
 import ScreenHeaderContent from './ScreenHeaderContent';
 import { Button } from 'react-native-paper';
-const Drawer = createDrawerNavigator();
+import Users from '../screens/Users';
+import Plots from "../screens/Plots"
+import Sites from '../screens/Sites';
+import Visits from '../screens/Visits';
+
+import Trees from '../screens/Trees';
+import { APP_VERSION } from '../constants/constants';
+import { DrawerContent } from './Drawer';
+import LoginScreen from '../screens/Login';
+import Home from '../screens/HomeScreen';
+import Dev from '../screens/Dev';
+import PlotSaplings from '../screens/PlotSaplings';
+import MapScreen from '../screens/Map';
 
 const CustomDrawerToggleButton = ({ navigation }) => (
     <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
@@ -33,7 +45,7 @@ const fillInUserDetails = async (setIsAdmin, setUserDetails) => {
     if (storedUserDetails) {
         storedUserDetails = JSON.parse(storedUserDetails);
         setUserDetails(storedUserDetails);
-        if (storedUserDetails.adminID) {
+        if (storedUserDetails.roles.includes('admin')) {
             setIsAdmin(true);
         } else {
             setIsAdmin(false);
@@ -41,61 +53,7 @@ const fillInUserDetails = async (setIsAdmin, setUserDetails) => {
     }
 };
 
-const logout = async navigationRef => {
-    await AsyncStorage.removeItem(Constants.adminIdKey);
-    await AsyncStorage.removeItem(Constants.userIdKey);
-    await AsyncStorage.removeItem(Constants.userDetailsKey);
-    navigationRef.current?.navigate(
-        Strings.screenNames.getString('LogIn', Strings.english),
-    );
-};
-
-const DrawerContent = (props) => {
-
-    let { isAdmin, userDetails } = props;
-
-    return (
-        <DrawerContentScrollView {...props}>
-            <View style={drawerNavigatorStyles.navigatorView}>
-                <Image source={Constants.logoImage()} style={drawerNavigatorStyles.image} />
-                {userDetails ? (
-                    <View
-                        style={drawerNavigatorStyles.userDetails}>
-                        <Image
-                            source={getImageSourceObject(userDetails.image)}
-                            style={drawerNavigatorStyles.userImage}></Image>
-                        <View style={{ flexDirection: 'column', marginLeft: 15 }}>
-                            <View style={{ width: 160 }}>
-                                <Text
-                                    style={drawerNavigatorStyles.userName}>
-                                    {userDetails.name}
-                                </Text>
-                            </View>
-                            <Text
-                                style={drawerNavigatorStyles.userType}>
-                                {isAdmin ? Strings.labels.admin : Strings.labels.logger}
-                            </Text>
-                        </View>
-                    </View>
-                ) : (
-                    <Text style={{ fontFamily: 'Inter-Regular' }}>Loading user details...</Text>
-                )}
-            </View>
-            <DrawerItemList {...props} />
-            <View style={drawerNavigatorStyles.logOutButton}>
-                <Button
-                    onPress={() => Utils.confirmAction(() => logout(props.navigationRef), undefined, Strings.messages.logoutConfirm)}
-                    mode="contained"
-                    buttonColor='red'
-                    labelStyle={CustomButtonStyles.buttonLabel}
-                    style={CustomButtonStyles.button}
-                >
-                    {Strings.buttonLabels.logOut}
-                </Button>
-            </View>
-        </DrawerContentScrollView>
-    );
-};
+const Drawer = createDrawerNavigator();
 
 export const DrawerNavigator = () => {
     const [isAdmin, setIsAdmin] = useState(false);
@@ -153,12 +111,107 @@ export const DrawerNavigator = () => {
         >
             <Drawer.Screen
                 name={Strings.screenNames.getString('HomePage', Strings.english)}
-                component={HomeScreen}
+                component={Home}
                 options={{
                     headerRight: () => (
                         <ScreenHeaderContent />
                     ),
                     title: Strings.screenNames.HomePage,
+                    // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+                    // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+                    // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                    // drawerActiveBackgroundColor: '#F1FAEE',
+                    // drawerActiveTintColor: 'blue',
+                    // drawerStyle: {
+                    //     backgroundColor: '#f0f3f7',
+                    //     fontFamily: 'Inter-Regular'
+                    // }
+                }}
+            />
+            <Drawer.Screen
+                name={Strings.screenNames.getString('UsersPage', Strings.english)}
+                component={Users}
+                options={{
+                    headerRight: () => (
+                        <ScreenHeaderContent />
+                    ),
+                    title: Strings.screenNames.UsersPage,
+                    // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+                    // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+                    // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                    // drawerActiveBackgroundColor: '#F1FAEE',
+                    // drawerActiveTintColor: 'blue',
+                    // drawerStyle: {
+                    //     backgroundColor: '#f0f3f7',
+                    //     fontFamily: 'Inter-Regular'
+                    // }
+                }}
+            />
+            <Drawer.Screen
+                name={Strings.screenNames.getString('VisitsPage', Strings.english)}
+                component={Visits}
+                options={{
+                    headerRight: () => (
+                        <ScreenHeaderContent />
+                    ),
+                    title: Strings.screenNames.VisitsPage,
+                    // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+                    // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+                    // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                    // drawerActiveBackgroundColor: '#F1FAEE',
+                    // drawerActiveTintColor: 'blue',
+                    // drawerStyle: {
+                    //     backgroundColor: '#f0f3f7',
+                    //     fontFamily: 'Inter-Regular'
+                    // }
+                }}
+            />    
+            <Drawer.Screen
+                name={Strings.screenNames.getString('TreesPage', Strings.english)}
+                component={Trees}
+                options={{
+                    headerRight: () => (
+                        <ScreenHeaderContent />
+                    ),
+                    title: Strings.screenNames.TreesPage,
+                    // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+                    // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+                    // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                    // drawerActiveBackgroundColor: '#F1FAEE',
+                    // drawerActiveTintColor: 'blue',
+                    // drawerStyle: {
+                    //     backgroundColor: '#f0f3f7',
+                    //     fontFamily: 'Inter-Regular'
+                    // }
+                }}
+            />
+            <Drawer.Screen
+                name={Strings.screenNames.getString('PlotsPage', Strings.english)}
+                component={Plots}
+                options={{
+                    headerRight: () => (
+                        <ScreenHeaderContent />
+                    ),
+                    title: Strings.screenNames.PlotsPage,
+                    // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+                    // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+                    // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+                    // drawerActiveBackgroundColor: '#F1FAEE',
+                    // drawerActiveTintColor: 'blue',
+                    // drawerStyle: {
+                    //     backgroundColor: '#f0f3f7',
+                    //     fontFamily: 'Inter-Regular'
+                    // }
+                }}
+            />
+            <Drawer.Screen
+                name={Strings.screenNames.getString('SitesPage', Strings.english)}
+                component={Sites}
+                options={{
+                    headerRight: () => (
+                        <ScreenHeaderContent />
+                    ),
+                    title: Strings.screenNames.SitesPage,
                     // headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
                     // headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
                     // headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
@@ -185,26 +238,7 @@ export const DrawerNavigator = () => {
                     // },
                     title: Strings.screenNames.Shifts,
                     headerRight: () => (
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 10 }}>
-                            {/* <TouchableOpacity
-                                style={{ marginRight: 15 }}
-                                onPress={() => {
-                                    setToggleMode(!toggleMode);
-                                    setLightTheme(!lightTheme);
-                                }}
-                            >
-                                {toggleMode ? <Image
-                                    source={require('../../assets/icon-brightness-on.png')}
-                                    style={ScreenHeaderContentStyles.modeIcon}
-                                /> : <Image
-                                    source={require('../../assets/icon-brightness.png')}
-                                    style={ScreenHeaderContentStyles.modeIcon}
-                                />}
-                            </TouchableOpacity> */}
-                            <View style={{ height: 35, marginRight: 6, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                                <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
-                            </View>
-                        </View>
+                        <ScreenHeaderContent />
                     )
                 }}
             />
@@ -225,31 +259,14 @@ export const DrawerNavigator = () => {
                         // },
                         title: Strings.screenNames.EditTree,
                         headerRight: () => (
-                            <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 10 }}>
-                                <TouchableOpacity
-                                    style={{ marginRight: 15 }}
-                                    onPress={() => {
-                                        setToggleMode(!toggleMode);
-                                        setLightTheme(!lightTheme);
-                                    }}
-                                >
-                                    {toggleMode ? <Image
-                                        source={require('../../assets/icon-brightness-on.png')}
-                                        style={ScreenHeaderContentStyles.modeIcon}
-                                    /> : <Image
-                                        source={require('../../assets/icon-brightness.png')}
-                                        style={ScreenHeaderContentStyles.modeIcon}
-                                    />}
-                                </TouchableOpacity>
-                                <View style={{ height: 35, marginRight: 6, marginTop: 2, borderRadius: 10, borderColor: "white", borderWidth: 1 }}>
-                                    <Text style={{ color: lightTheme ? '#333' : 'black', fontSize: 20, fontWeight: "bold", paddingLeft: 4, paddingTop: 2 }}>2.4.1</Text>
-                                </View>
-                            </View>
+                            <ScreenHeaderContent />
                         )
                     }}
                 />
             )}
-            {isAdmin && (
+
+            {/* Hidden Screen */}
+            {isAdmin && false && (
                 <Drawer.Screen
                     name={Strings.screenNames.getString('VerifyUsers', Strings.english)}
                     component={VerifyusersScreen}
@@ -281,6 +298,20 @@ export const DrawerNavigator = () => {
                     //     backgroundColor: '#f0f3f7',
                     //     fontFamily: 'Inter-Regular'
                     // }
+                }}
+            />
+            <Drawer.Screen
+                name={Strings.screenNames.getString('Dev', Strings.english)}
+                component={Dev}
+                options={{
+                    title: Strings.screenNames.Dev,
+                }}
+            />
+            <Drawer.Screen
+                name={Strings.screenNames.getString('Map', Strings.english)}
+                component={MapScreen}
+                options={{
+                    title: Strings.screenNames.Map,
                 }}
             />
         </Drawer.Navigator >
