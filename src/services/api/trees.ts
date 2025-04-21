@@ -18,9 +18,9 @@ export class TreeService {
     }
 
     async uploadTrees(trees: any[]) {
-        const userId =  Utils.getUserId();
+        const userId = await Utils.getUserId();
         const url = `/api/appv2/uploadTrees`;
-        const response = await this.api.post(url, trees, { headers: { 'user-id': userId } });
+        const response = await this.api.post(url, trees, { headers: { 'user-id': userId.toString() }});
         if (response) {
           return response.data;
         }
