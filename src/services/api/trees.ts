@@ -1,7 +1,7 @@
 import { AxiosInstance } from "axios";
 import { Tree, TreeAnalytics, TreeHelperDataResponse, TreePlantationInfo } from "../../model/tree"
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Constants } from "../Utils";
+import { Constants, Utils } from "../Utils";
 import { FilterItem, PaginatedResponse } from "../../model/common";
 
 export class TreeService {
@@ -18,8 +18,9 @@ export class TreeService {
     }
 
     async uploadTrees(trees: any[]) {
+        const userId = await Utils.getUserId();
         const url = `/api/appv2/uploadTrees`;
-        const response = await this.api.post(url, trees);
+        const response = await this.api.post(url, trees, { headers: { 'user-id': userId.toString() }});
         if (response) {
           return response.data;
         }

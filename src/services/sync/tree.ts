@@ -125,7 +125,8 @@ export const uploadNewTreesData = async (daoClient: DaoClient, trees: Tree[], sy
                 images.tree_image && await daoClient.treeImages.markImageUploaded(images.tree_image.local_id);
                 images.user_card_image && await daoClient.treeImages.markImageUploaded(images.user_card_image.local_id);
                 images.user_tree_image && await daoClient.treeImages.markImageUploaded(images.user_tree_image.local_id);
-                syncInfo.trees.add += 1;
+
+                if (!response[treeReq.sapling_id].existing) syncInfo.trees.add += 1;
                 syncInfo.upload_time = new Date().getTime() - new Date(syncInfo.synced_at).getTime();
                 await saveSyncInfo(daoClient, syncInfo);
             }
