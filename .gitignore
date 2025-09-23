@@ -66,3 +66,5 @@ yarn-error.log
 
 # testing
 /coverage
+14trees.db
+RKStorage

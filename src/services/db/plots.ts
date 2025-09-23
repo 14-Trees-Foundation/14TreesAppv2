@@ -62,7 +62,7 @@ export class PlotsDao {
 
             await this.db.executeSql(query);
             console.log('Plots table created successfully!');
-            await this.releaseChanges();
+            // await this.releaseChanges();
         } catch (error) {
             console.log('error creating plots table:', error);
         }
@@ -83,7 +83,15 @@ export class PlotsDao {
             ORDER BY local_id DESC 
             ${limit < 0 ? '' : `LIMIT ${limit} OFFSET ${offset}`};  `
 
-        const [results] = await this.db.executeSql(query)
+        const result = await this.db.executeSql(query);
+        let results;
+        if (Array.isArray(result) && result.length > 0) {
+            results = result[0];
+        } else if (result && typeof result === 'object' && result.rows) {
+            results = result;
+        } else {
+            throw new Error('Unexpected result from executeSql');
+        }
         for (let index = 0; index < results.rows.length; index++) {
             plots.push(results.rows.item(index));
         }
@@ -96,7 +104,15 @@ export class PlotsDao {
         const query = `SELECT change_type, COUNT(*) as count FROM ${this.tableName}
             WHERE ${isUploaded !== undefined ? whereCondition : "1==1"} GROUP BY change_type;`
 
-        const [results] = await this.db.executeSql(query)
+        const result = await this.db.executeSql(query);
+        let results;
+        if (Array.isArray(result) && result.length > 0) {
+            results = result[0];
+        } else if (result && typeof result === 'object' && result.rows) {
+            results = result;
+        } else {
+            throw new Error('Unexpected result from executeSql');
+        }
         let response: any = {}
         for (let i = 0; i < results.rows.length; i++) {
             const row = results.rows.item(i);
@@ -112,7 +128,7 @@ export class PlotsDao {
 
     createPlot = async (data: CreatePlotRequest) => {
         const query = `
-            INSERT INTO ${this.tableName} ( 
+            INSERT INTO ${this.tableName} (
                 name,
                 plot_id,
                 tags,
@@ -126,7 +142,7 @@ export class PlotsDao {
         `
 
         const timeStamp = new Date().toISOString();
-        const [results] = await this.db.executeSql(query, [
+        const result = await this.db.executeSql(query, [
             data.name,
             data.plot_id,
             data.tags,
@@ -135,6 +151,7 @@ export class PlotsDao {
             timeStamp,
             timeStamp
         ]);
+        const results = result;
         console.log(JSON.stringify(results))
     }
 
@@ -142,15 +159,15 @@ export class PlotsDao {
         const now = new Date().toISOString();
         let changeType = 'edit';
 
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
             [data.local_id]
-        )
+        );
 
         if (response.rows.length === 1) {
             const existingPlot = response.rows.item(0) as Plot;
             if (existingPlot.change_type === 'add') {
-                changeType = 'add'
+                changeType = 'add';
             }
         }
 
@@ -190,10 +207,11 @@ export class PlotsDao {
     upsertLivePlotIntoLocalDb = async (data: Plot) => {
         if (!data.id) return;
 
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE id = ?;`,
             [data.id]
-        )
+        );
+
         if (response.rows.length === 0) {
             // insert live user
             await this.db.executeSql(
@@ -249,31 +267,28 @@ export class PlotsDao {
 
 
     deletePlot = async (id: number) => {
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
             [id]
         )
 
         if (response.rows.length === 1) {
-            // locally added plot: HARD DELETE
-            if (response.rows.length === 1) {
-                const existingPlot = response.rows.item(0) as Plot;
-                if (existingPlot.change_type === 'add') {
-                    await this.db.executeSql(
-                        `DELETE FROM ${this.tableName} WHERE local_id = ?;`,
-                        [id]
-                    )
-                } else {
-                    // Live PLot
-                    await this.db.executeSql(
-                        `UPDATE ${this.tableName}
-                        SET
-                            is_uploaded = 0,
-                            change_type = 'delete'
-                        WHERE local_id = ?;`,
-                        [id]
-                    )
-                }
+            const existingPlot = response.rows.item(0) as Plot;
+            if (existingPlot.change_type === 'add') {
+                await this.db.executeSql(
+                    `DELETE FROM ${this.tableName} WHERE local_id = ?;`,
+                    [id]
+                )
+            } else {
+                // Live PLot
+                await this.db.executeSql(
+                    `UPDATE ${this.tableName}
+                    SET
+                        is_uploaded = 0,
+                        change_type = 'delete'
+                    WHERE local_id = ?;`,
+                    [id]
+                )
             }
         }
     }
@@ -299,7 +314,7 @@ export class PlotsDao {
 
     getLivePlotIds = async () => {
         const query = `SELECT id FROM ${this.tableName} WHERE id IS NOT NULL;`
-        const [result] = await this.db.executeSql(query);
+        const result = await this.db.executeSql(query);
 
         const plot_ids: number[] = [];
         for (let i = 0; i < result.rows.length; i++) {

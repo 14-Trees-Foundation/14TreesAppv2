@@ -77,3 +77,31 @@ To learn more about React Native, take a look at the following resources:
 - [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+
+---
+
+## Visitor Data Flow Overview (Project-specific)
+
+This project includes a Visitor Data flow triggered from Visits. It captures:
+- Sapling ID (required)
+- User (optional; prefilled to current user when available, selectable)
+- User Tree Image (optional)
+- User Card Image (optional)
+
+### Persistence
+- Data is stored in `tree_images` using the existing DAO (`TreeImagesDao.upsertTreeImage`).
+  - Types used: `user_tree_image` and `user_card_image`.
+  - `user_id` is saved alongside each image record.
+- Schema (as created on device in `src/services/db/tree_images.ts`) has:
+  - `sapling_id TEXT NOT NULL`, `type`, `user_id INTEGER NULL`, flags, timestamps.
+  - No foreign key from `tree_images.sapling_id` to `trees.sapling_id` (no hard referential integrity).
+- Tree–user assignment for full tree records remains in `trees` via `assigned_to` (and related fields). Visitor-only flow does not create or modify rows in `trees`.
+
+### Range-based Workflow
+- Optional flow like Plots → Add Trees: preselect a sapling ID range, then tap chips to open the Visitor Data form prefilled with the sapling ID.
+
+### Backend/Sync Note
+- Since `tree_images` has no FK to `trees`, visitor-only images can exist without a corresponding tree record. Confirm backend accepts these and associates by `sapling_id` and/or `user_id`. If not, delay upload or create a lightweight tree when required.
+
+### Full Plan
+- See `docs/visitor_flow_changes.md` for detailed UX, DB, components, and implementation steps.

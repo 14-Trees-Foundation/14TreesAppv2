@@ -1,0 +1,4 @@
+adb exec-out run-as com.androidappv2 cat databases/14trees.db > /Users/admin/Projects/14TreesAppv2Copy/14trees.db
+sqlite3 /Users/admin/Projects/14TreesAppv2Copy/14trees.db "SELECT COUNT(*) FROM visits;"
+
+adb exec-out run-as com.androidappv2 cat databases/RKStorage > /Users/admin/Projects/14TreesAppv2Copy/RKStorage

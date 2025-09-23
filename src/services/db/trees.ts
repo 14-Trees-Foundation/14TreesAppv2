@@ -70,7 +70,7 @@ export class TreesDao {
             let rowsCopied;
 
             do {
-                const [result] = await this.db.executeSql(
+                const result = await this.db.executeSql(
                     `INSERT INTO trees_new (
                         local_id, id, sapling_id, plant_type_id, plot_id, image, tags, location, 
                         planted_by, mapped_to_user, mapped_to_group, mapped_at, sponsored_by_user, 
@@ -170,8 +170,8 @@ export class TreesDao {
 
             await this.db.executeSql(query);
             console.log('Trees table created successfully!');
-            await this.releaseChanges();
-            await this.releaseChangesV_3_0_10();
+            // await this.releaseChanges();
+            // await this.releaseChangesV_3_0_10();
 
         } catch (error) {
             console.log('error creating trees table:', error);
@@ -197,7 +197,7 @@ export class TreesDao {
             ${limit < 0 ? '' : `LIMIT ${limit} OFFSET ${offset}`};
         `
 
-        const [results] = await this.db.executeSql(query)
+        const results = await this.db.executeSql(query)
         for (let index = 0; index < results.rows.length; index++) {
             trees.push(results.rows.item(index));
         }
@@ -213,7 +213,7 @@ export class TreesDao {
             ORDER BY local_id DESC;
         `;
 
-        const [results] = await this.db.executeSql(query, saplingIds)
+        const results = await this.db.executeSql(query, saplingIds)
         for (let index = 0; index < results.rows.length; index++) {
             trees.push(results.rows.item(index));
         }
@@ -225,7 +225,7 @@ export class TreesDao {
         const query = `
             SELECT EXISTS(SELECT 1 FROM ${this.tableName} WHERE sapling_id = ?) AS does_exists;
         `
-        const [results] = await this.db.executeSql(query, [saplingId])
+        const results = await this.db.executeSql(query, [saplingId])
         return results.rows.length === 0
             ? false
             : results.rows.item(0)?.does_exists === 1
@@ -238,7 +238,15 @@ export class TreesDao {
         const query = `SELECT change_type, COUNT(*) as count FROM ${this.tableName}
             WHERE ${isUploaded !== undefined ? whereCondition : "1==1"} GROUP BY change_type;`
 
-        const [results] = await this.db.executeSql(query)
+        const result = await this.db.executeSql(query);
+        let results;
+        if (Array.isArray(result) && result.length > 0) {
+            results = result[0];
+        } else if (result && typeof result === 'object' && result.rows) {
+            results = result;
+        } else {
+            throw new Error('Unexpected result from executeSql');
+        }
         let response: any = {}
         for (let i = 0; i < results.rows.length; i++) {
             const row = results.rows.item(i);
@@ -251,6 +259,21 @@ export class TreesDao {
         return response;
     }
 
+    getTreesByVisitId = async (visitId: number): Promise<Tree[]> => {
+        const query = `SELECT * FROM ${this.tableName}
+            WHERE visit_id = ? AND change_type != 'delete'
+            ORDER BY local_id DESC;`;
+
+        const results = await this.db.executeSql(query, [visitId]);
+
+        const trees: Tree[] = [];
+        for (let i = 0; i < results.rows.length; i++) {
+            trees.push(results.rows.item(i) as Tree);
+        }
+
+        return trees;
+    }
+
     createTree = async (data: CreateTreeRequest) => {
         const query = `
             INSERT OR IGNORE INTO ${this.tableName}
@@ -259,7 +282,7 @@ export class TreesDao {
         `
 
         const timeStamp = new Date().toISOString();
-        const [resp] = await this.db.executeSql(query, [
+        const resp = await this.db.executeSql(query, [
             data.sapling_id,
             data.plant_type_id,
             data.plot_id,
@@ -281,7 +304,7 @@ export class TreesDao {
         const now = new Date().toISOString();
         let changeType = 'edit';
 
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
             [data.local_id]
         )
@@ -346,7 +369,7 @@ export class TreesDao {
     upsertLiveTreeIntoLocalDb = async (data: Tree) => {
         if (!data.id) return;
 
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE id = ?;`,
             [data.id]
         )
@@ -486,7 +509,7 @@ export class TreesDao {
     }
 
     deleteTree = async (id: number) => {
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
             [id]
         )
@@ -535,7 +558,7 @@ export class TreesDao {
 
     getLiveTreeIds = async () => {
         const query = `SELECT id FROM ${this.tableName} WHERE id IS NOT NULL;`
-        const [result] = await this.db.executeSql(query);
+        const result = await this.db.executeSql(query);
 
         const tree_ids: number[] = [];
         for (let i = 0; i < result.rows.length; i++) {
@@ -556,7 +579,7 @@ export class TreesDao {
             LIMIT ? OFFSET ?;
         `
 
-        const [results] = await this.db.executeSql(query, [`${searchStr}%`, limit, offset]);
+        const results = await this.db.executeSql(query, [`${searchStr}%`, limit, offset]);
         for (let index = 0; index < results.rows.length; index++) {
             trees.push(results.rows.item(index));
         }
@@ -582,7 +605,7 @@ export class TreesDao {
     }
 
     getTreeByLocalId = async (localId: number) => {
-        const [result] = await this.db.executeSql(`
+        const result = await this.db.executeSql(`
             SELECT * from ${this.tableName} WHERE local_id = ?
         `, [localId]);
 

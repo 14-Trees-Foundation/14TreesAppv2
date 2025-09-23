@@ -8,16 +8,17 @@ import { ToastAndroid } from "react-native";
 import { INITIAL_TIMESTAMP } from "../../constants/constants";
 
 export const fetchAndStoreVisits = async (siteId: number | undefined) => {
+    console.log("fetchAndStoreVisits: for site: ", siteId)
     // fetch data from the backend
     const apiClient = new ApiClient();
     const daoClient = await DaoClient.authenticate();
 
     let visitIds = await daoClient.visits.getLiveVisitIds()
     let timestamp = await AsyncStorage.getItem(Constants.lastVisitsFetchedAt) || INITIAL_TIMESTAMP
-    if (siteId) {
-        const resp = await daoClient.siteSync.getSiteLastSyncTime(siteId, Constants.lastVisitsFetchedAt);
-        if (resp && new Date(timestamp).getTime() < new Date(resp.created_at).getTime()) timestamp = resp.created_at;
-    }
+    // if (siteId) {
+    //     const resp = await daoClient.siteSync.getSiteLastSyncTime(siteId, Constants.lastVisitsFetchedAt);
+    //     if (resp && new Date(timestamp).getTime() < new Date(resp.created_at).getTime()) timestamp = resp.created_at;
+    // }
 
     try {
         const now = new Date().toISOString();

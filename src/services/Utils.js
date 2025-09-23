@@ -312,14 +312,14 @@ export class Utils {
         await daoClient.syncInfo.createTable();
         await daoClient.siteSync.createTable();
         await daoClient.plantTypes.createTable();
-        await this.localdb.createTreetTypesTbl();
-        await this.localdb.createPlotTbl();
-        await this.localdb.createSaplingTbl();
-        await this.localdb.createTreesTable();
+        // await this.localdb.createTreetTypesTbl();
+        // await this.localdb.createPlotTbl();
+        // await this.localdb.createSaplingTbl();
+        // await this.localdb.createTreesTable();
         await this.localdb.createLogsTable();
-        await this.localdb.createSaplingPlotTbl();
-        await this.localdb.createShiftTblLive();
-        await this.localdb.createNewImageTable();
+        // await this.localdb.createSaplingPlotTbl();
+        // await this.localdb.createShiftTblLive();
+        // await this.localdb.createNewImageTable();
     }
 
     static async deleteUpdateTreesPlots(sapling_id) {
@@ -1531,7 +1531,30 @@ export class Utils {
             trees: JSON.parse(resp.trees), 
             tree_images: JSON.parse(resp.tree_images), 
             visit_images: JSON.parse(resp.visit_images),
-            users: resp.users ? JSON.parse(resp.users) : { add: 0, edit: 0, delete: 0 },
+            users: (() => {
+                let usersParsed;
+                try {
+                    usersParsed = resp.users ? JSON.parse(resp.users) : { add: 0, edit: 0, delete: 0 };
+                } catch {
+                    usersParsed = { add: 0, edit: 0, delete: 0 };
+                }
+                if (typeof usersParsed !== 'object' || usersParsed.add === undefined) {
+                    usersParsed = { add: 0, edit: 0, delete: 0 };
+                }
+                return usersParsed;
+            })(),
+            visitor_data: (() => {
+                let visitorParsed;
+                try {
+                    visitorParsed = resp.visitor_data ? JSON.parse(resp.visitor_data) : { user_tree_image: 0, user_card_image: 0 };
+                } catch {
+                    visitorParsed = { user_tree_image: 0, user_card_image: 0 };
+                }
+                if (typeof visitorParsed !== 'object' || visitorParsed.user_tree_image === undefined) {
+                    visitorParsed = { user_tree_image: 0, user_card_image: 0 };
+                }
+                return visitorParsed;
+            })(),
         }
     }
 

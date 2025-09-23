@@ -34,6 +34,21 @@ export class TreeService {
         return response.data;
     }
 
+    // Upload visitor-only images (no tree yet). Backend should link by sapling_id and visit_id.
+    async uploadVisitorImages(
+        saplingId: string,
+        images: { name: string; data: string; type: 'user_tree_image'|'user_card_image' }[],
+        visitId?: number | null,
+        visitorId?: number | null,
+    ) {
+        const url = `/api/appv2/upload-visitor-images`;
+        const payload: any = { sapling_id: saplingId, images };
+        if (visitId) payload.visit_id = visitId;
+        if (visitorId) payload.visitor_id = visitorId;
+        const response = await this.api.post(url, payload);
+        return response?.data;
+    }
+
     async deleteTree(tree: Tree) {
         const url = `/api/trees/${tree.id}`;
         return await this.api.delete(url);

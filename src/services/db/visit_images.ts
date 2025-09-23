@@ -57,7 +57,7 @@ export class VisitImagesDao {
     }
 
     getVisitImagesByVisitId = async (visitId: number, uploaded?: boolean) => {
-        const [result] = await this.db.executeSql(
+        const result = await this.db.executeSql(
             `SELECT * FROM ${this.tableName}
             WHERE visit_id = ? AND is_deleted = 0 ${uploaded === undefined ? '' : `AND is_uploaded = ${uploaded}`};`,
             [visitId]
@@ -74,8 +74,8 @@ export class VisitImagesDao {
 
     getVisitImages = async (uploaded?: boolean, deleted?: boolean) => {
         const isUploaded = `is_uploaded = ${uploaded ? 1 : 0}`
-        const isDeleted = `is_deleted = ${uploaded ? 1 : 0}`
-        const [result] = await this.db.executeSql(
+        const isDeleted = `is_deleted = ${deleted ? 1 : 0}`
+        const result = await this.db.executeSql(
             `SELECT * FROM ${this.tableName}
             WHERE 1=1 ${uploaded === undefined ? '' : 'AND ' + isUploaded} ${deleted === undefined ? '' : 'AND ' + isDeleted};`
         )
@@ -105,7 +105,7 @@ export class VisitImagesDao {
     upsertLiveVisitIntoLocalDb = async (data: VisitImage) => {
         if (!data.id) return;
 
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE id = ?;`,
             [data.id]
         )
@@ -152,7 +152,7 @@ export class VisitImagesDao {
     }
 
     deleteVisitImage = async (id: number) => {
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
             [id]
         )
@@ -182,7 +182,8 @@ export class VisitImagesDao {
 
     getLiveVisitImageIds = async () => {
         const query =  `SELECT id FROM ${this.tableName} WHERE id IS NOT NULL;`
-        const [result] = await this.db.executeSql(query);
+        const result = await this.db.executeSql(query);
+        
 
         const visit_ids: number [] = [];
         for (let i = 0; i < result.rows.length; i++) {
@@ -198,7 +199,8 @@ export class VisitImagesDao {
         const query = `SELECT is_deleted, COUNT(*) as count FROM ${this.tableName}
             WHERE ${isUploaded !== undefined ? whereCondition : "1==1"} GROUP BY is_deleted;`
 
-        const [results] = await this.db.executeSql(query)
+        const result = await this.db.executeSql(query)
+        const results = result;
         const resp = { add: 0, delete: 0 }
         if (results.rows.item(0)) {
             if (results.rows.item(0).is_deleted === 0) resp.add = results.rows.item(0).count;

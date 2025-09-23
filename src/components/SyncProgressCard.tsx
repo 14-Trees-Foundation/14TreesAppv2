@@ -4,19 +4,20 @@ import { Text } from 'react-native-paper';
 import { formatDuration } from '../services/Utils';
 import { Strings } from '../services/Strings';
 
-type SyncCardProps = {
+type SyncProgressCardProps = {
     syncedAt: string;
     trees: { add: number; edit: number; delete: number };
     users: { add: number; edit: number; delete: number };
     treeImages: { add: number; delete: number };
     visitImages: { add: number; delete: number };
+    visitorData?: { user_tree_image: number; user_card_image: number };
     uploadTime: number
     fetchTime: number
     fetchError: string | null
     uploadError: string | null
 };
 
-const SyncCard: React.FC<SyncCardProps> = ({ syncedAt, trees, users, treeImages, visitImages, uploadTime, fetchTime, uploadError, fetchError }) => {
+const SyncProgressCard: React.FC<SyncProgressCardProps> = ({ syncedAt, trees, users, treeImages, visitImages, visitorData, uploadTime, fetchTime, uploadError, fetchError }) => {
 
     let treesData: string = ''
     if (trees.add !== 0) treesData = `${Strings.messages.New}: ${trees.add}`
@@ -60,6 +61,10 @@ const SyncCard: React.FC<SyncCardProps> = ({ syncedAt, trees, users, treeImages,
         : visitImagesData += `, ${Strings.messages.Deleted}: ${visitImages.delete}`
     }
 
+    const visitorDataStr = visitorData && (visitorData.user_tree_image || visitorData.user_card_image)
+        ? `Tree: ${visitorData.user_tree_image || 0}${(visitorData.user_card_image || 0) ? `, Card: ${visitorData.user_card_image}` : ''}`
+        : '';
+
     return (
         <View style={styles.card}>
             {syncedAt !== '' && <Text style={styles.syncedAtTitle}>{Strings.messages.StartTime}: <Text style={styles.syncedAt}>{syncedAt}</Text></Text>}
@@ -84,6 +89,11 @@ const SyncCard: React.FC<SyncCardProps> = ({ syncedAt, trees, users, treeImages,
                 <Text style={styles.detail}>[ {visitImagesData} ]</Text>
             </View>}
 
+            {visitorDataStr.length !== 0 && <View style={styles.sectionContainer}>
+                <Text style={styles.sectionTitle}>Visitor Data: </Text>
+                <Text style={styles.detail}>[ {visitorDataStr} ]</Text>
+            </View>}
+
             {uploadTime !== 0 && <View style={styles.sectionContainer}>
                 <Text style={styles.sectionTitle}>{Strings.messages.UploadTime}: </Text>
                 <Text style={styles.detail}>{formatDuration(uploadTime)}</Text>
@@ -104,10 +114,10 @@ const SyncCard: React.FC<SyncCardProps> = ({ syncedAt, trees, users, treeImages,
                 <Text style={styles.detail}>{uploadError}</Text>
             </View>}
 
-            {syncedAt !== '' && treesData.length === 0 && treeImagesData.length === 0 && visitImagesData.length === 0 &&
+            {syncedAt !== '' && treesData.length === 0 && treeImagesData.length === 0 && visitImagesData.length === 0 && visitorDataStr.length === 0 &&
                 <Text style={styles.sectionTitle}>{Strings.messages.NoDataUploaded}</Text>
             }
-            {syncedAt === '' && treesData.length === 0 && treeImagesData.length === 0 && visitImagesData.length === 0 &&
+            {syncedAt === '' && treesData.length === 0 && treeImagesData.length === 0 && visitImagesData.length === 0 && visitorDataStr.length === 0 &&
                 <Text style={styles.sectionTitle}>{Strings.messages.UploadingChanges}</Text>
             }
         </View>
@@ -153,4 +163,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default SyncCard;
+export default SyncProgressCard;

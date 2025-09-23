@@ -113,8 +113,12 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
         if ((sitesPage + 1) * 10 >= sites.total) setHasMoreSites(false);
         else setHasMoreSites(true);
 
-        if(sites.offset === 0) setSites(sites.results);
-        else setSites(prev => [...prev, ...sites.results]);
+        if(sites.offset === 0) setSites(sites.results.filter((s, index, arr) => arr.findIndex(a => a.id === s.id) === index));
+        else setSites(prev => {
+          const existingIds = new Set(prev.map(s => s.id));
+          const newSites = sites.results.filter(s => !existingIds.has(s.id));
+          return [...prev, ...newSites];
+        });
       }
     }
 
@@ -129,8 +133,12 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       if ((sitesPage + 1) * 10 >= sites.total) setHasMoreSites(false);
         else setHasMoreSites(true);
 
-        if(sites.offset === 0) setSites(sites.results);
-        else setSites(prev => [...prev, ...sites.results]);
+        if(sites.offset === 0) setSites(sites.results.filter((s, index, arr) => arr.findIndex(a => a.id === s.id) === index));
+        else setSites(prev => {
+          const existingIds = new Set(prev.map(s => s.id));
+          const newSites = sites.results.filter(s => !existingIds.has(s.id));
+          return [...prev, ...newSites];
+        });
     }
 
     searchSites();

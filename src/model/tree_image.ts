@@ -9,6 +9,7 @@ export type TreeImage = {
     is_uploaded: 0 | 1,
     is_active: 0 | 1 | null,           // only in case of tree_snapshot
     user_id: number | null,     // only in case of tree_snapshot
+    visit_id: number | null,
     timestamp: string
 }
 
@@ -19,4 +20,5 @@ export type CreateTreeImageRequest = {
     type: TreeImageType,
     is_active: 0 | 1 | null,           // only in case of tree_snapshot
     user_id: number | null,     // only in case of tree_snapshot
+    visit_id: number | null,
 }

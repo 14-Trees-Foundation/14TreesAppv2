@@ -14,6 +14,7 @@ export const saveSyncInfo = async (daoClient: DaoClient, info: any) => {
     data.tree_images = JSON.stringify(data.tree_images);
     data.visit_images = JSON.stringify(data.visit_images);
     data.users = JSON.stringify(data.users);
+    if (data.visitor_data !== undefined) data.visitor_data = JSON.stringify(data.visitor_data);
     await daoClient.syncInfo.createSyncInfo(data);
 }
 
