@@ -10,23 +10,21 @@ export class SyncInfoDao {
     };
 
     releaseChanges = async () => {
-        // adding new column to sync info
+        // adding new columns to sync info
         try {
-            // Query to get the table schema
             const query = `PRAGMA table_info(${this.tableName});`;
             const results = await this.db.executeSql(query);
-
-            // Extract the column names from the results
             const columns = results[0].rows.raw().map(row => row.name);
 
-            // Check if the column exists
             if (!columns.includes('users')) {
-                // Add the column if it does not exist
                 const alterQuery = `ALTER TABLE ${this.tableName} ADD COLUMN users TEXT;`;
                 await this.db.executeSql(alterQuery);
                 console.log(`Column users added to ${this.tableName}.`);
-            } else {
-                console.log(`Column users already exists in ${this.tableName}.`);
+            }
+            if (!columns.includes('visitor_data')) {
+                const alterQuery2 = `ALTER TABLE ${this.tableName} ADD COLUMN visitor_data TEXT;`;
+                await this.db.executeSql(alterQuery2);
+                console.log(`Column visitor_data added to ${this.tableName}.`);
             }
         } catch (error) {
             console.error('Error adding column:', error);
@@ -44,6 +42,7 @@ export class SyncInfoDao {
                 tree_images TEXT NULL,
                 visit_images TEXT NULL,
                 users TEXT NULL,
+                visitor_data TEXT NULL,
                 synced_at TEXT UNIQUE,
                 upload_time INTEGER NULL,
                 fetch_time INTEGER NULL,
@@ -57,7 +56,7 @@ export class SyncInfoDao {
 
             await this.db.executeSql(query);
             console.log('SyncInfo table created successfully!');
-            await this.releaseChanges();
+            // await this.releaseChanges();
         } catch (error) {
             console.log('error creating sync_info table:', error);
         }
@@ -80,7 +79,15 @@ export class SyncInfoDao {
             ${limit < 0 ? '' : `LIMIT ${limit} OFFSET ${offset}`};
         `
 
-        const [results] = await this.db.executeSql(query)
+        const result = await this.db.executeSql(query);
+        let results;
+        if (Array.isArray(result) && result.length > 0) {
+            results = result[0];
+        } else if (result && typeof result === 'object' && result.rows) {
+            results = result;
+        } else {
+            throw new Error('Unexpected result from executeSql');
+        }
         for (let index = 0; index < results.rows.length; index++) {
             syncInfo.push(results.rows.item(index));
         }
@@ -93,7 +100,15 @@ export class SyncInfoDao {
             WHERE synced_at = ?;
         `
 
-        const [results] = await this.db.executeSql(query, [syncTime])
+        const result = await this.db.executeSql(query, [syncTime]);
+        let results;
+        if (Array.isArray(result) && result.length > 0) {
+            results = result[0];
+        } else if (result && typeof result === 'object' && result.rows) {
+            results = result;
+        } else {
+            throw new Error('Unexpected result from executeSql');
+        }
         if (results.rows.length === 0) throw new Error('Sync Information not found!')
 
         return results.rows.item(0);
@@ -102,8 +117,8 @@ export class SyncInfoDao {
     createSyncInfo = async (data: CreateSyncInfoRequest) => {
         const query = `
             INSERT OR REPLACE INTO ${this.tableName}
-            (trees, tree_images, visit_images, users, synced_at, upload_time, fetch_time, upload_error, fetch_error, is_uploaded, change_type, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'add', ?, ?)
+            (trees, tree_images, visit_images, users, visitor_data, synced_at, upload_time, fetch_time, upload_error, fetch_error, is_uploaded, change_type, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'add', ?, ?)
         `
 
         const timeStamp = new Date().toISOString();
@@ -112,6 +127,7 @@ export class SyncInfoDao {
             data.tree_images,
             data.visit_images,
             data.users,
+            data.visitor_data ?? null,
             data.synced_at,
             data.upload_time,
             data.fetch_time,
@@ -126,10 +142,18 @@ export class SyncInfoDao {
         const now = new Date().toISOString();
         let changeType = 'edit';
         
-        const [response] = await this.db.executeSql(
+        const result = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
             [data.local_id]
-        )
+        );
+        let response;
+        if (Array.isArray(result) && result.length > 0) {
+            response = result[0];
+        } else if (result && typeof result === 'object' && result.rows) {
+            response = result;
+        } else {
+            throw new Error('Unexpected result from executeSql');
+        }
 
         if (response.rows.length === 1) {
             const existingSyncInfo = response.rows.item(0) as SyncInfo;
@@ -146,6 +170,7 @@ export class SyncInfoDao {
                     tree_images = ?,
                     visit_images = ?,
                     users = ?,
+                    visitor_data = ?,
                     synced_at = ?,
                     upload_time = ?,
                     fetch_time = ?,
@@ -154,7 +179,7 @@ export class SyncInfoDao {
                     updated_at = ?
                 WHERE local_id = ?;`,
                 [
-                    data.trees, data.tree_images, data.visit_images, data.users, data.synced_at, data.upload_time, data.fetch_time, changeType, now, data.local_id
+                    data.trees, data.tree_images, data.visit_images, data.users, (data as any).visitor_data ?? null, data.synced_at, data.upload_time, data.fetch_time, changeType, now, data.local_id
                 ]
             )
         } catch(err: any) {
@@ -165,8 +190,8 @@ export class SyncInfoDao {
     upsertLiveSyncInfo = async (data: SyncInfo) => {
         const query = `
             INSERT OR REPLACE INTO ${this.tableName}
-            (id, trees, tree_images, visit_images, users, synced_at, upload_time, upload_error, fetch_time, fetch_error, is_uploaded, change_type, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, '', 1, 'none', ?, ?)
+            (id, trees, tree_images, visit_images, users, visitor_data, synced_at, upload_time, upload_error, fetch_time, fetch_error, is_uploaded, change_type, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, '', 1, 'none', ?, ?)
         `
 
         await this.db.executeSql(query, [
@@ -175,6 +200,7 @@ export class SyncInfoDao {
             data.tree_images,
             data.visit_images,
             data.users,
+            (data as any).visitor_data ?? null,
             data.synced_at,
             data.upload_time,
             data.upload_error,

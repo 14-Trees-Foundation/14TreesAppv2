@@ -8,7 +8,7 @@ import { Strings } from "../services/Strings";
 import InternetBanner from "../components/InternetInfo";
 import GlobalContext from "../context/GlobalContext ";
 import { useFocusEffect } from "@react-navigation/native";
-import SyncCard from "../components/SyncCard";
+import SyncProgressCard from "../components/SyncProgressCard";
 import NetworkSpeedModal from "../components/NetworkModal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MessageModal from "../components/MessageModal";
@@ -24,6 +24,7 @@ const syncDetailsTemplate = {
     users: { add: 0, edit: 0, delete: 0 },
     tree_images: { add: 0, delete: 0 },
     visit_images: { add: 0, delete: 0 },
+    visitor_data: { user_tree_image: 0, user_card_image: 0 },
 }
 
 const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
@@ -48,6 +49,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
     const [userChanges, setUserChanges] = useState<any>(null);
     const [treeChanges, setTreeChanges] = useState<any>(null);
     const [treeImagesCount, setTreeImagesCount] = useState<any>(null);
+    const [visitorDataCount, setVisitorDataCount] = useState<any>(null);
     const [visitImagesCount, setVisitImagesCount] = useState<any>(null);
     const [syncInfoList, setSyncInfoList] = useState<any[]>([]);
     const [selectedSite, setSelectedSite] = useState<Site | null>(null);
@@ -64,9 +66,9 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     useFocusEffect(
         useCallback(() => {
-            // Update last sync date on UI every 2 second (2000 milliseconds)
-            intervalId.current = setInterval(updateUI, 2000);
             fetchSelectedSite();
+            // Load data once on focus
+            loadInitialData();
 
             return () => {
                 clearInterval(intervalId.current);
@@ -74,8 +76,10 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         }, []),
     );
 
-    const updateUI = () => {
-        setState(prev => prev + 1);
+    const loadInitialData = async () => {
+        await handleLastSyncDate();
+        await setPendingUploadCounts();
+        await handleNetworkSpeed();
     }
 
     const fetchSelectedSite = async () => {
@@ -85,12 +89,6 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         }
         return setSelectedSite(null);
     }
-
-    useEffect(() => {
-        handleLastSyncDate();
-        setPendingUploadCounts();
-        handleNetworkSpeed();
-    }, [state]);
 
     const handleLastSyncDate = async () => {
         const lsSate = await Utils.getLastSyncDate();
@@ -127,14 +125,20 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                 add: visitImagesCount?.add || 0,
                 delete: visitImagesCount?.delete || 0,
             } : prev.visit_images,
+            visitor_data: visitorDataCount ? {
+                user_tree_image: visitorDataCount?.user_tree_image || 0,
+                user_card_image: visitorDataCount?.user_card_image || 0,
+            } : prev.visitor_data,
         }));
-    }, [userChanges, treeChanges, treeImagesCount, visitImagesCount]);
+    }, [userChanges, treeChanges, treeImagesCount, visitImagesCount, visitorDataCount]);
 
     useEffect(() => {
         const pending = remaining.users.add + remaining.users.edit + remaining.users.delete
             + remaining.trees.add + remaining.trees.edit + remaining.trees.delete
             + remaining.tree_images.add + remaining.tree_images.delete
-            + remaining.visit_images.delete + remaining.visit_images.delete
+            + remaining.visit_images.add + remaining.visit_images.delete
+            + (remaining.visitor_data?.user_tree_image || 0)
+            + (remaining.visitor_data?.user_card_image || 0)
 
         if (pending === 0) setSyncDisabled(true);
         else setSyncDisabled(false);
@@ -142,13 +146,14 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         if (uploadInProgress && currentSyncTime) {
             const updateCurrentSyncInfo = async () => {
                 let syncInfo: any = await Utils.getSyncInfoBySyncTime(currentSyncTime);
-                syncInfo = { ...syncInfo, key: syncInfo.local_id } 
+                syncInfo = { ...syncInfo, key: syncInfo.local_id }
 
                 const completed = syncInfo.users.add + syncInfo.users.edit + syncInfo.users.delete
                     + syncInfo.trees.add + syncInfo.trees.edit + syncInfo.trees.delete
                     + syncInfo.tree_images.add + syncInfo.tree_images.delete
-                    + syncInfo.visit_images.delete + syncInfo.visit_images.delete
-
+                    + syncInfo.visit_images.add + syncInfo.visit_images.delete
+                    + (syncInfo.visitor_data?.user_tree_image || 0)
+                    + (syncInfo.visitor_data?.user_card_image || 0)
 
                 if (pending + completed !== 0) {
                     const progress = completed / (pending + completed);
@@ -160,7 +165,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
             }
             updateCurrentSyncInfo();
         }
-    }, [state, uploadInProgress, currentSyncTime, remaining])
+    }, [uploadInProgress, currentSyncTime, remaining])
 
     const getSyncInfo = async () => {
         const daoClient = await DaoClient.authenticate();
@@ -171,7 +176,30 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
             data.trees = JSON.parse(item.trees)
             data.tree_images = JSON.parse(item.tree_images)
             data.visit_images = JSON.parse(item.visit_images)
-            data.users = item.users ? JSON.parse(item.users) : syncDetailsTemplate.users
+            data.users = (() => {
+                let usersParsed;
+                try {
+                    usersParsed = item.users ? JSON.parse(item.users) : syncDetailsTemplate.users;
+                } catch {
+                    usersParsed = syncDetailsTemplate.users;
+                }
+                if (typeof usersParsed !== 'object' || usersParsed.add === undefined) {
+                    usersParsed = syncDetailsTemplate.users;
+                }
+                return usersParsed;
+            })()
+            data.visitor_data = (() => {
+                let visitorParsed;
+                try {
+                    visitorParsed = item.visitor_data ? JSON.parse(item.visitor_data) : syncDetailsTemplate.visitor_data;
+                } catch {
+                    visitorParsed = syncDetailsTemplate.visitor_data;
+                }
+                if (typeof visitorParsed !== 'object' || visitorParsed.user_tree_image === undefined) {
+                    visitorParsed = syncDetailsTemplate.visitor_data;
+                }
+                return visitorParsed;
+            })()
 
             return data;
         })
@@ -207,6 +235,10 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                 add: visitImagesCount?.add || 0,
                 delete: visitImagesCount?.delete || 0,
             },
+            visitor_data: {
+                user_tree_image: visitorDataCount?.user_tree_image || 0,
+                user_card_image: visitorDataCount?.user_card_image || 0,
+            },
         }
 
         const syncDetails = {
@@ -227,6 +259,13 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                 synced_at: syncDetails.synced_at,
             }
         })
+
+        // Start refreshing counts every 2 seconds during upload
+        intervalId.current = setInterval(async () => {
+            await setPendingUploadCounts();
+            await handleNetworkSpeed();
+        }, 2000);
+
         await saveSyncInfo({ ...syncDetailsTemplate, synced_at: syncDetails.synced_at });
 
         let timeNow = new Date().getTime();
@@ -253,6 +292,11 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         await daoClient.syncInfo.createSyncInfo(syncInfo);
         getSyncInfo();
 
+        // Stop refreshing and get final counts
+        clearInterval(intervalId.current);
+        await setPendingUploadCounts();
+        await handleLastSyncDate();
+
         setUploadInProgress(false);
         setCurrentSyncTime(null);
         setStoppingSync(false);
@@ -262,6 +306,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     const stopUploadData = async () => {
         setStoppingSync(true);
+        clearInterval(intervalId.current);
         await AsyncStorage.setItem(Constants.isForceSyncStop, 'true');
     }
 
@@ -283,6 +328,11 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
             };
             await Utils.logException(JSON.stringify(errorLog));
         }
+
+        // Refresh counts after download
+        await setPendingUploadCounts();
+        await handleLastSyncDate();
+
         setDownloadInProgress(false);
     }
 
@@ -293,6 +343,7 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         data.tree_images = JSON.stringify(data.tree_images);
         data.visit_images = JSON.stringify(data.visit_images);
         data.users = JSON.stringify(data.users);
+        data.visitor_data = JSON.stringify(data.visitor_data);
         const daoClient = await DaoClient.authenticate();
         await daoClient.syncInfo.createSyncInfo(data);
     }
@@ -305,8 +356,11 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         const visitImagesResp = await daoClient.visitImages.countVisitImages(false);
         setVisitImagesCount(visitImagesResp);
 
-        const treeImagesResp = await daoClient.treeSnapshots.countTreeSnapshotImages(false);
-        setTreeImagesCount(treeImagesResp);
+        const treeSnapshotsResp = await daoClient.treeSnapshots.countTreeSnapshotImages(false);
+        setTreeImagesCount(treeSnapshotsResp);
+
+        const visitorDataResp = await daoClient.treeImages.countVisitorImages(false);
+        setVisitorDataCount(visitorDataResp);
 
         const usersResp = await daoClient.users.countUsersByChangeTye(false);
         setUserChanges(usersResp);
@@ -320,6 +374,8 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
         if (treeChanges?.edit) items += treeChanges?.edit;
         if (treeImagesCount?.add) items += treeImagesCount?.add;
         if (visitImagesCount?.add) items += visitImagesCount?.add;
+        if (visitorDataCount?.user_tree_image) items += visitorDataCount?.user_tree_image;
+        if (visitorDataCount?.user_card_image) items += visitorDataCount?.user_card_image;
         if (items === 0) return 'few seconds'
         return formatDuration((items * 1024 * 1000) / parseInt(networkSpeed))
     }
@@ -402,6 +458,13 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                                 <Chip icon={(props => getChipIcon(props, !(visitImagesCount?.delete)))} style={styles.chip} >{Strings.messages.Deleted}: {visitImagesCount?.delete || 0}</Chip>
                             </View>
                         </View>
+                        <View style={{ justifyContent: 'center', marginVertical: 5 }}>
+                            <Text variant='titleMedium' style={{ color: 'black', paddingRight: 10 }}>Visitor Data:</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
+                                <Chip icon={(props => getChipIcon(props, !(visitorDataCount?.user_tree_image)))} style={styles.chip} >Tree Images: {visitorDataCount?.user_tree_image || 0}</Chip>
+                                <Chip icon={(props => getChipIcon(props, !(visitorDataCount?.user_card_image)))} style={styles.chip} >Card Images: {visitorDataCount?.user_card_image || 0}</Chip>
+                            </View>
+                        </View>
                     </View>
 
                     <View style={{ marginTop: 20, justifyContent: 'center' }}>
@@ -422,12 +485,13 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                             {
                                 syncInfoList.map(info => (
                                     <View key={info.key} style={{ marginHorizontal: 5, marginVertical: 3 }}>
-                                        <SyncCard
+                                        <SyncProgressCard
                                             syncedAt={info.synced_at === '' ? '' : getHumanReadableDateTime(info.synced_at)}
                                             trees={info.trees}
                                             users={info.users}
                                             treeImages={info.tree_images}
                                             visitImages={info.visit_images}
+                                            visitorData={info.visitor_data}
                                             uploadTime={info.upload_time}
                                             fetchTime={info.fetch_time}
                                             fetchError={info.fetch_error !== '' ? info.fetch_error : null}
@@ -442,12 +506,13 @@ const Sync: React.FC<{ navigation: any }> = ({ navigation }) => {
                     {uploadInProgress && <View style={{ flex: 1, width: '100%', marginTop: 20 }}>
                         <Text variant='titleLarge' style={{ color: 'black', fontWeight: 'bold', paddingRight: 10 }}>{Strings.messages.CurrentSync}:</Text>
                         <View style={{ marginHorizontal: 5, marginVertical: 3 }}>
-                            <SyncCard
+                            <SyncProgressCard
                                 syncedAt={currentSyncDetails.synced_at === '' ? '' : getHumanReadableDateTime(currentSyncDetails.synced_at)}
                                 trees={currentSyncDetails.trees}
                                 users={currentSyncDetails.users}
                                 treeImages={currentSyncDetails.tree_images}
                                 visitImages={currentSyncDetails.visit_images}
+                                visitorData={currentSyncDetails.visitor_data}
                                 uploadTime={currentSyncDetails.upload_time}
                                 fetchTime={currentSyncDetails.fetch_time}
                                 fetchError={currentSyncDetails.fetch_error !== '' ? currentSyncDetails.fetch_error : null}

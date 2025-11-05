@@ -34,7 +34,7 @@ const CardList: FC<CardListProps> = ({ data, renderItem, pagination, onEndReache
             renderItem={({ item, index }) => renderItem(item, index)}
             ListFooterComponent={renderFooter}
             onEndReachedThreshold={pagination ? 0.2 : undefined}
-            onEndReached={pagination && onEndReached ? onEndReached : undefined}
+            onEndReached={pagination && hasMore && onEndReached ? onEndReached : undefined}
         />
     )
 }

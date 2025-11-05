@@ -42,7 +42,7 @@ export class SiteSyncsDao {
             LIMIT 1 OFFSET 0;
         `
 
-        const [results] = await this.db.executeSql(query, [siteId, syncKey])
+        const results = await this.db.executeSql(query, [siteId, syncKey])
         if (results.rows.length === 1) {
             return results.rows.item(0);
         }

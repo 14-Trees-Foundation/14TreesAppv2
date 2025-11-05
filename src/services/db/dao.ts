@@ -17,6 +17,29 @@ let dbConnection: SQLiteDatabase;
 const getDBConnection = async () => {
     if (!dbConnection) {
         dbConnection = await openDatabase({ name: '14trees.db', location: 'default' });
+
+        const executeSqlWithLogging = (sql: string, params = []) => {
+            console.log('Executing SQL:', sql, 'with params:', params);
+            return new Promise((resolve, reject) => {
+                dbConnection.transaction((tx) => {
+                    tx.executeSql(
+                        sql,
+                        params,
+                        (tx, results) => {
+                            // Normalize the result to always return ResultSet directly
+                            // On Android, executeSql returns ResultSet directly
+                            // On iOS, executeSql returns [ResultSet] array
+                            const normalizedResult = Array.isArray(results) ? results[0] : results;
+                            resolve(normalizedResult);
+                        },
+                        (error) => reject(error)
+                    );
+                });
+            });
+        };
+
+        dbConnection.executeSql = executeSqlWithLogging;
+
     }
     return dbConnection;
 };

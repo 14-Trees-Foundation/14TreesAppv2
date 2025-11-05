@@ -1,0 +1,38 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Android (Dev)",
+            "cwd": "${workspaceFolder}",
+            "type": "reactnative",
+            "request": "launch",
+            "platform": "android",
+            "port": 8081,
+            "runArguments": ["--mode", "devDebug"],
+            "trace": "verbose"
+        },
+        {
+            "name": "Debug Android (Prod)",
+            "cwd": "${workspaceFolder}",
+            "type": "reactnative",
+            "request": "launch",
+            "platform": "android",
+            "runArguments": ["--mode", "prodDebug"],
+            "port": 8081,
+            "trace": "verbose"
+        },
+        {
+            "name": "Debug iOS",
+            "cwd": "${workspaceFolder}",
+            "type": "reactnative",
+            "request": "launch",
+            "platform": "ios"
+        },
+        {
+            "name": "Attach to packager",
+            "cwd": "${workspaceFolder}",
+            "type": "reactnative",
+            "request": "attach"
+        }
+    ]
+}

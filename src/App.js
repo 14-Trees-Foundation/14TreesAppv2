@@ -31,6 +31,7 @@ import PlotSaplings from './screens/PlotSaplings';
 import PlotAudit from './screens/PlotAudit';
 import MapScreen from './screens/Map';
 import BulkAddTrees from './screens/BulkAddTrees';
+import BulkAddVisitorData from './screens/BulkAddVisitorData';
 
 
 const errorHandler = async (e, isFatal) => {
@@ -391,6 +392,28 @@ const App = () => {
             headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
             headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
             title: Strings.screenNames.BulkAddTrees,
+          }}
+        />
+        <Stack.Screen
+          name={Strings.screenNames.getString('BulkAddVisitorData', Strings.english)}
+          component={BulkAddVisitorData}
+          options={{
+            headerLeft: () => (
+              <View style={{ marginLeft: 10 }}>
+                <TouchableOpacity onPress={() => {
+                  stackNavRef.current.goBack()
+                }}>
+                  <Icon name="arrow-back" size={24} color="black" />
+                </TouchableOpacity>
+              </View>
+            ),
+            headerRight: () => (
+              <ScreenHeaderContent />
+            ),
+            headerStyle: lightTheme ? commonStyles.drawerHeaderLight : commonStyles.drawerHeaderDark,
+            headerTitleStyle: lightTheme ? commonStyles.headerTitleStyleLight : commonStyles.headerTitleStyleDark,
+            headerTintColor: lightTheme ? commonStyles.headerTitleStyleLight.color : commonStyles.headerTitleStyleDark.color,
+            title: Strings.screenNames.BulkAddVisitorData,
           }}
         />
         <Stack.Screen

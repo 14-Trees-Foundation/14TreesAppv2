@@ -12,6 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchAndStoreDeltaSyncInformation, saveSyncInfo, uploadSyncInfoData } from "./sync_info";
 import { DaoClient } from "../db/dao";
 import { fetchAndStoreDeltaPlantTypes } from "./plant_type";
+import { uploadVisitorData } from "./visitor_data";
 
 export const uploadLocalData = async (changesCount: any, syncTime: string) => {
     // remove force sync in order to allow the sync
@@ -28,6 +29,9 @@ export const uploadLocalData = async (changesCount: any, syncTime: string) => {
 
     count = changesCount.visit_images.add + changesCount.visit_images.delete
     if (count !== 0) await uploadVisitImagesData(syncTime);
+
+    count = changesCount.visitor_data? (changesCount.visitor_data.user_tree_image + changesCount.visitor_data.user_card_image):0;
+    if (count !== 0) await uploadVisitorData(syncTime);
 
     try {
         await uploadSyncInfoData();
@@ -50,6 +54,7 @@ export const uploadLocalData = async (changesCount: any, syncTime: string) => {
 }
 
 export const fetchDeltaChanges = async (setProgress: React.Dispatch<React.SetStateAction<number>>) => {
+    console.log("fetchDeltaChanges function invoked...")
     const userDetailsDtr = await AsyncStorage.getItem(Constants.userDetailsKey);
     if (userDetailsDtr) {
         const userDetails = JSON.parse(userDetailsDtr);
@@ -68,8 +73,8 @@ export const fetchDeltaChanges = async (setProgress: React.Dispatch<React.SetSta
     await fetchAndStoreDeltaPlantTypes();
     setProgress(0.1);
 
-    await fetchAndStoreUsers();
-    setProgress(0.2);
+    // await fetchAndStoreUsers();
+    // setProgress(0.2);
 
     await fetchAndStoreSites();
     setProgress(0.2);

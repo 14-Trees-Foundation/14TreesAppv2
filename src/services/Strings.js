@@ -38,6 +38,7 @@ export class Strings {
             UpdateSaplingsPlot: "UpdateSaplingsPlot",
             UsersPage: "Users",
             BulkAddTrees: "Add Trees",
+            BulkAddVisitorData: "Visitor Data (Bulk)",
         },
         "mr": {
             HomePage: "मुख्य पृष्ठ",
@@ -72,6 +73,7 @@ export class Strings {
             UpdateSaplingsPlot: "झाडाचा प्लॉट अपडेट करा",
             UsersPage: "वापरकर्ते",
             BulkAddTrees: "झाडे जोडा",
+            BulkAddVisitorData: "विजिटर डेटा (बल्क)",
         }
     })
 
@@ -564,6 +566,8 @@ export class Strings {
 
             // Visits
             AddVisitImages: 'Add Visit Images',
+            AddVisitorData: 'Add Visitor Data',
+            AddVisitorDataRange: 'Add Visitor Data (Range)',
 
             // Trees
             AddNewImage: 'Add New Image',
@@ -640,6 +644,8 @@ export class Strings {
 
             // Visits
             AddVisitImages: 'भेट प्रतिमा जोडा',
+            AddVisitorData: 'विजिटर माहिती जोडा',
+            AddVisitorDataRange: 'विजिटर माहिती (रेंज) जोडा',
 
             // Trees
             AddNewImage: 'नवीन प्रतिमा जोडा',

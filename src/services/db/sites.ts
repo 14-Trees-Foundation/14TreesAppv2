@@ -60,9 +60,9 @@ export class SitesDao {
             ${limit < 0 ? '' : `LIMIT ${limit} OFFSET ${offset}`};
         `
 
-        const [results] = await this.db.executeSql(query)
-        for (let index = 0; index < results.rows.length; index++) {
-            site.push(results.rows.item(index));
+        const result = await this.db.executeSql(query)
+        for (let index = 0; index < result.rows.length; index++) {
+            site.push(result.rows.item(index));
         }
 
         return site;
@@ -73,10 +73,10 @@ export class SitesDao {
         const query = `SELECT change_type, COUNT(*) as count FROM ${this.tableName}
             WHERE ${isUploaded !== undefined ? whereCondition : "1==1"} GROUP BY change_type;`
 
-        const [results] = await this.db.executeSql(query)
+        const result = await this.db.executeSql(query)
         let response: any = {}
-        for (let i = 0; i < results.rows.length; i++) {
-            const row = results.rows.item(i);
+        for (let i = 0; i < result.rows.length; i++) {
+            const row = result.rows.item(i);
             response = {
                 ...response,
                 [row.change_type]: row.count,
@@ -109,7 +109,7 @@ export class SitesDao {
         `
 
         const timeStamp = new Date().toISOString();
-        const [results] = await this.db.executeSql(query, [
+        const results = await this.db.executeSql(query, [
             data.name_marathi,
             data.name_english,
             data.owner,
@@ -131,7 +131,7 @@ export class SitesDao {
         const now = new Date().toISOString();
         let changeType = 'edit';
 
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
             [data.local_id]
         )
@@ -187,7 +187,7 @@ export class SitesDao {
     upsertLiveSiteIntoLocalDb = async (data: Site) => {
         if (!data.id) return;
 
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE id = ?;`,
             [data.id]
         )
@@ -251,7 +251,7 @@ export class SitesDao {
     }
 
     deleteSite = async (id: number) => {
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
             [id]
         )
@@ -299,27 +299,27 @@ export class SitesDao {
 
     getSiteByLiveId = async (id: number) => {
         const query = `
-            SELECT * FROM ${this.tableName} 
+            SELECT * FROM ${this.tableName}
             WHERE id = ?;
         `
-        const [results] = await this.db.executeSql(query, [id]);
+        const results = await this.db.executeSql(query, [id]);
         if (results.rows.length === 1) return results.rows.item(0) as Site;
         return null;
     }
 
     getSiteByLocalId = async (id: number) => {
         const query = `
-            SELECT * FROM ${this.tableName} 
+            SELECT * FROM ${this.tableName}
             WHERE local_id = ?;
         `
-        const [results] = await this.db.executeSql(query, [id]);
+        const results = await this.db.executeSql(query, [id]);
         if (results.rows.length === 1) return results.rows.item(0) as Site;
         return null;
     }
 
     getLiveSiteIds = async () => {
         const query = `SELECT id FROM ${this.tableName} WHERE id IS NOT NULL;`
-        const [result] = await this.db.executeSql(query);
+        const result = await this.db.executeSql(query);
 
         const site_ids: number[] = [];
         for (let i = 0; i < result.rows.length; i++) {
@@ -340,9 +340,9 @@ export class SitesDao {
             ORDER BY ${this.tableName}.updated_at DESC
             LIMIT ? OFFSET ?;
         `
-        
+
         const likeStr = `%${searchStr}%`
-        const [results] = await this.db.executeSql(query, [likeStr, likeStr, likeStr, limit, offset]);
+        const results = await this.db.executeSql(query, [likeStr, likeStr, likeStr, limit, offset]);
         for (let index = 0; index < results.rows.length; index++) {
             sites.push(results.rows.item(index));
         }

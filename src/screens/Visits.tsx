@@ -6,6 +6,7 @@ import { DaoClient } from "../services/db/dao";
 import VisitForm from "../components/visit/VisitForm";
 import VisitCard from "../components/visit/VisitCard";
 import VisitInfo from "../components/visit/VisitInfo";
+import VisitorDataForm from "../components/visit/VisitorDataForm";
 import { TouchableOpacity } from "react-native";
 import { CreateVisitRequest, Visit } from "../model/visits";
 import { useFocusEffect } from "@react-navigation/native";
@@ -13,11 +14,12 @@ import { AddIconButton } from "../components/FABplusIcon";
 import SearchBar from "../components/Searchbar";
 import { Image } from "../model/common";
 import InternetBanner from "../components/InternetInfo";
-import { TreeForm } from "../components/trees/NewTreeForm";
 import { CreateTreeRequest, Tree } from "../model/tree";
 import { TreeImageType } from "../model/tree_image";
 import CardList from "../components/CardList";
 import { Modal } from "react-native";
+import SaplingRangeModal from "../components/plots/SaplingRangeModal";
+import { Strings } from "../services/Strings";
 
 interface VisitsInputProps {
     navigation: any
@@ -39,6 +41,7 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
     const [visits, setVisits] = useState<Visit[]>([]);
     const [visitsPage, setVisitsPage] = useState(0);
     const [hasMoreVisits, setHasMoreVisits] = useState(true);
+    const [rangeModalVisible, setRangeModalVisible] = useState(false);
 
     useFocusEffect(
         useCallback(() => {
@@ -66,14 +69,16 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
         const getVisits = async () => {
             const daoClient = await DaoClient.authenticate();
             let resp = await daoClient.visits.getVisits(visitsPage * 10, 10);
-            const newVisits = visitsPage === 0 ? resp : [...visits, ...resp];
+            console.log('Visits page', visitsPage, 'resp.length', resp.length, 'local_ids', resp.map(v => v.local_id));
 
-            // Filter out duplicates based on visit.local_id
-            const uniqueVisits = newVisits.filter((visit, index, self) =>
-                index === self.findIndex((t) => t.local_id === visit.local_id)
-            );
-
-            setVisits(uniqueVisits);
+            setVisits(prev => {
+                const merged = visitsPage === 0 ? resp : [...prev, ...resp];
+                const unique = merged.filter((visit, index, self) =>
+                    index === self.findIndex((t) => t.local_id === visit.local_id)
+                );
+                // console.log("uniqueVisits: ", JSON.stringify(unique, null, 3));
+                return unique;
+            });
             setHasMoreVisits(resp.length === 10);
         }
 
@@ -86,14 +91,14 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
         const getVisits = async () => {
             const daoClient = await DaoClient.authenticate();
             let resp = await daoClient.visits.searchVisits(searchQuery, visitsPage * 10, 10);
-            const newVisits = visitsPage === 0 ? resp : [...visits, ...resp];
 
-            // Filter out duplicates based on visit.local_id
-            const uniqueVisits = newVisits.filter((visit, index, self) =>
-                index === self.findIndex((t) => t.local_id === visit.local_id)
-            );
-
-            setVisits(uniqueVisits);
+            setVisits(prev => {
+                const merged = visitsPage === 0 ? resp : [...prev, ...resp];
+                const unique = merged.filter((visit, index, self) =>
+                    index === self.findIndex((t) => t.local_id === visit.local_id)
+                );
+                return unique;
+            });
             setHasMoreVisits(resp.length === 10);
         }
 
@@ -138,6 +143,45 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
         deleteVisit();
     }
 
+    // Visitor data save: capture images only, do NOT create a tree here
+    const handleVisitorSubmit = async (payload: { sapling_id: string, user: any | null, visit_id: number | null, images: any }) => {
+        const localClient = await DaoClient.authenticate();
+        const { sapling_id, user, visit_id, images } = payload;
+
+        try {
+            const upsert = async (key: 'user_tree_image' | 'user_card_image') => {
+                const img = images[key];
+                if (!img) return;
+                try {
+                    await localClient.treeImages.upsertTreeImage({
+                        name: img.name,
+                        data: img.data,
+                        sapling_id,
+                        type: key,
+                        is_active: null,
+                        user_id: user ? (user.local_id ?? null) : null,
+                        visit_id,
+                    });
+                } catch (err) {
+                    ToastAndroid.show(`Failed to add ${key.replace('_', ' ')} locally!`, ToastAndroid.SHORT);
+                }
+            };
+
+            await upsert('user_tree_image');
+            await upsert('user_card_image');
+
+            setPlaySound(true);
+            console.log("Saved visitor data for sapling id: ", sapling_id, " image count: ", images?.length ?? 0);
+            ToastAndroid.show("Saved visitor data locally!", ToastAndroid.SHORT);
+            setTreeModal(false);
+            // Trigger refresh of visit cards to update visitor data counts
+            setStateChange(prev => prev + 1);
+        } catch (error) {
+            console.error('Error saving visitor data:', error);
+            ToastAndroid.show("Failed to save visitor data!", ToastAndroid.SHORT);
+        }
+    };
+
     const handleTreeSave = (data: Tree | CreateTreeRequest, images?: any) => {
         let hasError = false;
 
@@ -169,6 +213,7 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
                             type: type,
                             is_active: null,
                             user_id: null,
+                            visit_id: data.visit_id,
                         })
                     } catch (err: any) {
                         ToastAndroid.show(`Failed to add ${type.replace('_', ' ')} locally!`, ToastAndroid.SHORT)
@@ -196,9 +241,11 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
                     setInfoModalVisible(true);
                 }}>
                     <VisitCard
+                        key={`${visit.local_id}-${stateChange}`}
                         visit={visit}
                         onTreeAdd={() => { setSelectedVisit(visit); setTreeModal(true) }}
                         onEdit={() => { setChangeModel('edit'); setIsFormVisible(true); }}
+                        onRangeAdd={() => { setSelectedVisit(visit); setRangeModalVisible(true); }}
                     />
                 </TouchableOpacity>
             </View>
@@ -240,13 +287,22 @@ const Visits: React.FC<VisitsInputProps> = ({ navigation }) => {
                     visit={selectedVisit}
                 />}
 
-                {(!isFormVisible && treeModal) && <TreeForm
-                    tree={null}
-                    changeMode="add"
+                {(!isFormVisible && treeModal) && <VisitorDataForm
+                    visitId={selectedVisit?.id}
                     onCancel={() => setTreeModal(false)}
-                    onSubmit={handleTreeSave}
-                    visit={selectedVisit ?? undefined}
+                    onSubmit={handleVisitorSubmit}
                 />}
+                <SaplingRangeModal
+                    visible={rangeModalVisible}
+                    onClose={() => setRangeModalVisible(false)}
+                    onSubmit={(saplings) => {
+                        setRangeModalVisible(false);
+                        navigation.navigate(
+                            Strings.screenNames.getString('BulkAddVisitorData', Strings.english),
+                            { saplings, visit: selectedVisit },
+                        )
+                    }}
+                />
             </View>
         </View>
     );

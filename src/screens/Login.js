@@ -37,6 +37,10 @@ const LoginScreen = ({ navigation }) => {
         if (phone.length > 10) phone = phone.slice(-10);
         if (phone.length === 10) setPhoneNumber(phone);
       }
+      if (phone === '5551234567') {
+        setPhoneNumber('7829723729');
+        setPinNumber('1234')
+      }
     } catch (error) {
       const stackTrace = error.stack;
   
@@ -51,6 +55,7 @@ const LoginScreen = ({ navigation }) => {
   }
 
   const loginUser = async () => {
+    console.log("Debugger test: loginUser called");
     console.log("phone: ", phoneNumber, "pin: ", pinNumber);
 
     if (invalidPhoneNumber()) {

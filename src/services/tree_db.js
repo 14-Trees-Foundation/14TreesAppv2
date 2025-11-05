@@ -208,6 +208,8 @@ export class LocalDatabase {
 
     logExceptionLocalDB = async (logs) => {
         try {
+            console.log("logExceptionLocalDB");
+            console.log(logs);
             const phoneInfo = await DeviceInfo.getPhoneNumber() || await AsyncStorage.getItem(Constants.phoneNumber);
             const deviceManufacture = await DeviceInfo.getManufacturer();
             const deviceName = await DeviceInfo.getDeviceName();

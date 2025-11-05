@@ -1,18 +1,22 @@
 // VisitCard.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Visit } from '../../model/visits';
 import moment from 'moment';
 import { Button } from 'react-native-paper';
 import { Strings } from '../../services/Strings';
+import { DaoClient } from '../../services/db/dao';
 
 interface VisitCardInputProps {
     visit: Visit
     onTreeAdd: () => void
     onEdit: () => void
+    onRangeAdd?: () => void
 }
 
-const VisitCard: React.FC<VisitCardInputProps> = ({ visit, onTreeAdd, onEdit }) => {
+const VisitCard: React.FC<VisitCardInputProps> = ({ visit, onTreeAdd, onEdit, onRangeAdd }) => {
+  const [visitorDataCount, setVisitorDataCount] = useState<number>(0);
+  const [isLoadingCount, setIsLoadingCount] = useState<boolean>(true);
 
   const getDateStringForVisit = (str: string) => {
     const date = new Date(str);
@@ -21,24 +25,57 @@ const VisitCard: React.FC<VisitCardInputProps> = ({ visit, onTreeAdd, onEdit }) 
     return moment(date).format('DD MMMM, YYYY');
   }
 
+  const fetchVisitorDataCount = async () => {
+    try {
+      setIsLoadingCount(true);
+      const daoClient = await DaoClient.authenticate();
+
+      // Count the visitor images that are not uploaded for trees in this visit
+      const totalCount = await daoClient.treeImages.countVisitorImagesForVisit(visit.id, false);
+
+      setVisitorDataCount(totalCount);
+    } catch (error) {
+      console.error('Error fetching visitor data count:', error);
+      setVisitorDataCount(0);
+    } finally {
+      setIsLoadingCount(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchVisitorDataCount();
+  }, [visit]);
+
   return (
     <View style={styles.container}>
       <View style={styles.info}>
         <Text style={styles.title}>{visit.visit_name}</Text>
         <Text style={styles.text}>{visit.visit_type}</Text>
         <Text style={styles.text}>{getDateStringForVisit(visit.visit_date)}</Text>
+        {!isLoadingCount && visitorDataCount > 0 && (
+          <Text style={styles.countText}>
+            {visitorDataCount} unsynced visitor data entr{visitorDataCount !== 1 ? 'ies' : 'y'}
+          </Text>
+        )}
       </View>
       <View style={styles.actionContainer}>
         <Button
           style={styles.action} 
           labelStyle={styles.actionLabel}
           onPress={onTreeAdd}
-        >{Strings.messages.AddTree}</Button>
-        <Button
+        >{Strings.buttonLabels.AddVisitorData}</Button>
+        {onRangeAdd && (
+          <Button
+            style={styles.action}
+            labelStyle={styles.actionLabel}
+            onPress={onRangeAdd}
+          >{Strings.buttonLabels.AddVisitorDataRange}</Button>
+        )}
+        {/* <Button
           style={styles.action} 
           labelStyle={styles.actionLabel}
           onPress={onEdit}
-        >{Strings.buttonLabels.AddVisitImages}</Button>
+        >{Strings.buttonLabels.AddVisitImages}</Button> */}
       </View>
     </View>
   );
@@ -81,6 +118,12 @@ const styles = StyleSheet.create({
   },
   actionLabel: {
     color: 'green'
+  },
+  countText: {
+    fontSize: 12,
+    color: '#ff9800', // Orange color for unsynced items
+    fontWeight: '500',
+    marginTop: 4,
   },
 });
 

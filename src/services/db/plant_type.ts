@@ -37,9 +37,9 @@ export class PlantTypesDao {
         const query = `SELECT * FROM ${this.tableName}
             ${limit < 0 ? '' : `LIMIT ${limit} OFFSET ${offset}`};  `
 
-        const [results] = await this.db.executeSql(query)
-        for (let index = 0; index < results.rows.length; index++) {
-            plantTypes.push(results.rows.item(index));
+        const result = await this.db.executeSql(query)
+        for (let index = 0; index < result.rows.length; index++) {
+            plantTypes.push(result.rows.item(index));
         }
 
         return plantTypes;
@@ -68,7 +68,8 @@ export class PlantTypesDao {
 
     getLivePlantTypeIds = async () => {
         const query = `SELECT id FROM ${this.tableName} WHERE id IS NOT NULL;`
-        const [result] = await this.db.executeSql(query);
+        const result = await this.db.executeSql(query);
+        
 
         const plantTypeIds: number[] = [];
         for (let i = 0; i < result.rows.length; i++) {
@@ -87,9 +88,9 @@ export class PlantTypesDao {
             LIMIT ? OFFSET ?;
         `
         const likeStr = `%${searchStr}%`
-        const [results] = await this.db.executeSql(query, [likeStr, limit, offset]);
-        for (let index = 0; index < results.rows.length; index++) {
-            plantTypes.push(results.rows.item(index));
+        const result = await this.db.executeSql(query, [likeStr, limit, offset]);
+        for (let index = 0; index < result.rows.length; index++) {
+            plantTypes.push(result.rows.item(index));
         }
         return plantTypes;
     }
@@ -99,8 +100,8 @@ export class PlantTypesDao {
             SELECT * FROM ${this.tableName} 
             WHERE id = ?;
         `
-        const [results] = await this.db.executeSql(query, [id]);
-        if (results.rows.length === 1) return results.rows.item(0) as PlantType;
+        const result = await this.db.executeSql(query, [id]);
+        if (result.rows.length === 1) return result.rows.item(0) as PlantType;
         return null;
     }
 };

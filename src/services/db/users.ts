@@ -51,7 +51,7 @@ export class UsersDao {
             ${limit < 0 ? '' : `LIMIT ${limit} OFFSET ${offset}`};
         `
 
-        const [results] = await this.db.executeSql(query)
+        const results = await this.db.executeSql(query)
         for (let index = 0; index < results.rows.length; index++) {
             users.push(results.rows.item(index));
         }
@@ -64,7 +64,7 @@ export class UsersDao {
         const query = `SELECT change_type, COUNT(*) as count FROM ${this.tableName}
             WHERE ${isUploaded !== undefined ? whereCondition : "1==1"} GROUP BY change_type;`
 
-        const [results] = await this.db.executeSql(query)
+        const results = await this.db.executeSql(query)
         let response: any = {}
         for (let i = 0; i < results.rows.length; i++) {
             const row = results.rows.item(i);
@@ -85,7 +85,7 @@ export class UsersDao {
         `
 
         const timeStamp = new Date().toISOString();
-        const [resp] = await this.db.executeSql(query, [
+        const resp = await this.db.executeSql(query, [
             data.name, 
             data.email,
             data.phone,
@@ -101,7 +101,7 @@ export class UsersDao {
         const now = new Date().toISOString();
         let changeType = 'edit';
         
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
             [data.local_id]
         )
@@ -137,7 +137,7 @@ export class UsersDao {
     upsertLiveUserIntoLocalDb = async (data: User) => {
         if (!data.id) return;
 
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE id = ?;`,
             [data.id]
         )
@@ -213,7 +213,7 @@ export class UsersDao {
     }
 
     deleteUser = async (id: number) => {
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
             [id]
         )
@@ -262,7 +262,7 @@ export class UsersDao {
 
     getLiveUserIds = async () => {
         const query =  `SELECT id FROM ${this.tableName} WHERE id IS NOT NULL;`
-        const [result] = await this.db.executeSql(query);
+        const result = await this.db.executeSql(query);
 
         const user_ids: number [] = [];
         for (let i = 0; i < result.rows.length; i++) {
@@ -282,7 +282,7 @@ export class UsersDao {
             LIMIT ? OFFSET ?;
         `
         const likeStr = `%${searchStr}%`
-        const [results] = await this.db.executeSql(query, [ likeStr, likeStr, likeStr, limit, offset]);
+        const results = await this.db.executeSql(query, [ likeStr, likeStr, likeStr, limit, offset]);
         for (let index = 0; index < results.rows.length; index++) {
             users.push(results.rows.item(index));
         }
@@ -297,7 +297,7 @@ export class UsersDao {
             ORDER BY updated_at DESC
             LIMIT 10 OFFSET 0;
         `
-        const [results] = await this.db.executeSql(query, [email]);
+        const results = await this.db.executeSql(query, [email]);
         for (let index = 0; index < results.rows.length; index++) {
             users.push(results.rows.item(index));
         }
@@ -306,20 +306,20 @@ export class UsersDao {
 
     getUserByLiveId = async (id: number) => {
         const query =  `
-            SELECT * FROM ${this.tableName} 
+            SELECT * FROM ${this.tableName}
             WHERE id = ?;
         `
-        const [results] = await this.db.executeSql(query, [id]);
+        const results = await this.db.executeSql(query, [id]);
         if (results.rows.length === 1) return results.rows.item(0) as User;
         return null;
     }
 
     getUserByLocalId = async (id: number) => {
         const query =  `
-            SELECT * FROM ${this.tableName} 
+            SELECT * FROM ${this.tableName}
             WHERE local_id = ?;
         `
-        const [results] = await this.db.executeSql(query, [id]);
+        const results = await this.db.executeSql(query, [id]);
         if (results.rows.length === 1) return results.rows.item(0) as User;
         return null;
     }

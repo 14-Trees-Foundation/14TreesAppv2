@@ -64,7 +64,7 @@ export class VisitsDao {
             ${limit < 0 ? '' : `LIMIT ${limit} OFFSET ${offset}`};
         `
 
-        const [results] = await this.db.executeSql(query)
+        const results = await this.db.executeSql(query)
         for (let index = 0; index < results.rows.length; index++) {
           visits.push(results.rows.item(index));
         }
@@ -77,7 +77,7 @@ export class VisitsDao {
         const query = `SELECT change_type, COUNT(*) as count FROM ${this.tableName}
             WHERE ${isUploaded !== undefined ? whereCondition : "1==1"} GROUP BY change_type;`
 
-        const [results] = await this.db.executeSql(query)
+        const results = await this.db.executeSql(query)
         let response: any = {}
         for (let i = 0; i < results.rows.length; i++) {
             const row = results.rows.item(i);
@@ -112,7 +112,7 @@ export class VisitsDao {
         const now = new Date().toISOString();
         let changeType = 'edit';
         
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
             [data.local_id]
         )
@@ -148,7 +148,7 @@ export class VisitsDao {
     upsertLiveVisitIntoLocalDb = async (data: Visit) => {
         if (!data.id) return;
 
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE id = ?;`,
             [data.id]
         )
@@ -194,7 +194,7 @@ export class VisitsDao {
     }
 
     deleteVisit=  async (id: number) => {
-        const [response] = await this.db.executeSql(
+        const response = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
             [id]
         )
@@ -243,7 +243,7 @@ export class VisitsDao {
 
     getLiveVisitIds = async () => {
         const query =  `SELECT id FROM ${this.tableName} WHERE id IS NOT NULL;`
-        const [result] = await this.db.executeSql(query);
+        const result = await this.db.executeSql(query);
 
         const visit_ids: number [] = [];
         for (let i = 0; i < result.rows.length; i++) {
@@ -263,7 +263,7 @@ export class VisitsDao {
             LIMIT ? OFFSET ?;
         `
         const likeStr = `%${searchStr}%`
-        const [results] = await this.db.executeSql(query, [ likeStr, limit, offset]);
+        const results = await this.db.executeSql(query, [ likeStr, limit, offset]);
         for (let index = 0; index < results.rows.length; index++) {
           visits.push(results.rows.item(index));
         }
@@ -275,7 +275,7 @@ export class VisitsDao {
             SELECT * FROM ${this.tableName} 
             WHERE id = ?;
         `
-        const [results] = await this.db.executeSql(query, [id]);
+        const results = await this.db.executeSql(query, [id]);
         if (results.rows.length === 1) return results.rows.item(0) as Visit;
         return null;
     }
@@ -305,7 +305,7 @@ export class VisitsDao {
     getVisitUsers = async (visitId: number) => {
 
         const query = `SELECT user_id FROM ${this.tableVisitUsersName} WHERE visit_id = ?`;
-        const [result] = await this.db.executeSql(query, [visitId]);
+        const result = await this.db.executeSql(query, [visitId]);
 
         let userIds: number[] = [];
         for (let i = 0; i < result.rows.length; i++) {
