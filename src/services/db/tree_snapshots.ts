@@ -90,7 +90,8 @@ export class TreeSnapshotsDao {
         const isDeleted = `is_deleted = ${uploaded ? 1 : 0}`
         const [result] = await this.db.executeSql(
             `SELECT * FROM ${this.tableName}
-            WHERE 1=1 ${uploaded === undefined ? '' : 'AND ' + isUploaded} ${deleted === undefined ? '' : 'AND ' + isDeleted};`
+            WHERE 1=1 ${uploaded === undefined ? '' : 'AND ' + isUploaded} ${deleted === undefined ? '' : 'AND ' + isDeleted} 
+            LIMIT 100;`
         )
 
         let images: TreeSnapshot[] = []
