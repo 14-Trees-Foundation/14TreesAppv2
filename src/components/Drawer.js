@@ -74,25 +74,14 @@ export const DrawerContent = (props) => {
                 labelStyle={{ marginLeft: -40 }} 
                 onPress={() => props.navigation.navigate(Strings.screenNames.getString('HomePage', Strings.english))}
               />
-            </Drawer.Section>
-            <Drawer.Section>
-              <DrawerItem 
+              <DrawerItem
                 icon={({size, color}) => (
-                  <Button icon='account-outline' size={size + 20} color={color}/>
+                  <Button icon='cloud-sync-outline' size={size + 20} color={color}/>
                 )}
-                label={Strings.screenNames.UsersPage} 
+                label={Strings.screenNames.SyncDisplay} 
                 style={{marginVertical: -5}}
                 labelStyle={{ marginLeft: -40 }} 
-                onPress={() => props.navigation.navigate(Strings.screenNames.getString('UsersPage', Strings.english))}
-              />
-              <DrawerItem 
-                icon={({size, color}) => (
-                  <Button icon='map-marker-account-outline' size={size + 20} color={color}/>
-                )}
-                label={Strings.screenNames.VisitsPage} 
-                style={{marginVertical: -5}}
-                labelStyle={{ marginLeft: -40 }} 
-                onPress={() => props.navigation.navigate(Strings.screenNames.getString('VisitsPage', Strings.english))}
+                onPress={() => props.navigation.navigate(Strings.screenNames.getString('SyncDisplay', Strings.english))}
               />
             </Drawer.Section>
             <Drawer.Section>
@@ -153,15 +142,15 @@ export const DrawerContent = (props) => {
               labelStyle={{ marginLeft: -40 }} 
               onPress={() => props.navigation.navigate(Strings.screenNames.getString('Dev', Strings.english))}
             />}
-            {/* <DrawerItem 
+            {isAdmin && <DrawerItem 
               icon={({size, color}) => (
-                <Button icon='map' size={size + 20} color={color}/>
+                <Button icon='chart-pie' size={size + 20} color={color}/>
               )}
-              label={Strings.screenNames.Map} 
+              label={Strings.screenNames.Reports} 
               style={{marginVertical: -5}}
               labelStyle={{ marginLeft: -40 }} 
-              onPress={() => props.navigation.navigate(Strings.screenNames.getString('Map', Strings.english))}
-            /> */}
+              onPress={() => props.navigation.navigate(Strings.screenNames.getString('Reports', Strings.english))}
+            />}
             <DrawerItem 
               icon={({size, color}) => (
                 <Button icon='information-outline' size={size + 20} color={color}/>

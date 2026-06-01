@@ -20,7 +20,7 @@ const About = ({ navigation }) => {
             style={aboutStyles.outerView}>
             <Text
                 style={aboutStyles.appName}>
-                14Trees Onsite App
+                14 Trees Onsite App
             </Text>
             <Text style={aboutStyles.text}>Version {APP_VERSION}</Text>
             <View>

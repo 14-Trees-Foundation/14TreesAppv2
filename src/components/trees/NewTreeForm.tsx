@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { ScrollView, Text, ToastAndroid, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
 import { Strings } from "../../services/Strings";
 import { Constants, Utils } from "../../services/Utils";
 import { CoordinateSetter } from "../CoordinateSetter";
@@ -13,8 +13,11 @@ import Autocomplete from '../AutocompleteModal';
 import { ImageSelector } from '../SingleImageSelector';
 import { Image } from '../../model/common';
 import { Visit } from '../../model/visits';
-import { Plot } from '../../model/plot';
+import { Plot, locationPlotToPlot } from '../../model/plot';
 import { Site } from '../../model/sites';
+import SelectMenu from '../SelectMenu';
+import { useFocusEffect } from '@react-navigation/native';
+import UserUpsertForm from './UpsertUserForm';
 
 interface TreeFormInputProps {
     tree: Tree | null,
@@ -22,10 +25,14 @@ interface TreeFormInputProps {
     onSubmit: (data: Tree | CreateTreeRequest, images?: any) => void,
     onCancel: () => void,
     defaultPlot?: any
+    saplingID?: string
+    defaultLocation?: { latitude: number, longitude: number }
+    visit?: Visit
 }
 
-export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCancel, onSubmit, defaultPlot }) => {
+export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, changeMode, onCancel, onSubmit, defaultPlot, defaultLocation, visit }) => {
 
+    const scrollViewRef = useRef<ScrollView>(null)
     const [saplingId, setSaplingId] = useState('');
     const [lat, setlat] = useState(0);
     const [lng, setlng] = useState(0);
@@ -39,19 +46,24 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     const [userCardImageUri, setUserCardImageUri] = useState<string | null>(null);
 
     const [plantTypes, setPlantTypes] = useState<any[]>([]);
-    const [users, setUsers] = useState<User[]>([]);
+    const [recentPlantTypes, setRecentPlantTypes] = useState<any[]>([]);
+    const recentPlantTypesRef = useRef(recentPlantTypes);
+
     const [visits, setVisits] = useState<Visit[]>([]);
     const [assignedTo, setAssignedTo] = useState<User | null>(null);
-    const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
+    const [selectedVisit, setSelectedVisit] = useState<Visit | null>(visit ? visit : null);
 
     const [selectedPlantType, setSelectedPlantType] = useState<any>(null);
     const [plotSearchQuery, setPlotSearchQuery] = useState('');
     const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null);
     const [plots, setPlots] = useState<Plot[]>([]);
+    const [plotsPage, setPlotsPage] = useState(0);
+    const [hasMorePlots, setHasMorePlots] = useState(true);
+
     const [selectedSite, setSelectedSite] = useState<Site | null>(null);
     const [userDetails, setUserDetails] = useState<any>(null);
 
-    const [visitEnabled, setVisitEnabled] = useState(false);
+    const [visitEnabled, setVisitEnabled] = useState(visit ? true : false);
 
     const [validationErrors, setValidationErrors] = useState({
         saplingId: false,
@@ -86,6 +98,43 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
         Utils.addTasks();
     }, []);
 
+    // Update the ref whenever recentPlantTypes changes
+    useEffect(() => {
+        recentPlantTypesRef.current = recentPlantTypes;
+    }, [recentPlantTypes]);
+
+    useFocusEffect(
+        useCallback(() => {
+            const getRecentPTs = async () => {
+                try {
+                    const recentPTs = await AsyncStorage.getItem(Constants.recentPlantTypes);
+                    if (recentPTs) {
+                        setRecentPlantTypes(JSON.parse(recentPTs));
+                    }
+                } catch (error) {
+                    console.error("Error fetching recent plant types:", error);
+                }
+            };
+
+            getRecentPTs();
+
+            // Cleanup function to save recentPlantTypes if it has changed
+            return () => {
+                const saveRecentPTs = async () => {
+                    try {
+                        await AsyncStorage.setItem(
+                            Constants.recentPlantTypes,
+                            JSON.stringify(recentPlantTypesRef.current)
+                        );
+                    } catch (error) {
+                        console.error("Error saving recent plant types:", error);
+                    }
+                };
+                saveRecentPTs();
+            };
+        }, [])
+    );
+
     useEffect(() => {
         if (tree) {
             setSaplingId(tree.sapling_id);
@@ -118,6 +167,19 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     }, [tree])
 
     useEffect(() => {
+        if (defaultLocation) {
+            setlat(defaultLocation.latitude);
+            setlng(defaultLocation.longitude);
+        }
+    }, [defaultLocation]
+    )
+    useEffect(() => {
+        if (saplingID) {
+            setSaplingId(saplingID);
+        }
+    }, [saplingID])
+
+    useEffect(() => {
         if (tree) {
             const plantType = plantTypes.find((item) => item.id === tree.plant_type_id) || null;
             setSelectedPlantType(plantType)
@@ -127,13 +189,15 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     useEffect(() => {
         const getPlotForPlotId = async (plotId: number) => {
             const daoClient = await DaoClient.authenticate();
+            const locationPlot = await daoClient.locationPlots.getByOldPlotId(plotId);
+            if (locationPlot) { setSelectedPlot(locationPlotToPlot(locationPlot)); return; }
             const plot = await daoClient.plots.getPlotByLiveId(plotId);
             setSelectedPlot(plot);
         }
         if (tree) {
             getPlotForPlotId(tree.plot_id);
         }
-    }, [tree, plots])
+    }, [tree])
 
     useEffect(() => {
         changeMode === 'add' && defaultPlot && setSelectedPlot(defaultPlot);
@@ -149,27 +213,34 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                 setVisitEnabled(true);
             }
         }, 100)
-    }, [tree, users])
+    }, [tree])
 
     useEffect(() => {
         if (selectedVisit) return;
-        setTimeout(async () => {
+
+        const getVisit = async () => {
             if (tree && tree.visit_id) {
                 const daoClient = await DaoClient.authenticate();
                 const visit = await daoClient.visits.getVisitByLiveId(tree.visit_id)
                 setSelectedVisit(visit)
                 setVisitEnabled(true);
             }
-        }, 100)
+        }
+
+        getVisit();
     }, [tree, visits])
 
     useEffect(() => {
-        setTimeout(async () => {
+        const getDetails = async () => {
             try {
                 const userData = await AsyncStorage.getItem(Constants.userDetailsKey)
                 if (userData) setUserDetails(JSON.parse(userData));
-                let { treeTypes } = await Utils.getLocalTreeTypesAndPlots();
-                if (treeTypes) setPlantTypes(treeTypes);
+
+                if (plantTypes.length === 0) {
+                    const daoClient = await DaoClient.authenticate();
+                    let plantTypes = await daoClient.plantTypes.getPlantTypes(0, -1);
+                    setPlantTypes(plantTypes);
+                }
             } catch (error: any) {
                 console.error(error);
                 const stackTrace = error.stack;
@@ -181,8 +252,10 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
                 await Utils.logException(JSON.stringify(errorLog));
             }
-        }, 1000);
-    }, []);
+        }
+
+        getDetails();
+    }, [plantTypes]);
 
     useEffect(() => {
         setTimeout(async () => {
@@ -198,43 +271,63 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
 
     useEffect(() => {
         if (plotSearchQuery.length !== 0) return;
-        setTimeout(async () => {
+
+        const getPlots = async () => {
             const daoClient = await DaoClient.authenticate();
-            let resp = await daoClient.plots.getPlots(0, 50, undefined, false, selectedSite?.id);
-            setPlots(resp)
-        }, 10)
-    }, [plotSearchQuery, selectedSite])
+            if (selectedSite?.id) {
+                const locationPlots = await daoClient.locationPlots.getLocationPlots(selectedSite.id);
+                if (locationPlots.length > 0) {
+                    setPlots(locationPlots.map(locationPlotToPlot));
+                    setHasMorePlots(false);
+                    return;
+                }
+            }
+            let resp = await daoClient.plots.getPlots(plotsPage * 10, 10, undefined, false, undefined);
+            const newPlots = plotsPage === 0 ? resp : [...plots, ...resp];
+            const uniquePlots = newPlots.filter((plot, index, self) =>
+                index === self.findIndex((t) => t.local_id === plot.local_id)
+            );
+            setPlots(uniquePlots);
+            setHasMorePlots(resp.length === 10);
+        }
+
+        getPlots();
+    }, [plotsPage, plotSearchQuery, selectedSite])
 
     useEffect(() => {
         if (plotSearchQuery.length < 1) return;
-        setTimeout(async () => {
+
+        const searchPlots = async () => {
             const daoClient = await DaoClient.authenticate();
-            let plots = await daoClient.plots.searchPlots(plotSearchQuery, 0, 50, selectedSite?.id);
-            setPlots(plots);
-        }, 10)
-    }, [plotSearchQuery, selectedSite])
+            const locationPlots = await daoClient.locationPlots.searchLocationPlots(plotSearchQuery, selectedSite?.id);
+            if (locationPlots.length > 0) {
+                setPlots(locationPlots.map(locationPlotToPlot));
+                setHasMorePlots(false);
+                return;
+            }
+            let resp = await daoClient.plots.searchPlots(plotSearchQuery, plotsPage * 10, 10, undefined);
+            const newPlots = plotsPage === 0 ? resp : [...plots, ...resp];
+            const uniquePlots = newPlots.filter((plot, index, self) =>
+                index === self.findIndex((t) => t.local_id === plot.local_id)
+            );
+            setPlots(uniquePlots);
+            setHasMorePlots(resp.length === 10);
+        }
+
+        searchPlots();
+    }, [plotsPage, plotSearchQuery, selectedSite])
 
     useEffect(() => {
-        setTimeout(async () => {
-
-            const daoClient = await DaoClient.authenticate();
-            const siteId = await AsyncStorage.getItem(Constants.selectedSiteId)
-            if (siteId) {
-                const site = await daoClient.sites.getSiteByLiveId(parseInt(siteId));
+        const getSelectedSite = async () => {
+            const data = await AsyncStorage.getItem(Constants.selectedSite);
+            if (data) {
+                const site = JSON.parse(data);
                 setSelectedSite(site);
             }
-        }, 10)
-    }, [])
-
-    const handleUserSearch = (txt: string) => {
-        if (txt.length > 0) {
-            setTimeout(async () => {
-                const daoClient = await DaoClient.authenticate();
-                const users = await daoClient.users.searchUsers(txt, 0, 20)
-                setUsers(users)
-            }, 100)
         }
-    }
+
+        getSelectedSite();
+    }, [])
 
     const handleVisitSearch = (txt: string) => {
         if (txt.length > 0) {
@@ -247,7 +340,6 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
     }
 
     useEffect(() => {
-        handleUserSearch(' ');
         handleVisitSearch(' ');
     }, [])
 
@@ -273,14 +365,15 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
             plot_id: selectedPlot.id,
             planted_by: userDetails?.name,
             tree_status: treeStatus.value,
-            assigned_to: ( visitEnabled && assignedTo) ? assignedTo.id : null,
-            assigned_at: ( visitEnabled && assignedTo) ? new Date().toISOString() : null,
-            visit_id: ( visitEnabled && selectedVisit) ? selectedVisit.id : null,
+            assigned_to: (visitEnabled && assignedTo?.id) ? assignedTo.id : null,
+            assigned_to_local: (visitEnabled && assignedTo) ? assignedTo.local_id : null,
+            assigned_at: (visitEnabled && assignedTo) ? new Date().toISOString() : null,
+            visit_id: (visitEnabled && selectedVisit) ? selectedVisit.id : null,
         }
 
-        const imageData = { 
-            tree_image: image, 
-            user_tree_image: visitEnabled ? userTreeImage : null, 
+        const imageData = {
+            tree_image: image,
+            user_tree_image: visitEnabled ? userTreeImage : null,
             user_card_image: visitEnabled ? userCardImage : null,
         }
 
@@ -293,7 +386,21 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
             onSubmit(newChanges as Tree, imageData)
         }
 
-        onCancel()
+        if (visit) {
+            setAssignedTo(null);
+            setUserCardImage(null);
+            setUserCardImageUri(null);
+            setUserTreeImage(null);
+            setUserTreeImageUri(null);
+            setSaplingId('');
+            setSelectedPlantType(null);
+            setlat(0);
+            setlng(0);
+            setImage(null);
+            setImageUri(null);
+        } else {
+            onCancel()
+        }
     }
 
     const handleImageChange = (image: Image | null) => {
@@ -313,14 +420,82 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
         else setUserCardImageUri(null);
     }
 
+    const handleImageLoadOnAdd = () => {
+        // only in case of add tree, scroll down to bottom on new image load
+        if (changeMode === 'add' && scrollViewRef.current) {
+            scrollViewRef.current.scrollToEnd();
+        }
+    }
+
+    const handlePlantTypeSelect = (pt: any) => {
+        setSelectedPlantType(pt);
+        if (pt) {
+            setRecentPlantTypes(prev => {
+                const updated = prev.filter(item => item.id !== pt.id);  // Remove if already exists
+                updated.unshift(pt); // Add to the top
+                return updated.slice(0, 20); // Limit recent selections to 20 items
+            });
+        }
+    }
+
+    const renderVisitDetails = () => {
+        return (
+            <View>
+                {!visit &&<View style={{ marginTop: 10 }}>
+                    <Autocomplete
+                        value={selectedVisit}
+                        options={visits}
+                        label={Strings.labels.SelectVisit}
+                        onSelect={(data) => { setSelectedVisit(data); }}
+                        valueGetter={(data) => `${data?.visit_name}`}
+                        keyGetter={(data) => `${data?.local_id}`}
+                        onSearch={handleVisitSearch}
+                        variant='outlined'
+                    />
+                </View>}
+
+                <View style={{ marginTop: 10 }}>
+                    <UserUpsertForm
+                        value={assignedTo}
+                        onSelect={setAssignedTo}
+                    />
+                </View>
+
+                <View style={{ width: '100%', marginTop: 10 }}>
+                    <ImageSelector
+                        label={Strings.labels.UserTreeImage}
+                        buttonLabel={Strings.buttonLabels.AddUserTreeImage}
+                        onChange={handleUserTreeImageChange}
+                        imageUri={userTreeImageUri ? userTreeImageUri : undefined}
+                        defaultImageUri='https://drive.google.com/uc?id=1mFig4YN4OFxeDi63taZYQVX6T-eaVHWv'
+                    />
+                </View>
+
+                <View style={{ width: '100%', marginTop: 10 }}>
+                    <ImageSelector
+                        label={Strings.labels.UserCardImage}
+                        buttonLabel={Strings.buttonLabels.AddUserCardImage}
+                        onChange={handleUserCardImageChange}
+                        imageUri={userCardImageUri ? userCardImageUri : undefined}
+                        defaultImageUri='https://drive.google.com/uc?id=102Pu4dqADhamwDmDI00f4ijiyx1v8ZgA'
+                    />
+                </View>
+            </View>
+        )
+    }
+
     return (
-        <View style={{ height: "98%" }}>
-            <Text style={treeFormStyles.plotSapling}> {changeMode === 'add' ? Strings.messages.AddTree : Strings.messages.EditTree + ': ' + saplingId} </Text>
+        <View style={{ height: "98%", width: "95%" }}>
+            {!visit && <Text style={treeFormStyles.plotSapling}> {changeMode === 'add' ? Strings.messages.AddTree : Strings.messages.EditTree + ': ' + saplingId} </Text>}
+            {visit && <Text style={treeFormStyles.plotSapling}> {visit.visit_name} </Text>}
             <ScrollView
+                ref={scrollViewRef}
                 keyboardShouldPersistTaps='handled'
                 scrollEnabled={true}
                 style={{ ...treeFormStyles.detailsContainerOuter, marginHorizontal: 0, }} >
                 <View style={{ margin: 4, borderRadius: 10 }}>
+
+                    { visit && renderVisitDetails() }
 
                     <View style={{ marginTop: 10 }}>
                         <TextInput
@@ -334,11 +509,12 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                     </View>
 
                     <View style={{ marginTop: 10 }}>
-                        <Autocomplete
+                        <SelectMenu
                             value={selectedPlantType}
                             options={plantTypes}
+                            recentOptions={recentPlantTypes}
                             label={Strings.labels.SelectTreeType}
-                            onSelect={(data) => { setSelectedPlantType(data); }}
+                            onSelect={handlePlantTypeSelect}
                             valueGetter={(data) => data.name}
                             keyGetter={(data) => data.value}
                             variant='outlined'
@@ -355,34 +531,27 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                             valueGetter={(data) => data.name}
                             keyGetter={(data) => data.id}
                             variant='outlined'
-                            onSearch={setPlotSearchQuery}
+                            onSearch={(text: string) => { setPlotsPage(0); setPlotSearchQuery(text) }}
+                            paginationOptions={{
+                                hasMore: hasMorePlots,
+                                onPageChange: setPlotsPage,
+                                page: plotsPage
+                            }}
                         />
                         {validationErrors.plot && <HelperText visible={true} type='error'>Please select a plot</HelperText>}
                     </View>
 
-                    {changeMode === 'edit' && <View style={{ marginTop: 10 }}>
-                        <Autocomplete
-                            value={treeStatus}
-                            options={treeStatusList}
-                            label={Strings.labels.SelectTreeStatus}
-                            onSelect={(data) => { setTreeStatus(data); }}
-                            valueGetter={(data) => data.name}
-                            keyGetter={(data) => data.value}
-                            variant='outlined'
-                        />
-                        {validationErrors.status && <HelperText visible={true} type='error'>Please select tree status</HelperText>}
-                    </View>}
-
-                    <View style={{ width: '100%', marginTop: 10 }}>
+                    {!defaultLocation && <View style={{ width: '100%', marginTop: 10 }}>
                         <Text style={treeFormStyles.inputLabel}>{Strings.messages.Location}:</Text>
                         <CoordinateSetter
                             inLat={lat}
                             inLng={lng}
                             onSetLat={(item: number) => setlat(item)}
                             onSetLng={(item: number) => setlng(item)}
+                            disabled={defaultLocation ? true : false}
                         />
                         {validationErrors.coordinates && <HelperText visible={true} type='error'>Tree coordinates are required</HelperText>}
-                    </View>
+                    </View>}
 
                     <View style={{ width: '100%', marginTop: 10 }}>
                         <ImageSelector
@@ -390,65 +559,22 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ tree, changeMode, onCan
                             buttonLabel={Strings.buttonLabels.AddTreeImage}
                             onChange={handleImageChange}
                             imageUri={imageUri ? imageUri : undefined}
+                            defaultImageUri='https://drive.google.com/uc?id=18NlBK9AuZQi91LYyQuLHFsfMP1t_n3Xg'
+                            onImageLoad={handleImageLoadOnAdd}
                         />
                         {validationErrors.image && <HelperText visible={true} type='error'>Tree Image is required</HelperText>}
                     </View>
 
-                    <View style={{ marginTop: 10 }}>
+                    {!visit && <View style={{ marginTop: 10 }}>
                         <Checkbox.Item
                             label={Strings.messages.AddVisitorDetails}
                             status={visitEnabled ? "checked" : 'unchecked'}
                             onPress={() => { setVisitEnabled(prev => !prev) }}
                             color='#4CAF50'
                         />
-                    </View>
-
-                    {visitEnabled && <View>
-                        <View style={{ marginTop: 10 }}>
-                            <Autocomplete
-                                value={selectedVisit}
-                                options={visits}
-                                label={Strings.labels.SelectVisit}
-                                onSelect={(data) => { setSelectedVisit(data); }}
-                                valueGetter={(data) => `${data?.visit_name}`}
-                                keyGetter={(data) => `${data?.local_id}`}
-                                onSearch={handleVisitSearch}
-                                variant='outlined'
-                            />
-                        </View>
-
-                        <View style={{ marginTop: 10 }}>
-                            <Autocomplete
-                                value={assignedTo}
-                                options={users}
-                                label={Strings.labels.SelectUser}
-                                onSelect={(data) => { setAssignedTo(data); }}
-                                valueGetter={(data) => `${data?.name} (${data?.email})`}
-                                keyGetter={(data) => `${data?.local_id}`}
-                                onSearch={handleUserSearch}
-                                variant='outlined'
-                            />
-                        </View>
-
-                        <View style={{ width: '100%', marginTop: 10 }}>
-                            <ImageSelector
-                                label={Strings.labels.UserTreeImage}
-                                buttonLabel={Strings.buttonLabels.AddUserTreeImage}
-                                onChange={handleUserTreeImageChange}
-                                imageUri={userTreeImageUri ? userTreeImageUri : undefined}
-                            />
-                        </View>
-
-                        <View style={{ width: '100%', marginTop: 10 }}>
-                            <ImageSelector
-                                label={Strings.labels.UserCardImage}
-                                buttonLabel={Strings.buttonLabels.AddUserCardImage}
-                                onChange={handleUserCardImageChange}
-                                imageUri={userCardImageUri ? userCardImageUri : undefined}
-                            />
-                        </View>
                     </View>}
 
+                    {(!visit && visitEnabled) && renderVisitDetails()}
 
                     <View style={CustomButtonStyles.container}>
                         <View style={CustomButtonStyles.buttonRow}>

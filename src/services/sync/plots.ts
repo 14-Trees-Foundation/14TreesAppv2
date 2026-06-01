@@ -29,6 +29,7 @@ export const fetchAndStorePlots = async (siteId?: number) => {
             // upload plot in local db
             for (const plot of plots) {
                 plot.tags = plot.tags ? (plot.tags as any).join(',') : '';
+                plot.boundaries = plot.boundaries ? JSON.stringify(plot.boundaries) : null;
                 await daoClient.plots.upsertLivePlotIntoLocalDb(plot);
             }
 

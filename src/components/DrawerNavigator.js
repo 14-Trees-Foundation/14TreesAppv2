@@ -1,33 +1,29 @@
 import { Strings } from '../services/Strings';
-import HomeScreen from '../screens/Home';
 import EditTreeScreen from '../screens/EditTree';
 import VerifyusersScreen from '../screens/VerifyUsers';
 import { stackNavRef } from '../App';
 import GlobalContext from "../context/GlobalContext ";
-import { CustomButtonStyles, commonStyles, drawerNavigatorStyles, ScreenHeaderContentStyles } from "../services/Styles";
+import { commonStyles } from "../services/Styles";
 import { useState, useEffect, useCallback, useContext } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { View, Image, Text, BackHandler, TouchableOpacity } from "react-native";
-import { Constants, Utils, getImageSourceObject, logoSrc } from "../services/Utils";
-import { DrawerContentScrollView, DrawerItem, DrawerItemList, createDrawerNavigator, } from '@react-navigation/drawer';
+import { Image, BackHandler, TouchableOpacity } from "react-native";
+import { Constants} from "../services/Utils";
+import { createDrawerNavigator, } from '@react-navigation/drawer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import About from '../screens/About';
 import Shifts from "../screens/Shifts";
 import ScreenHeaderContent from './ScreenHeaderContent';
-import { Button } from 'react-native-paper';
 import Users from '../screens/Users';
 import Plots from "../screens/Plots"
 import Sites from '../screens/Sites';
 import Visits from '../screens/Visits';
 
 import Trees from '../screens/Trees';
-import { APP_VERSION } from '../constants/constants';
 import { DrawerContent } from './Drawer';
-import LoginScreen from '../screens/Login';
 import Home from '../screens/HomeScreen';
 import Dev from '../screens/Dev';
-import PlotSaplings from '../screens/PlotSaplings';
-import MapScreen from '../screens/Map';
+import Sync from '../screens/Sync';
+import Reports from '../screens/Reports';
 
 const CustomDrawerToggleButton = ({ navigation }) => (
     <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
@@ -126,6 +122,16 @@ export const DrawerNavigator = () => {
                     //     backgroundColor: '#f0f3f7',
                     //     fontFamily: 'Inter-Regular'
                     // }
+                }}
+            />
+            <Drawer.Screen
+                name={Strings.screenNames.getString('SyncDisplay', Strings.english)}
+                component={Sync}
+                options={{
+                    headerRight: () => (
+                        <ScreenHeaderContent />
+                    ),
+                    title: Strings.screenNames.SyncDisplay,
                 }}
             />
             <Drawer.Screen
@@ -308,10 +314,10 @@ export const DrawerNavigator = () => {
                 }}
             />
             <Drawer.Screen
-                name={Strings.screenNames.getString('Map', Strings.english)}
-                component={MapScreen}
+                name={Strings.screenNames.getString('Reports', Strings.english)}
+                component={Reports}
                 options={{
-                    title: Strings.screenNames.Map,
+                    title: Strings.screenNames.Reports,
                 }}
             />
         </Drawer.Navigator >

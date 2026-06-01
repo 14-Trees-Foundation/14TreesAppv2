@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Icon, Text } from 'react-native-paper';
 import { formatDuration } from '../services/Utils';
 import { Strings } from '../services/Strings';
 
@@ -8,129 +8,174 @@ type SyncCardProps = {
     syncedAt: string;
     trees: { add: number; edit: number; delete: number };
     treeImages: { add: number; delete: number };
-    visitImages: { add: number; delete: number };
-    uploadTime: number
-    fetchTime: number
-    fetchError: string | null
-    uploadError: string | null
+    uploadTime: number;
+    fetchError: string | null;
+    uploadError: string | null;
 };
 
-const SyncCard: React.FC<SyncCardProps> = ({ syncedAt, trees, treeImages, visitImages, uploadTime, fetchTime, uploadError, fetchError }) => {
+const StatChip: React.FC<{ label: string; value: number; color: string }> = ({ label, value, color }) => (
+    <View style={[chipStyles.chip, { borderColor: color }]}>
+        <Text style={[chipStyles.value, { color }]}>{value}</Text>
+        <Text style={chipStyles.label}>{label}</Text>
+    </View>
+);
 
-    let treesData: string = ''
-    if (trees.add !== 0) treesData = `${Strings.messages.New}: ${trees.add}`
-    if (trees.edit !== 0) {
-        treesData.length === 0
-        ? treesData = `${Strings.messages.Updated}: ${trees.edit}`
-        : treesData += `, ${Strings.messages.Updated}: ${trees.edit}`
-    }
-    if (trees.delete !== 0) {
-        treesData.length === 0
-        ? treesData = `${Strings.messages.Deleted}: ${trees.delete}`
-        : treesData += `, ${Strings.messages.Deleted}: ${trees.delete}`
-    }
+const chipStyles = StyleSheet.create({
+    chip: {
+        alignItems: 'center',
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        marginRight: 6,
+        marginBottom: 4,
+        minWidth: 52,
+    },
+    value: {
+        fontSize: 16,
+        fontWeight: '700',
+    },
+    label: {
+        fontSize: 11,
+        color: '#666',
+        marginTop: 1,
+    },
+});
 
-    let treeImagesData = ''
-    if (treeImages.add !== 0) treeImagesData = `${Strings.messages.New}: ${treeImages.add}`
-    if (treeImages.delete !== 0) {
-        treeImagesData.length === 0
-        ? treeImagesData = `${Strings.messages.Deleted}: ${treeImages.delete}`
-        : treeImagesData += `, ${Strings.messages.Deleted}: ${treeImages.delete}`
-    }
-
-    let visitImagesData = ''
-    if (visitImages.add !== 0) visitImagesData = `${Strings.messages.New}: ${visitImages.add}`
-    if (visitImages.delete !== 0) {
-        visitImagesData.length === 0
-        ? visitImagesData = `${Strings.messages.Deleted}: ${visitImages.delete}`
-        : visitImagesData += `, ${Strings.messages.Deleted}: ${visitImages.delete}`
-    }
+const SyncCard: React.FC<SyncCardProps> = ({ syncedAt, trees, treeImages, uploadTime, uploadError, fetchError }) => {
+    const hasTreeData = trees.add + trees.edit + trees.delete > 0;
+    const hasImageData = treeImages.add + treeImages.delete > 0;
+    const hasAnyData = hasTreeData || hasImageData;
+    const hasError = !!fetchError || !!uploadError;
 
     return (
-        <View style={styles.card}>
-            {syncedAt !== '' && <Text style={styles.syncedAtTitle}>{Strings.messages.StartTime}: <Text style={styles.syncedAt}>{syncedAt}</Text></Text>}
+        <View style={[styles.card, hasError && styles.cardError]}>
+            {syncedAt !== '' && (
+                <View style={styles.header}>
+                    <Icon source='clock-outline' size={14} color='#666' />
+                    <Text style={styles.syncedAt}>{syncedAt}</Text>
+                    {uploadTime !== 0 && (
+                        <Text style={styles.duration}>{formatDuration(uploadTime)}</Text>
+                    )}
+                </View>
+            )}
 
-            {treesData.length !== 0 && <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>{Strings.messages.Trees}: </Text>
-                <Text style={styles.detail}>[ {treesData} ]</Text>
-            </View>}
+            {hasAnyData && (
+                <View style={styles.section}>
+                    {hasTreeData && (
+                        <View style={styles.row}>
+                            <Text style={styles.sectionTitle}>Trees</Text>
+                            <View style={styles.chips}>
+                                {trees.add > 0 && <StatChip label='New' value={trees.add} color='#2e7d32' />}
+                                {trees.edit > 0 && <StatChip label='Updated' value={trees.edit} color='#1565c0' />}
+                                {trees.delete > 0 && <StatChip label='Deleted' value={trees.delete} color='#b71c1c' />}
+                            </View>
+                        </View>
+                    )}
+                    {hasImageData && (
+                        <View style={styles.row}>
+                            <Text style={styles.sectionTitle}>Audits</Text>
+                            <View style={styles.chips}>
+                                {treeImages.add > 0 && <StatChip label='New' value={treeImages.add} color='#2e7d32' />}
+                                {treeImages.delete > 0 && <StatChip label='Deleted' value={treeImages.delete} color='#b71c1c' />}
+                            </View>
+                        </View>
+                    )}
+                </View>
+            )}
 
-            {treeImagesData.length !==0 && <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>{Strings.messages.TreeImages}: </Text>
-                <Text style={styles.detail}>[ {treeImagesData} ]</Text>
-            </View>}
+            {!hasAnyData && syncedAt !== '' && (
+                <Text style={styles.emptyText}>{Strings.messages.NoDataUploaded}</Text>
+            )}
+            {!hasAnyData && syncedAt === '' && (
+                <Text style={styles.emptyText}>{Strings.messages.UploadingChanges}</Text>
+            )}
 
-            {visitImagesData.length !== 0 && <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>{Strings.messages.VisitImages}: </Text>
-                <Text style={styles.detail}>[ {visitImagesData} ]</Text>
-            </View>}
-
-            {uploadTime !== 0 && <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>{Strings.messages.UploadTime}: </Text>
-                <Text style={styles.detail}>{formatDuration(uploadTime)}</Text>
-            </View>}
-
-            {fetchTime !== 0 && <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>{Strings.messages.FetchTime}: </Text>
-                <Text style={styles.detail}>{formatDuration(fetchTime)}</Text>
-            </View>}
-
-            {fetchError && <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>{Strings.messages.FetchError}: </Text>
-                <Text style={styles.detail}>{fetchError}</Text>
-            </View>}
-
-            {uploadError && <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>{Strings.messages.UploadError}: </Text>
-                <Text style={styles.detail}>{uploadError}</Text>
-            </View>}
-
-            {syncedAt !== '' && treesData.length === 0 && treeImagesData.length === 0 && visitImagesData.length === 0 &&
-                <Text style={styles.sectionTitle}>{Strings.messages.NoDataUploaded}</Text>
-            }
-            {syncedAt === '' && treesData.length === 0 && treeImagesData.length === 0 && visitImagesData.length === 0 &&
-                <Text style={styles.sectionTitle}>{Strings.messages.UploadingChanges}</Text>
-            }
+            {fetchError && (
+                <View style={styles.errorRow}>
+                    <Icon source='alert-circle-outline' size={14} color='#b71c1c' />
+                    <Text style={styles.errorText}>{fetchError}</Text>
+                </View>
+            )}
+            {uploadError && (
+                <View style={styles.errorRow}>
+                    <Icon source='alert-circle-outline' size={14} color='#b71c1c' />
+                    <Text style={styles.errorText}>{uploadError}</Text>
+                </View>
+            )}
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: '#dff0d8', // Light green color
+        backgroundColor: '#fff',
         width: '100%',
-        padding: 10,
-        borderRadius: 10,
+        padding: 12,
+        borderRadius: 12,
+        borderLeftWidth: 4,
+        borderLeftColor: '#2e7d32',
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-        elevation: 3,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.06,
+        shadowRadius: 4,
+        elevation: 2,
     },
-    syncedAtTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: 'black',
-        marginBottom: 8,
+    cardError: {
+        borderLeftColor: '#b71c1c',
     },
-    syncedAt: {
-        fontSize: 16,
-        color: 'black',
-        marginBottom: 8,
-    },
-    sectionContainer: {
+    header: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 8,
+        gap: 4,
+    },
+    syncedAt: {
+        fontSize: 13,
+        color: '#555',
+        flex: 1,
+        marginLeft: 2,
+    },
+    duration: {
+        fontSize: 12,
+        color: '#888',
+        fontStyle: 'italic',
+    },
+    section: {
+        gap: 8,
+    },
+    row: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexWrap: 'wrap',
     },
     sectionTitle: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: 'black',
+        fontSize: 13,
+        fontWeight: '700',
+        color: '#333',
+        width: 52,
+        marginRight: 8,
     },
-    detail: {
-        fontSize: 14,
-        color: 'black',
+    chips: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        flex: 1,
+    },
+    emptyText: {
+        fontSize: 13,
+        color: '#888',
+        fontStyle: 'italic',
+    },
+    errorRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 6,
+        gap: 4,
+    },
+    errorText: {
+        fontSize: 12,
+        color: '#b71c1c',
+        flex: 1,
     },
 });
 

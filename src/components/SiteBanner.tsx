@@ -1,21 +1,24 @@
 import { Banner, Text } from "react-native-paper";
 import React, { useCallback, useState } from "react";
-import { Site } from '../model/sites';
+import { LocationSite, Site } from '../model/sites';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Constants } from '../services/Utils';
-import { DaoClient } from '../services/db/dao';
 import { useFocusEffect } from "@react-navigation/native";
 
 const SiteBanner: React.FC<{}> = () => {
-    const [site, setSite] = useState<Site | null>(null)
+    const [site, setSite] = useState<LocationSite | null>(null)
 
     useFocusEffect(
         useCallback(() => {
             const getSiteInfo = async () => {
-                const siteId = await AsyncStorage.getItem(Constants.selectedSiteId);
-                if (siteId && !isNaN(parseInt(siteId))) {
-                    const daoClient = await DaoClient.authenticate();
-                    const site = await daoClient.sites.getSiteByLiveId(parseInt(siteId));
+                const data = await AsyncStorage.getItem(Constants.selectedSite);
+                if (data) {
+                    const raw = JSON.parse(data);
+                    const site: LocationSite = {
+                        ...raw,
+                        location_name: raw.location_name ?? raw.name_english ?? '',
+                        display_name: raw.display_name ?? raw.name_marathi ?? null,
+                    };
                     setSite(site);
                 }
             }
@@ -32,8 +35,8 @@ const SiteBanner: React.FC<{}> = () => {
             visible={site !== null}
         >
             <Text variant='bodyLarge' style={{ fontWeight: '700' }}>Selected Site: {'\n'}</Text>
-            <Text variant='bodyMedium'>{site?.name_english + '\n'}</Text>
-            <Text variant='bodyMedium'>{site?.name_marathi}</Text>
+            <Text variant='bodyMedium'>{site?.location_name + '\n'}</Text>
+            <Text variant='bodyMedium'>{site?.display_name ?? ''}</Text>
         </Banner>
     )
 }

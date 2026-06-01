@@ -27,6 +27,7 @@ export class Strings {
             UpdatePlotShift: "Update Tree Plot",
             AppInfo: "App Info",
             Dev: "Dev",
+            Reports: "Reports",
             Map: "Map",
             ChangePlot: "Change Plot",
             PlotAudit: "Plot Audit",
@@ -36,6 +37,7 @@ export class Strings {
             LoadingScreen: 'Load',
             UpdateSaplingsPlot: "UpdateSaplingsPlot",
             UsersPage: "Users",
+            BulkAddTrees: "Add Trees",
         },
         "mr": {
             HomePage: "मुख्य पृष्ठ",
@@ -59,6 +61,7 @@ export class Strings {
             UpdatePlotShift: "सॅपलिंग प्लॉट अपडेट",
             AppInfo: "अ‍ॅपची माहिती",
             Dev: "देव",
+            Reports: "अहवाल",
             Map: "नकाशा",
             ChangePlot: "प्लॉट बदला",
             PlotAudit: 'प्लॉट ऑडिट',
@@ -68,6 +71,7 @@ export class Strings {
             LoadingScreen: 'लोड',
             UpdateSaplingsPlot: "झाडाचा प्लॉट अपडेट करा",
             UsersPage: "वापरकर्ते",
+            BulkAddTrees: "झाडे जोडा",
         }
     })
 
@@ -112,6 +116,7 @@ export class Strings {
             Type: "Type",
             Plot: "Plot",
             Trees: 'Trees',
+            Users: 'Users',
             OldPlot: "Old Plot",
             NewPlot: "New Plot",
             Synced: "Synced",
@@ -181,10 +186,12 @@ export class Strings {
             AddVisitorDetails: 'Add Visitor Details?',
             AddTree: 'Add Tree',
             EditTree: 'Edit Tree',
-            AddTreeImages: 'Add Tree Images For Sapling',
+            Sapling: 'Sapling',
             TreeImages: 'Tree Images',
             ImageDate: "Image date different than today's date?",
-            WhatIsTreeStatus: "What is the health status of the tree?",
+            WhatIsTreeStatus: "Health status?",
+            SelectAuditStartDate: "Select audit start date",
+            DeleteImageConfirmation: "Do you want to delete this image?",
         },
         "mr": {
             SignIn: "साइन इन करा",
@@ -202,6 +209,7 @@ export class Strings {
             failedToUpdate: "साठी प्लॉट अपडेट करू शकलो नाही",
             couldNotAdd: "साठी प्रतिमा जोडू शकलो नाही",
             Trees: "झाडे",
+            Users: "वापरकर्ते",
             trees: "झाडे",
             // add tree
             Location: "स्थान",
@@ -294,9 +302,12 @@ export class Strings {
             AddTree: 'झाड जोडा',
             EditTree: 'झाड संपादित करा',
             AddTreeImages: 'रोपट्यासाठी वृक्ष प्रतिमा जोडा',
+            Sapling: 'रोप',
             TreeImages: 'वृक्ष प्रतिमा',
             ImageDate: "चित्राची तारीख आजच्या तारखेपेक्षा वेगळी आहे का?",
-            WhatIsTreeStatus: "झाडाच्या आरोग्याची स्थिती काय आहे?",
+            WhatIsTreeStatus: "आरोग्य स्थिती?",
+            SelectAuditStartDate: "ऑडिट सुरू होण्याची तारीख निवडा",
+            DeleteImageConfirmation: "तुम्हाला ही इमेज हटवायची आहे का?",
         },
     });
     static alertMessages = new LocalizedStrings({
@@ -393,7 +404,9 @@ export class Strings {
             MarkedSaplingDead: "You have marked this sapling dead.",
             ConfirmDeleteEntry: "Do you want to delete the entry?",
             EmptyField : "Empty Field!",
-            EmptySaplingField : "The sapling field is empty."
+            EmptySaplingField : "The sapling field is empty.",
+
+            SyncInProgress: "Sync already in progress. Stop the running sync or wait till it's finished."
 
         },
         "mr": {
@@ -489,7 +502,9 @@ export class Strings {
             MarkedSaplingDead: "तुम्ही हे रोपटे मृत मार्क केले आहे",
             ConfirmDeleteEntry: "तुम्हाला एंट्री हटवायची आहे का?",
             EmptyField : "रिकामे फील्ड!",
-            EmptySaplingField : "झाडाचे फील्ड रिकामे."
+            EmptySaplingField : "झाडाचे फील्ड रिकामे.",
+
+            SyncInProgress: "सिंक आधीच प्रगतीपथावर आहे. चालू असलेले सिंक थांबवा किंवा ते पूर्ण होईपर्यंत प्रतीक्षा करा.",
         }
     })
     static buttonLabels = new LocalizedStrings({
@@ -541,6 +556,8 @@ export class Strings {
             Settings: "Settings",
             ChangeLanguage: "Change Language",
             ChangeTheme: "Change Theme",
+            Yes: 'Yes',
+            Ok: 'Ok',
 
             // Users
             AddUser: "Add User",
@@ -557,9 +574,14 @@ export class Strings {
             DownloadData: 'Download Data',
             UploadData: 'Upload Data',
             UploadInProgress: 'Upload in progress',
+            StopUpload: 'Stop Uploading',
             DownloadSitesPlots: 'Download Sites & Plots Data',
 
             ChangePlot: 'Change Plot',
+            MoveTrees: 'Move Trees',
+            Audit: 'Audit',
+            TreeMap: 'Tree Map',
+            AddTrees: 'Add Trees',
         },
         "mr": {
             // home
@@ -610,6 +632,8 @@ export class Strings {
             Settings: "सेटिंग्ज",
             ChangeLanguage: "भाषा बदला",
             ChangeTheme: "थीम बदला",
+            Yes: 'होय',
+            Ok: 'ठीक आहे',
 
             // Users
             AddUser: "वापरकर्ता जोडा",
@@ -626,9 +650,14 @@ export class Strings {
             DownloadData: 'डेटा डाउनलोड करा',
             UploadData: 'डेटा अपलोड करा',
             UploadInProgress: 'अपलोड प्रगतीपथावर आहे',
+            StopUpload: 'अपलोड करणे थांबवा',
             DownloadSitesPlots: 'साइट्स आणि प्लॉट डेटा डाउनलोड करा',
 
             ChangePlot: 'प्लॉट बदला',
+            MoveTrees: 'झाडे हलवा',
+            Audit: 'ऑडिट',
+            TreeMap: 'झाडाचा नकाशा',
+            AddTrees: 'झाडे जोडा',
         }
     })
     static labels = new LocalizedStrings({
@@ -692,9 +721,13 @@ export class Strings {
             NotSelected: 'Not Selected',
             Audited: 'Audited',
             NotAudited: 'Not Audited',
+            LocalChanges: 'Local Changes',
             Total: 'Total',
             ChangeSaplingsFromPlot: 'Change saplings from plot',
             To: 'To',
+            AlreadyExists: 'Already Exists',
+            Remaining: 'Remaining',
+            LocalNew: 'Local New',
         },
         "mr": {
             //add tree
@@ -756,9 +789,13 @@ export class Strings {
             NotSelected: 'निवडलेले नाही',
             Audited: 'ऑडिट केले',
             NotAudited: 'ऑडिट केलेले नाही',
+            LocalChanges: 'स्थानिक बदल',
             Total: 'एकूण',
             ChangeSaplingsFromPlot: 'प्लॉटमधून रोपे बदला',
             To: 'ला',
+            AlreadyExists: 'आधीच अस्तित्वात आहे',
+            Remaining: 'बाकी',
+            LocalNew: 'स्थानिक नवीन',
         }
     })
     static english = 'en';

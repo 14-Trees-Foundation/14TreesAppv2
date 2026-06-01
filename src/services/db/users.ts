@@ -47,7 +47,7 @@ export class UsersDao {
         const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
         const query = `SELECT * FROM ${this.tableName}
             WHERE 1=1 ${isDeleted ? '' : ` AND change_type != 'delete'`} ${isUploaded !== undefined ? 'AND ' + whereCondition : ""}
-            ORDER BY local_id DESC 
+            ORDER BY updated_at DESC 
             ${limit < 0 ? '' : `LIMIT ${limit} OFFSET ${offset}`};
         `
 
@@ -85,7 +85,7 @@ export class UsersDao {
         `
 
         const timeStamp = new Date().toISOString();
-        await this.db.executeSql(query, [
+        const [resp] = await this.db.executeSql(query, [
             data.name, 
             data.email,
             data.phone,
@@ -93,6 +93,8 @@ export class UsersDao {
             timeStamp,
             timeStamp
         ]);
+
+        return resp.insertId;
     }
 
     updateUser = async (data: User) => {
@@ -186,6 +188,30 @@ export class UsersDao {
         }
     }
 
+    updateLiveUserByLocalId = async (data: User) => {
+        // update user
+        await this.db.executeSql(
+            `UPDATE ${this.tableName}
+            SET
+                id = ?,
+                name = ?,
+                email = ?,
+                phone = ?,
+                birth_date = ?,
+                roles = ?,
+                pin = ?,
+                change_type = 'none',
+                is_uploaded = 1,
+                created_at = ?,
+                updated_at = ?
+            WHERE local_id = ?;`,
+            [
+                data.id, data.name, data.email, data.phone, data.birth_date, 
+                data.roles, data.pin, data.created_at, data.updated_at, data.local_id
+            ]
+        )
+    }
+
     deleteUser = async (id: number) => {
         const [response] = await this.db.executeSql(
             `SELECT * FROM ${this.tableName} WHERE local_id = ?;`,
@@ -263,10 +289,35 @@ export class UsersDao {
         return users;
     }
 
+    getUsersByEmail = async (email: string) => {
+        let users: User[] = [];
+        const query =  `
+            SELECT * FROM ${this.tableName} 
+            WHERE change_type != 'delete' AND email = ?
+            ORDER BY updated_at DESC
+            LIMIT 10 OFFSET 0;
+        `
+        const [results] = await this.db.executeSql(query, [email]);
+        for (let index = 0; index < results.rows.length; index++) {
+            users.push(results.rows.item(index));
+        }
+        return users;
+    }
+
     getUserByLiveId = async (id: number) => {
         const query =  `
             SELECT * FROM ${this.tableName} 
             WHERE id = ?;
+        `
+        const [results] = await this.db.executeSql(query, [id]);
+        if (results.rows.length === 1) return results.rows.item(0) as User;
+        return null;
+    }
+
+    getUserByLocalId = async (id: number) => {
+        const query =  `
+            SELECT * FROM ${this.tableName} 
+            WHERE local_id = ?;
         `
         const [results] = await this.db.executeSql(query, [id]);
         if (results.rows.length === 1) return results.rows.item(0) as User;

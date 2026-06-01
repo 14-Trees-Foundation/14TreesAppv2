@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { BackHandler, SafeAreaView, ToastAndroid, View } from 'react-native';
-import SaplingChipList from '../components/plots/SaplingChipList';
+import SaplingChipList, { SaplingChipItem } from '../components/plots/SaplingChipList';
 import { Button, Divider, Icon, Text } from 'react-native-paper';
 import Autocomplete from '../components/AutocompleteModal';
 import { Plot } from '../model/plot';
@@ -23,8 +23,7 @@ const PlotSaplings: FC<PlotSaplingsProps> = ({ navigation, route }) => {
     }, [langChanged]);
 
     const [loading, setLoading] = useState(false)
-    const [selectedSaplings, setSelectedSapling] = useState<string[]>([])
-    const [saplings, setSaplings] = useState<string[]>([])
+    const [saplings, setSaplings] = useState<SaplingChipItem[]>([])
     const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null)
     const [plots, setPlots] = useState<Plot[]>([])
     const [searchQuery, setSearchQuery] = useState<string>('')
@@ -58,7 +57,7 @@ const PlotSaplings: FC<PlotSaplingsProps> = ({ navigation, route }) => {
 
         const getSaplings = async (daoClient: DaoClient) => {
             const trees = await daoClient.trees.getTrees(0, -1, undefined, false, plot.id)
-            const saplings = trees.map(tree => tree.sapling_id);
+            const saplings = trees.map(tree => ({ sapling: tree.sapling_id, selected: false }));
             setSaplings(saplings);
         }
 
@@ -85,20 +84,21 @@ const PlotSaplings: FC<PlotSaplingsProps> = ({ navigation, route }) => {
         if (!selectedPlot || !selectedPlot.id) return;
 
         const daoClient = await DaoClient.authenticate();
+        const selectedSaplings = saplings.filter(sapling => sapling.selected).map(item => item.sapling);
         await daoClient.trees.updateTreesPlot(selectedSaplings, selectedPlot.id);
         setModalOpen(false);
         setPlaySound(true);
         navigation.goBack();
     }
 
-    const handleChipPress = (item: string) => {
-        let newSelectedItems = [...selectedSaplings];
-        if (newSelectedItems.includes(item)) {
-            newSelectedItems = newSelectedItems.filter(chip => chip !== item);
-        } else {
-            newSelectedItems.push(item);
+    const handleChipPress = (value: string) => {
+        let newSaplings = [...saplings];
+        const idx = newSaplings.findIndex(item => item.sapling === value);
+        if (idx >= 0) {
+            newSaplings[idx].selected = newSaplings[idx].selected ? false : true;
         }
-        setSelectedSapling(newSelectedItems);
+        setSaplings(newSaplings);
+
     };
 
     return (
@@ -128,8 +128,7 @@ const PlotSaplings: FC<PlotSaplingsProps> = ({ navigation, route }) => {
                         thickness={10} duration={700} spinDuration={2000} />
                 </View>}
                 {!loading && <SaplingChipList
-                    items={saplings.map(sapling => ({ sapling }))}
-                    selectedItems={selectedSaplings.map(sapling => ({ sapling }))}
+                    items={saplings}
                     onSelectionChange={handleChipPress}
                 />}
                 <Divider />
@@ -143,7 +142,7 @@ const PlotSaplings: FC<PlotSaplingsProps> = ({ navigation, route }) => {
                         </View>
                         <View style={{ flexDirection: 'row' }}>
                             <Text variant='titleSmall' style={{ fontWeight: 'bold' }}>{Strings.labels.Selected}: </Text>
-                            <Text variant='titleSmall' >{selectedSaplings.length}</Text>
+                            <Text variant='titleSmall' >{saplings.filter(item => item.selected).length}</Text>
                             <Text variant='titleSmall' style={{ fontWeight: 'bold', marginLeft: 10 }}>{Strings.labels.Total}: </Text>
                             <Text variant='titleSmall' >{saplings.length}</Text>
                         </View>
@@ -152,7 +151,7 @@ const PlotSaplings: FC<PlotSaplingsProps> = ({ navigation, route }) => {
                         style={{ marginHorizontal: 3 }}
                         mode='elevated'
                         buttonColor='#93faa9'
-                        disabled={selectedPlot === null || selectedSaplings.length === 0}
+                        disabled={selectedPlot === null || saplings.filter(item => item.selected).length === 0}
                         onPress={() => setModalOpen(true)}
                     >{Strings.buttonLabels.ChangePlot}</Button>
                 </View>
@@ -161,7 +160,7 @@ const PlotSaplings: FC<PlotSaplingsProps> = ({ navigation, route }) => {
                     visible={modalOpen}
                     fromPlot={plot.name}
                     toPlot={selectedPlot.name}
-                    selectedSaplings={selectedSaplings}
+                    selectedSaplings={saplings.filter(item => item.selected).map(item => item.sapling)}
                     onClose={() => setModalOpen(false)}
                     onSubmit={handleSubmit}
                 />}

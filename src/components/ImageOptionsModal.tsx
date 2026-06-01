@@ -1,20 +1,26 @@
-import { Modal, Text, TouchableOpacity } from "react-native";
+import { Modal, TouchableOpacity } from "react-native";
 import { View } from "react-native";
 import { Utils } from "../services/Utils";
 import { Button, Icon } from "react-native-paper";
 import { Strings } from "../services/Strings";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Image } from "../model/common";
 
 interface ImageOptionsInputProps {
     buttonLabel?: string
     onChange: (image?: Image) => void
     multiple?: boolean
+    optionsVisible?: boolean
+    onCancel?: () => void
 }
 
-const ImageOptions: React.FC<ImageOptionsInputProps> = ({ buttonLabel, onChange, multiple }) => {
+const ImageOptions: React.FC<ImageOptionsInputProps> = ({ buttonLabel, onChange, multiple, optionsVisible, onCancel }) => {
 
     const [modalVisible, setModalVisible] = useState(false);
+
+    useEffect(() => {
+        if (optionsVisible) setModalVisible(true);
+    }, [optionsVisible])
 
     const pickImage = async (selectionId: number) => {
         setModalVisible(false);
@@ -32,19 +38,24 @@ const ImageOptions: React.FC<ImageOptionsInputProps> = ({ buttonLabel, onChange,
         Utils.stopTask();
     };
 
+    const handleClose = () => {
+        setModalVisible(false);
+        onCancel && onCancel();
+    }
+
     return (
         <View>
-            <Button 
+            {(optionsVisible === undefined) && <Button 
                 mode='contained-tonal' 
                 icon='file-image-plus-outline' 
                 onPress={() => setModalVisible(true)}
                 style={{ marginTop: 10 }}
-            >{buttonLabel ? buttonLabel : 'Add Images'}</Button>
+            >{buttonLabel ? buttonLabel : 'Add Images'}</Button>}
             <Modal
                 animationType="slide"
                 transparent={true}
                 visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
+                onRequestClose={handleClose}
             >
                 <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.1)' }}>
                     <View style={{ backgroundColor: 'white', padding: 40 }}>
@@ -65,7 +76,7 @@ const ImageOptions: React.FC<ImageOptionsInputProps> = ({ buttonLabel, onChange,
                             >{Strings.buttonLabels.openGallery}</Button>
                             
                         </View>
-                        <TouchableOpacity style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }} onPress={() => setModalVisible(false)}  >
+                        <TouchableOpacity style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }} onPress={handleClose}  >
                             <Icon source="close-circle" size={28} color="red" />
                         </TouchableOpacity>
                     </View>

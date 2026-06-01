@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Constants, Utils } from "../Utils";
 import { User } from "../../model/user";
 import { ToastAndroid } from "react-native";
+import { saveSyncInfo } from "./sync_info";
 
 export const fetchAndStoreUsers = async () => {
     // fetch data from the backend
@@ -53,48 +54,85 @@ export const fetchAndStoreUsers = async () => {
     }
 }
 
-export const uploadUsersData = async () => {
-    const daoClient = await DaoClient.authenticate();
-    const users = await daoClient.users.getUsers(0, -1, undefined, true);
+export const uploadUsersData = async (syncTime: string) => {
 
-    const newUsers = users.filter(user => user.change_type === 'add');
-    const editedUsers = users.filter(user => user.change_type === 'edit');
-    const deletedUsers = users.filter(user => user.change_type === 'delete');
-
-    await uploadDeletedUsersData(deletedUsers);
-    deletedUsers.forEach(async (user) => {
-        await daoClient.users.deleteLocalUser(user.local_id);
-    })
-
-    await uploadEditedUsersData(editedUsers);
-    editedUsers.forEach(async (user) => {
-        await daoClient.users.updateUserUploadStatus(user.local_id);
-    })
-
-    await uploadNewUsersData(newUsers);
-    newUsers.forEach(async (user) => {
-        await daoClient.users.deleteLocalUser(user.local_id);
-    })
-
-}
-
-export const uploadNewUsersData = async (users: User[]) => {
-    let apiClient = new ApiClient()
-    for (let i = 0; i < users.length; i++) {
-        await apiClient.users.createUser(users[i]);
+    try {
+        const daoClient = await DaoClient.authenticate();
+        const users = await daoClient.users.getUsers(0, -1, undefined, true);
+    
+        const newUsers = users.filter(user => user.change_type === 'add');
+        const editedUsers = users.filter(user => user.change_type === 'edit');
+        const deletedUsers = users.filter(user => user.change_type === 'delete');
+    
+        const syncInfo = await Utils.getSyncInfoBySyncTime(syncTime);
+        await uploadDeletedUsersData(daoClient, deletedUsers, syncInfo);
+        await uploadEditedUsersData(daoClient, editedUsers, syncInfo);
+        await uploadNewUsersData(daoClient, newUsers, syncInfo);
+    } catch (error: any) {
+        Utils.saveErrorLog("UploadUser::uploadUsersData", error);
     }
 }
 
-export const uploadEditedUsersData = async (users: User[]) => {
-    let apiClient = new ApiClient()
-    for (let i = 0; i < users.length; i++) {
-        await apiClient.users.updateUser(users[i]);
+export const uploadSingleUsersData = async (localId: number, syncTime: string) => {
+
+    try {
+        const daoClient = await DaoClient.authenticate();
+        const user = await daoClient.users.getUserByLocalId(localId);
+    
+        const syncInfo = await Utils.getSyncInfoBySyncTime(syncTime);
+        if (user && user.change_type === 'edit') await uploadEditedUsersData(daoClient, [user], syncInfo);
+        if (user && user.change_type === 'add') await uploadNewUsersData(daoClient, [user], syncInfo);
+    } catch (error: any) {
+        Utils.saveErrorLog("UploadUser::uploadUsersData", error);
     }
 }
 
-export const uploadDeletedUsersData = async (users: User[]) => {
+export const uploadNewUsersData = async (daoClient: DaoClient, users: User[], syncInfo: any) => {
     let apiClient = new ApiClient()
     for (let i = 0; i < users.length; i++) {
-        await apiClient.users.deleteUser(users[i]);
+        try {
+            const user = await apiClient.users.createUser(users[i]);
+            user.local_id = users[i].local_id;
+            await daoClient.users.updateLiveUserByLocalId(user);
+
+            syncInfo.users.add += 1;
+            syncInfo.upload_time = new Date().getTime() - new Date(syncInfo.synced_at).getTime();
+            await saveSyncInfo(daoClient, syncInfo);
+        } catch (error: any) {
+            Utils.saveErrorLog("UploadUser::uploadNewUsersData", error);
+        }
+    }
+}
+
+export const uploadEditedUsersData = async (daoClient: DaoClient, users: User[], syncInfo: any) => {
+    let apiClient = new ApiClient()
+    for (let i = 0; i < users.length; i++) {
+        try {
+            const user = await apiClient.users.updateUser(users[i]);
+            user.local_id = users[i].local_id;
+            await daoClient.users.updateLiveUserByLocalId(user);
+
+            syncInfo.users.edit += 1;
+            syncInfo.upload_time = new Date().getTime() - new Date(syncInfo.synced_at).getTime();
+            await saveSyncInfo(daoClient, syncInfo);
+        } catch (error: any) {
+            Utils.saveErrorLog("UploadUser::uploadEditedUsersData", error);
+        }
+    }
+}
+
+export const uploadDeletedUsersData = async (daoClient: DaoClient, users: User[], syncInfo: any) => {
+    let apiClient = new ApiClient()
+    for (let i = 0; i < users.length; i++) {
+        try {
+            await apiClient.users.deleteUser(users[i]);
+            await daoClient.users.deleteLocalUser(users[i].local_id);
+
+            syncInfo.users.delete += 1;
+            syncInfo.upload_time = new Date().getTime() - new Date(syncInfo.synced_at).getTime();
+            await saveSyncInfo(daoClient, syncInfo);
+        } catch (error: any) {
+            Utils.saveErrorLog("UploadUser::uploadDeletedUsersData", error);
+        }
     }
 }

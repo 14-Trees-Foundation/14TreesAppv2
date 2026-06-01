@@ -1,18 +1,19 @@
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import moment from "moment";
 import { useEffect, useState } from "react";
-import { Keyboard, TouchableWithoutFeedback } from "react-native";
+import { Keyboard, StyleProp, TextStyle, TouchableWithoutFeedback } from "react-native";
 import { View } from "react-native"
 import { TextInput } from "react-native-paper";
 
 interface DatePickerInputProps {
-    label: string,
+    label?: string,
     value: Date | null,
     onChange: (date: Date) => void
     disabled?: boolean
+    style?: StyleProp<TextStyle>
 }
 
-export const DatePicker: React.FC<DatePickerInputProps> = ({ label, value, onChange, disabled }) => {
+export const DatePicker: React.FC<DatePickerInputProps> = ({ label, value, onChange, disabled, style }) => {
 
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [date, setDate] = useState(new Date());
@@ -43,6 +44,7 @@ export const DatePicker: React.FC<DatePickerInputProps> = ({ label, value, onCha
                     mode='outlined'
                     label={label}
                     disabled={disabled}
+                    style={style}
                 />
                 </View>
             </TouchableWithoutFeedback>

@@ -5,6 +5,7 @@ export type Tree = {
     sapling_id: string;
     plant_type_id: number;
     plot_id: number;
+    location_id: number | null;
     image: string | null;
     tags: string | null;
     location: string | null;
@@ -18,6 +19,7 @@ export type Tree = {
     gifted_to: number | null;
     assigned_at: string | null;
     assigned_to: number | null;
+    assigned_to_local: number | null;
     user_tree_image: string | null;
     user_card_image: string | null;
     description: string | null;
@@ -40,6 +42,7 @@ export type CreateTreeRequest = {
     tree_status: 'healthy' | 'diseased' | 'dead';
     assigned_at: string | null;
     assigned_to: number | null;
+    assigned_to_local: number | null;
     visit_id: number | null;
 }
 
@@ -54,4 +57,10 @@ export type TreeAnalytics = {
     trees_planted_this_year: number,
     trees_planted_this_month: number,
     trees_planted_by_you: number,
+}
+
+export type TreePlantationInfo = {
+    user_name: string,
+    plot_name: string,
+    trees_planted: number,
 }

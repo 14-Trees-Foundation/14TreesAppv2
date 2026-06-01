@@ -5,21 +5,26 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Constants, Utils } from "../Utils";
 import { Visit } from "../../model/visits";
 import { ToastAndroid } from "react-native";
+import { INITIAL_TIMESTAMP } from "../../constants/constants";
 
-export const fetchAndStoreVisits = async () => {
+export const fetchAndStoreVisits = async (siteId: number | undefined) => {
     // fetch data from the backend
     const apiClient = new ApiClient();
     const daoClient = await DaoClient.authenticate();
 
     let visitIds = await daoClient.visits.getLiveVisitIds()
-    const timestamp = await AsyncStorage.getItem(Constants.lastVisitsFetchedAt) || '2020-01-01T00:00:00Z'
+    let timestamp = await AsyncStorage.getItem(Constants.lastVisitsFetchedAt) || INITIAL_TIMESTAMP
+    if (siteId) {
+        const resp = await daoClient.siteSync.getSiteLastSyncTime(siteId, Constants.lastVisitsFetchedAt);
+        if (resp && new Date(timestamp).getTime() < new Date(resp.created_at).getTime()) timestamp = resp.created_at;
+    }
 
     try {
         const now = new Date().toISOString();
 
         let offset: number = 0;
         while (true) {
-            const response = await apiClient.visits.fetchChanges(timestamp, visitIds, offset)
+            const response = await apiClient.visits.fetchChanges(timestamp, visitIds, offset, siteId)
             const visits = response.visits;
 
             // upload visits in local db
@@ -38,7 +43,9 @@ export const fetchAndStoreVisits = async () => {
             if (offset >= response.total) break;
         }
         
-        await AsyncStorage.setItem(Constants.lastVisitsFetchedAt, now);
+        if (siteId) await daoClient.siteSync.createLastSyncTime(siteId, Constants.lastVisitsFetchedAt, now);
+        else await AsyncStorage.setItem(Constants.lastVisitsFetchedAt, now);
+
         console.log('visits fetch Done!')
         ToastAndroid.show('Visits data upto date!', ToastAndroid.LONG)
     } catch (error: any) {

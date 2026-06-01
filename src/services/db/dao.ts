@@ -9,6 +9,9 @@ import { VisitImagesDao } from './visit_images';
 import { TreeSnapshotsDao } from './tree_snapshots';
 import { SyncInfoDao } from './sync_info';
 import { SiteSyncsDao } from './site_sync';
+import { PlantTypesDao } from './plant_type';
+import { LocationSitesDao } from './location_sites';
+import { LocationPlotsDao } from './location_plots';
 
 enablePromise(true);
 
@@ -31,6 +34,9 @@ export class DaoClient {
     public treeSnapshots: TreeSnapshotsDao;
     public syncInfo: SyncInfoDao;
     public siteSync: SiteSyncsDao;
+    public plantTypes: PlantTypesDao;
+    public locationSites: LocationSitesDao;
+    public locationPlots: LocationPlotsDao;
 
     constructor(dbConnection: SQLiteDatabase) {
         this.trees = new TreesDao(dbConnection);
@@ -43,6 +49,9 @@ export class DaoClient {
         this.treeSnapshots = new TreeSnapshotsDao(dbConnection);
         this.syncInfo = new SyncInfoDao(dbConnection);
         this.siteSync = new SiteSyncsDao(dbConnection);
+        this.plantTypes = new PlantTypesDao(dbConnection);
+        this.locationSites = new LocationSitesDao(dbConnection);
+        this.locationPlots = new LocationPlotsDao(dbConnection);
     }
 
     static async authenticate() {

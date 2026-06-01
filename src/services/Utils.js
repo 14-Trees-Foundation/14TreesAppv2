@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { openCamera, openPicker } from "react-native-image-crop-picker";
 import { Alert, ToastAndroid } from "react-native";
 import { DataService } from "./DataService";
 import { LocalDatabase } from "./tree_db";
@@ -11,6 +10,7 @@ import ReactNativeForegroundService from '@supersami/rn-foreground-service';
 import { shiftTypes } from "../screens/Shifts";
 import { DaoClient } from "./db/dao";
 import moment from "moment";
+import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 const MIN_BATCH_SIZE = 5
 
 const shiftTypesObject = {
@@ -36,6 +36,16 @@ export class Utils {
     static async logException(logs) {
         await this.localdb.logExceptionLocalDB(logs);
         return;
+    }
+
+    static async saveErrorLog(message, error) {
+        const stackTrace = error.stack;
+        const errorLog = {
+            msg: message,
+            error: JSON.stringify(error),
+            stackTrace: stackTrace,
+        };
+        await Utils.logException(JSON.stringify(errorLog));
     }
 
     static async getLogsFromLocalDB() {
@@ -301,6 +311,9 @@ export class Utils {
         await daoClient.visitImages.createTable();
         await daoClient.syncInfo.createTable();
         await daoClient.siteSync.createTable();
+        await daoClient.plantTypes.createTable();
+        await daoClient.locationSites.createTable();
+        await daoClient.locationPlots.createTable();
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
         await this.localdb.createSaplingTbl();
@@ -1354,6 +1367,80 @@ export class Utils {
 
     }
 
+    static async getImage(compressionRequired = false, selectionId, multiple = false) {
+
+        const options = {
+            mediaType: 'photo',
+            includeBase64: true,
+            maxHeight: 960,
+            maxWidth: 720,
+            selectionLimit: multiple ? 10 : 1
+        };
+
+        try {
+            let response = {}
+            if (selectionId === 0) {
+                response = await launchCamera(options);
+            } else {
+                response = await launchImageLibrary(options)
+            }
+
+
+            if (response.didCancel) {
+                console.log('User cancelled image picker');
+            } else if (response.errorMessage) {
+                throw new Error(response.errorMessage)
+            } else {
+
+                const timestamp = new Date().toISOString(); // only show time and not date
+                let images = response.assets;
+                let result = []
+                for (const image of images) {
+
+                    let filesz = response.assets[0].fileSize;
+                    let base64Data = response.assets[0].base64;
+    
+                    let imagePath = response.assets[0].uri;
+
+    
+                    if (compressionRequired) {
+                        const compressedData = await Utils.compressImageAt(filesz, imagePath);
+                        if (compressedData) {
+                            base64Data = compressedData;
+                        } else {
+                            console.log("could not compressed------");
+                        }
+                    }
+                    const newImage = {
+                        data: base64Data,
+                        meta: {
+                            capturetimestamp: timestamp,
+                            remark: Strings.messages.defaultRemark,
+    
+                        },
+                    };
+
+                    result.push(newImage);
+                }
+
+                return result;
+            }
+        } catch (error) {
+            console.log('An error occurred while accessing the camera:', error);
+            const stackTrace = error.stack;
+            const errorLog = {
+                msg: "Error occurred while accessing the camera (inside Utils)",
+                error: JSON.stringify(error),
+                stackTrace: stackTrace
+            };
+            await this.logException(JSON.stringify(errorLog));
+            return null;
+        }
+
+        return null;
+
+    }
+
 
 
     static async formatImageForSapling(image, saplingid) {
@@ -1436,6 +1523,19 @@ export class Utils {
         return null; // Return null if file size is already within limit
     }
 
+    // # NEW v3
+
+    static async getSyncInfoBySyncTime(syncTime) {
+        const daoClient = await DaoClient.authenticate();
+        const resp = await daoClient.syncInfo.getSyncInfoBySyncTime(syncTime);
+        return { 
+            ...resp, 
+            trees: JSON.parse(resp.trees), 
+            tree_images: JSON.parse(resp.tree_images), 
+            visit_images: JSON.parse(resp.visit_images),
+            users: resp.users ? JSON.parse(resp.users) : { add: 0, edit: 0, delete: 0 },
+        }
+    }
 
 }
 
@@ -1459,7 +1559,7 @@ export class Constants {
     static authToken = 'token'
     static userRole = 'user_role'
     static logoImage() {
-        return require('../../assets/14-trees-logo.png');
+        return require('../../assets/dark_logo.png');
     }
     static placeholderImage() {
         return require('../../assets/icon-profile.png');
@@ -1474,16 +1574,20 @@ export class Constants {
     static lastVisitImagesFetchedAt = 'last_visit_images_fetched_at'
     static lastTreeSnapshotsFetchedAt = 'last_tree_snapshots_fetched_at'
     static lastSyncInfoFetchedAt = 'last_sync_info_fetched_at'
+    static lastPlantTypesFetchedAt = 'last_plant_types_fetched_at'
 
+    static recentPlantTypes = 'recent_plant_types'
     // tree analytics for home screen
     static treeAnalyticsDataKey = 'tree_analytics'
 
     // for sync screen
     static lastSyncInfo = 'last_sync_info'
     static networkSpeed = 'network_speed'
+    static isForceSyncStop = 'force_sync_stop'
 
     // selected Site to work with
     static selectedSiteId = 'selected_site_id'
+    static selectedSite = 'selected_site'
 }
 
 export const getImageSourceObject = (src) => {

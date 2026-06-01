@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, View, StyleSheet, Keyboard, TouchableWithoutFeedback } from 'react-native';
-import { TextInput, Button, List, Icon, IconButton } from 'react-native-paper';
+import { TextInput, Button, List, IconButton, Text, ActivityIndicator } from 'react-native-paper';
 import { FlatList, TouchableOpacity } from 'react-native';
 import SearchBar from './Searchbar';
+
+interface PaginationOptions {
+  page: number;
+  onPageChange: (page: number) => void;
+  hasMore: boolean;
+}
 
 
 interface AutocompleteInputProps<T> {
@@ -16,11 +22,14 @@ interface AutocompleteInputProps<T> {
   variant?: 'flat' | 'outlined'
   disabled?: boolean
   boldSelection?: boolean
+  helpedText?: string
+  paginationOptions?: PaginationOptions
 }
 
-function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSelect, onSearch, variant, disabled, boldSelection }: AutocompleteInputProps<T>) {
+function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSelect, onSearch, variant, disabled, boldSelection, helpedText, paginationOptions }: AutocompleteInputProps<T>) {
   const [filteredData, setFilteredData] = useState(options);
   const [visible, setVisible] = useState(false);
+  const [recentSelections, setRecentSelections] = useState<T[]>([]);
 
   useEffect(() => {
     setFilteredData(options);
@@ -33,15 +42,32 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
     }
 
     if (query) {
-      const newData = options.filter(item => {
+      const recentData = recentSelections.filter(item => {
         const value = valueGetter(item);
         return value.toLowerCase().includes(query.toLowerCase())
       });
-      setFilteredData(newData);
+
+      const newData = options.filter(item => {
+        const idx = recentData.findIndex(recent => keyGetter(recent) === keyGetter(item));
+        if (idx !== -1) return false;
+
+        const value = valueGetter(item);
+        return value.toLowerCase().includes(query.toLowerCase())
+      });
+
+      setFilteredData([...recentData, ...newData]);
     } else {
       setFilteredData(options);
     }
   };
+
+  useEffect(() => {
+    const filteredSelections = recentSelections.filter(item => options.includes(item));
+
+    const updatedOptions = options.filter(item => !filteredSelections.includes(item));
+
+    setFilteredData([...filteredSelections, ...updatedOptions]);
+  }, [recentSelections, options]);
 
   const handleClose = () => {
     setVisible(false);
@@ -50,7 +76,28 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
   const handleSelect = (option: T | null) => {
     onSelect(option);
     handleClose();
+
+    if (option) {
+      setRecentSelections(prev => {
+        const updated = prev.filter(item => keyGetter(item) !== keyGetter(option));  // Remove if already exists
+        updated.unshift(option); // Add to the top
+        return updated.slice(0, 20); // Limit recent selections to 20 items
+      });
+    }
     setFilteredData(options);
+  }
+
+  const renderFooter = () => {
+    if (!paginationOptions) {
+      return undefined;
+    }
+
+    return (
+      <View style={styles.paginationContainer}>
+        {paginationOptions.hasMore && <ActivityIndicator />}
+        {!paginationOptions.hasMore && <Text>No more data</Text>}
+      </View>
+    )
   }
 
   return (
@@ -64,7 +111,7 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
               disabled={disabled}
               style={{ fontWeight: (boldSelection && value) ? 'bold' : 'normal' }}
               numberOfLines={2}
-              multiline={value ? valueGetter(value).length > 50 : false}
+              multiline={value ? valueGetter(value).length > 40 : false}
             />
         </View>
       </TouchableWithoutFeedback>
@@ -86,10 +133,12 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <SearchBar onChange={handleSearch}/>
+            {helpedText && <Text style={{ marginHorizontal: 10, marginBottom: 5, fontWeight: 'bold' }} variant='bodyLarge'>{helpedText}</Text>}
+            <SearchBar onChange={handleSearch} autoFocus />
             <FlatList
               keyboardShouldPersistTaps={'handled'}
               style={{ maxHeight: '70%', marginTop: 20 }}
+              contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
               data={filteredData}
               keyExtractor={(item, index) => keyGetter(item)}
               renderItem={({ item }) => (
@@ -102,6 +151,9 @@ function Autocomplete<T>({ label, value, options, keyGetter, valueGetter, onSele
                   />
                 </TouchableOpacity>
               )}
+              ListFooterComponent={renderFooter}
+              onEndReachedThreshold={paginationOptions ? 0.2 : undefined}
+              onEndReached={paginationOptions && paginationOptions.hasMore ? () => paginationOptions?.onPageChange(paginationOptions.page + 1) : undefined}
             />
             <View style={{
               marginTop: 20,
@@ -150,6 +202,11 @@ const styles = StyleSheet.create({
     right: 0,
     top: 8,  // Adjust this value as needed to align with the TextInput
   },
+  paginationContainer: {
+    marginTop: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 });
 
 export default Autocomplete;

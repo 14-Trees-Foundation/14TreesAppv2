@@ -4,16 +4,17 @@ import { Badge, Chip } from 'react-native-paper';
 
 export type SaplingChipItem = {
   sapling: string,
-  badge?: number
+  badge?: number,
+  selected?: boolean,
+  local?: boolean,
 }
 
 type SaplingChipListProps = {
   items: SaplingChipItem[];
-  selectedItems?: SaplingChipItem[]
   onSelectionChange?: (sapling: string) => void;
 };
 
-const SaplingChipList: React.FC<SaplingChipListProps> = ({ items, selectedItems, onSelectionChange }) => {
+const SaplingChipList: React.FC<SaplingChipListProps> = ({ items, onSelectionChange }) => {
 
   return (
     <ScrollView>
@@ -26,12 +27,21 @@ const SaplingChipList: React.FC<SaplingChipListProps> = ({ items, selectedItems,
           <View key={index}>
             <Chip
               key={index}
-              style={{ margin: 4, backgroundColor: selectedItems?.find((value) => value.sapling === item.sapling) ? '#82b398' : '#daf7dc', borderColor: 'black', borderWidth: 0.7 }}
+              style={{ 
+                margin: 4, 
+                backgroundColor: item.selected 
+                                  ? '#82b398' 
+                                  : item.local 
+                                    ? '#ffe7b3'
+                                    : '#daf7dc', 
+                borderColor: 'black', 
+                borderWidth: 0.7 
+              }}
               onPress={() => {onSelectionChange && onSelectionChange(item.sapling)}}
             >
               {item.sapling}
             </Chip>
-            {(item.badge !== undefined && item.badge > 0) && <Badge size={20} style={{ borderRadius: 10, position: 'absolute', top: 2, right: 2 }}>{String(item.badge)}</Badge>}
+            {(item.badge !== undefined && item.badge > 0) && <Badge size={20} style={{ backgroundColor: 'orange', borderRadius: 10, position: 'absolute', top: 2, right: 2 }}>{String(item.badge)}</Badge>}
           </View>
         ))}
       </View>

@@ -1,116 +1,25 @@
-import { useEffect, useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import MapView, { Callout, KmlMapEvent, LatLng, MapMarker, MapPressEvent, Marker, MarkerDragStartEndEvent, Polygon, UserLocationChangeEvent } from "react-native-maps";
-import { Text } from "react-native-paper";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { BackHandler, StyleSheet, ToastAndroid, View } from "react-native";
+import MapView, { Circle, Marker, Polygon, Region } from "react-native-maps";
+import { Icon, Text, TouchableRipple } from "react-native-paper";
 import { DaoClient } from "../services/db/dao";
-import { makeMutable } from "react-native-reanimated";
+import { TreeForm } from "../components/trees/NewTreeForm";
+import { CreateTreeRequest, Tree } from "../model/tree";
+import { TreeImageType } from "../model/tree_image";
+import { Plot } from "../model/plot";
+import GlobalContext from "../context/GlobalContext ";
+import ConfirmationModal from "../components/ConfirmationModal";
+import SlideUpComponent from "../components/Map/SlideUpComponent";
+import { useFocusEffect } from "@react-navigation/native";
+import MapRadiusSelector from "../components/Map/MapRadiusSelector";
 
-const boundaries: Location[] = [
-    {
-        longitude: 73.77285450362623,
-        latitude: 18.92518422398344
-    },
-    {
-        longitude: 73.77282623118357,
-        latitude: 18.92522621997616
-    },
-    {
-        longitude: 73.77282133637596,
-        latitude: 18.92526385235402
-    },
-    {
-        longitude: 73.77276205240535,
-        latitude: 18.92535790898204
-    },
-    {
-        longitude: 73.77269061339545,
-        latitude: 18.92543652085708
-    },
-    {
-        longitude: 73.77264437867238,
-        latitude: 18.92545361297476
-    },
-    {
-        longitude: 73.77259121498065,
-        latitude: 18.92548666862078
-    },
-    {
-        longitude: 73.77255359271267,
-        latitude: 18.92547477820353
-    },
-    {
-        longitude: 73.77255736037661,
-        latitude: 18.92545164555718
-    },
-    {
-        longitude: 73.77253586426036,
-        latitude: 18.92543423628121
-    },
-    {
-        longitude: 73.77246241450463,
-        latitude: 18.92539789442547
-    },
-    {
-        longitude: 73.77242085628514,
-        latitude: 18.92541278377427
-    },
-    {
-        longitude: 73.7722927256448,
-        latitude: 18.9253601758723
-    },
-    {
-        longitude: 73.77218853761413,
-        latitude: 18.9253341722819
-    },
-    {
-        longitude: 73.77225324146039,
-        latitude: 18.92530886442278
-    },
-    {
-        longitude: 73.77229301650324,
-        latitude: 18.92531687197494
-    },
-    {
-        longitude: 73.77235971145069,
-        latitude: 18.925321606593
-    },
-    {
-        longitude: 73.77241401075716,
-        latitude: 18.92531407398686
-    },
-    {
-        longitude: 73.77246378761424,
-        latitude: 18.92529292249666
-    },
-    {
-        longitude: 73.77252892756144,
-        latitude: 18.92525185286155
-    },
-    {
-        longitude: 73.77262461724905,
-        latitude: 18.92517132922493
-    },
-    {
-        longitude: 73.77268484873031,
-        latitude: 18.92509361204812
-    },
-    {
-        longitude: 73.77273128612809,
-        latitude: 18.92501512841722
-    },
-    {
-        longitude: 73.77275602607588,
-        latitude: 18.92495892162952
-    },
-    {
-        longitude: 73.77277286826984,
-        latitude: 18.92491962821201
-    },
-    {
-        longitude: 73.77285450362623,
-        latitude: 18.92518422398344
-    },    
-]
+// india
+const defaultRegion = {
+    "latitude": 19.42672623676615,
+    "latitudeDelta": 40.02551781377842,
+    "longitude": 78.54402227327228,
+    "longitudeDelta": 22.864106185734272
+}
 
 interface Location {
     latitude: number,
@@ -118,124 +27,546 @@ interface Location {
 }
 
 interface MarkerType {
-    ref: any,
     title: string
     location: Location
+    isNew: boolean
+    tree: Tree
 }
 
-const MapScreen = () => {
-    const [location, setLocation] = useState<Location | null>(null);
-    const [userLocation, setUserLocation] = useState<Location | null>({
-        latitude: 18.925298,
-        longitude: 73.7726301,
-    });
-    const [markers, setMarkers] = useState<MarkerType[]>([])
-    const markerRefs = useRef<(MapMarker | null)[]>([]);
-    const markerRef = useRef<(MapMarker | null)>(null);
+interface MapScreenProps {
+    navigation: any,
+    route: any,
+}
 
-    useEffect(() => {
-        // markerRefs.current.forEach((marker, index) => {
-        //     if (marker) {
-        //         console.log(marker)
-        //         marker.showCallout();
-        //     }
-        // })
-        
-        setTimeout(() => {
-            markerRefs.current[0]?.showCallout()
-        }, 10)
-        setTimeout(() => {
-            markerRefs.current[1]?.showCallout()
-        }, 5000)
-        setTimeout(() => {
-            markerRefs.current[2]?.showCallout()
-        }, 10000)
-        // console.log(markerRefs.current[0])
-    }, [markerRefs])
+/**
+ * Calculates the distance between two coordinates using the Haversine formula.
+ * @param coord1 - The first coordinate.
+ * @param coord2 - The second coordinate.
+ * @returns The distance in meters between the two coordinates.
+ */
+const haversineDistance = (coord1: Location, coord2: Location): number => {
+    const R = 6371e3; // Radius of the Earth in meters
+    const lat1 = coord1.latitude * (Math.PI / 180);
+    const lat2 = coord2.latitude * (Math.PI / 180);
+    const deltaLat = (coord2.latitude - coord1.latitude) * (Math.PI / 180);
+    const deltaLon = (coord2.longitude - coord1.longitude) * (Math.PI / 180);
 
-    const handlePress = (event: MapPressEvent) => {
-        console.log(event.nativeEvent.coordinate);
-        setLocation(event.nativeEvent.coordinate)
-    }
+    const a =
+        Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+        Math.cos(lat1) * Math.cos(lat2) *
+        Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    const handleMarkerDrag = (event: MarkerDragStartEndEvent) => {
-        console.log(event.nativeEvent.coordinate);
-        setLocation(event.nativeEvent.coordinate)
-    }
+    return R * c; // Distance in meters
+};
 
-    useEffect(() => {
-        const getTreeLocations = async () => {
-            const plotId: number = 2974;
-            const daoClient = await DaoClient.authenticate();
-            const trees = await daoClient.trees.getTrees(0, 200, undefined, false, plotId);
-            const markers: MarkerType[] = []
-            trees.forEach(tree => {
-                if (tree.location) {
-                    const coordinates = JSON.parse(tree.location).coordinates;
-                    markers.push({
-                        title: tree.sapling_id,
-                        location: { latitude: coordinates[0], longitude: coordinates[1] }
-                    } as MarkerType)
-                }
+/**
+ * Filters a list of coordinates to return only those within a certain radius of a given coordinate.
+ * @param coordinates - The list of coordinates to filter.
+ * @param center - The coordinate to filter around.
+ * @param radius - The radius in meters to filter within.
+ * @returns The list of coordinates within the specified radius.
+ */
+const filterCoordinatesWithinRadius = (
+    markers: MarkerType[],
+    center: Location,
+    radius: number
+): MarkerType[] => {
+    return markers.filter(marker => haversineDistance(center, marker.location) <= radius);
+};
+
+const sortMarkers = (markers: MarkerType[]) => {
+    return markers.sort((a, b) => {
+        if (a.location.latitude === b.location.latitude) {
+            return b.location.longitude - a.location.longitude; // Sort by longitude if latitudes are equal
+        }
+        return b.location.latitude - a.location.latitude; // Otherwise, sort by latitude
+    })
+}
+
+const MapScreen: React.FC<MapScreenProps> = ({ navigation, route }) => {
+    const mapRef = useRef<MapView>(null);
+    const markerRef = useRef<any>(null);
+    const plot: Plot = route.params.selectedPlot;
+    const saplingId: string = route.params.sapling;
+    const coordinates: Location[] = [];
+    if (plot.boundaries) {
+        const boundaries = JSON.parse(plot.boundaries);
+        if (boundaries.coordinates && boundaries.coordinates.length === 1) {
+            boundaries.coordinates[0].forEach((location: any) => {
+                coordinates.push({
+                    latitude: location[0],
+                    longitude: location[1],
+                })
             })
-            setMarkers(markers);
+        }
+    }
+
+    const { setPlaySound } = useContext(GlobalContext);
+
+    const [focusedCoords, setFocusedCoors] = useState<Location | null>(null);
+    const [centerCords, setCenterCords] = useState<Location | null>(null);
+    const [markers, setMarkers] = useState<MarkerType[]>([]);
+    const [regionalMarkers, setReginalMarkers] = useState<MarkerType[]>([]);
+    const [visibleCallout, setVisibleCallout] = useState(false);
+    const [showTarget, setShowTarget] = useState(false);
+    const [treeModal, setTreeModal] = useState(false);
+    const [isAddingTree, setIsAddingTree] = useState(false);
+    const [isMovingTree, setIsMovingTree] = useState(false);
+    const [deleteConfirmation, setDeleteConfirmation] = useState(false);
+    const [saplingListVisible, setSaplingListVisible] = useState(false);
+    const [changeType, setChangeType] = useState<'edit' | 'add'>('add');
+    const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
+    const [selectedMarker, setSelectedMarker] = useState<MarkerType | null>(null);
+    const [treeLocation, setTreeLocation] = useState<Location | null>(null);
+    const [regionRadius, setRegionRadius] = useState<number>(-1);
+
+    const resetStates = () => {
+        setSelectedTree(null);
+        setSelectedMarker(null);
+        setShowTarget(false);
+        setIsAddingTree(false);
+        setIsMovingTree(false);
+    }
+
+    const handleMapMovement = (region: Region) => {
+        const center = {
+            latitude: region.latitude,
+            longitude: region.longitude
         }
 
+        setCenterCords(center)
+    }
+
+    const getTreeLocations = async () => {
+        if (!plot.id) return;
+
+        const plotId: number = plot.id;
+        const daoClient = await DaoClient.authenticate();
+        const trees = await daoClient.trees.getTrees(0, 200, undefined, false, plotId);
+        const markers: MarkerType[] = []
+        trees.forEach(tree => {
+            if (tree.location) {
+                const coordinates = JSON.parse(tree.location).coordinates;
+                if (coordinates && coordinates.length === 2) {
+                    if (typeof coordinates[0] === 'string') {
+                        if (isNaN(parseInt(coordinates[0]))) return;
+                        coordinates[0] = parseInt(coordinates[0])
+                    }
+                    if (typeof coordinates[1] === 'string') {
+                        if (isNaN(parseInt(coordinates[1]))) return;
+                        coordinates[1] = parseInt(coordinates[1])
+                    }
+                    markers.push({
+                        title: tree.sapling_id,
+                        location: { latitude: coordinates[0], longitude: coordinates[1] },
+                        isNew: !tree.is_uploaded,
+                        tree: tree
+                    } as MarkerType)
+                }
+            }
+        })
+        setMarkers(markers);
+    }
+
+    useEffect(() => {
         getTreeLocations();
     }, [])
 
-    // const handleUserLocation = (event: UserLocationChangeEvent) => {
-    //     setUserLocation(event.nativeEvent.coordinate || null);
-    // }   
+    useFocusEffect(useCallback(() => {
+        const backAction = () => {
+            navigation.goBack();
+            return true;
+        };
 
-    // const handleKml = (event: KmlMapEvent) => {
-    //     setMarkers(event.nativeEvent.markers)
-    // }
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+        return () => backHandler.remove();
+    }, []));
+
+    useEffect(() => {
+        if (centerCords && regionRadius > 0) {
+            const regionalMarkers = filterCoordinatesWithinRadius(markers, centerCords, regionRadius);
+            setReginalMarkers(sortMarkers(regionalMarkers));
+        } else {
+            setReginalMarkers(sortMarkers(markers));
+        }
+    }, [centerCords, markers, regionRadius])
+
+    useEffect(() => {
+        if (mapRef.current && focusedCoords) {
+            mapRef.current.animateToRegion({
+                latitude: focusedCoords.latitude,
+                latitudeDelta: 0.0001,
+                longitude: focusedCoords.longitude,
+                longitudeDelta: 0.0001
+            }, 5000)
+        }
+    }, [focusedCoords])
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (markerRef.current) {
+                setFocusedCoors(markerRef.current.props.coordinate)
+                markerRef.current.showCallout();
+            }
+        }, 2000)
+
+        return () => clearTimeout(timeoutId);
+    }, []);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            let coords: Location[] = []
+            if (coordinates.length > 0) {
+                coords = coordinates;
+            } else {
+                coords = markers.map(marker => marker.location)
+            }
+            if (mapRef.current && coords.length > 0) {
+                mapRef.current.fitToCoordinates(coords, {
+                    edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                    animated: false,
+                });
+            }
+        }, 500)
+
+        return () => clearTimeout(timeoutId);
+    }, []);
+
+    const toggleCallout = () => {
+        setVisibleCallout(prev => !prev);
+    }
+
+    const handleAddTreeMarker = () => {
+        setChangeType('add')
+
+        if (showTarget) {
+            setShowTarget(false);
+            setTreeModal(true);
+        } else {
+            setIsAddingTree(true);
+            setShowTarget(true);
+            setSaplingListVisible(false);
+        }
+    }
+
+    const handleTreeLocationChange = () => {
+        if (showTarget && selectedMarker && centerCords) {
+            const tree = selectedMarker.tree
+            const location = {
+                type: 'Point',
+                coordinates: [centerCords.latitude, centerCords.longitude]
+            }
+            tree.location = JSON.stringify(location);
+
+            const updateTree = async () => {
+                const daoClient = await DaoClient.authenticate();
+                await daoClient.trees.updateTree(tree);
+
+                setSelectedMarker(prev => prev ? { ...prev, isNew: true, location: centerCords } : null)
+                getTreeLocations();
+                setShowTarget(false);
+            }
+
+            updateTree();
+            setIsMovingTree(false);
+        } else {
+            setIsMovingTree(true);
+            setShowTarget(true);
+            setSaplingListVisible(false);
+        }
+    }
+
+    const treeSave = (data: Tree | CreateTreeRequest, images?: any) => {
+        let hasError = false;
+        const saveTreeData = async () => {
+            const daoClient = await DaoClient.authenticate();
+
+            if (changeType === 'add') {
+                data = JSON.parse(JSON.stringify(data)) as CreateTreeRequest;
+                try {
+                    const success = await daoClient.trees.createTree(data)
+                    if (success) {
+                        ToastAndroid.show("Added Tree Locally!", ToastAndroid.SHORT);
+                        setPlaySound(true);
+                        getTreeLocations();
+                    } else {
+                        ToastAndroid.show("Tree with given sapling id already exists!", ToastAndroid.LONG)
+                        hasError = true;
+                    }
+                } catch (err: any) {
+                    hasError = true;
+                    console.log(err)
+                    ToastAndroid.show("Failed to add tree locally!", ToastAndroid.SHORT)
+                }
+            } else {
+                data = JSON.parse(JSON.stringify(data)) as Tree;
+                try {
+                    await daoClient.trees.updateTree(data);
+                    setPlaySound(true);
+                    getTreeLocations();
+                    ToastAndroid.show("Updated Tree Locally!", ToastAndroid.SHORT)
+                } catch (err: any) {
+                    hasError = true;
+                    ToastAndroid.show("Failed to update tree locally!", ToastAndroid.SHORT)
+                }
+            };
+
+
+            const upsertImage = async (type: TreeImageType) => {
+                if (images[type]) {
+                    try {
+                        await daoClient.treeImages.upsertTreeImage({
+                            name: images[type].name,
+                            data: images[type].data,
+                            sapling_id: data.sapling_id,
+                            type: type,
+                            is_active: null,
+                            user_id: null,
+                        })
+                    } catch (err: any) {
+                        ToastAndroid.show(`Failed to add ${type.replace('_', ' ')} locally!`, ToastAndroid.SHORT)
+                    }
+                }
+            }
+
+            if (!hasError) {
+                upsertImage('tree_image')
+                upsertImage('user_card_image')
+                upsertImage('user_tree_image')
+                ToastAndroid.show("Updated Tree images locally!", ToastAndroid.SHORT)
+            }
+
+            setIsAddingTree(false);
+            setSelectedTree(null);
+        }
+
+        saveTreeData();
+    };
+
+    const handleTreeFormClose = () => {
+        setTreeModal(false);
+        setIsAddingTree(false);
+    }
+
+    const handleTreeDelete = async () => {
+        setDeleteConfirmation(false);
+        if (selectedTree) {
+            const daoClient = await DaoClient.authenticate();
+            await daoClient.trees.deleteTree(selectedTree.local_id);
+            setSelectedTree(null);
+            setPlaySound(true);
+            getTreeLocations();
+        }
+    }
+
+    const handleTreeEditPress = () => {
+        if (selectedMarker) {
+            const marker = selectedMarker;
+            if (marker.tree.location) {
+                const location = JSON.parse(marker.tree.location);
+                const coordinates = location.coordinates;
+                if (coordinates && coordinates.length === 2) setTreeLocation({ latitude: coordinates[0], longitude: coordinates[1] });
+                else setTreeLocation(null);
+            }
+            setSelectedTree(marker.tree);
+            setChangeType('edit');
+            setTreeModal(true);
+        }
+    }
+
+    const handleTreeDeletePress = () => {
+        if (selectedMarker) {
+            const marker = selectedMarker;
+            setSelectedTree(marker.tree);
+            setDeleteConfirmation(true);
+        }
+    }
+
+    const handleTreeSelectPress = (saplingId: string | null) => {
+        if (saplingId === null) {
+            setSelectedMarker(null);
+        } else {
+            const idx = markers.findIndex(marker => marker.title === saplingId);
+            if (idx >= 0) {
+                const marker = markers[idx];
+                setSelectedMarker(marker);
+            }
+        }
+    }
 
     return (
         <View style={{ flex: 1 }}>
-            <MapView
-                style={StyleSheet.absoluteFill}
-                showsUserLocation
-                followsUserLocation
-                mapType="satellite"
-                initialRegion={userLocation ? { latitude: userLocation.latitude, longitude: userLocation.longitude, latitudeDelta: 0.001, longitudeDelta: 0.001 } : undefined}
-                // onUserLocationChange={handleUserLocation}
-                onPress={handlePress}
-            // kmlSrc={markers.length === 0 ? "https://drive.google.com/uc?export=download&id=1_wSv5V0-lvkhCSAfYPS01URpHvpRA5xy" : undefined}
-            // onKmlReady={markers.length === 0 ? handleKml : undefined}
-            >
-                <Polygon 
-                    coordinates={boundaries}
-                    fillColor="400055ff"
-                />
-                {location && <Marker
-                    draggable
-                    title="Pressed"
-                    coordinate={location}
-                    onDragEnd={handleMarkerDrag}
-                    ref={markerRef}
-                />}
+            <View style={{ flex: 1, flexGrow: 1, alignItems: 'center', justifyContent: 'center' }}>
+                <MapView
+                    ref={mapRef}
+                    style={StyleSheet.absoluteFillObject}
+                    showsUserLocation
+                    followsUserLocation
+                    mapType="satellite"
+                    initialRegion={defaultRegion}
+                    onRegionChangeComplete={handleMapMovement}
+                    onPress={(event) => { resetStates(); }}
+                >
+                    {coordinates.length > 0 && (
+                        <Polygon
+                            coordinates={coordinates}
+                            fillColor="rgba(219, 255, 232, 0.3)"
+                            strokeWidth={3}
+                        />
+                    )}
 
-                {markers.map((marker, index) => (
-                    <Marker
-                        draggable
-                        key={marker.title}
-                        title={marker.title}
-                        description="123"
-                        coordinate={marker.location}
-                        ref={(ref) => markerRefs.current[index]=ref}
-                    >
-                        <Callout tooltip >
-                            <View style={{ padding: 5 }}>
-                                <Text style={{ color: 'white' }}>{marker.title}</Text>
+                    {!selectedMarker && regionalMarkers.map((marker, index) => (
+                        <Marker
+                            key={marker.title}
+                            title={marker.title}
+                            coordinate={marker.location}
+                            ref={marker.title === saplingId ? markerRef : undefined}
+                        >
+                            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                {visibleCallout && <Text style={{ color: 'white' }}>{marker.title}</Text>}
+                                <Icon source='map-marker' size={35} color={marker.isNew ? "orange" : "green"} />
                             </View>
-                        </Callout>
-                    </Marker>
-                ))}
-            </MapView>
+                        </Marker>
+                    ))}
+
+                    {selectedMarker && (
+                        <Marker
+                            key={selectedMarker.title}
+                            title={selectedMarker.title}
+                            coordinate={selectedMarker.location}
+                            ref={selectedMarker.title === saplingId ? markerRef : undefined}
+                        >
+                            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                <Text style={{ color: 'white' }}>{selectedMarker.title}</Text>
+                                <Icon source='map-marker' size={35} color={selectedMarker.isNew ? "orange" : "green"} />
+                            </View>
+                        </Marker>
+                    )}
+
+                    {regionRadius > 0 && centerCords && (
+                        <Circle
+                            center={centerCords}
+                            radius={regionRadius}
+                            strokeColor="rgba(177, 243, 250, 1)"
+                            fillColor="rgba(177, 243, 250, 0.4)"
+                        />
+                    )}
+                </MapView>
+                {saplingListVisible && (
+                    <SlideUpComponent
+                        items={regionalMarkers.map(marker => marker.title)}
+                        selectedItem={selectedMarker ? selectedMarker.title : null}
+                        visible={saplingListVisible}
+                        onTreeEdit={handleTreeEditPress}
+                        onTreeDelete={handleTreeDeletePress}
+                        onTreeSelect={handleTreeSelectPress}
+                        onTreeMove={handleTreeLocationChange}
+                    />
+                )}
+                {showTarget && (
+                    <View style={styles.targetContainer}>
+                        <Icon source='target' size={50} color="white" />
+                    </View>
+                )}
+            </View>
+            
+            <View>
+                <MapRadiusSelector radius={regionRadius} onSelect={setRegionRadius} />
+                <View style={styles.toolbarContainer}>
+                    <TouchableRipple style={styles.toolbarButton} onPress={() => { setSaplingListVisible(prev => !prev) }}>
+                        <View style={styles.iconContainer}>
+                            <Icon source={saplingListVisible ? "tree" : "tree-outline"} size={25} />
+                            <Text variant='bodySmall' style={styles.iconText}>Trees</Text>
+                        </View>
+                    </TouchableRipple>
+                    <TouchableRipple style={styles.toolbarButton} onPress={toggleCallout}>
+                        <View style={styles.iconContainer}>
+                            <Icon source={visibleCallout ? "label" : "label-off-outline"} size={25} />
+                            <Text variant='bodySmall' style={styles.iconText}>Show Tree Ids</Text>
+                        </View>
+                    </TouchableRipple>
+                    <TouchableRipple style={styles.toolbarButton} onPress={handleAddTreeMarker}>
+                        <View style={styles.iconContainer}>
+                            <Icon source={isAddingTree ? 'palm-tree' : 'plus'} size={25} />
+                            <Text variant='bodySmall' style={styles.iconText}>Add Tree</Text>
+                        </View>
+                    </TouchableRipple>
+                    {isMovingTree && (
+                        <TouchableRipple style={styles.toolbarButton} onPress={handleTreeLocationChange}>
+                            <View style={styles.iconContainer}>
+                                <Icon source={'map-marker-check'} size={25} />
+                                <Text variant='bodySmall' style={styles.iconText}>Change Location</Text>
+                            </View>
+                        </TouchableRipple>
+                    )}
+                </View>
+            </View>
+
+            {treeModal && (
+                <View style={styles.treeFormContainer}>
+                    <TreeForm
+                        changeMode={changeType}
+                        tree={changeType === 'add' ? null : selectedTree}
+                        onCancel={handleTreeFormClose}
+                        onSubmit={treeSave}
+                        defaultPlot={plot}
+                        defaultLocation={
+                            changeType === 'add'
+                                ? centerCords || undefined
+                                : treeLocation || undefined
+                        }
+                    />
+                </View>
+            )}
+
+            <ConfirmationModal
+                visible={deleteConfirmation}
+                text={"Do you want to delete tree with sapling id " + selectedTree?.sapling_id + '?'}
+                onCancel={() => setDeleteConfirmation(false)}
+                onSubmit={handleTreeDelete}
+            />
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    toolbarContainer: {
+        backgroundColor: 'white',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexDirection: 'row',
+        paddingVertical: 10,
+    },
+    toolbarButton: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexGrow: 1,
+        marginHorizontal: 5,
+    },
+    iconContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    iconText: {
+        color: 'black',
+    },
+    targetContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1,
+    },
+    treeFormContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff', // Semi-transparent background
+        zIndex: 10, // Make sure it's above the map
+    },
+});
 
 export default MapScreen;

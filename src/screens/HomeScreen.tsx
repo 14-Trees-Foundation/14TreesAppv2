@@ -1,33 +1,35 @@
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { BackHandler, ScrollView, View } from "react-native";
-import { Button, Icon, ProgressBar, Surface, Text } from "react-native-paper";
-import { Constants, Utils, getReadableProgress, getTimeDiffString } from "../services/Utils";
+import { Button, Icon, IconButton, ProgressBar, Surface, Text } from "react-native-paper";
+import { Constants, Utils, getTimeDiffString } from "../services/Utils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Strings } from "../services/Strings";
 import { TreeAnalytics } from "../model/tree";
 import InternetBanner from "../components/InternetInfo";
-import { fetchDeltaChanges } from "../services/sync/sync";
 import GlobalContext from "../context/GlobalContext ";
 import Autocomplete from "../components/AutocompleteModal";
+import { LocationSite } from "../model/sites";
+import { ApiClient } from "../services/api/api";
 import { DaoClient } from "../services/db/dao";
-import { Site } from "../model/sites";
+import { fetchAndStoreLocationSites } from "../services/sync/location_sites";
 
 
 const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const intervalId = useRef<any>(null);
-  const { langChanged, downloadInProgress, setDownloadInProgress, syncProgress, setSyncProgress } = useContext(GlobalContext);
+  const { langChanged } = useContext(GlobalContext);
   useEffect(() => {
     console.log('langChanged inside HomeScreen: ', langChanged);
   }, [langChanged]);
 
+  const apiClient = new ApiClient();
   const [lastSyncDate, setLastSyncDate] = useState('');
   const [userDetails, setUserDetails] = useState<any>(null);
   const [analytics, setAnalytics] = useState<TreeAnalytics | null>(null);
-  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSite, setSelectedSite] = useState<Site | null>(null);
-  const [sites, setSites] = useState<Site[]>([]);
+  const [selectedSite, setSelectedSite] = useState<LocationSite | null>(null);
+  const [sites, setSites] = useState<LocationSite[]>([]);
+  const [sitesLoading, setSitesLoading] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -47,7 +49,6 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      // Update last sync date on UI every 1 minute (60000 milliseconds)
       intervalId.current = setInterval(updateLastSyncOnUI, 60000);
 
       return () => {
@@ -57,7 +58,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   );
 
   const updateLastSyncOnUI = () => {
-    if (!loading) updateLastSyncState();
+    updateLastSyncState();
   }
 
   const updateLastSyncState = async () => {
@@ -72,84 +73,83 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     const lsSate = await Utils.getLastSyncDate();
     if (lsSate) {
       setLastSyncDate(lsSate);
-    } else {
-      setLoading(true);
-      setDownloadInProgress(true);
-      await fetchDeltaChanges(setSyncProgress);
-      setLoading(false);
-      setDownloadInProgress(false);
-      Utils.setLastSyncDateNow();
-      updateLastSyncState();
     }
   }
-  const handleAnalytics = async () => {
+
+  const handleAnalytics = async (user?: any) => {
+    const resolvedUser = user ?? userDetails;
     const data = await AsyncStorage.getItem(Constants.treeAnalyticsDataKey);
     if (data) {
       const analytics: TreeAnalytics = JSON.parse(data);
       setAnalytics(analytics);
-    }
-  }
-
-  const handleDownloadInProgress = async () => {
-    // check if is it first sync
-    const lsSate = await Utils.getLastSyncDate();
-    if (lsSate) {
-      // if not avoid showing progress bar on home screen
-      setLastSyncDate(lsSate);
-    } else {
-      setLoading(true);
+    } else if (resolvedUser) {
+      const analytics = await apiClient.trees.analyticsCount(resolvedUser.name);
+      setAnalytics(analytics)
+      await AsyncStorage.setItem(Constants.treeAnalyticsDataKey, JSON.stringify(analytics))
+      updateLastSyncOnUI();
     }
   }
 
   useFocusEffect(
     useCallback(() => {
-      if (downloadInProgress) {
-        handleDownloadInProgress();
-      } else {
-        handleLastSyncDate();
-      }
+      handleLastSyncDate();
       handleAnalytics();
       return () => {
       };
-    }, [downloadInProgress])
+    }, [])
   );
 
-  useEffect(() => {
-    setTimeout(async () => {
-      const userData = await AsyncStorage.getItem(Constants.userDetailsKey)
-      if (userData) setUserDetails(JSON.parse(userData));
+  // Load sites from local SQLite cache on mount
+  const loadSitesFromLocal = async () => {
+    const daoClient = await DaoClient.authenticate();
+    const localSites = await daoClient.locationSites.getLocationSites(0, -1);
+    setSites(localSites);
+  };
 
-      const daoClient = await DaoClient.authenticate();
-      const siteId = await AsyncStorage.getItem(Constants.selectedSiteId)
-      let site: Site | null = null;
-      if (siteId) {
-        site = await daoClient.sites.getSiteByLiveId(parseInt(siteId));
+  useEffect(() => {
+    const fetchData = async () => {
+      let user = null;
+      const userData = await AsyncStorage.getItem(Constants.userDetailsKey)
+      if (userData) {
+        user = JSON.parse(userData);
+        setUserDetails(user);
+      }
+
+      const data = await AsyncStorage.getItem(Constants.selectedSite)
+      if (data) {
+        const raw = JSON.parse(data);
+        const site: LocationSite = { ...raw, location_name: raw.location_name ?? raw.name_english ?? '' };
         setSelectedSite(site);
       }
-      const sites = await daoClient.sites.getSites(0, 100)
-      if (site) {
-        const idx = sites.findIndex(value => value.id === site?.id);
-        if (idx < 0) setSites([site, ...sites]);
-        else setSites(sites);
-      }
-      else setSites(sites);
-    }, 10)
-  }, [])
 
-  useEffect(() => {
-    if (searchQuery.length < 1) return;
-    setTimeout(async () => {
-      const daoClient = await DaoClient.authenticate();
-      let sites = await daoClient.sites.searchSites(searchQuery, 0, 100);
-      setSites(sites);
-    }, 10)
-  }, [searchQuery])
+      await loadSitesFromLocal();
+      await handleAnalytics(user);
+    }
 
-  const handleSiteSelection = (site: Site | null) => {
+    fetchData();
+  }, []);
+
+  // Refresh sites from network, then reload local cache
+  const handleRefreshSites = async () => {
+    setSitesLoading(true);
+    try {
+      await fetchAndStoreLocationSites();
+      await loadSitesFromLocal();
+    } finally {
+      setSitesLoading(false);
+    }
+  };
+
+  const handleSiteSelection = (site: LocationSite | null) => {
     setSelectedSite(site);
-    if (site !== null && site.id) AsyncStorage.setItem(Constants.selectedSiteId, site.id.toString());
-    else AsyncStorage.removeItem(Constants.selectedSiteId);
+    if (site !== null) AsyncStorage.setItem(Constants.selectedSite, JSON.stringify(site))
+    else AsyncStorage.removeItem(Constants.selectedSite);
   }
+
+  // Filter sites locally from cached list
+  const filteredSites = searchQuery.length >= 1
+    ? sites.filter(s => s.location_name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : sites;
 
   const getName = () => {
     const name = userDetails?.name || 'User'
@@ -222,37 +222,36 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
             {card('account-outline', Strings.messages.PersonTrees, analytics.trees_planted_by_you)}
           </View>
         </View>}
-        {!loading && <View
-          style={{
-            padding: 15
-          }}>
+        {<View style={{ padding: 15 }}>
           <Text variant='bodyMedium'>{Strings.messages.SelectTheSiteYouAreAt}:</Text>
-          <Autocomplete
-            label={Strings.labels.ClickSiteFromDropdown}
-            value={selectedSite}
-            options={sites}
-            keyGetter={(option) => option ? option.local_id : ''}
-            valueGetter={(option) => {
-              return option.plot_count && option.plot_count > 0
-                ? `${option.name_english} (Plots: ${option.plot_count})`
-                : option.name_english
-            }}
-            onSelect={handleSiteSelection}
-            onSearch={(text) => setSearchQuery(text)}
-            variant='outlined'
-          />
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ flex: 1 }}>
+              <Autocomplete
+                label={selectedSite ? Strings.labels.SelectedSite : Strings.labels.ClickSiteFromDropdown}
+                value={selectedSite}
+                options={filteredSites}
+                keyGetter={(option) => option ? option.id : ''}
+                valueGetter={(option) => option.location_name}
+                onSelect={handleSiteSelection}
+                onSearch={(text) => { setSearchQuery(text); }}
+                variant='outlined'
+                helpedText={Strings.messages.SelectTheSiteYouAreAt}
+              />
+            </View>
+            <IconButton
+              icon="refresh"
+              size={26}
+              disabled={sitesLoading}
+              onPress={handleRefreshSites}
+              style={{ marginLeft: 2 }}
+            />
+          </View>
+          {sitesLoading && (
+            <ProgressBar indeterminate style={{ marginTop: 4, borderRadius: 2 }} color="#2aafdb" />
+          )}
         </View>}
         <View style={{ marginVertical: 30 }}></View>
       </ScrollView>
-
-      {loading && <View
-        style={{ position: 'absolute', bottom: 80, left: 20, right: 20 }}>
-        <Text style={{ textAlign: 'center', marginBottom: 5 }}>
-          Fetching Data from the Server!
-        </Text>
-        <ProgressBar visible={loading} progress={syncProgress} style={{ backgroundColor: '#bf8686' }} fillStyle={{ backgroundColor: '#02ab4e' }} />
-        <Text style={{ textAlign: 'center', marginTop: 2 }}>Completed: {getReadableProgress(syncProgress)}</Text>
-      </View>}
 
       <View style={{ position: 'absolute', bottom: 10, left: 20, right: 20 }}>
         <Text variant='bodySmall' style={{ color: 'black', alignSelf: 'center', marginBottom: 4 }}>
