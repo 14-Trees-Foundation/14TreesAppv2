@@ -87,26 +87,6 @@ export const DrawerContent = (props) => {
             <Drawer.Section>
               <DrawerItem 
                 icon={({size, color}) => (
-                  <Button icon='account-outline' size={size + 20} color={color}/>
-                )}
-                label={Strings.screenNames.UsersPage} 
-                style={{marginVertical: -5}}
-                labelStyle={{ marginLeft: -40 }} 
-                onPress={() => props.navigation.navigate(Strings.screenNames.getString('UsersPage', Strings.english))}
-              />
-              <DrawerItem 
-                icon={({size, color}) => (
-                  <Button icon='map-marker-account-outline' size={size + 20} color={color}/>
-                )}
-                label={Strings.screenNames.VisitsPage} 
-                style={{marginVertical: -5}}
-                labelStyle={{ marginLeft: -40 }} 
-                onPress={() => props.navigation.navigate(Strings.screenNames.getString('VisitsPage', Strings.english))}
-              />
-            </Drawer.Section>
-            <Drawer.Section>
-              <DrawerItem 
-                icon={({size, color}) => (
                   <Button icon='alpha-s-circle-outline' size={size + 20} color={color}/>
                 )}
                 label={Strings.screenNames.SitesPage} 

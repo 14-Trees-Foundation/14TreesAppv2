@@ -68,7 +68,7 @@ const PlotAudit: FC<PlotSaplingsProps> = ({ navigation, route }) => {
     }, [date])
 
     const getSaplings = async (daoClient: DaoClient, date: Date) => {
-        const trees = await daoClient.trees.getTrees(0, -1, undefined, false, plot.id)
+        const trees = await daoClient.trees.getTrees(0, -1, undefined, false, plot.id, plot.local_id)
         const saplings: SaplingChipItem[] = [];
         for (const tree of trees) {
             const count = await getImagesCountForSapling(tree.sapling_id, date);
@@ -183,6 +183,7 @@ const PlotAudit: FC<PlotSaplingsProps> = ({ navigation, route }) => {
                                 plantTypes={plantTypes}
                                 onSubmit={handleSaplingSubmit}
                                 onCancel={() => setIsFormVisible(false)}
+                                lockedPlot={plot}
                             />
                         </View>
                     </View>

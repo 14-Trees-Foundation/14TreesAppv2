@@ -7,17 +7,18 @@ import PlotsForm from "../components/plots/PlotsForm";
 import PlotsCard from "../components/plots/PlotsCard";
 import PlotsInfo from "../components/plots/PlotsInfo";
 import { TouchableOpacity } from "react-native";
-import { CreatePlotRequest, Plot } from "../model/plot";
+import { CreatePlotRequest, LocationPlot, Plot, locationPlotToPlot } from "../model/plot";
 import { useFocusEffect } from "@react-navigation/native";
 import SearchBar from "../components/Searchbar";
 import InternetBanner from "../components/InternetInfo";
 import { Strings } from "../services/Strings";
 import Autocomplete from "../components/AutocompleteModal";
-import { Site } from "../model/sites";
+import { LocationSite } from "../model/sites";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Constants } from "../services/Utils";
 import SaplingRangeModal from "../components/plots/SaplingRangeModal";
 import CardList from "../components/CardList";
+
 
 interface PlotsInputProps {
     navigation: any
@@ -38,10 +39,8 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
     const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null);
     const [plots, setPlots] = useState<Plot[]>([]);
     const [siteSearchQuery, setSiteSearchQuery] = useState('');
-    const [selectedSite, setSelectedSite] = useState<Site | null>(null);
-    const [sites, setSites] = useState<Site[]>([]);
-    const [plotsPage, setPlotsPage] = useState(0);
-    const [hasMorePlots, setHasMorePlots] = useState(true);
+    const [selectedSite, setSelectedSite] = useState<LocationSite | null>(null);
+    const [sites, setSites] = useState<LocationSite[]>([]);
 
     useFocusEffect(
         useCallback(() => {
@@ -62,44 +61,25 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
         return () => backHandler.remove();
     }, []);
 
+    // Load plots from local SQLite location_plots table
     useEffect(() => {
-        if (searchQuery.length !== 0) return;
         const fetchPlots = async () => {
-            const daoClient = await DaoClient.authenticate();
-            let resp = await daoClient.plots.getPlots(plotsPage * 10, 10, undefined, false, selectedSite?.id);
-            const newPlots = plotsPage === 0 ? resp : [...plots, ...resp];
-    
-            // Filter out duplicates based on plot.local_id
-            const uniquePlots = newPlots.filter((plot, index, self) => 
-                index === self.findIndex((t) => t.local_id === plot.local_id)
-            );
-    
-            setPlots(uniquePlots);
-            setHasMorePlots(resp.length === 10);
-        }
-        
-        fetchPlots();
-    }, [plotsPage, stateChange, searchQuery, selectedSite])
+            if (!selectedSite) {
+                setPlots([]);
+                return;
+            }
 
-    useEffect(() => {
-        if (searchQuery.length < 1) return;
-
-        const fetchPlots = async () => {
             const daoClient = await DaoClient.authenticate();
-            let resp = await daoClient.plots.searchPlots(searchQuery, plotsPage * 10, 10, selectedSite?.local_id);
-            const newPlots = plotsPage === 0 ? resp : [...plots, ...resp];
-    
-            // Filter out duplicates based on plot.local_id
-            const uniquePlots = newPlots.filter((plot, index, self) => 
-                index === self.findIndex((t) => t.local_id === plot.local_id)
-            );
-    
-            setPlots(uniquePlots);
-            setHasMorePlots(resp.length === 10);
-        }
-        
+            const locationPlots = await daoClient.locationPlots.getLocationPlots(selectedSite.id);
+            const mapped = locationPlots.map(locationPlotToPlot);
+            const filtered = searchQuery.length > 0
+                ? mapped.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                : mapped;
+            setPlots(filtered);
+        };
+
         fetchPlots();
-    }, [plotsPage, stateChange, searchQuery, selectedSite])
+    }, [stateChange, searchQuery, selectedSite]);
 
     const handleSave = (data: Plot | CreatePlotRequest) => {
         setIsFormVisible(false);
@@ -113,7 +93,7 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
             }
             setStateChange(prev => prev + 1);
         }
-        
+
         savePlotData();
     };
 
@@ -125,7 +105,7 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
                 setStateChange(prev => prev + 1);
             }
         }
-        
+
         deletePlot();
     }
 
@@ -133,38 +113,44 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
         useCallback(() => {
             const getSitesData = async () => {
                 const daoClient = await DaoClient.authenticate();
+
+                // Read selected site from AsyncStorage (set on Home page)
                 const data = await AsyncStorage.getItem(Constants.selectedSite);
                 if (data) {
-                    const site = JSON.parse(data);
+                    const raw = JSON.parse(data);
+                    const site: LocationSite = {
+                        ...raw,
+                        location_name: raw.location_name ?? raw.name_english ?? '',
+                    };
                     setSelectedSite(site);
-                    setPlotsPage(0);
                 } else {
                     setSelectedSite(null);
-                    setPlotsPage(0);
                 }
 
-                const sites = await daoClient.sites.getSites(0, 100)
-                setSites(sites);
-            }
+                // Load site list from local location_sites table (populated during sync)
+                const localSites = await daoClient.locationSites.getLocationSites(0, -1);
+                setSites(localSites);
+            };
 
             getSitesData();
-            return () => { }
+            return () => { };
         }, [])
-    )
+    );
 
     useEffect(() => {
         if (siteSearchQuery.length < 1) return;
         setTimeout(async () => {
             const daoClient = await DaoClient.authenticate();
-            let sites = await daoClient.sites.searchSites(siteSearchQuery, 0, 100);
-            setSites(sites);
-        }, 10)
-    }, [siteSearchQuery])
+            const results = await daoClient.locationSites.searchLocationSites(siteSearchQuery, 0, 100);
+            setSites(results);
+        }, 10);
+    }, [siteSearchQuery]);
 
-    const handleSiteSelection = (site: Site | null) => {
+    const handleSiteSelection = (site: LocationSite | null) => {
         setSelectedSite(site);
-        setPlotsPage(0);
-    }
+        if (site) AsyncStorage.setItem(Constants.selectedSite, JSON.stringify(site));
+        else AsyncStorage.removeItem(Constants.selectedSite);
+    };
 
     const renderPlotItem = (plot: Plot, index: number) => {
         return (
@@ -175,21 +161,9 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
                 }}>
                     <PlotsCard
                         plot={plot}
-                        onPlotChangePress={() => {
-                            navigation.navigate(
-                                Strings.screenNames.getString('ChangePlot', Strings.english),
-                                { selectedPlot: plot },
-                            )
-                        }}
                         onAuditPress={() => {
                             navigation.navigate(
                                 Strings.screenNames.getString('PlotAudit', Strings.english),
-                                { selectedPlot: plot },
-                            )
-                        }}
-                        onTreesMapPress={() => {
-                            navigation.navigate(
-                                Strings.screenNames.getString('Map', Strings.english),
                                 { selectedPlot: plot },
                             )
                         }}
@@ -214,7 +188,7 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
                             options={sites}
                             value={selectedSite}
                             onSelect={handleSiteSelection}
-                            valueGetter={(data) => data.name_english}
+                            valueGetter={(data) => data.location_name}
                             keyGetter={(data) => data.id}
                             variant="outlined"
                             boldSelection
@@ -224,21 +198,14 @@ const Plots: React.FC<PlotsInputProps> = ({ navigation }) => {
                 </View>}
                 {!isFormVisible && <View style={styles.header}>
                     <View style={{ width: '96%', flexGrow: 1, }}>
-                        <SearchBar query={searchQuery} onChange={(text: string) => { setPlotsPage(0); setSearchQuery(text) }} />
+                        <SearchBar query={searchQuery} onChange={(text: string) => { setSearchQuery(text) }} />
                     </View>
                 </View>}
-                {!isFormVisible && <CardList 
-                    data={plots} 
-                    renderItem={renderPlotItem} 
-                    pagination 
-                    onEndReached={() => { setPlotsPage(plotsPage + 1) }} 
-                    hasMore={hasMorePlots} 
+                {!isFormVisible && <CardList
+                    data={plots}
+                    renderItem={renderPlotItem}
+                    pagination={false}
                 />}
-                {/* {!isFormVisible && <AddIconButton onClick={() => {
-                setIsFormVisible(true);
-                setSelectedVisit(null);
-                setChangeModel('add');
-            }} />} */}
 
                 {isFormVisible && <PlotsForm
                     changeMode={changeMode}
@@ -295,4 +262,3 @@ const styles = StyleSheet.create({
 });
 
 export default Plots;
-

@@ -1,4 +1,20 @@
 
+export type LocationSite = {
+  id: number;
+  location_name: string;
+  display_name: string | null;
+  location_type: string;
+  location_path: string;
+  parent_location_id: number | null;
+  total_trees_count: number;
+  area_acres: number;
+  grove_type: string | null;
+  land_type: string | null;
+  maintenance_type: string | null;
+  accessibility_status: string | null;
+  photo_album: string | null;
+}
+
 export type Site = {
   local_id: number,
   id?: number,

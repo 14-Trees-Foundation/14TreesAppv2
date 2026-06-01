@@ -1,8 +1,6 @@
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
-import { Button, IconButton } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { useState } from 'react';
+import { Button } from 'react-native-paper';
 import { Tree } from '../../model/tree';
 
 interface TreeInfoInputProps {
@@ -11,13 +9,9 @@ interface TreeInfoInputProps {
     plantType: string
     plot: string
     onClose: () => void
-    onDelete: () => void
 }
 
-export const TreeInfo: React.FC<TreeInfoInputProps> = ({ isVisible, tree, plantType, plot, onClose, onDelete }) => {
-
-    const [isDelete, setIsDelete] = useState(false);
-
+export const TreeInfo: React.FC<TreeInfoInputProps> = ({ isVisible, tree, plantType, plot, onClose }) => {
     return (
         <Modal
             isVisible={isVisible}
@@ -27,51 +21,17 @@ export const TreeInfo: React.FC<TreeInfoInputProps> = ({ isVisible, tree, plantT
             style={{ alignItems: 'center' }}
         >
             <View style={styles.container}>
-                <View style={styles.header}>
-                    <Text style={styles.title}>Tree Information</Text>
-                    <IconButton icon='delete-outline' style={styles.icons} iconColor='red' onPress={ () => { setIsDelete(true) }}/>
-                </View>
+                <Text style={styles.title}>Tree Information</Text>
                 <Text style={styles.label}>Sapling Id:</Text>
                 <Text style={styles.value}>{tree.sapling_id}</Text>
                 <Text style={styles.label}>Plant Type:</Text>
                 <Text style={styles.value}>{plantType}</Text>
                 <Text style={styles.label}>Plot:</Text>
                 <Text style={styles.value}>{plot}</Text>
-                {/* <Text style={styles.label}>Location</Text>
-                <Text style={styles.value}>{tree.location}</Text> */}
-
-
-                <Button style={styles.closeButton} onPress={onClose} >
-                    Close
-                </Button>
+                <Button style={styles.closeButton} onPress={onClose}>Close</Button>
             </View>
-
-            <Modal
-                isVisible={isDelete}
-                onBackdropPress={() => { setIsDelete(false); }}
-                backdropColor="black"
-                backdropOpacity={0.5}
-            >
-                <View style={styles.container}>
-                    <Text style={styles.deleteTitle}>Delete tree "{tree.sapling_id}"?</Text>
-                    <View style={{ flexDirection: 'row' }}>
-                        <Button style={styles.cancelButton} onPress={() => { setIsDelete(false);}} >
-                            Cancel
-                        </Button>
-                        <Button style={styles.deleteButton} onPress={() => {
-                            onClose();
-                            setIsDelete(false);
-                            onDelete();
-                        }} >
-                            Delete
-                        </Button>
-                    </View>
-                </View>
-            </Modal>
         </Modal>
-
-
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -86,60 +46,28 @@ const styles = StyleSheet.create({
         shadowRadius: 8,
         elevation: 5,
         width: '100%',
-        height: 'auto'
+    },
+    title: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: 'black',
+        marginBottom: 20,
     },
     label: {
         fontSize: 16,
         fontWeight: 'bold',
         marginTop: 5,
         marginBottom: 1,
-        color: '#333'
+        color: '#333',
     },
     value: {
         fontWeight: 'normal',
-        color: '#333'
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 20,
-        width: '100%',
-        color: 'black'
-    },
-    title: {
-        flex: 1,
-        fontSize: 20,
-        fontWeight: 'bold',
-        textAlign: 'left',
-        color: 'black',
-    },
-    deleteTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        textAlign: 'left',
-        marginBottom: 10,
-        color: 'black',
-    },
-    icons: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        padding: 5,
+        color: '#333',
     },
     closeButton: {
         marginTop: 20,
-        backgroundColor: "#55cf5f",
-        color: 'black',
+        backgroundColor: '#55cf5f',
     },
-    cancelButton: { 
-        backgroundColor: '#f9f9f9',
-        borderRadius: 5,
-        color: 'black',
-    },
-    deleteButton: {
-        backgroundColor: '#e82a2a',
-        borderRadius: 5,
-        color: 'black',
-    }
 });
 
 export default TreeInfo;

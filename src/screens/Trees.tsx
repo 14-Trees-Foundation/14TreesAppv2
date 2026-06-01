@@ -4,8 +4,6 @@ import React, { useCallback, useContext, useEffect, useState } from "react";
 import { DaoClient } from "../services/db/dao";
 import { TreeForm } from "../components/trees/NewTreeForm";
 import TreeCard from "../components/trees/TreeCard";
-import TreeInfo from "../components/trees/TreeInfo";
-import { TouchableOpacity } from "react-native";
 import { CreateTreeRequest, Tree } from "../model/tree";
 import { Constants, Utils } from "../services/Utils";
 import { useFocusEffect } from "@react-navigation/native";
@@ -21,8 +19,8 @@ import { CreateTreeSnapshotRequest } from "../model/tree_snapshot";
 import InternetBanner from "../components/InternetInfo";
 import GlobalContext from "../context/GlobalContext ";
 import SiteBanner from "../components/SiteBanner";
-import { Plot } from "../model/plot";
-import { Site } from "../model/sites";
+import { Plot, locationPlotToPlot } from "../model/plot";
+import { LocationSite } from "../model/sites";
 import { syncSingleTree } from "../services/sync/sync";
 import MessageModal from "../components/MessageModal";
 import CardList from "../components/CardList";
@@ -44,7 +42,6 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
     const [isFormVisible, setIsFormVisible] = useState(false);
     const [isImageFormVisible, setIsImageFormVisible] = useState(false);
-    const [isInfoModalVisible, setInfoModalVisible] = useState(false);
     const [showSyncInProgress, setShowSyncInProgress] = useState(false);
     const [changeMode, setChangeModel] = useState<'add' | 'edit'>('add');
     const [searchQuery, setSearchQuery] = useState('');
@@ -52,12 +49,11 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     const [trees, setTrees] = useState<Tree[]>([]);
     const [plantTypes, setPlantTypes] = useState<any[]>([]);
     const [plotSearchQuery, setPlotSearchQuery] = useState('');
-    const [plotsPage, setPlotsPage] = useState(0);
-    const [hasMorePlots, setHasMorePlots] = useState(true);
+    const [hasMorePlots, setHasMorePlots] = useState(false);
     const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null);
     const [plots, setPlots] = useState<Plot[]>([]);
     const [allPlots, setAllPlots] = useState<Plot[]>([]);
-    const [selectedSite, setSelectedSite] = useState<Site | null>(null);
+    const [selectedSite, setSelectedSite] = useState<LocationSite | null>(null);
     const [userDetails, setUserDetails] = useState<any>(null);
     const [syncTree, setSyncTree] = useState<Tree | null>(null);
     const [treesPage, setTreesPage] = useState(0);
@@ -68,7 +64,6 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
             setIsFormVisible(false);
             setIsImageFormVisible(false);
             setTreesPage(0);
-            setPlotsPage(0);
             setStateChange(prev => prev + 1);
             return () => {
             };
@@ -99,10 +94,14 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
 
     useEffect(() => {
         if (searchQuery.length !== 0) return;
-        
+
         const getTrees = async () => {
             const localClient = await DaoClient.authenticate();
-            let resp = await localClient.trees.getTrees(treesPage * 10, 10, undefined, false, selectedPlot?.id);
+            // local_id = location_id from location_plots; id = old server plot_id (matches tree.plot_id)
+            const locationIdFilter = selectedPlot?.local_id;
+            const plotIdFilter = selectedPlot?.id;
+
+            let resp = await localClient.trees.getTrees(treesPage * 10, 10, undefined, false, plotIdFilter, locationIdFilter);
     
             for (let i = 0; i < resp.length; i++) {
                 const count = await getPendingImagesCountForSapling(resp[i].sapling_id);
@@ -113,12 +112,9 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
             }
     
             const newTrees = treesPage === 0 ? resp : [...trees, ...resp];
-    
-            // Filter out duplicates based on tree.id
-            const uniqueTrees = newTrees.filter((tree, index, self) => 
+            const uniqueTrees = newTrees.filter((tree, index, self) =>
                 index === self.findIndex((t) => t.local_id === tree.local_id)
             );
-    
             setTrees(uniqueTrees);
             setHasMoreTrees(resp.length === 10);
             setLoading(false);
@@ -133,7 +129,9 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
         const timeoutId = setTimeout(() => {
             const searchTrees = async () => {
                 const localClient = await DaoClient.authenticate();
-                let resp = await localClient.trees.searchTrees(searchQuery, treesPage * 10, 10, selectedPlot?.id);
+                const locationIdFilter = selectedPlot?.local_id;
+                const plotIdFilter = selectedPlot?.id;
+                let resp = await localClient.trees.searchTrees(searchQuery, treesPage * 10, 10, plotIdFilter, locationIdFilter);
                 for (let i = 0; i < resp.length; i++) {
                     const count = await getPendingImagesCountForSapling(resp[i].sapling_id);
                     if (count > 0) resp[i].is_uploaded = 0;
@@ -155,46 +153,50 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
         return () => clearTimeout(timeoutId);
     }, [treesPage, searchQuery, stateChange, selectedPlot]);
 
+    // Load plots from local SQLite for the dropdown (filtered by selected site's location_id)
     useEffect(() => {
         if (plotSearchQuery.length !== 0) return;
         const getPlots = async () => {
             const daoClient = await DaoClient.authenticate();
-            let resp = await daoClient.plots.getPlots(plotsPage * 10, 10, undefined, false, selectedSite?.id);
-            if (resp.length < 10) setHasMorePlots(false);
-            else setHasMorePlots(true);
-
-            if (plotsPage === 0) setPlots(resp);
-            else setPlots([...plots, ...resp]);
-        }
-
+            if (selectedSite) {
+                const locationPlots = await daoClient.locationPlots.getLocationPlots(selectedSite.id);
+                if (locationPlots.length > 0) {
+                    setPlots(locationPlots.map(locationPlotToPlot));
+                    setHasMorePlots(false);
+                    return;
+                }
+            }
+            // Fallback: old plots table (all plots, paginated)
+            let resp = await daoClient.plots.getPlots(0, 50, undefined, false, undefined);
+            setPlots(resp);
+            setHasMorePlots(resp.length === 50);
+        };
         getPlots();
-    }, [plotsPage, plotSearchQuery, selectedSite])
+    }, [plotSearchQuery, selectedSite]);
 
     useEffect(() => {
         if (plotSearchQuery.length < 1) return;
-
         const getPlots = async () => {
             const daoClient = await DaoClient.authenticate();
-            let resp = await daoClient.plots.searchPlots(plotSearchQuery, plotsPage * 10, 10, selectedSite?.id);
-            if (resp.length < 10) setHasMorePlots(false);
-            else setHasMorePlots(true);
-
-            if (plotsPage === 0) setPlots(resp);
-            else setPlots([...plots, ...resp]);
-        }
-
+            const locationPlots = await daoClient.locationPlots.searchLocationPlots(plotSearchQuery, selectedSite?.id);
+            if (locationPlots.length > 0) {
+                setPlots(locationPlots.map(locationPlotToPlot));
+                return;
+            }
+            let resp = await daoClient.plots.searchPlots(plotSearchQuery, 0, 50, undefined);
+            setPlots(resp);
+        };
         getPlots();
-
-    }, [plotsPage, plotSearchQuery, selectedSite])
+    }, [plotSearchQuery, selectedSite]);
 
     useEffect(() => {
         const getAllPlots = async () => {
             const daoClient = await DaoClient.authenticate();
             let plots = await daoClient.plots.getPlots(0, -1);
             setAllPlots(plots);
-        }
+        };
         getAllPlots();
-    }, [])
+    }, []);
 
     useEffect(() => {
         const getSelectedSite = async () => {
@@ -303,23 +305,6 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
         saveImagesChange();
     }
 
-    const handleDelete = () => {
-        if (selectedTree) {
-            setTimeout(async () => {
-                try {
-                    const localClient = await DaoClient.authenticate();
-                    await localClient.trees.deleteTree(selectedTree.local_id);
-                    setPlaySound(true);
-                    ToastAndroid.show("Deleted tree locally!", ToastAndroid.SHORT)
-                } catch (err: any) {
-                    ToastAndroid.show("Failed to delete tree!", ToastAndroid.SHORT)
-                }
-                setTreesPage(0);
-                setStateChange(prev => prev + 1);
-            }, 1000)
-        }
-    }
-
     const handleSingleTreeSync = async (tree: Tree) => {
         if (uploadInProgress) {
             setShowSyncInProgress(true);
@@ -345,29 +330,15 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
     const renderTreeItem = (tree: Tree, index: number) => {
         return (
             <View style={{ width: '100%', paddingHorizontal: 10 }} key={index}>
-                <TouchableOpacity style={{ width: '100%', alignItems: 'center' }} activeOpacity={0.91} onPress={() => {
-                    setSelectedTree(tree);
-                    setInfoModalVisible(true);
-                }}>
-                    <TreeCard
-                        tree={tree}
-                        plantTypeName={plantTypes.find(plantType => plantType.id === tree.plant_type_id)?.name || ''}
-                        plotName={allPlots.find(plot => plot.id === tree.plot_id)?.name || ''}
-                        onEdit={() => { setSelectedTree(tree); setChangeModel('edit'); setIsFormVisible(true); }}
-                        onAudit={() => { setSelectedTree(tree); setIsImageFormVisible(true); }}
-                        onTreeMap={() => {
-                            navigation.navigate(
-                                Strings.screenNames.getString('Map', Strings.english),
-                                {
-                                    selectedPlot: selectedPlot ? selectedPlot : allPlots.find(plot => plot.id === tree.plot_id),
-                                    sapling: tree.sapling_id
-                                },
-                            )
-                        }}
-                        onSync={() => handleSingleTreeSync(tree)}
-                        currentTreeSync={tree.local_id === syncTree?.local_id}
-                    />
-                </TouchableOpacity>
+                <TreeCard
+                    tree={tree}
+                    plantTypeName={plantTypes.find(plantType => plantType.id === tree.plant_type_id)?.name || ''}
+                    plotName={allPlots.find(plot => plot.id === tree.plot_id)?.name || ''}
+                    onEdit={() => { setSelectedTree(tree); setChangeModel('edit'); setIsFormVisible(true); }}
+                    onAudit={() => { setSelectedTree(tree); setIsImageFormVisible(true); }}
+                    onSync={() => handleSingleTreeSync(tree)}
+                    currentTreeSync={tree.local_id === syncTree?.local_id}
+                />
             </View>
         );
     }
@@ -383,17 +354,12 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                             label={selectedPlot ? Strings.labels.SelectedPlot : Strings.labels.SelectPlot}
                             options={plots}
                             value={selectedPlot}
-                            onSelect={setSelectedPlot}
+                            onSelect={(plot) => { setSelectedPlot(plot); setTreesPage(0); setTrees([]); }}
                             valueGetter={(data) => data.name}
                             keyGetter={(data) => data.id}
                             variant="outlined"
                             boldSelection
-                            onSearch={(text: string) => { setPlotsPage(0); setPlotSearchQuery(text) }}
-                            paginationOptions={{
-                                hasMore: hasMorePlots,
-                                onPageChange: setPlotsPage,
-                                page: plotsPage
-                            }}
+                            onSearch={(text: string) => { setPlotSearchQuery(text) }}
                         />
                     </View>
                 </View>}
@@ -426,15 +392,6 @@ const Trees: React.FC<TreesInputProps> = ({ navigation }) => {
                     onSubmit={handleImagesSave}
                     saplingId={selectedTree.sapling_id}
                     plantTypes={plantTypes}
-                />}
-
-                {selectedTree && <TreeInfo
-                    isVisible={isInfoModalVisible}
-                    plantType={plantTypes.find(plantType => plantType.id === selectedTree.plant_type_id)?.name || ''}
-                    plot={allPlots.find(plot => plot.id === selectedTree.plot_id)?.name || ''}
-                    onClose={() => { setInfoModalVisible(false) }}
-                    onDelete={handleDelete}
-                    tree={selectedTree}
                 />}
 
                 <MessageModal

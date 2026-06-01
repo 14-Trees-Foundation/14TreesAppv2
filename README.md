@@ -4,6 +4,32 @@ This is a new [**React Native**](https://reactnative.dev) project, bootstrapped 
 
 >**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
 
+## Prerequisites
+
+### Java 17
+
+This project requires **Java 17** (Gradle 8.0.2 + AGP 8.1.1 are incompatible with newer versions).
+
+```bash
+brew install openjdk@17
+
+export JAVA_HOME=/usr/local/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
+export PATH="$JAVA_HOME/bin:$PATH"
+```
+
+To make this permanent, add both lines to your `~/.zshrc`.
+
+### Android: local.properties
+
+Create `android/local.properties` with your Android SDK path and Google Maps API key:
+
+```
+sdk.dir=/Users/<your-username>/Library/Android/sdk
+secrets.googleMapsAPIKey=YOUR_GOOGLE_MAPS_API_KEY
+```
+
+This file is gitignored and must be created manually on each machine.
+
 ## Step 1: Start the Metro Server
 
 First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
@@ -31,6 +57,18 @@ npm run android
 # OR using Yarn
 yarn android
 ```
+
+To build a specific APK directly (without Metro):
+
+```bash
+# Dev debug APK
+cd android && ./gradlew assembleDevDebug
+
+# Prod release APK
+cd android && ./gradlew assembleProdRelease
+```
+
+APK output: `android/app/build/outputs/apk/<flavor>/<buildType>/`
 
 ### For iOS
 

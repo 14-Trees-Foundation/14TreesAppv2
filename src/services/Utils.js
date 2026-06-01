@@ -312,6 +312,8 @@ export class Utils {
         await daoClient.syncInfo.createTable();
         await daoClient.siteSync.createTable();
         await daoClient.plantTypes.createTable();
+        await daoClient.locationSites.createTable();
+        await daoClient.locationPlots.createTable();
         await this.localdb.createTreetTypesTbl();
         await this.localdb.createPlotTbl();
         await this.localdb.createSaplingTbl();

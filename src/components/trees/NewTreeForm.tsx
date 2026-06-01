@@ -13,7 +13,7 @@ import Autocomplete from '../AutocompleteModal';
 import { ImageSelector } from '../SingleImageSelector';
 import { Image } from '../../model/common';
 import { Visit } from '../../model/visits';
-import { Plot } from '../../model/plot';
+import { Plot, locationPlotToPlot } from '../../model/plot';
 import { Site } from '../../model/sites';
 import SelectMenu from '../SelectMenu';
 import { useFocusEffect } from '@react-navigation/native';
@@ -189,6 +189,8 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
     useEffect(() => {
         const getPlotForPlotId = async (plotId: number) => {
             const daoClient = await DaoClient.authenticate();
+            const locationPlot = await daoClient.locationPlots.getByOldPlotId(plotId);
+            if (locationPlot) { setSelectedPlot(locationPlotToPlot(locationPlot)); return; }
             const plot = await daoClient.plots.getPlotByLiveId(plotId);
             setSelectedPlot(plot);
         }
@@ -272,18 +274,23 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
 
         const getPlots = async () => {
             const daoClient = await DaoClient.authenticate();
-            let resp = await daoClient.plots.getPlots(plotsPage * 10, 10, undefined, false, selectedSite?.id);
+            if (selectedSite?.id) {
+                const locationPlots = await daoClient.locationPlots.getLocationPlots(selectedSite.id);
+                if (locationPlots.length > 0) {
+                    setPlots(locationPlots.map(locationPlotToPlot));
+                    setHasMorePlots(false);
+                    return;
+                }
+            }
+            let resp = await daoClient.plots.getPlots(plotsPage * 10, 10, undefined, false, undefined);
             const newPlots = plotsPage === 0 ? resp : [...plots, ...resp];
-    
-            // Filter out duplicates based on plot.id
-            const uniquePlots = newPlots.filter((plot, index, self) => 
+            const uniquePlots = newPlots.filter((plot, index, self) =>
                 index === self.findIndex((t) => t.local_id === plot.local_id)
             );
-    
             setPlots(uniquePlots);
             setHasMorePlots(resp.length === 10);
         }
-        
+
         getPlots();
     }, [plotsPage, plotSearchQuery, selectedSite])
 
@@ -292,18 +299,21 @@ export const TreeForm: React.FC<TreeFormInputProps> = ({ saplingID, tree, change
 
         const searchPlots = async () => {
             const daoClient = await DaoClient.authenticate();
-            let resp = await daoClient.plots.searchPlots(plotSearchQuery, plotsPage * 10, 10, selectedSite?.id);
+            const locationPlots = await daoClient.locationPlots.searchLocationPlots(plotSearchQuery, selectedSite?.id);
+            if (locationPlots.length > 0) {
+                setPlots(locationPlots.map(locationPlotToPlot));
+                setHasMorePlots(false);
+                return;
+            }
+            let resp = await daoClient.plots.searchPlots(plotSearchQuery, plotsPage * 10, 10, undefined);
             const newPlots = plotsPage === 0 ? resp : [...plots, ...resp];
-    
-            // Filter out duplicates based on plot.id
-            const uniquePlots = newPlots.filter((plot, index, self) => 
+            const uniquePlots = newPlots.filter((plot, index, self) =>
                 index === self.findIndex((t) => t.local_id === plot.local_id)
             );
-    
             setPlots(uniquePlots);
             setHasMorePlots(resp.length === 10);
         }
-        
+
         searchPlots();
     }, [plotsPage, plotSearchQuery, selectedSite])
 

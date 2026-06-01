@@ -117,14 +117,13 @@ export class TreesDao {
             // Extract the column names from the results
             const columns = results[0].rows.raw().map(row => row.name);
 
-            // Check if the column exists
             if (!columns.includes('assigned_to_local')) {
-                // Add the column if it does not exist
-                const alterQuery = `ALTER TABLE ${this.tableName} ADD COLUMN assigned_to_local TEXT;`;
-                await this.db.executeSql(alterQuery);
+                await this.db.executeSql(`ALTER TABLE ${this.tableName} ADD COLUMN assigned_to_local TEXT;`);
                 console.log(`Column assigned_to_local added to ${this.tableName}.`);
-            } else {
-                console.log(`Column assigned_to_local already exists in ${this.tableName}.`);
+            }
+            if (!columns.includes('location_id')) {
+                await this.db.executeSql(`ALTER TABLE ${this.tableName} ADD COLUMN location_id INTEGER DEFAULT NULL;`);
+                console.log(`Column location_id added to ${this.tableName}.`);
             }
         } catch (error) {
             console.error('Error adding column:', error);
@@ -186,14 +185,22 @@ export class TreesDao {
 
 
     // Data manipulation operations
-    getTrees = async (offset: number = 0, limit: number = 10, isUploaded?: boolean, isDeleted: boolean = false, plotId?: number) => {
+    getTrees = async (offset: number = 0, limit: number = 10, isUploaded?: boolean, isDeleted: boolean = false, plotId?: number, locationId?: number) => {
         const trees: Tree[] = []
         const whereCondition = `is_uploaded = ${isUploaded ? 1 : 0}`
+        let plotFilter = '';
+        if (locationId !== undefined && plotId !== undefined && plotId !== locationId) {
+            plotFilter = `AND (location_id = ${locationId} OR plot_id = ${plotId})`;
+        } else if (locationId !== undefined) {
+            plotFilter = `AND location_id = ${locationId}`;
+        } else if (plotId !== undefined) {
+            plotFilter = `AND plot_id = ${plotId}`;
+        }
         const query = `SELECT * FROM ${this.tableName}
-            WHERE 1=1 ${isDeleted ? '' : ` AND change_type != 'delete'`} 
+            WHERE 1=1 ${isDeleted ? '' : ` AND change_type != 'delete'`}
             ${isUploaded !== undefined ? 'AND ' + whereCondition : ""}
-            ${plotId !== undefined ? `AND plot_id = ${plotId}` : ""}
-            ORDER BY local_id DESC 
+            ${plotFilter}
+            ORDER BY local_id DESC
             ${limit < 0 ? '' : `LIMIT ${limit} OFFSET ${offset}`};
         `
 
@@ -358,6 +365,7 @@ export class TreesDao {
                     sapling_id,
                     plant_type_id,
                     plot_id,
+                    location_id,
                     image,
                     tags,
                     location,
@@ -382,10 +390,10 @@ export class TreesDao {
                     created_at,
                     updated_at
                 ) VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?
                 );`,
                 [
-                    data.id, data.sapling_id, data.plant_type_id, data.plot_id, data.image, data.tags,
+                    data.id, data.sapling_id, data.plant_type_id, data.plot_id, data.location_id ?? null, data.image, data.tags,
                     data.location, data.planted_by, data.mapped_to_user, data.mapped_to_group, data.mapped_at,
                     data.sponsored_by_user, data.sponsored_by_group, data.gifted_by, data.gifted_to,
                     data.assigned_at, data.assigned_to, data.user_tree_image, data.user_card_image, data.description, data.event_id,
@@ -400,6 +408,7 @@ export class TreesDao {
                     sapling_id = ?,
                     plant_type_id = ?,
                     plot_id = ?,
+                    location_id = ?,
                     image = ?,
                     tags = ?,
                     location = ?,
@@ -427,7 +436,7 @@ export class TreesDao {
                     updated_at = ?
                 WHERE id = ?;`,
                 [
-                    data.sapling_id, data.plant_type_id, data.plot_id, data.image, data.tags,
+                    data.sapling_id, data.plant_type_id, data.plot_id, data.location_id ?? null, data.image, data.tags,
                     data.location, data.planted_by, data.mapped_to_user, data.mapped_to_group, data.mapped_at,
                     data.sponsored_by_user, data.sponsored_by_group, data.gifted_by, data.gifted_to,
                     data.assigned_at, data.assigned_to, data.user_tree_image, data.user_card_image, data.description, data.event_id,
@@ -444,7 +453,7 @@ export class TreesDao {
             let replacement: any[] = []
             let valuesStr = '';
             trees.forEach(data => {
-                valuesStr += `(${data.id}, ?, ${data.plant_type_id}, ${data.plot_id}, ?, ?, ?, ${data.mapped_to_user}, ${data.mapped_to_group}, ?, ${data.sponsored_by_user}, ${data.sponsored_by_group}, ${data.gifted_by}, ${data.gifted_to}, ?, ${data.assigned_to}, NULL, ${data.visit_id}, ?, ?, ?, 1, ?, ?),`
+                valuesStr += `(${data.id}, ?, ${data.plant_type_id}, ${data.plot_id}, ${data.location_id ?? null}, ?, ?, ?, ${data.mapped_to_user}, ${data.mapped_to_group}, ?, ${data.sponsored_by_user}, ${data.sponsored_by_group}, ${data.gifted_by}, ${data.gifted_to}, ?, ${data.assigned_to}, NULL, ${data.visit_id}, ?, ?, ?, 1, ?, ?),`
                 replacement = [...replacement,
                 data.sapling_id, data.image, data.location, data.planted_by, data.mapped_at,
                 data.assigned_at, data.user_tree_image, data.user_card_image, data.tree_status, data.created_at, data.updated_at
@@ -459,6 +468,7 @@ export class TreesDao {
                     sapling_id,
                     plant_type_id,
                     plot_id,
+                    location_id,
                     image,
                     location,
                     planted_by,
@@ -546,12 +556,20 @@ export class TreesDao {
         return tree_ids;
     }
 
-    searchTrees = async (searchStr: string, offset: number, limit: number, plotId?: number) => {
+    searchTrees = async (searchStr: string, offset: number, limit: number, plotId?: number, locationId?: number) => {
         let trees: Tree[] = [];
+        let plotFilter = '';
+        if (locationId !== undefined && plotId !== undefined && plotId !== locationId) {
+            plotFilter = `AND (location_id = ${locationId} OR plot_id = ${plotId})`;
+        } else if (locationId !== undefined) {
+            plotFilter = `AND location_id = ${locationId}`;
+        } else if (plotId !== undefined) {
+            plotFilter = `AND plot_id = ${plotId}`;
+        }
         const query = `
-            SELECT * FROM ${this.tableName} 
+            SELECT * FROM ${this.tableName}
             WHERE change_type != 'delete' AND sapling_id LIKE ?
-            ${plotId !== undefined ? `AND plot_id = ${plotId}` : ''}
+            ${plotFilter}
             ORDER BY updated_at DESC
             LIMIT ? OFFSET ?;
         `

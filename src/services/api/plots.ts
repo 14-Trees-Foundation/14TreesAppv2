@@ -1,20 +1,19 @@
-import axios, { AxiosInstance } from "axios";
-import { FilterItem, PaginatedResponse } from "../../model/common"
-import { Plot, PlotHelperDataResponse} from "../../model/plot"
+import { AxiosInstance } from "axios";
+import { LocationPlot, Plot, PlotHelperDataResponse} from "../../model/plot"
 import { handleApiError } from "./handleError";
 
 export class PlotService {
     private api: AxiosInstance;
-    
+
     constructor(api: AxiosInstance) {
         this.api = api;
     }
 
-    async getPlots(offset: number, limit: number, filters?: FilterItem[]): Promise<PaginatedResponse<Plot>> {
-        const url = `/api/plots/get?offset=${offset}&limit=${limit}`;
+    async getPlots(siteLocationId: number): Promise<LocationPlot[]> {
+        const url = `/api/locations/hierarchy?parent_id=${siteLocationId}`;
         try {
-            const response = await this.api.post<PaginatedResponse<Plot>>(url, { filters: filters });
-            return response.data;
+            const response = await this.api.get<{ locations: LocationPlot[] }>(url);
+            return response.data.locations ?? [];
         } catch (error: any) {
             return handleApiError("PlotService::getPlots:", error)
         }
@@ -48,10 +47,10 @@ export class PlotService {
         }
     }
 
-    async fetchChanges(timestamp: string, plot_ids: number[], offset: number, site_id?: number): Promise<PlotHelperDataResponse> {
+    async fetchChanges(timestamp: string, plot_ids: number[], offset: number, location_id?: number): Promise<PlotHelperDataResponse> {
         const url = `/api/appv2/fetchHelperData/plots`;
         try {
-            const response = await this.api.post<PlotHelperDataResponse>(url, { site_id, timestamp, plot_ids, offset });
+            const response = await this.api.post<PlotHelperDataResponse>(url, { location_id, timestamp, plot_ids, offset });
             return response.data;
         } catch (error: any) {
             return handleApiError("PlotService::fetchChanges:", error)

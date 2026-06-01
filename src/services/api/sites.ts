@@ -1,18 +1,19 @@
 import { AxiosInstance } from "axios";
-import { FilterItem, PaginatedResponse } from "../../model/common"
-import { Site, SiteHelperDataResponse } from "../../model/sites"
+import { PaginatedResponse } from "../../model/common"
+import { LocationSite, Site, SiteHelperDataResponse } from "../../model/sites"
 import { handleApiError } from "./handleError";
+import { MAHARASHTRA_LOCATION_ID } from "../../constants/constants";
 
 export class SiteService {
     private api: AxiosInstance;
-    
+
     constructor(api: AxiosInstance) {
         this.api = api;
     }
 
-    async getSites(offset: number, limit: number, filters?: FilterItem[]): Promise<PaginatedResponse<Site>> {
-        const url = `/api/sites/get?offset=${offset}&limit=${limit}`;
-        const response = await this.api.post<PaginatedResponse<Site>>(url, { filters: filters });
+    async getSites(offset: number, limit: number): Promise<PaginatedResponse<LocationSite>> {
+        const url = `/api/locations?type=site&ancestor_id=${MAHARASHTRA_LOCATION_ID}&offset=${offset}&limit=${limit}`;
+        const response = await this.api.get<PaginatedResponse<LocationSite>>(url);
         return response.data;
     }
 

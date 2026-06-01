@@ -5,6 +5,7 @@ export type Tree = {
     sapling_id: string;
     plant_type_id: number;
     plot_id: number;
+    location_id: number | null;
     image: string | null;
     tags: string | null;
     location: string | null;

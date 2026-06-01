@@ -1,7 +1,7 @@
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { BackHandler, ScrollView, View } from "react-native";
-import { Button, Icon, Surface, Text } from "react-native-paper";
+import { Button, Icon, IconButton, ProgressBar, Surface, Text } from "react-native-paper";
 import { Constants, Utils, getTimeDiffString } from "../services/Utils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Strings } from "../services/Strings";
@@ -9,8 +9,10 @@ import { TreeAnalytics } from "../model/tree";
 import InternetBanner from "../components/InternetInfo";
 import GlobalContext from "../context/GlobalContext ";
 import Autocomplete from "../components/AutocompleteModal";
-import { Site } from "../model/sites";
+import { LocationSite } from "../model/sites";
 import { ApiClient } from "../services/api/api";
+import { DaoClient } from "../services/db/dao";
+import { fetchAndStoreLocationSites } from "../services/sync/location_sites";
 
 
 const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
@@ -25,10 +27,9 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [userDetails, setUserDetails] = useState<any>(null);
   const [analytics, setAnalytics] = useState<TreeAnalytics | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSite, setSelectedSite] = useState<Site | null>(null);
-  const [sites, setSites] = useState<Site[]>([]);
-  const [sitesPage, setSitesPage] = useState<number>(0);
-  const [hasMoreSites, setHasMoreSites] = useState<boolean>(false);
+  const [selectedSite, setSelectedSite] = useState<LocationSite | null>(null);
+  const [sites, setSites] = useState<LocationSite[]>([]);
+  const [sitesLoading, setSitesLoading] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -48,7 +49,6 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      // Update last sync date on UI every 1 minute (60000 milliseconds)
       intervalId.current = setInterval(updateLastSyncOnUI, 60000);
 
       return () => {
@@ -75,13 +75,15 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       setLastSyncDate(lsSate);
     }
   }
-  const handleAnalytics = async () => {
+
+  const handleAnalytics = async (user?: any) => {
+    const resolvedUser = user ?? userDetails;
     const data = await AsyncStorage.getItem(Constants.treeAnalyticsDataKey);
     if (data) {
       const analytics: TreeAnalytics = JSON.parse(data);
       setAnalytics(analytics);
-    } else if (userDetails) {
-      const analytics = await apiClient.trees.analyticsCount(userDetails.name);
+    } else if (resolvedUser) {
+      const analytics = await apiClient.trees.analyticsCount(resolvedUser.name);
       setAnalytics(analytics)
       await AsyncStorage.setItem(Constants.treeAnalyticsDataKey, JSON.stringify(analytics))
       updateLastSyncOnUI();
@@ -97,50 +99,57 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     }, [])
   );
 
+  // Load sites from local SQLite cache on mount
+  const loadSitesFromLocal = async () => {
+    const daoClient = await DaoClient.authenticate();
+    const localSites = await daoClient.locationSites.getLocationSites(0, -1);
+    setSites(localSites);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
+      let user = null;
       const userData = await AsyncStorage.getItem(Constants.userDetailsKey)
-      if (userData) setUserDetails(JSON.parse(userData));
+      if (userData) {
+        user = JSON.parse(userData);
+        setUserDetails(user);
+      }
 
       const data = await AsyncStorage.getItem(Constants.selectedSite)
       if (data) {
-        const site: Site = JSON.parse(data);
+        const raw = JSON.parse(data);
+        const site: LocationSite = { ...raw, location_name: raw.location_name ?? raw.name_english ?? '' };
         setSelectedSite(site);
       }
 
-      if (searchQuery.length === 0) {
-        const sites = await apiClient.sites.getSites(sitesPage * 10, 10)
-        if ((sitesPage + 1) * 10 >= sites.total) setHasMoreSites(false);
-        else setHasMoreSites(true);
-
-        if(sites.offset === 0) setSites(sites.results);
-        else setSites(prev => [...prev, ...sites.results]);
-      }
+      await loadSitesFromLocal();
+      await handleAnalytics(user);
     }
 
     fetchData();
-  }, [searchQuery, sitesPage])
+  }, []);
 
-  useEffect(() => {
-    if (searchQuery.length < 3) return;
-    const searchSites = async () => {
-      let sites = await apiClient.sites.getSites(sitesPage * 10, 10, [{ columnField: 'name_english', value: searchQuery, operatorValue: 'contains' }]);
-
-      if ((sitesPage + 1) * 10 >= sites.total) setHasMoreSites(false);
-        else setHasMoreSites(true);
-
-        if(sites.offset === 0) setSites(sites.results);
-        else setSites(prev => [...prev, ...sites.results]);
+  // Refresh sites from network, then reload local cache
+  const handleRefreshSites = async () => {
+    setSitesLoading(true);
+    try {
+      await fetchAndStoreLocationSites();
+      await loadSitesFromLocal();
+    } finally {
+      setSitesLoading(false);
     }
+  };
 
-    searchSites();
-  }, [searchQuery, sitesPage])
-
-  const handleSiteSelection = (site: Site | null) => {
+  const handleSiteSelection = (site: LocationSite | null) => {
     setSelectedSite(site);
     if (site !== null) AsyncStorage.setItem(Constants.selectedSite, JSON.stringify(site))
     else AsyncStorage.removeItem(Constants.selectedSite);
   }
+
+  // Filter sites locally from cached list
+  const filteredSites = searchQuery.length >= 1
+    ? sites.filter(s => s.location_name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : sites;
 
   const getName = () => {
     const name = userDetails?.name || 'User'
@@ -213,31 +222,33 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
             {card('account-outline', Strings.messages.PersonTrees, analytics.trees_planted_by_you)}
           </View>
         </View>}
-        {<View
-          style={{
-            padding: 15
-          }}>
+        {<View style={{ padding: 15 }}>
           <Text variant='bodyMedium'>{Strings.messages.SelectTheSiteYouAreAt}:</Text>
-          <Autocomplete
-            label={selectedSite ? Strings.labels.SelectedSite : Strings.labels.ClickSiteFromDropdown}
-            value={selectedSite}
-            options={sites}
-            keyGetter={(option) => option ? option.id : ''}
-            valueGetter={(option) => {
-              return option.plot_count && option.plot_count > 0
-                ? `${option.name_english} (Plots: ${option.plot_count})`
-                : option.name_english
-            }}
-            onSelect={handleSiteSelection}
-            onSearch={(text) => {setSitesPage(0); setSearchQuery(text)}}
-            variant='outlined'
-            helpedText={Strings.messages.SelectTheSiteYouAreAt}
-            paginationOptions={{
-              page: sitesPage,
-              onPageChange: setSitesPage,
-              hasMore: hasMoreSites
-            }}
-          />
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ flex: 1 }}>
+              <Autocomplete
+                label={selectedSite ? Strings.labels.SelectedSite : Strings.labels.ClickSiteFromDropdown}
+                value={selectedSite}
+                options={filteredSites}
+                keyGetter={(option) => option ? option.id : ''}
+                valueGetter={(option) => option.location_name}
+                onSelect={handleSiteSelection}
+                onSearch={(text) => { setSearchQuery(text); }}
+                variant='outlined'
+                helpedText={Strings.messages.SelectTheSiteYouAreAt}
+              />
+            </View>
+            <IconButton
+              icon="refresh"
+              size={26}
+              disabled={sitesLoading}
+              onPress={handleRefreshSites}
+              style={{ marginLeft: 2 }}
+            />
+          </View>
+          {sitesLoading && (
+            <ProgressBar indeterminate style={{ marginTop: 4, borderRadius: 2 }} color="#2aafdb" />
+          )}
         </View>}
         <View style={{ marginVertical: 30 }}></View>
       </ScrollView>

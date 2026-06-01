@@ -11,9 +11,9 @@ export class TreeService {
         this.api = api;
     }
 
-    async fetchChanges(timestamp: string, tree_ids: number[], offset?: number, site_id?: number): Promise<TreeHelperDataResponse> {
+    async fetchChanges(timestamp: string, tree_ids: number[], offset?: number, location_id?: number): Promise<TreeHelperDataResponse> {
         const url = `/api/appv2/fetchHelperData/trees`;
-        const response = await this.api.post<TreeHelperDataResponse>(url, { site_id, timestamp, tree_ids, offset, limit: 10000 });
+        const response = await this.api.post<TreeHelperDataResponse>(url, { location_id, timestamp, tree_ids, offset, limit: 10000 });
         return response.data;
     }
 

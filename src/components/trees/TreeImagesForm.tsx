@@ -15,7 +15,7 @@ import SelectMenu from '../SelectMenu';
 import Autocomplete from '../AutocompleteModal';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Plot } from '../../model/plot';
+import { Plot, locationPlotToPlot } from '../../model/plot';
 import { Site } from '../../model/sites';
 
 const getImageDescription = (imageDate: string, treeStatus: string) => {
@@ -33,9 +33,10 @@ interface TreeImageFormInputProps {
     plantTypes: any[],
     onSubmit: (images: CreateTreeSnapshotRequest[], deleted: number[], treeStatus: string) => void,
     onCancel: () => void,
+    lockedPlot?: Plot,
 }
 
-const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ saplingId, plantTypes, onCancel, onSubmit }) => {
+const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ saplingId, plantTypes, onCancel, onSubmit, lockedPlot }) => {
 
     const [images, setImages] = useState<(ImageSource | CreateTreeSnapshotRequest)[]>([]);
     const [deletedImages, setDeletedImages] = useState<number[]>([]);
@@ -49,7 +50,7 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ saplingId, plantType
     const recentPlantTypesRef = useRef(recentPlantTypes);
 
     const [plotSearchQuery, setPlotSearchQuery] = useState('');
-    const [selectedPlot, setSelectedPlot] = useState<Plot | null>(null);
+    const [selectedPlot, setSelectedPlot] = useState<Plot | null>(lockedPlot ?? null);
     const [plots, setPlots] = useState<Plot[]>([]);
     const [plotsPage, setPlotsPage] = useState(0);
     const [hasMorePlots, setHasMorePlots] = useState(true);
@@ -130,8 +131,11 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ saplingId, plantType
     }, [saplingId])
 
     useEffect(() => {
+        if (lockedPlot) return;
         const getPlotForPlotId = async (plotId: number) => {
             const daoClient = await DaoClient.authenticate();
+            const locationPlot = await daoClient.locationPlots.getByOldPlotId(plotId);
+            if (locationPlot) { setSelectedPlot(locationPlotToPlot(locationPlot)); return; }
             const plot = await daoClient.plots.getPlotByLiveId(plotId);
             setSelectedPlot(plot);
         }
@@ -162,13 +166,21 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ saplingId, plantType
     }, [])
 
     useEffect(() => {
+        if (lockedPlot) return;
         if (plotSearchQuery.length !== 0) return;
         const getPlots = async () => {
             const daoClient = await DaoClient.authenticate();
-            let resp = await daoClient.plots.getPlots(plotsPage * 10, 10, undefined, false, selectedSite?.id);
+            if (selectedSite?.id) {
+                const locationPlots = await daoClient.locationPlots.getLocationPlots(selectedSite.id);
+                if (locationPlots.length > 0) {
+                    setPlots(locationPlots.map(locationPlotToPlot));
+                    setHasMorePlots(false);
+                    return;
+                }
+            }
+            let resp = await daoClient.plots.getPlots(plotsPage * 10, 10, undefined, false, undefined);
             if (resp.length < 10) setHasMorePlots(false);
             else setHasMorePlots(true);
-
             if (plotsPage === 0) setPlots(resp);
             else setPlots([...plots, ...resp]);
         }
@@ -177,14 +189,20 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ saplingId, plantType
     }, [plotsPage, plotSearchQuery, selectedSite])
 
     useEffect(() => {
+        if (lockedPlot) return;
         if (plotSearchQuery.length < 1) return;
 
         const getPlots = async () => {
             const daoClient = await DaoClient.authenticate();
-            let resp = await daoClient.plots.searchPlots(plotSearchQuery, plotsPage * 10, 10, selectedSite?.id);
+            const locationPlots = await daoClient.locationPlots.searchLocationPlots(plotSearchQuery, selectedSite?.id);
+            if (locationPlots.length > 0) {
+                setPlots(locationPlots.map(locationPlotToPlot));
+                setHasMorePlots(false);
+                return;
+            }
+            let resp = await daoClient.plots.searchPlots(plotSearchQuery, plotsPage * 10, 10, undefined);
             if (resp.length < 10) setHasMorePlots(false);
             else setHasMorePlots(true);
-
             if (plotsPage === 0) setPlots(resp);
             else setPlots([...plots, ...resp]);
         }
@@ -299,6 +317,7 @@ const TreeImageForm: React.FC<TreeImageFormInputProps> = ({ saplingId, plantType
                             valueGetter={(data) => data.name}
                             keyGetter={(data) => data.id}
                             variant='outlined'
+                            disabled={!!lockedPlot}
                             onSearch={(text: string) => { setPlotsPage(0); setPlotSearchQuery(text) }}
                             paginationOptions={{
                                 hasMore: hasMorePlots,

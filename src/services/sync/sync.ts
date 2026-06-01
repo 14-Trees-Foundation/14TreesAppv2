@@ -6,6 +6,8 @@ import { fetchAndStoreTreeSnapshots, uploadSingleTreeSnapshotsData, uploadTreeSn
 import { fetchAndStoreUsers, uploadSingleUsersData, uploadUsersData } from "./users";
 import { fetchAndStoreSites } from "./sites";
 import { fetchAndStorePlots } from "./plots";
+import { fetchAndStoreLocationSites } from "./location_sites";
+import { fetchAndStoreLocationPlots } from "./location_plots";
 import { fetchAndStoreVisits } from "./visits";
 import { ApiClient } from "../api/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -68,16 +70,18 @@ export const fetchDeltaChanges = async (setProgress: React.Dispatch<React.SetSta
     await fetchAndStoreDeltaPlantTypes();
     setProgress(0.1);
 
-    await fetchAndStoreUsers();
+    // await fetchAndStoreUsers();
     setProgress(0.2);
 
     await fetchAndStoreSites();
-    setProgress(0.2);
+    await fetchAndStoreLocationSites();
+    setProgress(0.25);
 
     await fetchAndStorePlots(siteId);
-    setProgress(0.3);
+    if (siteId) await fetchAndStoreLocationPlots(siteId);
+    setProgress(0.35);
 
-    await fetchAndStoreVisits(siteId);
+    // await fetchAndStoreVisits(siteId);
     setProgress(0.4);
 
     await fetchAndStoreVisitImages(siteId);
